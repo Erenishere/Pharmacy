@@ -1,0 +1,131 @@
+<div class="list-page-container">
+  <div class="list-page-header">
+    <div class="header-content">
+      <h1>Sales Invoices</h1>
+      <p>Manage and track all customer sales transactions and returns</p>
+    </div>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="createInvoice()" *ngIf="selectedSource === 'admin'">
+        <mat-icon>add</mat-icon> New Sales Invoice
+      </button>
+    </div>
+  </div>
+
+  <!-- Source Tabs -->
+  <div class="source-tabs">
+    <button class="source-tab" [class.active]="selectedSource === 'admin'"
+      (click)="selectedSource = 'admin'; pageIndex = 0; loadInvoices()">
+      <mat-icon>admin_panel_settings</mat-icon>
+      Admin Invoices
+    </button>
+    <button class="source-tab" [class.active]="selectedSource === 'pos'"
+      (click)="selectedSource = 'pos'; pageIndex = 0; loadInvoices()">
+      <mat-icon>point_of_sale</mat-icon>
+      POS Invoices
+    </button>
+    <button class="source-tab" [class.active]="selectedSource === ''"
+      (click)="selectedSource = ''; pageIndex = 0; loadInvoices()">
+      <mat-icon>list_alt</mat-icon>
+      All
+    </button>
+  </div>
+
+  <div class="statistics-cards mb-4" *ngIf="statistics">
+    <div class="stat-card">
+      <mat-icon>receipt</mat-icon>
+      <div class="stat-content">
+        <span class="stat-value">{{ statistics.totalInvoices }}</span>
+        <span class="stat-label">Total Invoices</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <mat-icon>payments</mat-icon>
+      <div class="stat-content">
+        <span class="stat-value">{{ formatCurrency(statistics.totalAmount) }}</span>
+        <span class="stat-label">Total Sales</span>
+      </div>
+    </div>
+    <div class="stat-card pending">
+      <mat-icon>schedule</mat-icon>
+      <div class="stat-content">
+        <span class="stat-value">{{ formatCurrency(statistics.pendingAmount) }}</span>
+        <span class="stat-label">Pending Collection</span>
+      </div>
+    </div>
+    <div class="stat-card paid">
+      <mat-icon>done_all</mat-icon>
+      <div class="stat-content">
+        <span class="stat-value">{{ formatCurrency(statistics.paidAmount) }}</span>
+        <span class="stat-label">Collected</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="list-page-card">
+    <div class="list-filters-section">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Search invoices</mat-label>
+        <input matInput [formControl]="searchControl">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Status</mat-label>
+        <mat-select [(value)]="selectedStatus" (selectionChange)="onFilterChange()">
+          <mat-option *ngFor="let opt of statusOptions; trackBy: trackByValue" [value]="opt.value">{{ opt.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Payment Status</mat-label>
+        <mat-select [(value)]="selectedPaymentStatus" (selectionChange)="onFilterChange()">
+          <mat-option *ngFor="let opt of paymentStatusOptions; trackBy: trackByValue" [value]="opt.value">{{ opt.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>From Date</mat-label>
+        <input matInput [matDatepicker]="fromPicker" [(ngModel)]="dateFrom" (dateChange)="onFilterChange()">
+        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>To Date</mat-label>
+        <input matInput [matDatepicker]="toPicker" [(ngModel)]="dateTo" (dateChange)="onFilterChange()">
+        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+        <mat-datepicker #toPicker></mat-datepicker>
+      </mat-form-field>
+
+      <button mat-icon-button color="warn" (click)="clearFilters()" matTooltip="Clear All Filters"
+        *ngIf="searchControl.value || selectedStatus || selectedPaymentStatus || dateFrom || dateTo">
+        <mat-icon>filter_alt_off</mat-icon>
+      </button>
+    </div>
+
+    <div class="table-wrapper px-3 pb-3" style="position: relative; min-height: 200px;">
+      <div class="loading-overlay" *ngIf="loading"
+           style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); display: flex; justify-content: center; align-items: center; z-index: 10;">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+
+      <div class="error-message" *ngIf="error && !loading">
+        <mat-icon>error</mat-icon>
+        <span>{{ error }}</span>
+        <button mat-button color="primary" (click)="loadInvoices()">Retry</button>
+      </div>
+
+      <app-data-table 
+        *ngIf="!error"
+        [data]="dataSource.data"
+        [columns]="tableColumns"
+        [totalItems]="totalInvoices"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="pageSizeOptions"
+        (pageChange)="onPageChange($event)"
+        (actionClick)="onTableAction($event)">
+      </app-data-table>
+    </div>
+  </div>
+</div>

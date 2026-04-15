@@ -1,0 +1,280 @@
+<div class="stock-transfer-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>
+      <mat-icon>swap_horiz</mat-icon>
+      Stock Transfer Management
+    </h1>
+  </div>
+
+  <!-- Transfer Form -->
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>{{ formTitle }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="transferForm" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+          <!-- Date -->
+          <mat-form-field appearance="outline">
+            <mat-label>Transfer Date</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="transferDate" required>
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="transferForm.get('transferDate')?.hasError('required')">
+              Date is required
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Item Selection -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Item</mat-label>
+            <mat-select formControlName="itemId" required>
+              <mat-option *ngFor="let item of filteredItems" [value]="item._id">
+                {{ item.code }} - {{ item.name }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="transferForm.get('itemId')?.hasError('required')">
+              Item is required
+            </mat-error>
+          </mat-form-field>
+
+          <!-- From Warehouse -->
+          <mat-form-field appearance="outline">
+            <mat-label>From Warehouse</mat-label>
+            <mat-select formControlName="fromWarehouseId" required>
+              <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse._id">
+                {{ warehouse.name }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="transferForm.get('fromWarehouseId')?.hasError('required')">
+              Source warehouse is required
+            </mat-error>
+          </mat-form-field>
+
+          <!-- To Warehouse -->
+          <mat-form-field appearance="outline">
+            <mat-label>To Warehouse</mat-label>
+            <mat-select formControlName="toWarehouseId" required>
+              <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse._id">
+                {{ warehouse.name }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="transferForm.get('toWarehouseId')?.hasError('required')">
+              Destination warehouse is required
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Warehouse Validation Error -->
+          <div class="full-width" *ngIf="transferForm.errors?.['sameWarehouse'] && transferForm.touched">
+            <mat-error class="validation-error">
+              Source and destination warehouses must be different
+            </mat-error>
+          </div>
+        </div>
+
+        <!-- Quantity Section -->
+        <div class="quantity-section">
+          <h3>Enter Quantity</h3>
+          <div class="quantity-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>QTY Carton</mat-label>
+              <input matInput type="number" formControlName="qtyCtn" min="0">
+              <mat-error *ngIf="transferForm.get('qtyCtn')?.hasError('min')">
+                Must be 0 or greater
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>QTY Box</mat-label>
+              <input matInput type="number" formControlName="qtyBox" min="0">
+              <mat-error *ngIf="transferForm.get('qtyBox')?.hasError('min')">
+                Must be 0 or greater
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>QTY Unit</mat-label>
+              <input matInput type="number" formControlName="qtyUnit" min="0">
+              <mat-error *ngIf="transferForm.get('qtyUnit')?.hasError('min')">
+                Must be 0 or greater
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Total Unit QTY</mat-label>
+              <input matInput type="number" formControlName="totalUnitQty" readonly>
+              <mat-hint>Auto-calculated</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Batch Number (Optional)</mat-label>
+            <input matInput formControlName="batchNumber">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status" required>
+              <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+                {{ status.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            [disabled]="submitting">
+            <mat-icon *ngIf="!submitting">save</mat-icon>
+            <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+            {{ submitButtonText }}
+          </button>
+          <button 
+            mat-stroked-button 
+            type="button" 
+            (click)="resetForm()"
+            [disabled]="submitting">
+            <mat-icon>clear</mat-icon>
+            {{ editMode ? 'Cancel' : 'Reset' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Transfer List -->
+  <mat-card class="table-card">
+    <mat-card-header>
+      <mat-card-title>Transfer List</mat-card-title>
+      <div class="header-actions">
+        <button mat-icon-button (click)="loadTransfers()" matTooltip="Refresh">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" matSort class="transfer-table">
+          
+          <!-- S# Column -->
+          <ng-container matColumnDef="sno">
+            <th mat-header-cell *matHeaderCellDef>S#</th>
+            <td mat-cell *matCellDef="let transfer; let i = index">{{ i + 1 }}</td>
+          </ng-container>
+
+          <!-- Date Column -->
+          <ng-container matColumnDef="transferDate">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+            <td mat-cell *matCellDef="let transfer">{{ formatDate(transfer.transferDate) }}</td>
+          </ng-container>
+
+          <!-- Formula Size Column -->
+          <ng-container matColumnDef="formulaSize">
+            <th mat-header-cell *matHeaderCellDef>Formula Size</th>
+            <td mat-cell *matCellDef="let transfer">
+              <span class="transfer-number">{{ transfer.itemCode || transfer.item?.code || '—' }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Item Name Column -->
+          <ng-container matColumnDef="itemName">
+            <th mat-header-cell *matHeaderCellDef>Item Name</th>
+            <td mat-cell *matCellDef="let transfer">{{ transfer.itemName || transfer.item?.name || '—' }}</td>
+          </ng-container>
+
+          <!-- From Warehouse Column -->
+          <ng-container matColumnDef="fromWarehouse">
+            <th mat-header-cell *matHeaderCellDef>From Warehouse</th>
+            <td mat-cell *matCellDef="let transfer">{{ transfer.fromWarehouseName || '—' }}</td>
+          </ng-container>
+
+          <!-- To Warehouse Column -->
+          <ng-container matColumnDef="toWarehouse">
+            <th mat-header-cell *matHeaderCellDef>To Warehouse</th>
+            <td mat-cell *matCellDef="let transfer">{{ transfer.toWarehouseName || '—' }}</td>
+          </ng-container>
+
+          <!-- Quantity Column -->
+          <ng-container matColumnDef="quantity">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Qty</th>
+            <td mat-cell *matCellDef="let transfer" class="text-right">
+              <span matTooltip="Ctn: {{transfer.quantities?.qtyCtn}}, Box: {{transfer.quantities?.qtyBox}}, Unit: {{transfer.quantities?.qtyUnit}}">
+                {{ formatNumber(transfer.quantities?.totalUnitQty || 0) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- User ID Column -->
+          <ng-container matColumnDef="userId">
+            <th mat-header-cell *matHeaderCellDef>User ID</th>
+            <td mat-cell *matCellDef="let transfer">{{ transfer.createdBy?.name || transfer.createdBy?.username || transfer.createdBy || '—' }}</td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+            <td mat-cell *matCellDef="let transfer" class="text-center">
+              <button mat-icon-button [matMenuTriggerFor]="actionMenu" matTooltip="Actions">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #actionMenu="matMenu">
+                <button mat-menu-item (click)="editTransfer(transfer)" [disabled]="transfer.status === 'completed'">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+                <button mat-menu-item (click)="receiveTransfer(transfer)" [disabled]="transfer.status !== 'in_transit'">
+                  <mat-icon>check_circle</mat-icon>
+                  <span>Receive</span>
+                </button>
+                <button mat-menu-item (click)="printTransfer(transfer)">
+                  <mat-icon>print</mat-icon>
+                  <span>Print</span>
+                </button>
+                <button mat-menu-item (click)="deleteTransfer(transfer)" [disabled]="transfer.status === 'completed'">
+                  <mat-icon color="warn">delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+          <!-- No Data Row -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length">
+              <div class="no-data-message">
+                <mat-icon>swap_horiz</mat-icon>
+                <p>No stock transfers found</p>
+              </div>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Loading Spinner -->
+        <div *ngIf="loading" class="loading-overlay">
+          <mat-spinner diameter="50"></mat-spinner>
+        </div>
+      </div>
+
+      <!-- Paginator -->
+      <mat-paginator
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        [pageIndex]="pageIndex"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,194 @@
+<div class="po-detail-container" *ngIf="!loading; else loadingTemplate">
+  <!-- Header -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="title-section">
+        <button mat-icon-button (click)="onBack()" class="back-button">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="title-info">
+          <h1>Purchase Order {{ purchaseOrder?.poNumber }}</h1>
+          <div class="meta-info">
+            <span class="supplier">{{ purchaseOrder?.supplierName || 'N/A' }}</span>
+            <span class="separator">•</span>
+            <span class="date">{{ purchaseOrder?.poDate | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-section">
+        <mat-chip [style.background-color]="getStatusColor(purchaseOrder?.status || '')" class="status-chip">
+          {{ getStatusLabel(purchaseOrder?.status || '') }}
+        </mat-chip>
+        <mat-chip [style.background-color]="getFulfillmentColor(purchaseOrder?.fulfillmentStatus || '')" class="status-chip">
+          {{ getFulfillmentLabel(purchaseOrder?.fulfillmentStatus || '') }}
+        </mat-chip>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button mat-button (click)="onPrint()" class="print-button">
+        <mat-icon>print</mat-icon>
+        Print
+      </button>
+
+      <button mat-raised-button color="primary" (click)="onEdit()" *ngIf="canEdit()" [disabled]="processing">
+        <mat-icon>edit</mat-icon>
+        Edit
+      </button>
+
+      <button mat-raised-button color="accent" (click)="onApprove()" *ngIf="canApprove()" [disabled]="processing">
+        <mat-icon>check_circle</mat-icon>
+        Approve
+      </button>
+
+      <button mat-raised-button color="primary" (click)="onSend()" *ngIf="canSend()" [disabled]="processing">
+        <mat-icon>send</mat-icon>
+        Send to Supplier
+      </button>
+
+      <button mat-raised-button color="primary" (click)="onConfirm()" *ngIf="canConfirm()" [disabled]="processing">
+        <mat-icon>verified</mat-icon>
+        Confirm
+      </button>
+
+      <button mat-raised-button color="primary" (click)="onConvertToInvoice()" *ngIf="canConvert()" [disabled]="processing">
+        <mat-icon>receipt</mat-icon>
+        Convert to Invoice
+      </button>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+    <!-- Order Information -->
+    <mat-card class="info-card">
+      <mat-card-header>
+        <mat-card-title>Order Information</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>PO Number:</label>
+            <span>{{ purchaseOrder?.poNumber }}</span>
+          </div>
+          <div class="info-item">
+            <label>PO Date:</label>
+            <span>{{ purchaseOrder?.poDate | date:'mediumDate' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Supplier:</label>
+            <span>{{ purchaseOrder?.supplierName }}</span>
+          </div>
+          <div class="info-item">
+            <label>Supplier Code:</label>
+            <span>N/A</span>
+          </div>
+          <div class="info-item">
+            <label>Bill Number:</label>
+            <span>{{ purchaseOrder?.billNo || 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Total Amount:</label>
+            <span class="amount">PKR {{ purchaseOrder?.totalAmount | number:'1.2-2' }}</span>
+          </div>
+          <div class="info-item" *ngIf="purchaseOrder?.notes">
+            <label>Notes:</label>
+            <span>{{ purchaseOrder?.notes }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Items Table -->
+    <mat-card class="items-card">
+      <mat-card-header>
+        <mat-card-title>Order Items</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="purchaseOrder?.items || []" class="items-table">
+            <!-- Serial Number -->
+            <ng-container matColumnDef="sno">
+              <th mat-header-cell *matHeaderCellDef>#</th>
+              <td mat-cell *matCellDef="let item; let i = index">{{ i + 1 }}</td>
+            </ng-container>
+
+            <!-- Item Name -->
+            <ng-container matColumnDef="itemName">
+              <th mat-header-cell *matHeaderCellDef>Item</th>
+              <td mat-cell *matCellDef="let item">
+                <div class="item-info">
+                  <strong>{{ item.item?.name || item.itemName }}</strong>
+                  <small class="item-code">{{ item.item?.code }}</small>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Box Packing -->
+            <ng-container matColumnDef="boxPacking">
+              <th mat-header-cell *matHeaderCellDef>Box Packing</th>
+              <td mat-cell *matCellDef="let item">{{ item.boxPacking || 1 }}</td>
+            </ng-container>
+
+            <!-- Box Quantity -->
+            <ng-container matColumnDef="boxQty">
+              <th mat-header-cell *matHeaderCellDef>Box Qty</th>
+              <td mat-cell *matCellDef="let item">{{ item.boxQty || 0 }}</td>
+            </ng-container>
+
+            <!-- Unit Quantity -->
+            <ng-container matColumnDef="unitQty">
+              <th mat-header-cell *matHeaderCellDef>Unit Qty</th>
+              <td mat-cell *matCellDef="let item">{{ item.unitQty || 0 }}</td>
+            </ng-container>
+
+            <!-- Box TP -->
+            <ng-container matColumnDef="boxTP">
+              <th mat-header-cell *matHeaderCellDef>Box TP</th>
+              <td mat-cell *matCellDef="let item">{{ item.boxTP | number:'1.2-2' }}</td>
+            </ng-container>
+
+            <!-- Unit TP -->
+            <ng-container matColumnDef="unitTP">
+              <th mat-header-cell *matHeaderCellDef>Unit TP</th>
+              <td mat-cell *matCellDef="let item">{{ item.unitTP | number:'1.2-2' }}</td>
+            </ng-container>
+
+            <!-- Discount -->
+            <ng-container matColumnDef="discount">
+              <th mat-header-cell *matHeaderCellDef>Discount %</th>
+              <td mat-cell *matCellDef="let item">{{ item.discount || 0 }}%</td>
+            </ng-container>
+
+            <!-- Net Amount -->
+            <ng-container matColumnDef="netAmount">
+              <th mat-header-cell *matHeaderCellDef>Net Amount</th>
+              <td mat-cell *matCellDef="let item" class="amount-cell">
+                PKR {{ item.netAmount | number:'1.2-2' }}
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+
+        <!-- Total Summary -->
+        <div class="total-summary" *ngIf="purchaseOrder?.items?.length">
+          <div class="total-row">
+            <strong>Total Amount: PKR {{ purchaseOrder?.totalAmount | number:'1.2-2' }}</strong>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+
+<!-- Loading Template -->
+<ng-template #loadingTemplate>
+  <div class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading purchase order details...</p>
+  </div>
+</ng-template>

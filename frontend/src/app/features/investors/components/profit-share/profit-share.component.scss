@@ -1,0 +1,102 @@
+@import 'styles/shared-list-styles';
+
+.page-container {
+  @include page-container;
+}
+
+.page-header {
+  @include page-header;
+}
+
+.list-card {
+  @include list-card;
+}
+
+@include form-field-overrides;
+@include expansion-panel;
+
+.create-panel {
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  &.three-col mat-form-field {
+    flex: 1;
+    min-width: 180px;
+  }
+}
+
+.table-container {
+  @include table-container;
+}
+
+.history-table,
+.detail-table {
+  @include data-table;
+}
+
+.detail-table {
+  margin-top: 12px;
+}
+
+.amount-cell {
+  @include amount-cell;
+}
+
+.action-buttons {
+  @include action-buttons;
+}
+
+mat-chip {
+  @include status-chip-base;
+}
+
+@include paginator;
+
+.no-data,
+.empty-state {
+  @include empty-state;
+}
+
+.loading-container {
+  @include loading-container;
+}
+
+.save-btn-row {
+  margin-top: 16px;
+  text-align: right;
+
+  button[mat-raised-button] {
+    background: linear-gradient(118deg, $purple, rgba($purple, .8));
+    box-shadow: 0 0 10px 1px rgba($purple, .4);
+    color: #fff;
+    font-weight: 500;
+
+    &:hover {
+      box-shadow: 0 0 14px 2px rgba($purple, .6);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+button[mat-stroked-button] {
+  border: 2px solid $purple;
+  color: $purple;
+  background: white;
+  font-weight: 600;
+  transition: all .25s ease;
+
+  &:hover {
+    background: $purple;
+    color: white;
+    transform: translateY(-1px);
+  }
+
+  mat-icon {
+    margin-right: 6px;
+  }
+}

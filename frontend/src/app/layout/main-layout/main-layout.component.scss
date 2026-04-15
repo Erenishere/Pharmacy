@@ -1,0 +1,52 @@
+@import 'styles/vuexy-vars';
+
+$navbar-height: 72px;
+
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.sidenav-container {
+  flex: 1;
+  height: calc(100vh - #{$navbar-height});
+  margin-top: $navbar-height;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.sidenav {
+  width: 288px;
+  border-right: 1px solid rgba($grey-dark, 0.08);
+  background: #ffffff;
+  box-shadow: none;
+  overflow-y: auto;
+}
+
+.main-content {
+  height: 100%;
+  padding: 24px;
+  overflow-y: auto;
+  background: #f8fafc;
+}
+
+.full-page-mode {
+  .full-page-content {
+    height: 100vh;
+    overflow-y: auto;
+    background: #f8fafc;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidenav {
+    width: 280px;
+  }
+
+  .main-content {
+    padding: 16px;
+  }
+}

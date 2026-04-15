@@ -1,0 +1,683 @@
+// =============================================
+// Purchase Invoice — Premium Dense Layout
+// =============================================
+
+$purple: #7367f0;
+$purple-light: rgba(115, 103, 240, 0.12);
+$green: #28c76f;
+$red: #ea5455;
+$text-dark: #2d3748;
+$text-muted: #4a5568;
+$border: #b4bccc;
+$bg-page: #f7f8fc;
+$bg-card: #ffffff;
+$bg-field: #ffffff;
+$accent: #ff9f43;
+
+:host {
+  display: block;
+  background: $bg-page;
+  min-height: 100vh;
+  padding: 16px;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  font-size: 13px;
+  color: $text-dark;
+}
+
+// ─── Header Bar ───────────────────────────────
+.pi-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: $bg-card;
+  border-radius: 10px;
+  padding: 12px 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  .pi-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    color: $text-dark;
+    border-left: 4px solid $purple;
+    padding-left: 12px;
+
+    mat-icon {
+      color: $purple;
+    }
+  }
+
+  .pi-header-actions {
+    display: flex;
+    gap: 10px;
+
+    button {
+      font-size: 13px;
+      font-weight: 500;
+      height: 36px;
+      padding: 0 16px;
+
+      mat-icon {
+        font-size: 18px;
+        margin-right: 4px;
+      }
+    }
+
+    button[color="primary"] {
+      background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+      color: #fff;
+      box-shadow: 0 4px 12px rgba($purple, 0.35);
+    }
+  }
+}
+
+// ─── Body: Left + Right ───────────────────────
+.pi-body {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ─── Section Titles ───────────────────────────
+.pi-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: $purple;
+  background: $purple-light;
+  border-left: 3px solid $purple;
+  padding: 6px 12px;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 10px;
+  letter-spacing: 0.3px;
+}
+
+.pi-sub-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: $text-dark;
+  background: #f1f5f9;
+  border-left: 3px solid $accent;
+  padding: 5px 10px;
+  border-radius: 0 4px 4px 0;
+  margin: 10px 0 8px;
+}
+
+// ─── Left Panel ───────────────────────────────
+.pi-left {
+  background: $bg-card;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+// ─── Right Panel ──────────────────────────────
+.pi-right {
+  background: $bg-card;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+// ─── Field Row (label + input side by side) ───
+.pi-field-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 7px;
+
+  label {
+    font-size: 12px;
+    font-weight: 700;
+    color: $text-muted;
+    white-space: nowrap;
+
+    &.required-label::after {
+      content: ' *';
+      color: $red;
+    }
+  }
+}
+
+// ─── Inputs ───────────────────────────────────
+.pi-input {
+  width: 100%;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid $border;
+  border-radius: 6px;
+  background: $bg-field;
+  font-size: 12px;
+  color: $text-dark;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: $purple;
+    background: #fff;
+  }
+
+  &.pi-readonly {
+    background: #f1f5f9;
+    color: $text-muted;
+    cursor: default;
+  }
+
+  &.pi-pct {
+    width: 60px;
+    text-align: center;
+  }
+}
+
+.pi-select {
+  width: 100%;
+  height: 30px;
+  font-size: 12px;
+
+  ::ng-deep .mat-mdc-select-trigger {
+    height: 30px;
+    border: 1px solid $border;
+    border-radius: 6px;
+    background: $bg-field;
+    padding: 0 8px;
+  }
+
+  ::ng-deep .mat-mdc-select-value {
+    font-size: 12px;
+  }
+}
+
+.pi-date-toggle {
+  ::ng-deep button {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.pi-inline-pair {
+  display: flex;
+  gap: 6px;
+
+  .pi-input {
+    flex: 1;
+  }
+}
+
+// ─── Item Search Row ──────────────────────────
+.pi-item-search-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+
+  .pi-input {
+    border: 1.5px solid $purple !important;
+    background: #ffffff !important;
+
+    &:focus {
+      border-color: darken($purple, 10%) !important;
+      box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.18);
+    }
+
+    &::placeholder {
+      color: #a0aec0;
+    }
+  }
+}
+
+// ─── Item Grid (2-column) ─────────────────────
+.pi-item-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin-bottom: 4px;
+
+  .span-2 {
+    grid-column: 1 / -1;
+  }
+}
+
+.pi-item-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  .item-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: $text-muted;
+
+    &.accent-label {
+      color: $purple;
+    }
+  }
+}
+
+.pi-display-val {
+  height: 30px;
+  padding: 0 8px;
+  background: #f1f5f9;
+  border: 1px solid $border;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: $text-dark;
+
+  &.accent-val {
+    color: $purple;
+  }
+
+  .avail-qty {
+    margin-left: 8px;
+    font-size: 11px;
+    color: $green;
+  }
+
+  .formula-hint {
+    margin-left: 4px;
+    font-size: 11px;
+    color: $purple;
+    font-weight: 500;
+  }
+}
+
+// Global Mat Autocomplete Overrides for Purchase Invoice
+::ng-deep {
+  .mat-mdc-autocomplete-panel {
+    border-radius: 8px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+
+    .mat-mdc-option {
+      padding: 10px 14px !important;
+      border-bottom: 1px solid #f1f5f9;
+
+      .itm-search-row {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        width: 100%;
+
+        .itm-name {
+          font-weight: 700;
+          color: $text-dark;
+          font-size: 13px;
+        }
+
+        .itm-formula {
+          font-size: 11.5px;
+          color: $purple;
+          font-weight: 600;
+        }
+
+        .itm-stock {
+          font-size: 11px;
+          color: $green;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+
+// GST Radio
+.pi-gst-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+
+  .gst-radio {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+
+    input[type="radio"] {
+      accent-color: $purple;
+    }
+  }
+
+  .gst-arrow {
+    color: $purple;
+    font-size: 11px;
+    letter-spacing: -2px;
+  }
+}
+
+// Add to Invoice button
+.pi-add-btn-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid $border;
+
+  button[color="primary"] {
+    background: linear-gradient(118deg, $green, rgba($green, 0.8));
+    color: #fff;
+    box-shadow: 0 4px 12px rgba($green, 0.3);
+    font-weight: 600;
+  }
+}
+
+// ─── Items Table ──────────────────────────────
+.pi-table-section {
+  background: $bg-card;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 14px;
+  overflow-x: auto;
+}
+
+.pi-table-wrapper {
+  overflow-x: auto;
+}
+
+.pi-table {
+  width: 100%;
+  min-width: 1200px;
+  border-collapse: collapse;
+  font-size: 12px;
+
+  thead tr {
+    background: linear-gradient(118deg, $purple, rgba($purple, 0.85));
+
+    th {
+      color: #fff;
+      padding: 8px 6px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+  }
+
+  tbody tr {
+    border-bottom: 1px solid $border;
+    transition: background 0.15s;
+
+    &:hover {
+      background: $purple-light;
+    }
+
+    &.editing-row {
+      background: rgba($accent, 0.08);
+    }
+
+    td {
+      padding: 7px 6px;
+      vertical-align: top;
+      color: $text-dark;
+    }
+  }
+
+  .item-name-cell {
+    font-weight: 600;
+  }
+
+  .item-sub {
+    font-size: 10px;
+    color: $text-muted;
+    margin-top: 2px;
+  }
+
+  .net-amount-cell {
+    font-weight: 700;
+    color: $purple;
+  }
+
+  tfoot {
+
+    .totals-row td,
+    .totals-values-row td {
+      background: #f8f9ff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px;
+      border-top: 2px solid $purple;
+    }
+
+    .totals-label {
+      color: $text-muted;
+    }
+
+    .totals-val {
+      color: $text-dark;
+    }
+
+    .net-amount-cell {
+      color: $purple;
+    }
+  }
+}
+
+.pi-no-items {
+  text-align: center;
+  padding: 30px;
+  color: $text-muted;
+  border: 2px dashed $border;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+// Action buttons in table
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-right: 4px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &.edit-btn {
+    background: rgba($purple, 0.1);
+    color: $purple;
+
+    &:hover {
+      background: $purple;
+      color: #fff;
+    }
+  }
+
+  &.del-btn {
+    background: rgba($red, 0.1);
+    color: $red;
+
+    &:hover {
+      background: $red;
+      color: #fff;
+    }
+  }
+}
+
+// ─── Bottom Section ───────────────────────────
+.pi-bottom {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 14px;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pi-bottom-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pi-bottom-block {
+  background: $bg-card;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.pi-paste-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.pi-paste-box {
+  background: $bg-card;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  mat-icon {
+    color: $purple;
+  }
+
+  span {
+    font-size: 12px;
+    font-weight: 600;
+    color: $text-muted;
+  }
+
+  &.logo-box {
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+    border: 2px dashed $border;
+    background: $bg-field;
+  }
+}
+
+.pi-textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid $border;
+  border-radius: 6px;
+  background: $bg-field;
+  font-size: 12px;
+  color: $text-dark;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
+
+  &:focus {
+    border-color: $purple;
+    background: #fff;
+  }
+}
+
+// ─── Summary Box ──────────────────────────────
+.pi-bottom-right {
+  display: flex;
+  flex-direction: column;
+}
+
+.pi-summary-box {
+  background: $bg-card;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  flex: 1;
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid $border;
+    font-size: 12px;
+
+    span {
+      color: $text-muted;
+      font-weight: 500;
+    }
+
+    strong {
+      font-size: 13px;
+      color: $text-dark;
+    }
+
+    .red-val {
+      color: $red;
+    }
+
+    &.net-bill-row {
+      margin-top: 8px;
+      padding-top: 12px;
+      border-top: 2px solid $purple;
+      border-bottom: none;
+
+      span {
+        font-size: 14px;
+        font-weight: 700;
+        color: $text-dark;
+      }
+
+      strong {
+        font-size: 18px;
+        color: $purple;
+      }
+    }
+  }
+
+  .save-btn-row {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+
+    button {
+      width: 100%;
+      height: 40px;
+      background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba($purple, 0.4);
+      border-radius: 8px;
+    }
+  }
+}
+
+// ─── Loading ──────────────────────────────────
+.pi-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  gap: 16px;
+  color: $text-muted;
+}
+
+// ─── Balance hint ─────────────────────────────
+.balance-hint {
+  font-size: 11px;
+  color: $text-muted;
+  margin-left: 6px;
+}

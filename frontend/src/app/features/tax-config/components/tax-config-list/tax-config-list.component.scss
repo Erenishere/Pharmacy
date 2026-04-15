@@ -1,0 +1,65 @@
+@import 'styles/shared-list-styles';
+
+.page-container {
+  @include page-container;
+}
+
+.page-header {
+  @include page-header;
+}
+
+.add-card {
+  @include form-card;
+
+  .add-form {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+
+    mat-form-field {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    button[mat-raised-button] {
+      background: linear-gradient(118deg, $purple, rgba($purple, .8));
+      box-shadow: 0 0 10px 1px rgba($purple, .4);
+      color: #fff;
+      font-weight: 500;
+      margin-top: 4px;
+
+      &:hover {
+        box-shadow: 0 0 14px 2px rgba($purple, .6);
+        transform: translateY(-1px);
+      }
+    }
+  }
+}
+
+.list-card {
+  @include list-card;
+}
+
+@include form-field-overrides;
+
+.table-container {
+  @include table-container;
+}
+
+.tax-table {
+  @include data-table;
+}
+
+.action-buttons {
+  @include action-buttons;
+}
+
+.no-data,
+.empty-state {
+  @include empty-state;
+}
+
+.loading-container {
+  @include loading-container;
+}

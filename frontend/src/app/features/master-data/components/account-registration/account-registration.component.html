@@ -1,0 +1,531 @@
+<div class="account-registration-container">
+  <div class="page-header no-print">
+    <div class="header-text">
+      <h1>Account Registration</h1>
+      <p>Digital entry form with printable manual registration layout.</p>
+    </div>
+
+    <div class="header-actions">
+      <button mat-stroked-button color="primary" class="ghost-btn" type="button" (click)="printBlankForm()" [disabled]="saving">
+        <mat-icon>print</mat-icon>
+        Print Blank Form
+      </button>
+      <button mat-raised-button color="primary" class="primary-btn" type="button" (click)="printFilledForm()" [disabled]="saving">
+        <mat-icon>print</mat-icon>
+        Print Filled Form
+      </button>
+    </div>
+  </div>
+
+  <div class="form-card main-card print-area">
+    <form [formGroup]="accountForm" (ngSubmit)="save()">
+      <div class="sheet-title-row">
+        <h2>Account Registration Form</h2>
+        <span class="print-status" *ngIf="printMode === 'blank'">Blank print preview</span>
+      </div>
+
+      <div class="sheet-layout">
+        <div class="sheet-panel left-panel">
+          <div class="sheet-row tall-row">
+            <div class="sheet-label">Select Account Type</div>
+            <div class="sheet-control">
+              <div class="account-type-grid">
+                <label class="account-type-option" *ngFor="let type of primaryAccountTypes">
+                  <input type="radio" formControlName="accountType" [value]="type.value">
+                  <span>{{ type.label }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="sheet-row accent-row">
+            <div class="sheet-label">Select Dimension</div>
+            <div class="sheet-control">
+              <select class="sheet-select" formControlName="dimensionId">
+                <option value="">Select Dimension</option>
+                <option *ngFor="let d of dimensions" [value]="d._id">
+                  {{ d.name || d.dimensionName || d.code }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sheet-row accent-row">
+            <div class="sheet-label">Insert Account From Already Created Account List For Sub Account Creation</div>
+            <div class="sheet-control">
+              <select class="sheet-select" formControlName="parentAccountId">
+                <option value="">Select Account For Sub Account Creation</option>
+                <option *ngFor="let account of accounts" [value]="account._id">
+                  {{ account.code ? account.code + ' - ' : '' }}{{ account.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sheet-row accent-row">
+            <div class="sheet-label">Types Of Employees Designation Post List</div>
+            <div class="sheet-control">
+              <select class="sheet-select" formControlName="designationId">
+                <option value="">Select Designation</option>
+                <option *ngFor="let item of designations" [value]="item._id">{{ item.name }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sheet-row accent-row">
+            <div class="sheet-label">Customer Type</div>
+            <div class="sheet-control">
+              <select class="sheet-select" formControlName="customerTypeId">
+                <option value="">Select Customer Type</option>
+                <option *ngFor="let item of customerTypes" [value]="item._id">{{ item.name }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sheet-row accent-row">
+            <div class="sheet-label">Head</div>
+            <div class="sheet-control">
+              <select class="sheet-select" formControlName="accountHeadId">
+                <option value="">Select Head</option>
+                <option *ngFor="let item of heads" [value]="item._id">{{ item.name }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sheet-row accent-row">
+            <div class="sheet-label">Town City Name in English</div>
+            <div class="sheet-control">
+              <select class="sheet-select" formControlName="townId" (change)="onTownChange($any($event.target).value)">
+                <option value="">Select Town</option>
+                <option *ngFor="let item of towns" [value]="item._id">{{ item.name }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sheet-row accent-row">
+            <div class="sheet-label">Area / Route</div>
+            <div class="sheet-control">
+              <select class="sheet-select" formControlName="areaId">
+                <option value="">Select Area / Route</option>
+                <option *ngFor="let item of areas" [value]="item._id">{{ item.name }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Address</div>
+            <div class="sheet-control">
+              <textarea class="sheet-textarea" formControlName="address"></textarea>
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Create New Title Account in English</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="name">
+            </div>
+          </div>
+
+          <div class="sheet-row" *ngIf="accountForm.get('name')?.invalid && accountForm.get('name')?.touched">
+            <div class="sheet-label error-label">Validation</div>
+            <div class="sheet-control error-text">Title in English is required.</div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Title Account in Urdu</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="nameUrdu">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Proprietor Name</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="proprietorName">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Proprietor Whatsapp#</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="proprietorWhatsapp">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Store Incharge Name</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="storeInchargeName">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Store Incharge Cell# For Whatsapp</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="storeInchargeWhatsapp">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Message Sending Or Call Number</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="messageNumber">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Credit Limit Amount</div>
+            <div class="sheet-control">
+              <input class="sheet-input" type="number" formControlName="creditAmountLimit">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Days Limit For Credit</div>
+            <div class="sheet-control">
+              <input class="sheet-input" type="number" formControlName="creditDaysLimit">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Bank &amp; Account# Information 1</div>
+            <div class="sheet-control">
+              <div class="split-three">
+                <input class="sheet-input" formControlName="bankName1" placeholder="Bank Name">
+                <input class="sheet-input" formControlName="accountNumber1" placeholder="Account #">
+                <input class="sheet-input" formControlName="branch1" placeholder="Branch">
+              </div>
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Bank &amp; Account# Information 2</div>
+            <div class="sheet-control">
+              <div class="split-three">
+                <input class="sheet-input" formControlName="bankName2" placeholder="Bank Name">
+                <input class="sheet-input" formControlName="accountNumber2" placeholder="Account #">
+                <input class="sheet-input" formControlName="branch2" placeholder="Branch">
+              </div>
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Bank &amp; Account# Information 3</div>
+            <div class="sheet-control">
+              <div class="split-three">
+                <input class="sheet-input" formControlName="bankName3" placeholder="Bank Name">
+                <input class="sheet-input" formControlName="accountNumber3" placeholder="Account #">
+                <input class="sheet-input" formControlName="branch3" placeholder="Branch">
+              </div>
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Party Location Pin Point</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="locationPinPoint">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Opening Balance</div>
+            <div class="sheet-control">
+              <div class="split-two">
+                <input class="sheet-input" type="number" formControlName="openingBalance" placeholder="Amount">
+                <select class="sheet-select" formControlName="balanceType">
+                  <option value="debit">Debit</option>
+                  <option value="credit">Credit</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Licence # of Party With Expiry Date</div>
+            <div class="sheet-control">
+              <div class="split-two">
+                <input class="sheet-input" formControlName="licenseNo" placeholder="License #">
+                <input class="sheet-input" type="date" formControlName="licenseExpiryDate">
+              </div>
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">GST STRN # Of Party</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="strn">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">NTN# of Party</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="ntn">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">NIC#</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="nicNumber">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">SRB# of Party</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="srbNo">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Advance With Holding Tax % Filer Non Filer</div>
+            <div class="sheet-control">
+              <div class="split-two split-with-check">
+                <input class="sheet-input" type="number" formControlName="advanceWhtPercent" placeholder="Advance WHT %">
+                <label class="inline-check">
+                  <input type="checkbox" formControlName="isNonFiler">
+                  <span>Non Filer</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Fix Income Tax Deduction in %</div>
+            <div class="sheet-control">
+              <input class="sheet-input" type="number" formControlName="incomeTaxDeductionPercent">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Email Of Party</div>
+            <div class="sheet-control">
+              <input class="sheet-input" type="email" formControlName="email">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Dimension For Account</div>
+            <div class="sheet-control">
+              <input class="sheet-input" [value]="lookupName(dimensions, accountForm.get('dimensionId')?.value)" readonly>
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Select Account From Already Created Account For Adjustment Profit % Share</div>
+            <div class="sheet-control">
+              <div class="split-two">
+                <select class="sheet-select" formControlName="profitShareAccountId">
+                  <option value="">Select Account</option>
+                  <option *ngFor="let account of accounts" [value]="account._id">
+                    {{ account.code ? account.code + ' - ' : '' }}{{ account.name }}
+                  </option>
+                </select>
+                <input class="sheet-input" type="number" formControlName="profitSharePercent" placeholder="%">
+              </div>
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Account ID Number Auto</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="code" placeholder="Leave blank for auto">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Working Status</div>
+            <div class="sheet-control">
+              <div class="status-grid">
+                <label class="status-option">
+                  <input type="radio" formControlName="isActive" [value]="true">
+                  <span>Active</span>
+                </label>
+                <label class="status-option">
+                  <input type="radio" formControlName="isActive" [value]="false">
+                  <span>InActive</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Additional Notes</div>
+            <div class="sheet-control">
+              <textarea class="sheet-textarea" formControlName="notes"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="sheet-panel right-panel">
+          <div class="biodata-title">Employee Biodata</div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Select D</div>
+            <div class="sheet-control">
+              <select class="sheet-select" formControlName="employeeAccountType">
+                <option value="">Select Employee Type</option>
+                <option value="account_manager">Account Manager</option>
+                <option value="sub_account">Sub Account</option>
+                <option value="employee_account">Employee Account</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Father Name</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="fatherName">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Father NIC#</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="fatherNIC">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Date Of Appointment</div>
+            <div class="sheet-control">
+              <input class="sheet-input" type="date" formControlName="dateOfAppointment">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Guarantor Name</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="guarantorName">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Guarantor Address</div>
+            <div class="sheet-control">
+              <textarea class="sheet-textarea" formControlName="guarantorAddress"></textarea>
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Guarantor Phone/Cell Phone</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="guarantorPhone">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Guarantor NIC#</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="guarantorNIC">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Basic Pay Fix</div>
+            <div class="sheet-control">
+              <input class="sheet-input" type="number" formControlName="basicPay">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Experience if any or Fresh</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="experience">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Blood Group</div>
+            <div class="sheet-control">
+              <select class="sheet-select" formControlName="bloodGroup">
+                <option value="">Select Blood Group</option>
+                <option *ngFor="let bg of bloodGroups" [value]="bg">{{ bg }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Permanent Address</div>
+            <div class="sheet-control">
+              <textarea class="sheet-textarea" formControlName="permanentAddress"></textarea>
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Phone</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="phone">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">WhatsApp</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="whatsapp">
+            </div>
+          </div>
+
+          <div class="sheet-row">
+            <div class="sheet-label">Tax Number</div>
+            <div class="sheet-control">
+              <input class="sheet-input" formControlName="taxNumber">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note-block">
+        Note: Attach personal NIC copy and guarantor NIC copy with NOC and clearance certificate from last work office.
+      </div>
+
+      <div class="signatures-grid">
+        <label>
+          Signature Indus Traders
+          <input class="sheet-input" formControlName="signatureIndusTraders">
+        </label>
+        <label>
+          Signature Employee
+          <input class="sheet-input" formControlName="signatureEmployee">
+        </label>
+        <label>
+          Signature Guarantor
+          <input class="sheet-input" formControlName="signatureGuarantor">
+        </label>
+      </div>
+
+      <div class="form-actions no-print">
+        <button mat-button type="button" (click)="resetForm()" *ngIf="!editingId">Clear Form</button>
+        <button mat-button type="button" (click)="cancelEdit()" *ngIf="editingId">Cancel Edit</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="saving">
+          <mat-icon *ngIf="!saving">save</mat-icon>
+          <mat-spinner diameter="20" *ngIf="saving"></mat-spinner>
+          {{ editingId ? 'Update Account' : 'Save Account' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="list-card main-card no-print">
+    <div class="card-header">
+      <h2>Registered Accounts</h2>
+      <div class="loading-overlay" *ngIf="loading">
+        <mat-spinner diameter="30"></mat-spinner>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <app-data-table 
+        [data]="dataSource.data"
+        [columns]="tableColumns"
+        [totalItems]="totalItems"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="[10, 20, 50, 100]"
+        (pageChange)="onPage($event)"
+        (actionClick)="onTableAction($event)">
+      </app-data-table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,142 @@
+<div class="report-container">
+  <div class="report-header">
+    <div class="header-left">
+      <button mat-icon-button class="back-btn" routerLink="/reports">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Stock Level Report</h1>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button class="refresh-btn" (click)="loadReport()">
+        <mat-icon>refresh</mat-icon> Refresh
+      </button>
+      <button mat-raised-button class="export-btn">
+        <mat-icon>download</mat-icon> Export
+      </button>
+    </div>
+  </div>
+
+  <div class="filters-card">
+    <div class="filters-row">
+      <mat-form-field class="filter-field">
+        <mat-label>Warehouse</mat-label>
+        <mat-select [(ngModel)]="warehouseFilter">
+          <mat-option value="">All Warehouses</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="filter-field">
+        <mat-label>Status</mat-label>
+        <mat-select [(ngModel)]="statusFilter">
+          <mat-option value="">All Status</mat-option>
+          <mat-option value="In Stock">In Stock</mat-option>
+          <mat-option value="Low Stock">Low Stock</mat-option>
+          <mat-option value="Out of Stock">Out of Stock</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="filter-actions">
+        <button mat-raised-button color="primary" (click)="applyFilters()">Apply</button>
+        <button mat-stroked-button (click)="resetFilters()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading stock level data...</p>
+    </div>
+  } @else {
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="icon-wrapper purple">
+          <mat-icon>inventory_2</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Total Items</div>
+          <div class="value">{{ formatNumber(summary.totalItems) }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper info">
+          <mat-icon>storage</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Total Stock</div>
+          <div class="value">{{ formatNumber(summary.totalStock) }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper success">
+          <mat-icon>attach_money</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Total Value</div>
+          <div class="value">{{ formatCurrency(summary.totalValue) }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper warning">
+          <mat-icon>warning</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Low Stock Items</div>
+          <div class="value">{{ formatNumber(summary.lowStockCount) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-card">
+      <div class="card-header">
+        <h2>Stock Level Details</h2>
+      </div>
+      <div class="table-container">
+        @if (reportData.length > 0) {
+          <table>
+            <thead>
+              <tr>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th>Warehouse</th>
+                <th class="text-right">Current Stock</th>
+                <th class="text-right">Min Stock</th>
+                <th class="text-right">Max Stock</th>
+                <th class="text-right">Unit Price</th>
+                <th class="text-right">Stock Value</th>
+                <th class="text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of reportData; track item.item.code) {
+                <tr>
+                  <td>{{ item.item.code }}</td>
+                  <td>{{ item.item.name }}</td>
+                  <td>{{ item.warehouse.name }}</td>
+                  <td class="text-right">{{ formatNumber(item.currentStock) }}</td>
+                  <td class="text-right">{{ formatNumber(item.reorderLevel) }}</td>
+                  <td class="text-right">{{ formatNumber(item.reorderLevel) }}</td>
+                  <td class="text-right amount">{{ formatCurrency(item.averageCost) }}</td>
+                  <td class="text-right amount">{{ formatCurrency(item.totalValue) }}</td>
+                  <td class="text-center">
+                    <span class="status-badge" [ngClass]="getStatusClass(item.status)">
+                      {{ item.status }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <div class="empty-state">
+            <mat-icon>inbox</mat-icon>
+            <p>No stock level data found</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

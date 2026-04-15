@@ -1,0 +1,172 @@
+<div class="profit-loss-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <button mat-icon-button (click)="onBackToDashboard()" class="back-button">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="header-icon">
+        <mat-icon>show_chart</mat-icon>
+      </div>
+      <div>
+        <h1>Profit & Loss Statement</h1>
+        <p class="subtitle">Revenue, expenses, and profitability analysis</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button mat-button (click)="onExportReport()">
+        <mat-icon>download</mat-icon> Export PDF
+      </button>
+      <button mat-raised-button color="primary" (click)="onGenerateReport()">
+        <mat-icon>refresh</mat-icon> Generate Report
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filter-card">
+    <div class="filter-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Report Period</mat-label>
+        <mat-select [formControl]="periodFilter">
+          <mat-option value="monthly">Monthly</mat-option>
+          <mat-option value="quarterly">Quarterly</mat-option>
+          <mat-option value="yearly">Yearly</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Start Date</mat-label>
+        <input matInput [matDatepicker]="startPicker" [formControl]="startDate">
+        <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>End Date</mat-label>
+        <input matInput [matDatepicker]="endPicker" [formControl]="endDate">
+        <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+  </mat-card>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Generating profit & loss statement...</p>
+  </div>
+
+  <!-- Report Content -->
+  <div class="report-content" *ngIf="statement && !loading">
+    <mat-card class="statement-card">
+      <mat-card-header>
+        <mat-card-title>Profit & Loss Statement - {{ statement.period }}</mat-card-title>
+        <mat-card-subtitle>Generated on {{ currentDate.toLocaleDateString() }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Revenue Section -->
+        <div class="statement-section">
+          <h3 class="section-title revenue">Revenue</h3>
+
+          <table class="statement-table">
+            <tbody>
+              <!-- Sales Revenue -->
+              <tr *ngFor="let item of statement.revenue.sales" class="data-row">
+                <td class="item-name">{{ item.category }}</td>
+                <td class="item-amount">{{ formatCurrency(item.amount) }}</td>
+              </tr>
+
+              <!-- Other Income -->
+              <tr *ngFor="let item of statement.revenue.otherIncome" class="data-row">
+                <td class="item-name">{{ item.category }}</td>
+                <td class="item-amount">{{ formatCurrency(item.amount) }}</td>
+              </tr>
+
+              <!-- Total Revenue -->
+              <tr class="total-row">
+                <td class="total-label">Total Revenue</td>
+                <td class="total-amount">{{ formatCurrency(getTotalRevenue()) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Expenses Section -->
+        <div class="statement-section">
+          <h3 class="section-title expenses">Expenses</h3>
+
+          <table class="statement-table">
+            <tbody>
+              <!-- Cost of Goods Sold -->
+              <tr *ngFor="let item of statement.expenses.costOfGoodsSold" class="data-row">
+                <td class="item-name">{{ item.category }}</td>
+                <td class="item-amount">{{ formatCurrency(item.amount) }}</td>
+              </tr>
+
+              <!-- Operating Expenses -->
+              <tr *ngFor="let item of statement.expenses.operatingExpenses" class="data-row">
+                <td class="item-name">{{ item.category }}</td>
+                <td class="item-amount">{{ formatCurrency(item.amount) }}</td>
+              </tr>
+
+              <!-- Other Expenses -->
+              <tr *ngFor="let item of statement.expenses.otherExpenses" class="data-row">
+                <td class="item-name">{{ item.category }}</td>
+                <td class="item-amount">{{ formatCurrency(item.amount) }}</td>
+              </tr>
+
+              <!-- Total Expenses -->
+              <tr class="total-row">
+                <td class="total-label">Total Expenses</td>
+                <td class="total-amount">{{ formatCurrency(getTotalExpenses()) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Profit Summary -->
+        <div class="statement-section summary">
+          <table class="statement-table summary-table">
+            <tbody>
+              <tr class="summary-row">
+                <td class="summary-label">Gross Profit</td>
+                <td class="summary-amount">{{ formatCurrency(getTotalRevenue() - getTotalExpenses()) }}</td>
+              </tr>
+              <tr class="summary-row">
+                <td class="summary-label">Tax Expense</td>
+                <td class="summary-amount">{{ formatCurrency(statement.taxExpense) }}</td>
+              </tr>
+              <tr class="final-total-row">
+                <td class="final-label">Net Profit</td>
+                <td class="final-amount" [class]="statement.netProfit >= 0 ? 'positive' : 'negative'">
+                  {{ formatCurrency(statement.netProfit) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Key Ratios -->
+        <div class="ratios-section">
+          <h4>Key Performance Indicators</h4>
+          <div class="ratios-grid">
+            <div class="ratio-item">
+              <span class="ratio-label">Gross Profit Margin</span>
+              <span class="ratio-value">{{ ((getTotalRevenue() - getTotalExpenses()) / getTotalRevenue() * 100).toFixed(1) }}%</span>
+            </div>
+            <div class="ratio-item">
+              <span class="ratio-label">Net Profit Margin</span>
+              <span class="ratio-value">{{ (statement.netProfit / getTotalRevenue() * 100).toFixed(1) }}%</span>
+            </div>
+            <div class="ratio-item">
+              <span class="ratio-label">Expense Ratio</span>
+              <span class="ratio-value">{{ (getTotalExpenses() / getTotalRevenue() * 100).toFixed(1) }}%</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

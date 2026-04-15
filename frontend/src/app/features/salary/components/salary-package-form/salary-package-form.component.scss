@@ -1,0 +1,268 @@
+$purple: #867cf0;
+
+.salary-package-form-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f8f7fa;
+  min-height: 100vh;
+}
+
+.form-card {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+
+  mat-card-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid $purple;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 24px;
+      font-weight: 600;
+      color: #444050;
+      border-left: 4px solid $purple;
+      padding-left: 12px;
+
+      mat-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        color: $purple;
+      }
+    }
+  }
+
+  mat-card-content {
+    padding: 24px;
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 20px;
+
+    p {
+      color: #6c757d;
+      font-size: 16px;
+    }
+  }
+
+  mat-card-actions {
+    padding: 16px 24px;
+    border-top: 1px solid $purple;
+
+    button {
+      margin-left: 8px;
+
+      mat-spinner {
+        display: inline-block;
+        margin-right: 8px;
+      }
+
+      mat-icon {
+        margin-right: 4px;
+      }
+
+      &[mat-raised-button] {
+        background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+        box-shadow: 0 0 10px 1px rgba($purple, 0.4);
+        color: #fff;
+        font-weight: 500;
+
+        &:hover {
+          box-shadow: 0 0 14px 2px rgba($purple, 0.6);
+          transform: translateY(-1px);
+        }
+      }
+
+      &[mat-button] {
+        color: #444050;
+      }
+    }
+  }
+}
+
+.salary-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-section {
+  padding: 16px 0;
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #444050;
+    border-left: 4px solid $purple;
+    padding-left: 12px;
+  }
+}
+
+mat-divider {
+  margin: 16px 0;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.duration-fields,
+.incentive-fields,
+.allowance-fields,
+.party-visit-fields,
+.bonus-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.other-bonus-fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+
+  mat-form-field:not(.full-width) {
+    grid-column: span 1;
+  }
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+
+    mat-form-field.full-width {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+.brand-incentive-row {
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid rgba($purple, 0.3);
+  border-radius: 8px;
+  background-color: rgba($purple, 0.02);
+}
+
+.brand-incentive-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  align-items: start;
+
+  .duration-inline {
+    display: flex;
+    gap: 8px;
+    grid-column: span 2;
+
+    mat-form-field {
+      flex: 1;
+    }
+  }
+
+  button[mat-icon-button] {
+    margin-top: 8px;
+    color: #ea5455;
+  }
+}
+
+mat-form-field {
+  mat-icon[matPrefix] {
+    margin-right: 8px;
+  }
+}
+
+// Form field overrides
+::ng-deep {
+  .mat-mdc-form-field {
+    .mdc-text-field--outlined {
+      background-color: #ffffff !important;
+    }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: rgba($purple, 0.5) !important;
+      border-width: 1px !important;
+    }
+
+    &:hover,
+    &.mat-focused {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: $purple !important;
+        border-width: 2px !important;
+      }
+    }
+
+    .mdc-floating-label {
+      color: #444050 !important;
+      font-weight: 500 !important;
+    }
+
+    &.mat-focused .mdc-floating-label {
+      color: $purple !important;
+    }
+
+    .mat-mdc-input-element {
+      color: #444050 !important;
+    }
+
+    .mat-mdc-select-value {
+      color: #444050 !important;
+    }
+
+    .mat-mdc-select-arrow {
+      color: $purple !important;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .salary-package-form-container {
+    padding: 16px;
+  }
+
+  .duration-fields,
+  .incentive-fields,
+  .allowance-fields,
+  .party-visit-fields,
+  .bonus-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-incentive-fields {
+    grid-template-columns: 1fr;
+
+    .duration-inline {
+      grid-column: span 1;
+      flex-direction: column;
+    }
+  }
+}
+
+// Error state styling
+mat-form-field.mat-form-field-invalid {
+  ::ng-deep .mdc-notched-outline__leading,
+  ::ng-deep .mdc-notched-outline__notch,
+  ::ng-deep .mdc-notched-outline__trailing {
+    border-color: #ea5455 !important;
+  }
+}
+
+// Loading state
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

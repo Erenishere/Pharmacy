@@ -1,0 +1,452 @@
+<div class="salary-package-form-container">
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>payments</mat-icon>
+        {{ isEditMode ? 'Edit Salary Package' : 'Create Salary Package for Each Month' }}
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Loading Spinner -->
+      <div *ngIf="loading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading package data...</p>
+      </div>
+
+      <form *ngIf="!loading" [formGroup]="packageForm" class="salary-form">
+        
+        <!-- 1. Pay Package Duration -->
+        <div class="form-section">
+          <h3 class="section-title">1. Pay Package For Duration</h3>
+          <div formGroupName="duration" class="duration-fields">
+            <mat-form-field appearance="outline">
+              <mat-label>From Date</mat-label>
+              <input matInput [matDatepicker]="fromPicker" formControlName="fromDate" required>
+              <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fromPicker></mat-datepicker>
+              <mat-error *ngIf="packageForm.get('duration.fromDate')?.hasError('required')">
+                From date is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>To Date</mat-label>
+              <input matInput [matDatepicker]="toPicker" formControlName="toDate" required>
+              <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+              <mat-datepicker #toPicker></mat-datepicker>
+              <mat-error *ngIf="packageForm.get('duration.toDate')?.hasError('required')">
+                To date is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- 2. Insert Employee Name -->
+        <div class="form-section">
+          <h3 class="section-title">2. Insert Employee Name</h3>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Select Employee</mat-label>
+            <mat-select formControlName="employeeId" required>
+              <mat-option *ngFor="let employee of employees" [value]="employee._id">
+                {{ employee.name }} ({{ employee.code }})
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-error *ngIf="packageForm.get('employeeId')?.hasError('required')">
+              Employee is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- 3. Basic Pay Fix -->
+        <div class="form-section">
+          <h3 class="section-title">3. Basic Pay Fix</h3>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Basic Pay (Auto From Employee Biodata)</mat-label>
+            <input matInput type="number" formControlName="basicPay" readonly>
+            <mat-icon matPrefix>account_balance_wallet</mat-icon>
+            <mat-hint>This value is automatically populated from employee biodata</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- 4. Basic Sales Target -->
+        <div class="form-section">
+          <h3 class="section-title">4. Basic Sales Target</h3>
+          <div formGroupName="salesTarget" class="incentive-fields">
+            <mat-form-field appearance="outline">
+              <mat-label>Target Amount</mat-label>
+              <input matInput type="number" formControlName="targetAmount" required>
+              <mat-icon matPrefix>trending_up</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Incentive Type</mat-label>
+              <mat-select formControlName="incentiveType" required>
+                <mat-option *ngFor="let type of incentiveTypes" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Incentive Value</mat-label>
+              <input matInput type="number" formControlName="incentiveValue" required>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- 5. Cash Recovery Target -->
+        <div class="form-section">
+          <h3 class="section-title">5. Cash Recovery Target</h3>
+          <div formGroupName="recoveryTarget" class="incentive-fields">
+            <mat-form-field appearance="outline">
+              <mat-label>Target Amount</mat-label>
+              <input matInput type="number" formControlName="targetAmount" required>
+              <mat-icon matPrefix>attach_money</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Incentive Type</mat-label>
+              <mat-select formControlName="incentiveType" required>
+                <mat-option *ngFor="let type of incentiveTypes" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Incentive Value</mat-label>
+              <input matInput type="number" formControlName="incentiveValue" required>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- 6. Daily Allowance D.A -->
+        <div class="form-section">
+          <h3 class="section-title">6. Daily Allowance D.A</h3>
+          <div formGroupName="dailyAllowance" class="allowance-fields">
+            <mat-form-field appearance="outline">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="type" required>
+                <mat-option *ngFor="let type of incentiveTypes" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Value</mat-label>
+              <input matInput type="number" formControlName="value" required>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- 7. Petrol and Bike Maintenance -->
+        <div class="form-section">
+          <h3 class="section-title">7. Petrol and Bike Maintenance</h3>
+          <div formGroupName="petrolAllowance" class="allowance-fields">
+            <mat-form-field appearance="outline">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="type" required>
+                <mat-option *ngFor="let type of incentiveTypes" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Value</mat-label>
+              <input matInput type="number" formControlName="value" required>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- 8. Call Mobile & Internet Services Package -->
+        <div class="form-section">
+          <h3 class="section-title">8. Call Mobile & Internet Services Package</h3>
+          <div formGroupName="mobilePackage" class="allowance-fields">
+            <mat-form-field appearance="outline">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="type" required>
+                <mat-option *ngFor="let type of incentiveTypes" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Value</mat-label>
+              <input matInput type="number" formControlName="value" required>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- 9. Incentive on Mobile Order Creation -->
+        <div class="form-section">
+          <h3 class="section-title">9. Incentive on Mobile Order Creation</h3>
+          <div formGroupName="mobileOrderIncentive" class="allowance-fields">
+            <mat-form-field appearance="outline">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="type" required>
+                <mat-option *ngFor="let type of incentiveTypes" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Value</mat-label>
+              <input matInput type="number" formControlName="value" required>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- 10. Incentive on Mobile Cash Recovery -->
+        <div class="form-section">
+          <h3 class="section-title">10. Incentive on Mobile Cash Recovery With Reference Sales Invoice in Cash Book</h3>
+          <div formGroupName="mobileCashRecoveryIncentive" class="allowance-fields">
+            <mat-form-field appearance="outline">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="type" required>
+                <mat-option *ngFor="let type of incentiveTypes" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Value</mat-label>
+              <input matInput type="number" formControlName="value" required>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- 11. Total Target Visit To Parties Order Invoices -->
+        <div class="form-section">
+          <h3 class="section-title">11. Total Target Visit To Parties Order Invoices</h3>
+          <div formGroupName="partyVisitTarget" class="party-visit-fields">
+            <mat-form-field appearance="outline">
+              <mat-label>No. Of Orders</mat-label>
+              <input matInput type="number" formControlName="numberOfOrders" required>
+              <mat-icon matPrefix>receipt</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="type" required>
+                <mat-option *ngFor="let type of incentiveTypes" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Value</mat-label>
+              <input matInput type="number" formControlName="value" required>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- 12. Eid ul Fitr Bonus -->
+        <div class="form-section">
+          <h3 class="section-title">12. Eid ul Fitr Bonus</h3>
+          <div formGroupName="eidFitrBonus" class="bonus-fields">
+            <mat-form-field appearance="outline">
+              <mat-label>Select Month</mat-label>
+              <mat-select formControlName="month" required>
+                <mat-option *ngFor="let month of months" [value]="month">
+                  {{ month }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="type" required>
+                <mat-option *ngFor="let type of incentiveTypes" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Value</mat-label>
+              <input matInput type="number" formControlName="value" required>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- 13. Eid Ul Adha Bonus -->
+        <div class="form-section">
+          <h3 class="section-title">13. Eid Ul Adha Bonus</h3>
+          <div formGroupName="eidAdhaBonus" class="bonus-fields">
+            <mat-form-field appearance="outline">
+              <mat-label>Select Month</mat-label>
+              <mat-select formControlName="month" required>
+                <mat-option *ngFor="let month of months" [value]="month">
+                  {{ month }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="type" required>
+                <mat-option *ngFor="let type of incentiveTypes" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Value</mat-label>
+              <input matInput type="number" formControlName="value" required>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- 14. Other Bonus -->
+        <div class="form-section">
+          <h3 class="section-title">14. Other Detail</h3>
+          <div formGroupName="otherBonus" class="other-bonus-fields">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Detail</mat-label>
+              <input matInput formControlName="detail">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Select Month</mat-label>
+              <mat-select formControlName="month">
+                <mat-option *ngFor="let month of months" [value]="month">
+                  {{ month }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="type" required>
+                <mat-option *ngFor="let type of incentiveTypes" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Value</mat-label>
+              <input matInput type="number" formControlName="value">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- 15. Incentive on Brand Item Sales -->
+        <div class="form-section">
+          <h3 class="section-title">15. Incentive on Brand Item Sales</h3>
+          
+          <div formArrayName="brandIncentives">
+            <div *ngFor="let brandIncentive of brandIncentives.controls; let i = index" 
+                 [formGroupName]="i" 
+                 class="brand-incentive-row">
+              
+              <div class="brand-incentive-fields">
+                <mat-form-field appearance="outline">
+                  <mat-label>Select Item</mat-label>
+                  <mat-select formControlName="itemId" required>
+                    <mat-option *ngFor="let item of items" [value]="item._id">
+                      {{ item.name }} ({{ item.code }})
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Select Qty</mat-label>
+                  <input matInput type="number" formControlName="quantityTarget" required>
+                </mat-form-field>
+
+                <div formGroupName="duration" class="duration-inline">
+                  <mat-form-field appearance="outline">
+                    <mat-label>From</mat-label>
+                    <input matInput [matDatepicker]="brandFromPicker" formControlName="fromDate" required>
+                    <mat-datepicker-toggle matSuffix [for]="brandFromPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #brandFromPicker></mat-datepicker>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>To</mat-label>
+                    <input matInput [matDatepicker]="brandToPicker" formControlName="toDate" required>
+                    <mat-datepicker-toggle matSuffix [for]="brandToPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #brandToPicker></mat-datepicker>
+                  </mat-form-field>
+                </div>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Type</mat-label>
+                  <mat-select formControlName="type" required>
+                    <mat-option *ngFor="let type of incentiveTypes" [value]="type">
+                      {{ type }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Value</mat-label>
+                  <input matInput type="number" formControlName="value" required>
+                </mat-form-field>
+
+                <button mat-icon-button color="warn" type="button" (click)="removeBrandIncentive(i)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button mat-raised-button color="accent" type="button" (click)="addBrandIncentive()">
+            <mat-icon>add</mat-icon>
+            Add Brand Incentive
+          </button>
+        </div>
+
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <button mat-button (click)="onCancel()" [disabled]="saving">
+        Cancel
+      </button>
+      <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="packageForm.invalid || saving">
+        <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
+        <mat-icon *ngIf="!saving">save</mat-icon>
+        {{ saving ? 'Saving...' : (isEditMode ? 'Update Package' : 'Save Package') }}
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

@@ -1,0 +1,152 @@
+<div class="report-container">
+  <div class="report-header">
+    <div class="header-left">
+      <button mat-icon-button class="back-btn" routerLink="/reports">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Stock Movement Report</h1>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button class="refresh-btn" (click)="loadReport()">
+        <mat-icon>refresh</mat-icon> Refresh
+      </button>
+      <button mat-raised-button class="export-btn">
+        <mat-icon>download</mat-icon> Export
+      </button>
+    </div>
+  </div>
+
+  <div class="filters-card">
+    <div class="filters-row">
+      <mat-form-field class="filter-field">
+        <mat-label>Start Date</mat-label>
+        <input matInput [matDatepicker]="startPicker" [(ngModel)]="startDate">
+        <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field class="filter-field">
+        <mat-label>End Date</mat-label>
+        <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate">
+        <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field class="filter-field">
+        <mat-label>Movement Type</mat-label>
+        <mat-select [(ngModel)]="movementTypeFilter">
+          <mat-option value="">All Types</mat-option>
+          <mat-option value="In">In</mat-option>
+          <mat-option value="Out">Out</mat-option>
+          <mat-option value="Transfer">Transfer</mat-option>
+          <mat-option value="Adjustment">Adjustment</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="filter-actions">
+        <button mat-raised-button color="primary" (click)="applyFilters()">Apply</button>
+        <button mat-stroked-button (click)="resetFilters()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading stock movement data...</p>
+    </div>
+  } @else {
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="icon-wrapper purple">
+          <mat-icon>swap_horiz</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Total Movements</div>
+          <div class="value">{{ formatNumber(summary.totalMovements) }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper success">
+          <mat-icon>arrow_downward</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Total In</div>
+          <div class="value">{{ formatNumber(summary.totalIn) }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper danger">
+          <mat-icon>arrow_upward</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Total Out</div>
+          <div class="value">{{ formatNumber(summary.totalOut) }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper info">
+          <mat-icon>trending_up</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Net Change</div>
+          <div class="value" [class.positive]="summary.netChange > 0" [class.negative]="summary.netChange < 0">
+            {{ formatNumber(summary.netChange) }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-card">
+      <div class="card-header">
+        <h2>Movement Details</h2>
+      </div>
+      <div class="table-container">
+        @if (reportData.length > 0) {
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th>Movement Type</th>
+                <th class="text-right">Quantity</th>
+                <th class="text-right">Running Balance</th>
+                <th>Reference</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of reportData; track $index) {
+                <tr>
+                  <td>{{ item.date | date:'short' }}</td>
+                  <td>{{ item.item.code }}</td>
+                  <td>{{ item.item.name }}</td>
+                  <td>
+                    <span class="movement-badge" [ngClass]="getMovementTypeClass(item.type)">
+                      {{ item.type }}
+                    </span>
+                  </td>
+                  <td class="text-right" [class.positive]="item.type === 'In'" [class.negative]="item.type === 'Out'">
+                    {{ item.type === 'Out' ? '-' : '+' }}{{ formatNumber(item.quantity) }}
+                  </td>
+                  <td class="text-right">{{ formatNumber(item.balance) }}</td>
+                  <td>{{ item.reference }}</td>
+                  <td>{{ item.reference || '-' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <div class="empty-state">
+            <mat-icon>inbox</mat-icon>
+            <p>No stock movement data found</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

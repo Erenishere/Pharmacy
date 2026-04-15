@@ -1,0 +1,235 @@
+<div class="list-page-container stock-adjustment-page">
+  <!-- Header -->
+  <div class="list-page-header">
+    <div class="header-content">
+      <h1 class="page-title"><mat-icon>tune</mat-icon> Stock Adjustment Management</h1>
+      <p class="page-subtitle">Adjust inventory levels and view adjustment history</p>
+    </div>
+  </div>
+
+  <!-- Adjustment Form Card -->
+  <div class="list-page-card form-card">
+    <div class="card-title-section">
+      <h2>{{ formTitle }}</h2>
+    </div>
+    
+    <form [formGroup]="adjustmentForm" (ngSubmit)="onSubmit()" class="premium-form">
+      <div class="form-grid">
+        <!-- Date -->
+        <mat-form-field appearance="outline">
+          <mat-label>Adjustment Date</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="adjustmentDate" required>
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <mat-error *ngIf="adjustmentForm.get('adjustmentDate')?.hasError('required')">Date is required</mat-error>
+        </mat-form-field>
+
+        <!-- Warehouse Selection -->
+        <mat-form-field appearance="outline">
+          <mat-label>Warehouse</mat-label>
+          <mat-select formControlName="warehouseId" required>
+            <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse._id">{{ warehouse.name }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="adjustmentForm.get('warehouseId')?.hasError('required')">Warehouse is required</mat-error>
+        </mat-form-field>
+
+        <!-- Item Selection -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Item</mat-label>
+          <mat-select formControlName="itemId" required>
+            <mat-option *ngFor="let item of filteredItems" [value]="item._id">
+              {{ item.code }} - {{ item.name }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="adjustmentForm.get('itemId')?.hasError('required')">Item is required</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Current Stock Display -->
+      <div class="current-stock-preview" *ngIf="showCurrentStock">
+        <div class="preview-item">
+          <span class="label">Current Stock</span>
+          <span class="value">{{ formatNumber(currentStock!.quantity) }}</span>
+        </div>
+        <div class="preview-item">
+          <span class="label">Reserved</span>
+          <span class="value warn">{{ formatNumber(currentStock!.reservedQuantity) }}</span>
+        </div>
+        <div class="preview-item">
+          <span class="label">Available</span>
+          <span class="value accent">{{ formatNumber(currentStock!.availableQuantity) }}</span>
+        </div>
+        <div class="preview-item result" *ngIf="newStockLevel !== null">
+          <span class="label">New Level</span>
+          <span class="value" [class.increase]="adjustmentForm.get('adjustmentType')?.value === 'increase'" 
+                [class.decrease]="adjustmentForm.get('adjustmentType')?.value === 'decrease'">
+            {{ formatNumber(newStockLevel) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="loading-stock" *ngIf="loadingStock">
+        <mat-spinner diameter="24"></mat-spinner>
+        <span>Fetching live stock level...</span>
+      </div>
+
+      <!-- Adjustment Type -->
+      <div class="type-selection-section">
+        <h3>Adjustment Type</h3>
+        <mat-radio-group formControlName="adjustmentType" class="premium-radio-group">
+          <mat-radio-button *ngFor="let type of adjustmentTypeOptions" [value]="type.value" [color]="type.color">
+            <div class="radio-label">
+              <mat-icon>{{ type.icon }}</mat-icon>
+              <span>{{ type.label }}</span>
+            </div>
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <!-- Quantity and Reason -->
+      <div class="form-grid smaller">
+        <mat-form-field appearance="outline">
+          <mat-label>Quantity</mat-label>
+          <input matInput type="number" formControlName="quantity" min="1" required>
+          <mat-error *ngIf="adjustmentForm.get('quantity')?.hasError('required')">Required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Reason</mat-label>
+          <mat-select formControlName="reason" required>
+            <mat-option *ngFor="let reason of reasonOptions" [value]="reason.value">{{ reason.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Batch Number</mat-label>
+          <input matInput formControlName="batchNumber">
+        </mat-form-field>
+      </div>
+
+      <!-- Notes -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Detailed Reason / Audit Notes</mat-label>
+        <textarea matInput formControlName="notes" rows="3" required placeholder="Detailed explanation..."></textarea>
+        <mat-error *ngIf="adjustmentForm.get('notes')?.hasError('required')">Notes required for audit trail</mat-error>
+      </mat-form-field>
+
+      <div class="form-footer-actions">
+        <button mat-raised-button color="primary" type="submit" [disabled]="submitting || adjustmentForm.disabled" class="submit-btn">
+          <mat-icon *ngIf="!submitting">check_circle</mat-icon>
+          <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+          {{ submitButtonText }}
+        </button>
+        <button mat-button type="button" (click)="resetForm()" [disabled]="submitting" class="reset-btn">
+          <mat-icon>restart_alt</mat-icon> Reset
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Adjustment List Card -->
+  <div class="list-page-card table-card">
+    <div class="card-title-section">
+      <h2>Adjustment History</h2>
+      <div class="header-actions">
+        <button mat-icon-button (click)="loadAdjustments()" matTooltip="Refresh History">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table mat-table [dataSource]="dataSource" matSort class="data-table">
+        <!-- Date -->
+        <ng-container matColumnDef="adjustmentDate">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+          <td mat-cell *matCellDef="let adj">{{ formatDate(adj.adjustmentDate) }}</td>
+        </ng-container>
+
+        <!-- Adjustment Number -->
+        <ng-container matColumnDef="adjustmentNumber">
+          <th mat-header-cell *matHeaderCellDef>Ref #</th>
+          <td mat-cell *matCellDef="let adj" class="font-600">{{ adj.adjustmentNumber || '-' }}</td>
+        </ng-container>
+
+        <!-- Item Name -->
+        <ng-container matColumnDef="itemName">
+          <th mat-header-cell *matHeaderCellDef>Item</th>
+          <td mat-cell *matCellDef="let adj">
+            <div class="item-cell">
+              <span class="name">{{ adj.itemName }}</span>
+              <small class="warehouse">{{ adj.warehouseName }}</small>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Type & Quantity -->
+        <ng-container matColumnDef="adjustmentType">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let adj">
+            <span class="type-badge" [class]="adj.adjustmentType">
+              <mat-icon>{{ getAdjustmentTypeIcon(adj.adjustmentType) }}</mat-icon>
+              {{ adj.adjustmentType }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef class="text-right">Qty</th>
+          <td mat-cell *matCellDef="let adj" class="text-right">
+            <span class="qty-text" [class]="adj.adjustmentType">
+              {{ adj.adjustmentType === 'increase' ? '+' : '-' }}{{ formatNumber(adj.quantity) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Status -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let adj">
+            <mat-chip [class]="getStatusClass(adj.status)" class="status-chip">{{ getStatusLabel(adj.status) }}</mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+          <td mat-cell *matCellDef="let adj" class="text-center">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu" class="action-btn">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item (click)="viewAdjustment(adj)"><mat-icon>visibility</mat-icon>Details</button>
+              <button mat-menu-item (click)="approveAdjustment(adj)" [disabled]="adj.status !== 'pending'"><mat-icon color="primary">check_circle</mat-icon>Approve</button>
+              <button mat-menu-item (click)="rejectAdjustment(adj)" [disabled]="adj.status !== 'pending'"><mat-icon color="warn">cancel</mat-icon>Reject</button>
+              <button mat-menu-item (click)="printAdjustment(adj)"><mat-icon>print</mat-icon>Print</button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <!-- Hidden/extra if needed -->
+        <ng-container matColumnDef="warehouse"><th mat-header-cell *matHeaderCellDef>Warehouse</th><td mat-cell *matCellDef="let adj">{{ adj.warehouseName }}</td></ng-container>
+        <ng-container matColumnDef="reason"><th mat-header-cell *matHeaderCellDef>Reason</th><td mat-cell *matCellDef="let adj">{{ getReasonLabel(adj.reason) }}</td></ng-container>
+        <ng-container matColumnDef="createdBy"><th mat-header-cell *matHeaderCellDef>By</th><td mat-cell *matCellDef="let adj">{{ adj.createdBy }}</td></ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <!-- Empty State -->
+      <div class="list-empty-state" *ngIf="!loading && dataSource.data.length === 0">
+        <mat-icon>tune</mat-icon>
+        <p>No adjustment records found</p>
+      </div>
+
+      <!-- Loading Overlay -->
+      <div class="list-loading-overlay" *ngIf="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+
+      <mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions"
+        [pageIndex]="pageIndex" (page)="onPageChange($event)" showFirstLastButtons>
+      </mat-paginator>
+    </div>
+  </div>
+</div>

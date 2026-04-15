@@ -1,0 +1,94 @@
+@import "../../../../../styles/shared-list-styles";
+
+.capital-assets-page {
+  @include data-table;
+  @include paginator;
+
+  .form-card {
+    @include layered-glass;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+
+    .card-header {
+      margin-bottom: 20px;
+      .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: $purple;
+        margin: 0;
+        border-left: 3px solid $purple;
+        padding-left: 12px;
+      }
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+
+      @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); }
+      @media (max-width: 600px) { grid-template-columns: 1fr; }
+
+      .span-2 { grid-column: span 2; @media (max-width: 600px) { grid-column: span 1; } }
+      .span-3 { grid-column: span 3; @media (max-width: 1200px) { grid-column: span 2; } @media (max-width: 600px) { grid-column: span 1; } }
+      .span-4 { grid-column: span 4; @media (max-width: 1200px) { grid-column: span 2; } @media (max-width: 600px) { grid-column: span 1; } }
+    }
+
+    .form-actions {
+      display: flex;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba($purple, 0.1);
+      gap: 12px;
+
+      .save-btn {
+        height: 44px;
+        padding: 0 32px;
+        background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+        box-shadow: 0 4px 12px rgba($purple, 0.3);
+      }
+    }
+  }
+
+  .asset-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    .name { font-weight: 600; color: $purple-dark; }
+    .status-badge {
+      font-size: 9px;
+      text-transform: uppercase;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      width: fit-content;
+      &.proprietor { background: rgba($purple, 0.1); color: $purple; }
+      &.investor { background: rgba($info, 0.1); color: $info; }
+    }
+  }
+
+  .amount-cell {
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    &.positive { color: $success; }
+    &.negative { color: $danger; }
+  }
+
+  .tx-chip {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    &.in { background: rgba($success, 0.1); color: $success; }
+    &.out { background: rgba($danger, 0.1); color: $danger; }
+  }
+
+  .action-buttons-inline {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    .edit-btn { color: $purple; }
+    .del-btn { color: $danger; }
+  }
+}

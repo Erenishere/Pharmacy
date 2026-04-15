@@ -1,0 +1,231 @@
+<div class="detail-page" *ngIf="!loading; else loadingTemplate">
+  <section class="hero-card">
+    <div class="hero-top">
+      <div class="title-wrap">
+        <button mat-icon-button (click)="onBack()" class="back-btn" matTooltip="Back to list">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+
+        <div class="title-copy">
+          <h1>E-Order {{ eOrder?.orderNumber || '-' }}</h1>
+          <div class="meta-line">
+            <span class="strong">{{ eOrder?.customerId?.name || '-' }}</span>
+            <span class="dot">&middot;</span>
+            <span>{{ eOrder?.customerId?.town || '-' }}</span>
+            <span class="dot">&middot;</span>
+            <span>{{ eOrder?.orderDate ? formatDate(eOrder?.orderDate) : '-' }}</span>
+            <ng-container *ngIf="eOrder?.salesmanId">
+              <span class="dot">&middot;</span>
+              <span>Salesman: {{ eOrder?.salesmanId?.name }}</span>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-wrap">
+        <mat-chip class="status-chip" [ngClass]="'status-' + (eOrder?.status || '')">
+          {{ getStatusLabel(eOrder?.status || '') }}
+        </mat-chip>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button mat-stroked-button (click)="onPrint()" class="action-btn ghost-btn">
+        <mat-icon>print</mat-icon>
+        Print
+      </button>
+
+      <button mat-raised-button (click)="onEdit()" *ngIf="canEdit()" [disabled]="processing" class="action-btn primary-btn">
+        <mat-icon>edit</mat-icon>
+        Edit
+      </button>
+
+      <button mat-raised-button (click)="onApprove()" *ngIf="canApprove()" [disabled]="processing" class="action-btn primary-btn">
+        <mat-icon>check_circle</mat-icon>
+        Approve
+      </button>
+
+      <button mat-raised-button (click)="onCancel()" *ngIf="canCancel()" [disabled]="processing" class="action-btn warn-btn">
+        <mat-icon>cancel</mat-icon>
+        Cancel
+      </button>
+
+      <button mat-raised-button (click)="onConvertToInvoice()" *ngIf="canConvert()" [disabled]="processing" class="action-btn primary-btn">
+        <mat-icon>receipt_long</mat-icon>
+        Convert to Invoice
+      </button>
+    </div>
+  </section>
+
+  <section class="overview-grid">
+    <mat-card class="surface-card info-card">
+      <div class="card-head">
+        <mat-icon>info</mat-icon>
+        <h3>Order Information</h3>
+      </div>
+
+      <div class="meta-grid">
+        <div class="meta-item">
+          <label>Order Number</label>
+          <span>{{ eOrder?.orderNumber || '-' }}</span>
+        </div>
+        <div class="meta-item">
+          <label>Order Date</label>
+          <span>{{ eOrder?.orderDate ? formatDate(eOrder?.orderDate) : '-' }}</span>
+        </div>
+        <div class="meta-item">
+          <label>Status</label>
+          <span class="text-capitalize">{{ getStatusLabel(eOrder?.status || '') }}</span>
+        </div>
+        <div class="meta-item">
+          <label>Customer</label>
+          <span>{{ eOrder?.customerId?.name || '-' }}</span>
+        </div>
+        <div class="meta-item">
+          <label>Town</label>
+          <span>{{ eOrder?.customerId?.town || '-' }}</span>
+        </div>
+        <div class="meta-item" *ngIf="eOrder?.salesmanId">
+          <label>Salesman</label>
+          <span>{{ eOrder?.salesmanId?.name }}</span>
+        </div>
+        <div class="meta-item" *ngIf="eOrder?.routeId">
+          <label>Route</label>
+          <span>{{ eOrder?.routeId?.name || '-' }}</span>
+        </div>
+        <div class="meta-item" *ngIf="eOrder?.notes">
+          <label>Notes</label>
+          <span class="notes">{{ eOrder?.notes }}</span>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="surface-card summary-card">
+      <div class="card-head">
+        <mat-icon>payments</mat-icon>
+        <h3>Amount Summary</h3>
+      </div>
+
+      <div class="summary-rows">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <strong>{{ formatCurrency(eOrder?.subtotal || 0) }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Discount</span>
+          <strong>{{ formatCurrency(eOrder?.totalDiscount || 0) }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>GST</span>
+          <strong>{{ formatCurrency(eOrder?.totalGST || 0) }}</strong>
+        </div>
+        <div class="summary-row grand">
+          <span>Grand Total</span>
+          <strong>{{ formatCurrency(eOrder?.grandTotal || eOrder?.estimatedAmount || 0) }}</strong>
+        </div>
+      </div>
+    </mat-card>
+  </section>
+
+  <mat-card class="surface-card items-card">
+    <div class="card-head">
+      <mat-icon>list_alt</mat-icon>
+      <h3>Order Items</h3>
+    </div>
+
+    <div class="table-shell" *ngIf="eOrder?.items?.length; else noItemsTemplate">
+      <table mat-table [dataSource]="eOrder?.items || []" class="items-table">
+        <ng-container matColumnDef="sno">
+          <th mat-header-cell *matHeaderCellDef>#</th>
+          <td mat-cell *matCellDef="let item; let i = index">{{ i + 1 }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="itemName">
+          <th mat-header-cell *matHeaderCellDef>Item</th>
+          <td mat-cell *matCellDef="let item">
+            <div class="item-info">
+              <strong>{{ item.itemName || '-' }}</strong>
+              <small class="item-code" *ngIf="item.formulaSize || item.companyName">
+                {{ item.formulaSize || '-' }} / {{ item.companyName || '-' }}
+              </small>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="boxQuantity">
+          <th mat-header-cell *matHeaderCellDef>Box Qty</th>
+          <td mat-cell *matCellDef="let item">{{ item.boxQuantity || 0 }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="unitQuantity">
+          <th mat-header-cell *matHeaderCellDef>Unit Qty</th>
+          <td mat-cell *matCellDef="let item">{{ item.unitQuantity || 0 }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="schemeUnitQty">
+          <th mat-header-cell *matHeaderCellDef>Scheme Qty</th>
+          <td mat-cell *matCellDef="let item">{{ item.scheme1Quantity || item.scheme2Quantity || 0 }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="rateWithGST">
+          <th mat-header-cell *matHeaderCellDef>Rate (GST)</th>
+          <td mat-cell *matCellDef="let item">{{ formatCurrency(item.rateWithGST || item.unitPrice || 0) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="discount">
+          <th mat-header-cell *matHeaderCellDef>Disc %</th>
+          <td mat-cell *matCellDef="let item">{{ item.discount || 0 }}%</td>
+        </ng-container>
+
+        <ng-container matColumnDef="lineTotal">
+          <th mat-header-cell *matHeaderCellDef class="text-right">Line Total</th>
+          <td mat-cell *matCellDef="let item" class="amount-cell text-right">
+            {{ formatCurrency(item.lineTotal || 0) }}
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+
+    <ng-template #noItemsTemplate>
+      <div class="no-items">
+        <mat-icon>inventory_2</mat-icon>
+        <h3>No items in this e-order</h3>
+      </div>
+    </ng-template>
+
+    <div class="totals-strip" *ngIf="eOrder?.items?.length">
+      <span>Subtotal: <strong>{{ formatCurrency(eOrder?.subtotal || 0) }}</strong></span>
+      <span>Discount: <strong>{{ formatCurrency(eOrder?.totalDiscount || 0) }}</strong></span>
+      <span>GST: <strong>{{ formatCurrency(eOrder?.totalGST || 0) }}</strong></span>
+      <span class="grand">Grand Total: <strong>{{ formatCurrency(eOrder?.grandTotal || eOrder?.estimatedAmount || 0) }}</strong></span>
+    </div>
+  </mat-card>
+
+  <mat-card class="surface-card conversion-card" *ngIf="eOrder?.convertedInvoiceId">
+    <div class="card-head">
+      <mat-icon>receipt</mat-icon>
+      <h3>Conversion Information</h3>
+    </div>
+
+    <div class="meta-grid conversion-grid">
+      <div class="meta-item">
+        <label>Converted Invoice ID</label>
+        <span>{{ eOrder?.convertedInvoiceId }}</span>
+      </div>
+      <div class="meta-item">
+        <label>Converted At</label>
+        <span>{{ eOrder?.convertedAt ? formatDate(eOrder?.convertedAt) : '-' }}</span>
+      </div>
+    </div>
+  </mat-card>
+</div>
+
+<ng-template #loadingTemplate>
+  <div class="loading-state">
+    <mat-spinner diameter="42"></mat-spinner>
+    <p>Loading e-order details...</p>
+  </div>
+</ng-template>

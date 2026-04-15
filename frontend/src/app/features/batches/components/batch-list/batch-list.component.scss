@@ -1,0 +1,193 @@
+@import '../../../../../styles/vuexy-vars';
+@import '../../../../../styles/shared-list-styles';
+
+:host {
+  display: block;
+}
+
+.batches-page {
+  /* Header specific icons */
+  .list-page-header h1 mat-icon {
+    color: $purple;
+  }
+
+  /* View Mode Toggle Styling */
+  .view-mode-container {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+
+    .view-mode-toggle {
+      border: 1px solid $grey-very-light;
+      border-radius: 8px;
+      overflow: hidden;
+      background-color: #fff;
+
+      .mat-button-toggle {
+        border: none;
+        border-right: 1px solid $grey-very-light;
+        
+        &:last-child {
+          border-right: none;
+        }
+
+        &.mat-button-toggle-checked {
+          background-color: $purple !important;
+          color: #fff !important;
+          
+          mat-icon {
+            color: #fff !important;
+          }
+        }
+
+        &:not(.mat-button-toggle-checked):hover {
+          background-color: $grey-very-light !important;
+          color: $purple !important;
+        }
+      }
+    }
+  }
+
+  /* Data Table */
+  .data-table {
+    @include data-table;
+
+    .item-info {
+      display: flex;
+      flex-direction: column;
+      
+      .item-name {
+        font-weight: 600;
+        color: $text-card-title;
+      }
+
+      .item-code {
+        font-size: 11px;
+        color: $grey-dark;
+      }
+    }
+
+    .quantity-info {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      
+      .remaining {
+        font-weight: 600;
+        color: $purple;
+      }
+
+      .total {
+        color: $grey-dark;
+      }
+    }
+  }
+
+  /* Grouped View Styles */
+  .grouped-view {
+    margin-top: 24px;
+
+    .batch-group-panel {
+      margin-bottom: 16px;
+      border: 1px solid $grey-very-light !important;
+      border-radius: 12px !important;
+      overflow: hidden;
+      @include layered-glass;
+      background: #fff !important;
+
+      .mat-expansion-panel-header {
+        height: 72px !important;
+        padding: 0 24px;
+        
+        .group-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+
+          .group-name {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            color: $text-card-title;
+            
+            mat-icon {
+              color: $purple;
+              margin-right: 12px;
+            }
+          }
+
+          .group-stats {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+
+            .qty {
+              font-weight: 600;
+              color: $purple;
+            }
+          }
+        }
+      }
+
+      .group-content {
+        .batch-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px 24px;
+          border-bottom: 1px solid $grey-very-light;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background-color: rgba($purple, 0.05);
+            
+            .batch-number {
+              color: $purple;
+            }
+          }
+
+          .batch-main {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            .batch-number {
+              font-weight: 600;
+              color: $text-card-title;
+            }
+          }
+
+          .batch-meta {
+            display: flex;
+            gap: 24px;
+            font-size: 13px;
+            color: $text-body;
+          }
+        }
+      }
+    }
+  }
+
+  /* Expiry Styling */
+  .expiry-date {
+    font-weight: 600;
+    
+    &.expired { color: $danger; }
+    &.expiring-soon { color: $warning; }
+    &.expiring-warning { color: $danger; }
+    &.normal { color: $success; }
+  }
+
+  /* Chips */
+  ::ng-deep .mat-mdc-chip {
+    @include status-chip-base;
+    
+    &.status-active { background-color: rgba($success, 0.1); color: $success; }
+    &.status-expired { background-color: rgba($danger, 0.1); color: $danger; }
+    &.status-depleted { background-color: rgba($grey-dark, 0.1); color: $grey-dark; }
+  }
+}
+
+@include paginator;

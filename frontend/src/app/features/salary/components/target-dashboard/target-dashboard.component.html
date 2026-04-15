@@ -1,0 +1,204 @@
+<div class="list-page-container target-dashboard-page">
+  <div class="list-page-header">
+    <div class="header-content">
+      <h1 class="page-title"><mat-icon>trending_up</mat-icon> Performance Dashboard</h1>
+      <p class="page-subtitle">Track sales targets, recoveries, and brand incentives</p>
+    </div>
+    <div class="header-actions">
+      <div class="date-filters">
+        <mat-form-field appearance="outline" class="filter-field sm compact">
+          <mat-label>Month</mat-label>
+          <mat-select [formControl]="monthFilter">
+            <mat-option *ngFor="let month of months" [value]="month">{{ month }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field sm compact">
+          <mat-label>Year</mat-label>
+          <mat-select [formControl]="yearFilter">
+            <mat-option *ngFor="let year of yearOptions" [value]="year">{{ year }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" (click)="loadDashboard()" class="refresh-btn">
+          <mat-icon>refresh</mat-icon> Update
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="dashboard-stats-grid target-summary" *ngIf="dashboardData && !loading">
+    <div class="stat-card" style="--stat-color: #7367f0">
+      <div class="stat-icon-wrapper"><mat-icon>people</mat-icon></div>
+      <div class="stat-details">
+        <h3 class="stat-value">{{ dashboardData.summary.totalEmployees }}</h3>
+        <p class="stat-label">Total Staff</p>
+      </div>
+    </div>
+
+    <div class="stat-card" style="--stat-color: #28c76f">
+      <div class="stat-icon-wrapper"><mat-icon>trending_up</mat-icon></div>
+      <div class="stat-details">
+        <h3 class="stat-value">{{ dashboardData.summary.salesTargetAchievers }}</h3>
+        <p class="stat-label">Sales Achievers</p>
+      </div>
+    </div>
+
+    <div class="stat-card" style="--stat-color: #00cfe8">
+      <div class="stat-icon-wrapper"><mat-icon>account_balance_wallet</mat-icon></div>
+      <div class="stat-details">
+        <h3 class="stat-value">{{ dashboardData.summary.recoveryTargetAchievers }}</h3>
+        <p class="stat-label">Recovery Achievers</p>
+      </div>
+    </div>
+
+    <div class="stat-card" style="--stat-color: #ff9f43">
+      <div class="stat-icon-wrapper"><mat-icon>groups</mat-icon></div>
+      <div class="stat-details">
+        <h3 class="stat-value">{{ dashboardData.summary.partyVisitTargetAchievers }}</h3>
+        <p class="stat-label">Visit Achievers</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="list-page-card">
+    @if (loading) {
+      <div class="list-loading-overlay">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Calculating performance metrics...</p>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="dashboardData?.employees || []" class="data-table dashboard-table">
+          <ng-container matColumnDef="serial">
+            <th mat-header-cell *matHeaderCellDef class="w-50">S#</th>
+            <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="employeeName">
+            <th mat-header-cell *matHeaderCellDef>Employee Performance</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="employee-identity">
+                <div class="avatar-circle">{{ element.employeeName.charAt(0) }}</div>
+                <div class="info">
+                  <span class="name">{{ element.employeeName }}</span>
+                  <small class="role">Sales Officer</small>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="salesTarget">
+            <th mat-header-cell *matHeaderCellDef>Sales Performance</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="performance-cell">
+                <div class="cell-header">
+                  <span class="label">Achieved: <strong>{{ formatCurrency(element.salesTarget.achieved) }}</strong></span>
+                  <mat-icon [class]="getStatusClass(element.salesTarget.status)" class="status-icon">
+                    {{ getStatusIcon(element.salesTarget.status) }}
+                  </mat-icon>
+                </div>
+                <div class="perf-progress">
+                  <div class="progress-bar">
+                    <div class="fill" [style.width]="getProgressBarWidth(element.salesTarget.percentage)"
+                         [style.background-color]="getProgressBarColor(element.salesTarget.percentage)"></div>
+                  </div>
+                  <span class="percentage">{{ formatPercentage(element.salesTarget.percentage) }}</span>
+                </div>
+                <small class="target-val">Goal: {{ formatCurrency(element.salesTarget.target) }}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="recoveryTarget">
+            <th mat-header-cell *matHeaderCellDef>Recovery Performance</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="performance-cell">
+                <div class="cell-header">
+                  <span class="label">Achieved: <strong>{{ formatCurrency(element.recoveryTarget.achieved) }}</strong></span>
+                  <mat-icon [class]="getStatusClass(element.recoveryTarget.status)" class="status-icon">
+                    {{ getStatusIcon(element.recoveryTarget.status) }}
+                  </mat-icon>
+                </div>
+                <div class="perf-progress">
+                  <div class="progress-bar">
+                    <div class="fill" [style.width]="getProgressBarWidth(element.recoveryTarget.percentage)"
+                         [style.background-color]="getProgressBarColor(element.recoveryTarget.percentage)"></div>
+                  </div>
+                  <span class="percentage">{{ formatPercentage(element.recoveryTarget.percentage) }}</span>
+                </div>
+                <small class="target-val">Goal: {{ formatCurrency(element.recoveryTarget.target) }}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="partyVisitTarget">
+            <th mat-header-cell *matHeaderCellDef>Visits</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="performance-cell">
+                <div class="cell-header">
+                  <span class="label"><strong>{{ element.partyVisitTarget.achieved }}</strong> / {{ element.partyVisitTarget.target }}</span>
+                  <mat-icon [class]="getStatusClass(element.partyVisitTarget.status)" class="status-icon">
+                    {{ getStatusIcon(element.partyVisitTarget.status) }}
+                  </mat-icon>
+                </div>
+                <div class="perf-progress">
+                  <div class="progress-bar">
+                    <div class="fill" [style.width]="getProgressBarWidth(element.partyVisitTarget.percentage)"
+                         [style.background-color]="getProgressBarColor(element.partyVisitTarget.percentage)"></div>
+                  </div>
+                  <span class="percentage">{{ formatPercentage(element.partyVisitTarget.percentage) }}</span>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="mobileOrders">
+            <th mat-header-cell *matHeaderCellDef>App Activity</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="activity-stack">
+                <div class="activity-item">
+                  <mat-icon>shopping_cart</mat-icon>
+                  <span>{{ element.mobileOrders.ordersCreated }} Orders</span>
+                </div>
+                <div class="activity-item">
+                  <mat-icon>account_balance</mat-icon>
+                  <span>{{ formatCurrency(element.mobileCashRecovery.amountRecovered) }}</span>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="brandIncentives">
+            <th mat-header-cell *matHeaderCellDef>Brand Awards</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="brand-cell">
+                @if (hasBrandIncentives(element)) {
+                  <div class="incentive-summary">
+                    <span class="badge achieved">{{ getBrandIncentivesAchieved(element) }}</span>
+                    <span class="sep">/</span>
+                    <span class="badge total">{{ getBrandIncentivesTotal(element) }}</span>
+                  </div>
+                  <button mat-button class="view-btn" [matTooltip]="'View brand wise breakdown'">Details</button>
+                } @else {
+                  <span class="no-incentive">-</span>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        @if (dashboardData?.employees?.length === 0) {
+          <div class="list-empty-state">
+            <mat-icon>insights</mat-icon>
+            <p>No dashboard data available for this period</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

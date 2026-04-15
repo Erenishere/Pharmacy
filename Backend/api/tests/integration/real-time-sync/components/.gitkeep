@@ -1,0 +1,8 @@
+# Components directory
+# This directory will contain the test framework components:
+# - mockDataGenerator.js
+# - syncVerifier.js
+# - consistencyChecker.js
+# - performanceMonitor.js
+# - concurrentExecutor.js
+# - inconsistencyResolver.js

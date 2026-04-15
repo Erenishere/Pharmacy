@@ -1,0 +1,136 @@
+<div class="salary-package-list-container">
+  <mat-card class="list-card">
+    <mat-card-header>
+      <mat-card-title>
+        <div class="header-content">
+          <div class="title-section">
+            <mat-icon>list_alt</mat-icon>
+            <span>Salary Package List</span>
+          </div>
+          <button mat-raised-button color="primary" (click)="onCreateNew()">
+            <mat-icon>add</mat-icon>
+            Create New Package
+          </button>
+        </div>
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Filters Section -->
+      <div class="filters-section">
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select [formControl]="statusFilter">
+            <mat-option *ngFor="let status of statusOptions" [value]="status">
+              {{ status }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Year</mat-label>
+          <mat-select [formControl]="yearFilter">
+            <mat-option *ngFor="let year of yearOptions" [value]="year">
+              {{ year }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div *ngIf="loading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading salary packages...</p>
+      </div>
+
+      <!-- Table -->
+      <div *ngIf="!loading" class="table-container">
+        <table mat-table [dataSource]="packages" class="salary-packages-table">
+          
+          <!-- Serial Number Column -->
+          <ng-container matColumnDef="serial">
+            <th mat-header-cell *matHeaderCellDef>S#</th>
+            <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
+          </ng-container>
+
+          <!-- Employee Name Column -->
+          <ng-container matColumnDef="employeeName">
+            <th mat-header-cell *matHeaderCellDef>Employee Name</th>
+            <td mat-cell *matCellDef="let element">{{ element.employeeName }}</td>
+          </ng-container>
+
+          <!-- Duration Column -->
+          <ng-container matColumnDef="duration">
+            <th mat-header-cell *matHeaderCellDef>Date To Date</th>
+            <td mat-cell *matCellDef="let element">{{ formatDuration(element.duration) }}</td>
+          </ng-container>
+
+          <!-- Basic Pay Column -->
+          <ng-container matColumnDef="basicPay">
+            <th mat-header-cell *matHeaderCellDef>Basic Pay</th>
+            <td mat-cell *matCellDef="let element">{{ formatCurrency(element.basicPay.amount) }}</td>
+          </ng-container>
+
+          <!-- Party Visiting Target Column -->
+          <ng-container matColumnDef="partyVisitingTarget">
+            <th mat-header-cell *matHeaderCellDef>Party Visiting Target</th>
+            <td mat-cell *matCellDef="let element">{{ element.partyVisitTarget.numberOfOrders }}</td>
+          </ng-container>
+
+          <!-- Visited Parties Column -->
+          <ng-container matColumnDef="visitedParties">
+            <th mat-header-cell *matHeaderCellDef>Visited Parties</th>
+            <td mat-cell *matCellDef="let element">{{ getVisitedParties(element) }}</td>
+          </ng-container>
+
+          <!-- Sales Target Column -->
+          <ng-container matColumnDef="salesTarget">
+            <th mat-header-cell *matHeaderCellDef>Sales Target</th>
+            <td mat-cell *matCellDef="let element">{{ formatCurrency(element.salesTarget.targetAmount) }}</td>
+          </ng-container>
+
+          <!-- Recovery Target Column -->
+          <ng-container matColumnDef="recoveryTarget">
+            <th mat-header-cell *matHeaderCellDef>Recovery Target</th>
+            <td mat-cell *matCellDef="let element">{{ formatCurrency(element.recoveryTarget.targetAmount) }}</td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Edit/Print</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="action-buttons">
+                <button 
+                  mat-icon-button 
+                  color="primary" 
+                  (click)="onEdit(element)"
+                  matTooltip="Edit Package">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button 
+                  mat-icon-button 
+                  color="accent" 
+                  (click)="onPrint(element)"
+                  matTooltip="Print Salary Slip">
+                  <mat-icon>print</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <!-- No Data Message -->
+        <div *ngIf="packages.length === 0" class="no-data">
+          <mat-icon>inbox</mat-icon>
+          <p>No salary packages found</p>
+          <button mat-raised-button color="primary" (click)="onCreateNew()">
+            Create First Package
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

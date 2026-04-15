@@ -1,0 +1,7 @@
+@import 'styles/form-dialog-shell';
+
+:host {
+  display: block;
+}
+
+@include standard-form-dialog;

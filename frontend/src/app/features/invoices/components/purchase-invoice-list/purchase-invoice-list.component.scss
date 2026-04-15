@@ -1,0 +1,415 @@
+@import 'styles/vuexy-vars';
+
+$page-bg: #f8f7fa;
+$card-bg: #ffffff;
+$border: #e9ecef;
+$purple: #7367f0;
+
+.purchase-invoice-list-container {
+  padding: 24px;
+  max-width: 1480px;
+  margin: 0 auto;
+  background-color: $page-bg;
+  min-height: 100vh;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 12px;
+
+  h2 {
+    margin: 0;
+    font-size: 36px;
+    font-weight: 600;
+    color: $text-card-title;
+    border-left: 4px solid $purple;
+    padding-left: 12px;
+    line-height: 1.1;
+  }
+}
+
+.statistics-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+
+  .stat-card {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid $border;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: $text-muted;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: $text-card-title;
+
+      &.warn {
+        color: $danger;
+      }
+
+      &.success {
+        color: $success;
+      }
+    }
+  }
+}
+
+.filters-section {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 24px;
+  padding: 18px;
+  background: $card-bg;
+  border-radius: 12px;
+  border: 1px solid $border;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: 2fr repeat(4, minmax(160px, 1fr));
+  gap: 12px;
+  align-items: start;
+
+  .search-field {
+    grid-column: 1 / span 2;
+    min-width: 240px;
+  }
+
+  .filter-field {
+    min-width: 0;
+  }
+}
+
+.filters-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  button {
+    min-width: 148px;
+  }
+}
+
+:host ::ng-deep .filters-section .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+:host ::ng-deep .filters-section .mat-mdc-form-field-infix {
+  min-height: 48px;
+}
+
+:host ::ng-deep .filters-section .mat-mdc-text-field-wrapper {
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+/* Hardening against cross-component/global Material overrides */
+:host ::ng-deep .purchase-invoice-list-container .filters-section .mdc-floating-label,
+:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-mdc-floating-label {
+  opacity: 1 !important;
+  color: #6e6b7b !important;
+}
+
+:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-mdc-form-field.mat-focused .mdc-floating-label,
+:host ::ng-deep .purchase-invoice-list-container .filters-section .mdc-floating-label--float-above {
+  opacity: 1 !important;
+  color: $purple !important;
+  background: #ffffff !important;
+  padding: 0 4px !important;
+}
+
+:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-mdc-input-element,
+:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-mdc-select-value-text,
+:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-mdc-select-min-line {
+  color: #5e5873 !important;
+}
+
+:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-mdc-form-field-icon-prefix,
+:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-mdc-form-field-icon-suffix,
+:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-datepicker-toggle-default-icon,
+:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-mdc-select-arrow,
+:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-icon {
+  color: $purple !important;
+  opacity: 1 !important;
+}
+
+.table-container {
+  background: #ffffff;
+  border: 1px solid $border;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.invoices-table {
+  width: 100%;
+  min-width: 1250px;
+  background-color: #ffffff;
+  border-collapse: collapse;
+
+  th {
+    background-color: #f6f6fb;
+    color: #5e5873;
+    font-weight: 600;
+    font-size: 12px;
+    padding: 14px 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid $border;
+  }
+
+  td {
+    padding: 12px 16px;
+    font-size: 14px;
+    border-bottom: 1px solid #f2f2f5;
+    vertical-align: middle;
+  }
+
+  tr.mat-mdc-row {
+    transition: background-color 0.2s ease;
+    &:hover {
+      background: #f8f9ff;
+    }
+  }
+}
+
+tr.return-row td {
+  background-color: #fffaf8;
+}
+
+.invoice-link {
+  color: $purple;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.supplier-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-size: 14px;
+    color: $text-card-title;
+  }
+
+  small {
+    font-size: 12px;
+    color: $text-muted;
+  }
+}
+
+.negative-balance,
+.return-amount {
+  color: $danger;
+  font-weight: 600;
+}
+
+.type-tag {
+  font-weight: 700;
+  font-size: 1.01rem;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.invoice-type-badge {
+  padding: 4px 9px;
+  background-color: #f3f2f7;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: $purple;
+  white-space: nowrap;
+}
+
+.gst-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .gst-total {
+    font-weight: 600;
+    color: $text-card-title;
+  }
+
+  .gst-detail {
+    font-size: 11px;
+    color: $text-muted;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+.status-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+:host ::ng-deep .status-chips .mat-mdc-standard-chip {
+  height: 27px;
+  font-size: 12px;
+}
+
+.purchase-chip {
+  background-color: rgba($success, 0.12);
+  color: #0d7f47;
+}
+
+.return-chip {
+  background-color: rgba($danger, 0.1);
+  color: #b42318;
+}
+
+.loading-container,
+.no-data,
+.error-message {
+  padding: 40px 24px;
+  text-align: center;
+  color: $text-muted;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.no-data mat-icon,
+.error-message mat-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+}
+
+:host ::ng-deep mat-paginator {
+  border-top: 1px solid $border;
+  background: #ffffff;
+}
+
+.summary-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 20px;
+  padding: 16px 20px;
+  background: #ffffff;
+  border: 1px solid $border;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  margin-top: 16px;
+
+  .summary-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 190px;
+
+    .label {
+      font-size: 12px;
+      color: $text-muted;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .value {
+      font-size: 18px;
+      font-weight: 700;
+      color: $purple;
+    }
+  }
+}
+
+@media (max-width: 1280px) {
+  .filters-grid {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+
+    .search-field {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+@media (max-width: 992px) {
+  .header-section {
+    flex-direction: column;
+    align-items: flex-start;
+    h2 {
+      font-size: 30px;
+    }
+  }
+
+  .filters-actions {
+    width: 100%;
+    justify-content: stretch;
+
+    button {
+      flex: 1;
+    }
+  }
+
+  .summary-footer {
+    justify-content: flex-start;
+
+    .summary-item {
+      align-items: flex-start;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .purchase-invoice-list-container {
+    padding: 16px;
+  }
+
+  .statistics-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .filters-grid {
+    grid-template-columns: 1fr;
+
+    .search-field {
+      grid-column: auto;
+    }
+  }
+
+  .filters-actions {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+}

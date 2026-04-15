@@ -1,0 +1,133 @@
+<div class="purchase-order-list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Purchase Orders</h1>
+      <button mat-raised-button color="primary" (click)="onCreateNew()">
+        <mat-icon>add</mat-icon>
+        Create Purchase Order
+      </button>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="statistics-cards">
+    <mat-card class="stat-card">
+      <div class="stat-icon" style="background: #e3f2fd;">
+        <mat-icon style="color: #1976d2;">shopping_cart</mat-icon>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">Total Orders</div>
+        <div class="stat-value">{{ statistics.totalOrders }}</div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="stat-icon" style="background: #e8f5e9;">
+        <mat-icon style="color: #388e3c;">attach_money</mat-icon>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">Total Amount</div>
+        <div class="stat-value">{{ statistics.totalAmount | currency:'PKR':'symbol':'1.0-0' }}</div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="stat-icon" style="background: #fff3e0;">
+        <mat-icon style="color: #f57c00;">drafts</mat-icon>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">Draft</div>
+        <div class="stat-value">{{ statistics.draftCount }}</div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="stat-icon" style="background: #e1f5fe;">
+        <mat-icon style="color: #0288d1;">send</mat-icon>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">Sent</div>
+        <div class="stat-value">{{ statistics.sentCount }}</div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="stat-icon" style="background: #e8f5e9;">
+        <mat-icon style="color: #2e7d32;">check_circle</mat-icon>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">Confirmed</div>
+        <div class="stat-value">{{ statistics.confirmedCount }}</div>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <div class="filters-row">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search</mat-label>
+        <input matInput [formControl]="searchControl" placeholder="Search by PO number, supplier...">
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select [formControl]="statusFilter">
+          <mat-option *ngFor="let status of statusOptions; trackBy: trackByValue" [value]="status.value">
+            {{ status.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Supplier</mat-label>
+        <mat-select [formControl]="supplierFilter">
+          <mat-option value="">All Suppliers</mat-option>
+          <mat-option *ngFor="let supplier of suppliers; trackBy: trackById" [value]="supplier._id">
+            {{ supplier.accountTitle }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Date From</mat-label>
+        <input matInput type="date" [formControl]="dateFromFilter">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Date To</mat-label>
+        <input matInput type="date" [formControl]="dateToFilter">
+      </mat-form-field>
+
+      <button mat-icon-button (click)="clearFilters()" matTooltip="Clear filters">
+        <mat-icon>clear</mat-icon>
+      </button>
+
+      <button mat-icon-button (click)="onExport()" matTooltip="Export">
+        <mat-icon>download</mat-icon>
+      </button>
+    </div>
+  </mat-card>
+
+  <!-- Table (Powered by Gen-Data Table) -->
+  <mat-card class="table-card">
+    <div class="table-container">
+      <app-data-table 
+        [data]="dataSource.data"
+        [columns]="tableColumns"
+        [totalItems]="totalItems"
+        [pageSize]="pageSize"
+        [pageIndex]="currentPage"
+        (pageChange)="onPageChange($event)"
+        (actionClick)="onTableAction($event)">
+      </app-data-table>
+    </div>
+  </mat-card>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+</div>

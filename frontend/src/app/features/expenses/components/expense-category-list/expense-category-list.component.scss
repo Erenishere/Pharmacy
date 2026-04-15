@@ -1,0 +1,18 @@
+@import 'styles/shared-list-styles';
+
+:host {
+  @include dialog-container;
+}
+
+.category-table {
+  @include data-table;
+  margin-top: 16px;
+}
+
+.action-buttons {
+  @include action-buttons;
+}
+
+mat-chip {
+  @include status-chip-base;
+}

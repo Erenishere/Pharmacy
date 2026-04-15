@@ -1,0 +1,113 @@
+<div class="data-table-container">
+  <div class="table-overlay" *ngIf="loading">
+    <div class="loader"></div>
+  </div>
+
+  <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSortChange($event)" [trackBy]="trackByRowId" class="w-100 data-table">
+
+    <ng-container *ngFor="let col of columns" [matColumnDef]="col.key">
+      
+      <!-- Header -->
+      <ng-container *ngIf="col.sortable; else noSort">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'text-align': col.align || 'left'}">
+          {{ col.label }}
+        </th>
+      </ng-container>
+      <ng-template #noSort>
+        <th mat-header-cell *matHeaderCellDef [ngStyle]="{'text-align': col.align || 'left'}" class="table-header">
+          {{ col.label }}
+        </th>
+      </ng-template>
+
+      <!-- Cell -->
+      <td mat-cell *matCellDef="let row" [ngStyle]="{'text-align': col.align || 'left'}">
+        
+        <!-- Text Type -->
+        <span *ngIf="!col.type || col.type === 'text'">
+          {{ row[col.key] || '—' }}
+        </span>
+
+        <!-- Numeric Type -->
+        <span *ngIf="col.type === 'numeric'" class="numeric-val">
+          {{ row[col.key] | number: col.pipeFormat || '1.0-2' }}
+        </span>
+
+        <!-- Currency Type -->
+        <span *ngIf="col.type === 'currency'" class="numeric-val fw-bold">
+          {{ row[col.key] | currency: 'PKR' : 'symbol' : col.pipeFormat || '1.0-0' }}
+        </span>
+
+        <!-- Date Type -->
+        <span *ngIf="col.type === 'date'">
+          {{ row[col.key] | date: col.pipeFormat || 'dd/MM/yyyy' }}
+        </span>
+
+        <!-- Status Type -->
+        <span *ngIf="col.type === 'status'">
+          <mat-chip 
+            [color]="col.colorMap ? col.colorMap[row[col.key]] : 'primary'"
+            [ngClass]="col.classMap ? col.classMap[row[col.key]] : ''"
+            class="status-chip-sm">
+            {{ row[col.key] | titlecase }}
+          </mat-chip>
+        </span>
+
+        <!-- Custom HTML projection (coming later) -->
+        <span *ngIf="col.type === 'custom'">
+          <!-- For now we fallback to standard text mapping -->
+          {{ row[col.key] !== undefined ? row[col.key] : '—' }}
+        </span>
+
+        <!-- Action Type -->
+        <div *ngIf="col.type === 'action' && col.actions">
+          <!-- Dropdown menu if more than 3 actions, else inline buttons -->
+          <ng-container *ngIf="col.actions.length > 2; else inlineActions">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu" (click)="$event.stopPropagation()">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionMenu="matMenu">
+              <ng-container *ngFor="let act of col.actions">
+                <button mat-menu-item *ngIf="!act.showIf || act.showIf(row)" (click)="onActionClick(act.actionKey, row, $event)">
+                  <mat-icon [color]="act.color || ''">{{ act.icon }}</mat-icon>
+                  <span>{{ act.label }}</span>
+                </button>
+              </ng-container>
+            </mat-menu>
+          </ng-container>
+
+          <ng-template #inlineActions>
+            <ng-container *ngFor="let act of col.actions">
+              <button mat-icon-button *ngIf="!act.showIf || act.showIf(row)"
+                      [color]="act.color || ''" 
+                      [matTooltip]="act.tooltip || act.label"
+                      (click)="onActionClick(act.actionKey, row, $event)">
+                <mat-icon>{{ act.icon }}</mat-icon>
+              </button>
+            </ng-container>
+          </ng-template>
+        </div>
+
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumnKeys; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumnKeys;" class="data-table-row"></tr>
+    
+    <!-- Empty State -->
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell empty-state" [attr.colspan]="displayedColumnKeys.length">
+        <mat-icon class="empty-icon">inbox</mat-icon>
+        <p>No records found</p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<mat-paginator *ngIf="showPaginator"
+               [length]="totalItems"
+               [pageSize]="pageSize"
+               [pageIndex]="pageIndex"
+               [pageSizeOptions]="pageSizeOptions"
+               (page)="onPageChange($event)"
+               class="data-table-paginator">
+</mat-paginator>

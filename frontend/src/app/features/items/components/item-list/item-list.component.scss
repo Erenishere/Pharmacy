@@ -1,0 +1,40 @@
+@import '../../../../../styles/vuexy-vars';
+@import '../../../../../styles/shared-list-styles';
+
+:host {
+  display: block;
+}
+
+.items-page {
+  /* Inherits global .list-page-container styles */
+
+  .list-page-header {
+    h1 {
+      mat-icon {
+        color: $purple;
+      }
+    }
+  }
+
+  .data-table {
+    @include data-table;
+    
+    .item-code {
+      font-family: 'Inter', monospace;
+      font-weight: 600;
+      color: $purple;
+      font-size: 13px;
+    }
+
+    .item-name {
+      font-weight: 600;
+      color: $text-card-title;
+    }
+  }
+
+  mat-chip {
+    @include status-chip-base;
+  }
+}
+
+@include paginator;

@@ -1,0 +1,41 @@
+@import "../../../../../styles/shared-list-styles";
+
+.bilty-list-page {
+  @include data-table;
+  @include paginator;
+
+  .party-info {
+    display: flex;
+    flex-direction: column;
+    .name { font-weight: 600; color: $grey-dark; }
+    .town { font-size: 11px; color: $grey-medium; }
+  }
+
+  .amt-cell {
+    font-weight: 500;
+    color: $purple-dark;
+  }
+
+  .status-chip {
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+
+    &.received { background: rgba($success, 0.1); color: $success; }
+    &.sent { background: rgba($info, 0.1); color: $info; }
+    &.pending { background: rgba($warning, 0.1); color: $warning; }
+  }
+
+  .type-chip {
+    padding: 2px 8px;
+    border: 1px solid;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+
+    &.receive { border-color: $success; color: $success; }
+    &.send { border-color: $purple; color: $purple; }
+  }
+}

@@ -1,0 +1,84 @@
+<div class="payment-modal">
+    <div class="modal-header">
+        <h2>Complete Payment</h2>
+        <div class="total-display">
+            <span class="label">Total Payable</span>
+            <span class="amount">{{ formatCurrency(data.totalAmount) }}</span>
+        </div>
+    </div>
+
+    <div class="modal-body">
+        <div class="customer-info" *ngIf="data.customer">
+            <mat-icon>person</mat-icon>
+            <span>{{ data.customer.name }}</span>
+            <span class="badge" [class.walkin]="isWalkIn">{{ isWalkIn ? 'Walk-In' : 'Registered' }}</span>
+        </div>
+
+        <!-- Payment Mode Selection -->
+        <div class="payment-tabs" *ngIf="!isCreditSale()">
+            <label>Payment Mode</label>
+            <mat-button-toggle-group [value]="paymentMode()" (change)="setPaymentMode($event.value)"
+                class="mode-toggles">
+                <mat-button-toggle value="cash">
+                    <mat-icon>payments</mat-icon> Cash
+                </mat-button-toggle>
+                <mat-button-toggle value="card">
+                    <mat-icon>credit_card</mat-icon> Card
+                </mat-button-toggle>
+            </mat-button-toggle-group>
+        </div>
+
+        <!-- Cash Payment Section -->
+        <div class="payment-details" *ngIf="!isCreditSale()">
+            <div class="input-section">
+                <mat-form-field appearance="outline" class="tendered-input">
+                    <mat-label>Amount Tendered</mat-label>
+                    <input matInput type="number" [ngModel]="amountTendered()"
+                        (ngModelChange)="amountTendered.set($event)" min="0" class="big-input" cdkFocusInitial>
+                    <span matPrefix>Rs.&nbsp;</span>
+                </mat-form-field>
+
+                <!-- Quick Cash Buttons -->
+                <div class="quick-cash" *ngIf="paymentMode() === 'cash'">
+                    <button mat-stroked-button (click)="onQuickTender(data.totalAmount)">Exact</button>
+                    <button mat-stroked-button (click)="onQuickTender(1000)">1000</button>
+                    <button mat-stroked-button (click)="onQuickTender(5000)">5000</button>
+                </div>
+            </div>
+
+            <div class="change-display" [class.valid]="changeDue() >= 0" [class.invalid]="changeDue() < 0">
+                <div class="row">
+                    <span>Change Due:</span>
+                    <span class="value">{{ formatCurrency(changeDue()) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Credit Sale Section (Only for registered) -->
+        <div class="credit-section" *ngIf="!isWalkIn">
+            <div class="divider">
+                <span>OR</span>
+            </div>
+            <div class="credit-toggle">
+                <button mat-button color="accent" (click)="isCreditSale.set(!isCreditSale())">
+                    {{ isCreditSale() ? 'Back to Payment' : 'Pay Later (Credit Sale)' }}
+                </button>
+            </div>
+
+            <div class="credit-warning" *ngIf="isCreditSale()">
+                <mat-icon>warning</mat-icon>
+                <p>This amount will be added to the customer's ledger balance.</p>
+                <p>Current Balance: {{ formatCurrency(data.customer.financialInfo.creditLimit || 0) }} (Limit)</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-actions">
+        <button mat-button (click)="close()">Cancel</button>
+        <button mat-flat-button color="primary" class="confirm-btn" [disabled]="!isValid() && !isCreditSale()"
+            (click)="submit()">
+            <span *ngIf="!isCreditSale()">Confirm Payment</span>
+            <span *ngIf="isCreditSale()">Confirm Credit Sale</span>
+        </button>
+    </div>
+</div>

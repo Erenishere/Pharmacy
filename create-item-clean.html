@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Item - Clean Design</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 32px 36px;
+            background: linear-gradient(135deg, #7367f0 0%, #9055ff 100%);
+            color: white;
+            position: relative;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            flex: 1;
+        }
+
+        .header-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .modal-subtitle {
+            font-size: 15px;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        .close-btn {
+            width: 44px;
+            height: 44px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 36px;
+        }
+
+        .section {
+            margin-bottom: 36px;
+        }
+
+        .section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-header {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #7367f0 0%, #9055ff 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a202c;
+            margin: 0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .form-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .required-mark {
+            color: #e53e3e;
+            font-size: 16px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: #f8fafc;
+            color: #2d3748;
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: #a0aec0;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #7367f0;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(115, 103, 240, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 110px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+            font-size: 20px;
+            pointer-events: none;
+        }
+
+        .input-with-icon {
+            padding-right: 48px;
+        }
+
+        .input-hint {
+            font-size: 13px;
+            color: #718096;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .checkbox-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .checkbox-item:hover {
+            background: #edf2f7;
+            border-color: #cbd5e1;
+        }
+
+        .checkbox-item.active {
+            background: #ede9fe;
+            border-color: #7367f0;
+        }
+
+        .checkbox-input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #7367f0;
+        }
+
+        .checkbox-label {
+            font-size: 15px;
+            color: #2d3748;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .modal-footer {
+            padding: 24px 36px;
+            background: #f8fafc;
+            border-top: 2px solid #e2e8f0;
+            display: flex;
+            gap: 16px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .btn-cancel {
+            background: white;
+            color: #64748b;
+            border: 2px solid #cbd5e1;
+        }
+
+        .btn-cancel:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7367f0 0%, #9055ff 100%);
+            color: white;
+            box-shadow: 0 4px 14px rgba(115, 103, 240, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(115, 103, 240, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+
+            .modal-header {
+                padding: 24px 20px;
+            }
+
+            .modal-body {
+                padding: 24px 20px;
+            }
+
+            .modal-footer {
+                padding: 20px;
+                flex-direction: column-reverse;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .form-row,
+            .checkbox-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="modal">
+            <!-- Header -->
+            <div class="modal-header">
+                <div class="header-content">
+                    <div class="header-left">
+                        <div class="header-icon">📦</div>
+                        <h1 class="modal-title">Create New Item</h1>
+                        <p class="modal-subtitle">Add a new product to your inventory system</p>
+                    </div>
+                    <button class="close-btn" onclick="alert('Close')">×</button>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+                <!-- Basic Information -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-icon">ℹ️</div>
+                        <h2 class="section-title">Basic Information</h2>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Item Name
+                                <span class="required-mark">*</span>
+                            </label>
+                            <input type="text" class="form-input" placeholder="Enter item name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                Category
+                                <span class="required-mark">*</span>
+                            </label>
+                            <select class="form-select" required>
+                                <option value="">Select a category</option>
+                                <option>Tablets</option>
+                                <option>Capsules</option>
+                                <option>Syrup</option>
+                                <option>Injection</option>
+                                <option>Ointment</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Brand Name</label>
+                            <input type="text" class="form-input" placeholder="Enter brand name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Manufacturer</label>
+                            <input type="text" class="form-input" placeholder="Enter manufacturer name">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Specifications -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-icon">📋</div>
+                        <h2 class="section-title">Specifications</h2>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Barcode</label>
+                            <div class="input-group">
+                                <input type="text" class="form-input input-with-icon" placeholder="Scan or enter barcode">
+                                <span class="input-icon">📷</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Pack Size</label>
+                            <input type="number" class="form-input" placeholder="Enter pack size" value="1">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Unit of Measure</label>
+                            <select class="form-select">
+                                <option value="">Select unit</option>
+                                <option>Box</option>
+                                <option>Strip</option>
+                                <option>Piece</option>
+                                <option>Bottle</option>
+                                <option>Vial</option>
+                                <option>Tube</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Strength/Dosage</label>
+                            <input type="text" class="form-input" placeholder="e.g., 500mg, 10ml">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Storage & Handling -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-icon">🏪</div>
+                        <h2 class="section-title">Storage & Handling</h2>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Storage Conditions</label>
+                            <textarea class="form-textarea" placeholder="e.g., Store at room temperature (15-25°C), away from moisture and direct sunlight"></textarea>
+                            <span class="input-hint">Describe optimal storage requirements for this item</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Handling Instructions</label>
+                            <textarea class="form-textarea" placeholder="e.g., Handle with care, avoid exposure to heat, shake well before use"></textarea>
+                            <span class="input-hint">Special handling instructions if applicable</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Options -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-icon">⚙️</div>
+                        <h2 class="section-title">Additional Options</h2>
+                    </div>
+                    <div class="checkbox-container">
+                        <div class="checkbox-item active" onclick="this.classList.toggle('active'); this.querySelector('input').checked = !this.querySelector('input').checked">
+                            <input type="checkbox" id="prescription" class="checkbox-input" checked>
+                            <label class="checkbox-label" for="prescription">Requires Prescription</label>
+                        </div>
+                        <div class="checkbox-item" onclick="this.classList.toggle('active'); this.querySelector('input').checked = !this.querySelector('input').checked">
+                            <input type="checkbox" id="temperature" class="checkbox-input">
+                            <label class="checkbox-label" for="temperature">Temperature Controlled</label>
+                        </div>
+                        <div class="checkbox-item active" onclick="this.classList.toggle('active'); this.querySelector('input').checked = !this.querySelector('input').checked">
+                            <input type="checkbox" id="active" class="checkbox-input" checked>
+                            <label class="checkbox-label" for="active">Active Status</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer">
+                <button class="btn btn-cancel" onclick="alert('Cancelled')">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" onclick="alert('Item Created Successfully!')">
+                    <span>✓</span>
+                    Create Item
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

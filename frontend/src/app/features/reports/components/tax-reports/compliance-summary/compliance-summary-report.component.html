@@ -1,0 +1,182 @@
+<div class="report-container">
+  <div class="report-header">
+    <div class="header-left">
+      <button mat-icon-button class="back-btn" routerLink="/reports">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Tax Compliance Summary</h1>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button class="refresh-btn" (click)="loadReport()">
+        <mat-icon>refresh</mat-icon> Refresh
+      </button>
+      <button mat-raised-button class="export-btn">
+        <mat-icon>download</mat-icon> Export
+      </button>
+    </div>
+  </div>
+
+  <div class="filters-card">
+    <div class="filters-row">
+      <mat-form-field class="filter-field">
+        <mat-label>Start Date</mat-label>
+        <input matInput [matDatepicker]="startPicker" [(ngModel)]="startDate">
+        <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field class="filter-field">
+        <mat-label>End Date</mat-label>
+        <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate">
+        <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+      </mat-form-field>
+
+      <div class="filter-actions">
+        <button mat-raised-button color="primary" (click)="applyFilters()">Apply</button>
+        <button mat-stroked-button (click)="resetFilters()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading tax compliance data...</p>
+    </div>
+  } @else if (reportData) {
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="icon-wrapper success">
+          <mat-icon>trending_up</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">GST on Sales</div>
+          <div class="value">{{ formatCurrency(reportData.gstSales.totalGSTAmount) }}</div>
+          <div class="sub-text">{{ formatNumber(reportData.gstSales.totalInvoices) }} invoices</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper info">
+          <mat-icon>trending_down</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">GST on Purchases</div>
+          <div class="value">{{ formatCurrency(reportData.gstPurchases.totalGSTAmount) }}</div>
+          <div class="sub-text">{{ formatNumber(reportData.gstPurchases.totalInvoices) }} invoices</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper warning">
+          <mat-icon>account_balance</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Net GST Payable</div>
+          <div class="value" [class.positive]="reportData.netGSTPayable > 0" [class.negative]="reportData.netGSTPayable < 0">
+            {{ formatCurrency(reportData.netGSTPayable) }}
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper purple">
+          <mat-icon>receipt_long</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Withholding Tax</div>
+          <div class="value">{{ formatCurrency(reportData.withholdingTax.totalWHTAmount) }}</div>
+          <div class="sub-text">{{ formatNumber(reportData.withholdingTax.totalTransactions) }} transactions</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-card">
+      <div class="card-header">
+        <h2>GST Sales Breakdown</h2>
+      </div>
+      <div class="card-body">
+        <div class="compliance-row">
+          <span class="label">Total Invoices:</span>
+          <span class="value">{{ formatNumber(reportData.gstSales.totalInvoices) }}</span>
+        </div>
+        <div class="compliance-row">
+          <span class="label">Taxable Amount:</span>
+          <span class="value">{{ formatCurrency(reportData.gstSales.totalTaxableAmount) }}</span>
+        </div>
+        <div class="compliance-row">
+          <span class="label">Total GST:</span>
+          <span class="value amount">{{ formatCurrency(reportData.gstSales.totalGSTAmount) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-card">
+      <div class="card-header">
+        <h2>GST Purchases Breakdown</h2>
+      </div>
+      <div class="card-body">
+        <div class="compliance-row">
+          <span class="label">Total Invoices:</span>
+          <span class="value">{{ formatNumber(reportData.gstPurchases.totalInvoices) }}</span>
+        </div>
+        <div class="compliance-row">
+          <span class="label">Taxable Amount:</span>
+          <span class="value">{{ formatCurrency(reportData.gstPurchases.totalTaxableAmount) }}</span>
+        </div>
+        <div class="compliance-row">
+          <span class="label">Input Tax Credit:</span>
+          <span class="value amount positive">{{ formatCurrency(reportData.gstPurchases.totalGSTAmount) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-card">
+      <div class="card-header">
+        <h2>Withholding Tax Summary</h2>
+      </div>
+      <div class="card-body">
+        <div class="compliance-row">
+          <span class="label">Total Transactions:</span>
+          <span class="value">{{ formatNumber(reportData.withholdingTax.totalTransactions) }}</span>
+        </div>
+        <div class="compliance-row">
+          <span class="label">Taxable Amount:</span>
+          <span class="value">{{ formatCurrency(reportData.withholdingTax.totalTaxableAmount) }}</span>
+        </div>
+        <div class="compliance-row">
+          <span class="label">Total WHT:</span>
+          <span class="value amount">{{ formatCurrency(reportData.withholdingTax.totalWHTAmount) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-card highlight-card">
+      <div class="card-header">
+        <h2>Total Tax Liability</h2>
+      </div>
+      <div class="card-body">
+        <div class="compliance-row large">
+          <span class="label">Net GST Payable:</span>
+          <span class="value amount" [class.positive]="reportData.netGSTPayable > 0" [class.negative]="reportData.netGSTPayable < 0">
+            {{ formatCurrency(reportData.netGSTPayable) }}
+          </span>
+        </div>
+        <div class="compliance-row large">
+          <span class="label">Withholding Tax Collected:</span>
+          <span class="value amount">{{ formatCurrency(reportData.withholdingTax.totalWHTAmount) }}</span>
+        </div>
+        <div class="compliance-row large total">
+          <span class="label">Total Tax Liability:</span>
+          <span class="value amount">{{ formatCurrency(reportData.totalTaxLiability) }}</span>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <mat-icon>inbox</mat-icon>
+      <p>No tax compliance data found</p>
+    </div>
+  }
+</div>

@@ -1,0 +1,189 @@
+<div class="purchase-return-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Create Purchase Return</mat-card-title>
+      <mat-card-subtitle>Return items to supplier</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="returnForm" (ngSubmit)="onSubmit()">
+        <!-- Header Section -->
+        <div class="form-section">
+          <h3>Return Information</h3>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Select Original Purchase Invoice</mat-label>
+              <mat-select formControlName="originalInvoiceId" (selectionChange)="onInvoiceSelected()">
+                <mat-option *ngFor="let invoice of originalInvoices" [value]="invoice._id">
+                  {{ invoice.invoiceNumber }} - {{ invoice.supplierName }} - {{ invoice.invoiceDate | date }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="returnForm.get('originalInvoiceId')?.hasError('required')">
+                Please select an invoice
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row" *ngIf="selectedInvoice">
+            <div class="invoice-details">
+              <div class="detail-item">
+                <span class="label">Supplier:</span>
+                <span class="value">{{ selectedInvoice.supplierName }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Invoice Date:</span>
+                <span class="value">{{ selectedInvoice.invoiceDate | date }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Invoice Total:</span>
+                <span class="value">{{ selectedInvoice.totals.grandTotal | currency:'PKR':'symbol':'1.2-2' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Supplier Bill No:</span>
+                <span class="value">{{ selectedInvoice.supplierBillNo || 'N/A' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Return Date</mat-label>
+              <input matInput type="date" formControlName="returnDate">
+              <mat-error *ngIf="returnForm.get('returnDate')?.hasError('required')">
+                Return date is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Return Reason</mat-label>
+              <mat-select formControlName="reason">
+                <mat-option value="damaged">Damaged Goods</mat-option>
+                <mat-option value="expired">Expired Items</mat-option>
+                <mat-option value="wrong_item">Wrong Item Received</mat-option>
+                <mat-option value="quality_issue">Quality Issue</mat-option>
+                <mat-option value="excess_stock">Excess Stock</mat-option>
+                <mat-option value="other">Other</mat-option>
+              </mat-select>
+              <mat-error *ngIf="returnForm.get('reason')?.hasError('required')">
+                Reason is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Notes</mat-label>
+              <textarea matInput formControlName="notes" rows="3" placeholder="Additional notes about the return"></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Items Section -->
+        <div class="form-section" *ngIf="selectedInvoice && itemsArray.length > 0">
+          <h3>Return Items</h3>
+          <p class="hint-text">Enter the quantity to return for each item. Leave as 0 for items not being returned.</p>
+
+          <div class="table-container">
+            <table mat-table [dataSource]="itemsArray.controls" class="items-table">
+              <!-- Item Name Column -->
+              <ng-container matColumnDef="itemName">
+                <th mat-header-cell *matHeaderCellDef>Item Name</th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  {{ getItemControl(i, 'itemName').value }}
+                </td>
+              </ng-container>
+
+              <!-- Original Quantity Column -->
+              <ng-container matColumnDef="originalQty">
+                <th mat-header-cell *matHeaderCellDef>Original Qty</th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  {{ getItemControl(i, 'originalQuantity').value }}
+                </td>
+              </ng-container>
+
+              <!-- Return Quantity Column -->
+              <ng-container matColumnDef="returnQty">
+                <th mat-header-cell *matHeaderCellDef>Return Qty</th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  <mat-form-field appearance="outline" class="compact-field">
+                    <input matInput type="number" [formControl]="getItemControl(i, 'returnQuantity')" min="0" [max]="getItemControl(i, 'originalQuantity').value">
+                    <mat-error *ngIf="getItemControl(i, 'returnQuantity').hasError('min')">
+                      Must be 0 or greater
+                    </mat-error>
+                  </mat-form-field>
+                </td>
+              </ng-container>
+
+              <!-- Unit Price Column -->
+              <ng-container matColumnDef="unitPrice">
+                <th mat-header-cell *matHeaderCellDef>Unit Price</th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  {{ getItemControl(i, 'unitPrice').value | currency:'PKR':'symbol':'1.2-2' }}
+                </td>
+              </ng-container>
+
+              <!-- GST Rate Column -->
+              <ng-container matColumnDef="gstRate">
+                <th mat-header-cell *matHeaderCellDef>GST Rate</th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  {{ getItemControl(i, 'gstRate').value }}%
+                </td>
+              </ng-container>
+
+              <!-- Line Total Column -->
+              <ng-container matColumnDef="lineTotal">
+                <th mat-header-cell *matHeaderCellDef>Line Total</th>
+                <td mat-cell *matCellDef="let item; let i = index" class="amount-cell">
+                  {{ calculateLineTotal(i) | currency:'PKR':'symbol':'1.2-2' }}
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Debit Note Preview -->
+        <div class="form-section debit-note-preview" *ngIf="selectedInvoice && itemsArray.length > 0">
+          <h3>Debit Note Preview</h3>
+          <div class="totals-grid">
+            <div class="total-row">
+              <span class="label">GST 18% Amount:</span>
+              <span class="value">{{ calculateGSTBreakdown().gst18 | currency:'PKR':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="total-row">
+              <span class="label">GST 4% Amount:</span>
+              <span class="value">{{ calculateGSTBreakdown().gst4 | currency:'PKR':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="total-row highlight">
+              <span class="label">Total Return Amount:</span>
+              <span class="value">{{ calculateReturnTotal() | currency:'PKR':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+          <p class="note">
+            <mat-icon>info</mat-icon>
+            This amount will be debited from the supplier's account and stock will be reduced.
+          </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button mat-raised-button type="button" (click)="onCancel()" [disabled]="submitting">
+            Cancel
+          </button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="submitting || !selectedInvoice">
+            <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+            <span *ngIf="!submitting">Create Return</span>
+            <span *ngIf="submitting">Processing...</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+</div>

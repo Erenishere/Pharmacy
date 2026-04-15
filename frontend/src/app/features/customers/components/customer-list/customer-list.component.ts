@@ -1,0 +1,370 @@
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
+import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { CustomerService } from '../../services/customer.service';
+import { ToastService } from '../../../../shared/services/toast.service';
+import { Customer, CustomerType, CustomerFilters } from '../../../../core/models/customer.model';
+import { CustomerFormDialogComponent } from '../customer-form/customer-form-dialog.component';
+import { CustomerDetailDialogComponent } from '../customer-detail/customer-detail-dialog.component';
+import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table/data-table.component';
+
+@Component({
+    selector: 'app-customer-list',
+    standalone: true,
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatInputModule,
+        MatButtonModule,
+        MatIconModule,
+        MatChipsModule,
+        MatSlideToggleModule,
+        MatSelectModule,
+        MatProgressSpinnerModule,
+        MatTooltipModule,
+        MatDialogModule,
+        DataTableComponent
+    ],
+    templateUrl: './customer-list.component.html',
+    styleUrl: './customer-list.component.scss'
+})
+export class CustomerListComponent implements OnInit, OnDestroy, AfterViewInit {
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
+    @ViewChild(MatSort) sort!: MatSort;
+
+    tableColumns: TableColumn[] = [
+        { key: 'code', label: 'Code', sortable: true },
+        { key: 'name', label: 'Name', sortable: true },
+        { key: 'email', label: 'Email' },
+        { key: 'phone', label: 'Phone' },
+        { key: 'type', label: 'Type', type: 'status', colorMap: {'retailer': 'primary', 'wholesaler': 'accent'} },
+        { key: 'isActive', label: 'Status', type: 'custom' }, // We'll handle custom templates in HTML for slide toggle or use chip
+        { key: 'createdAt', label: 'Created', type: 'date', sortable: true },
+        { key: 'actions', label: 'Actions', type: 'action', actions: [
+            { icon: 'visibility', label: 'View', actionKey: 'view' },
+            { icon: 'edit', label: 'Edit', actionKey: 'edit', color: 'primary' },
+            { icon: 'delete', label: 'Delete', actionKey: 'delete', color: 'warn' },
+            { icon: 'restore', label: 'Restore', actionKey: 'restore', color: 'primary' }
+        ]}
+    ];
+
+    displayedColumns: string[] = ['code', 'name', 'email', 'phone', 'type', 'status', 'createdAt', 'actions'];
+    dataSource = new MatTableDataSource<Customer>([]);
+
+    searchControl = new FormControl('');
+    selectedType: string = '';
+    showDeleted = false;
+
+    totalCustomers = 0;
+    pageSize = 10;
+    pageIndex = 0;
+
+    loading = false;
+    types = Object.values(CustomerType);
+
+    private destroy$ = new Subject<void>();
+    private pendingActions = new Map<string, boolean>();
+
+    constructor(
+        private customerService: CustomerService,
+        private toastService: ToastService,
+        private dialog: MatDialog
+    ) { }
+
+    ngOnInit(): void {
+        this.loadCustomers();
+        this.setupSearch();
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    ngAfterViewInit(): void {
+        // Don't connect paginator to data source since we're using server-side pagination
+        this.dataSource.sort = this.sort;
+    }
+
+    setupSearch(): void {
+        this.searchControl.valueChanges
+            .pipe(
+                debounceTime(300),
+                distinctUntilChanged(),
+                takeUntil(this.destroy$)
+            )
+            .subscribe(() => {
+                this.pageIndex = 0;
+                if (this.paginator) {
+                    this.paginator.pageIndex = 0;
+                }
+                this.loadCustomers();
+            });
+    }
+
+    loadCustomers(): void {
+        this.loading = true;
+
+        const filters: CustomerFilters = {
+            page: this.pageIndex + 1,
+            limit: this.pageSize,
+            search: this.searchControl.value || undefined,
+        };
+
+        if (this.selectedType && this.selectedType.trim() !== '') {
+            filters.type = this.selectedType;
+        }
+
+        if (this.showDeleted) {
+            filters.isActive = false;
+        }
+
+        this.customerService.getCustomers(filters)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (response) => {
+                    if (response.success) {
+                        const customersToShow = response.data || [];
+                        this.dataSource.data = customersToShow;
+
+                        if (response.pagination) {
+                            this.totalCustomers = response.pagination.totalItems || response.pagination.total || 0;
+                        } else {
+                            this.totalCustomers = customersToShow.length;
+                        }
+
+                        this.updatePaginatorState();
+                    } else {
+                        this.toastService.error('Failed to load customers');
+                    }
+                    this.loading = false;
+                },
+                error: (error: any) => {
+
+                    let errorMessage = 'Failed to load customers';
+                    if (error.status === 0) {
+                        errorMessage = 'Cannot connect to server. Please check if the backend is running.';
+                    } else if (error.status === 404) {
+                        errorMessage = 'Customer endpoint not found. Please check if the backend has customer routes.';
+                    } else if (error.status === 401) {
+                        errorMessage = 'Unauthorized. Please login again.';
+                    } else if (error.status === 500) {
+                        errorMessage = 'Server error. Please check the backend logs.';
+                    } else if (error.error?.message) {
+                        errorMessage = error.error.message;
+                    }
+
+                    this.toastService.error(errorMessage);
+                    this.loading = false;
+                }
+            });
+    }
+
+    onPageChange(event: any): void {
+
+        // If page size changed, reset to first page
+        if (this.pageSize !== event.pageSize) {
+            this.pageIndex = 0;
+            this.pageSize = event.pageSize;
+        } else {
+            // Only page index changed
+            this.pageIndex = event.pageIndex;
+        }
+
+        this.loadCustomers();
+    }
+
+    onTypeFilterChange(type: string): void {
+        this.selectedType = type || '';
+        this.pageIndex = 0;
+        if (this.paginator) {
+            this.paginator.pageIndex = 0;
+        }
+        this.loadCustomers();
+    }
+
+    toggleShowDeleted(): void {
+        this.pageIndex = 0;
+        if (this.paginator) {
+            this.paginator.pageIndex = 0;
+        }
+        this.loadCustomers();
+    }
+
+    isActionPending(customerId: string, action: string): boolean {
+        return this.pendingActions.get(`${customerId}-${action}`) || false;
+    }
+
+    setActionPending(customerId: string, action: string, pending: boolean): void {
+        if (pending) {
+            this.pendingActions.set(`${customerId}-${action}`, true);
+        } else {
+            this.pendingActions.delete(`${customerId}-${action}`);
+        }
+    }
+
+    toggleCustomerStatus(customer: Customer, event: any): void {
+        event.stopPropagation();
+        const actionKey = 'toggle-status';
+        this.setActionPending(customer._id, actionKey, true);
+
+        const originalStatus = customer.isActive;
+        customer.isActive = !customer.isActive;
+
+        this.customerService.toggleCustomerStatus(customer._id)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (response) => {
+                    if (response.success) {
+                        this.toastService.success(`Customer ${customer.isActive ? 'activated' : 'deactivated'} successfully`);
+                        const index = this.dataSource.data.findIndex(c => c._id === customer._id);
+                        if (index !== -1) {
+                            this.dataSource.data[index] = response.data;
+                            this.dataSource.data = [...this.dataSource.data];
+                        }
+                    }
+                    this.setActionPending(customer._id, actionKey, false);
+                },
+                error: (error: any) => {
+                    customer.isActive = originalStatus;
+                    this.dataSource.data = [...this.dataSource.data];
+                    this.toastService.error(error.userMessage || 'Failed to update customer status');
+                    this.setActionPending(customer._id, actionKey, false);
+                }
+            });
+    }
+
+    async deleteCustomer(customer: Customer): Promise<void> {
+        const confirmed = await this.toastService.confirm(
+            `This will permanently delete the customer "${customer.name}". This action cannot be undone.`,
+            'Delete Customer?',
+            'Yes, delete it',
+            'Cancel'
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        const actionKey = 'delete';
+        this.setActionPending(customer._id, actionKey, true);
+
+        this.customerService.deleteCustomer(customer._id)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (response) => {
+                    if (response.success) {
+                        this.toastService.success('Customer deleted successfully');
+                        this.loadCustomers();
+                    }
+                    this.setActionPending(customer._id, actionKey, false);
+                },
+                error: (error: any) => {
+                    this.toastService.error(error.userMessage || 'Failed to delete customer');
+                    this.setActionPending(customer._id, actionKey, false);
+                }
+            });
+    }
+
+    restoreCustomer(customer: Customer): void {
+        const actionKey = 'restore';
+        this.setActionPending(customer._id, actionKey, true);
+
+        this.customerService.restoreCustomer(customer._id)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (response) => {
+                    if (response.success) {
+                        this.toastService.success('Customer restored successfully');
+                        this.loadCustomers();
+                    }
+                    this.setActionPending(customer._id, actionKey, false);
+                },
+                error: (error: any) => {
+                    this.toastService.error(error.userMessage || 'Failed to restore customer');
+                    this.setActionPending(customer._id, actionKey, false);
+                }
+            });
+    }
+
+    openCreateCustomerDialog(): void {
+        const dialogRef = this.dialog.open(CustomerFormDialogComponent, {
+            width: '900px',
+            maxWidth: '95vw',
+            disableClose: false,
+            data: { customer: null }
+        });
+
+        dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
+            if (result) {
+                this.toastService.success(`Customer "${result.name}" created successfully!`);
+                this.loadCustomers();
+            }
+        });
+    }
+
+    viewCustomerDetail(customer: Customer): void {
+        this.dialog.open(CustomerDetailDialogComponent, {
+            width: '600px',
+            disableClose: false,
+            data: customer
+        });
+    }
+
+    editCustomer(customer: Customer): void {
+        const dialogRef = this.dialog.open(CustomerFormDialogComponent, {
+            width: '900px',
+            maxWidth: '95vw',
+            disableClose: false,
+            data: { customer }
+        });
+
+        dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
+            if (result) {
+                this.toastService.success(`Customer "${result.name}" updated successfully!`);
+                this.loadCustomers();
+            }
+        });
+    }
+
+    formatDate(date: string): string {
+        return new Date(date).toLocaleDateString();
+    }
+
+    private updatePaginatorState(): void {
+        if (this.paginator) {
+            // Force update paginator properties
+            this.paginator.length = this.totalCustomers;
+            this.paginator.pageSize = this.pageSize;
+            this.paginator.pageIndex = this.pageIndex;
+            // Note: Removed private property access as it's not accessible
+        }
+    }
+
+    onTableAction(event: { action: string, row: any }): void {
+        const customer = event.row as Customer;
+        switch(event.action) {
+            case 'view': this.viewCustomerDetail(customer); break;
+            case 'edit': if(customer.isActive) this.editCustomer(customer); break;
+            case 'delete': if(customer.isActive && !this.isActionPending(customer._id, 'delete')) this.deleteCustomer(customer); break;
+            case 'restore': if(!customer.isActive && !this.isActionPending(customer._id, 'restore')) this.restoreCustomer(customer); break;
+        }
+    }
+}

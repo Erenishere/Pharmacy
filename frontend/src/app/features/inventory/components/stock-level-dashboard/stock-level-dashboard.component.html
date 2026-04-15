@@ -1,0 +1,218 @@
+<div class="list-page-container stock-dashboard-page">
+  <!-- Header -->
+  <div class="list-page-header">
+    <div class="header-content">
+      <h1 class="page-title"><mat-icon>inventory</mat-icon> Stock Level Dashboard</h1>
+      <p class="page-subtitle">Real-time inventory levels and stock statistics</p>
+    </div>
+    <div class="header-actions">
+      <button mat-icon-button [class.active]="autoRefreshEnabled" (click)="toggleAutoRefresh()"
+        matTooltip="Toggle auto-refresh">
+        <mat-icon>{{autoRefreshEnabled ? 'sync' : 'sync_disabled'}}</mat-icon>
+      </button>
+      <button mat-icon-button (click)="refreshData()" [disabled]="refreshing" matTooltip="Refresh data">
+        <mat-icon [class.spinning]="refreshing">refresh</mat-icon>
+      </button>
+      <button mat-button (click)="exportToExcel()">
+        <mat-icon>download</mat-icon>
+        Excel
+      </button>
+      <button mat-button (click)="exportToPDF()">
+        <mat-icon>picture_as_pdf</mat-icon>
+        PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Overview Cards -->
+  <div class="dashboard-stats-grid">
+    <div class="stat-card primary">
+      <div class="stat-icon-wrapper"><mat-icon>inventory_2</mat-icon></div>
+      <div class="stat-data">
+        <span class="label">Total Items</span>
+        <span class="value">{{ formatNumber(overview.totalItems) }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card success">
+      <div class="stat-icon-wrapper"><mat-icon>attach_money</mat-icon></div>
+      <div class="stat-data">
+        <span class="label">Inventory Value</span>
+        <span class="value">{{ formatCurrency(overview.totalInventoryValue) }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card warning">
+      <div class="stat-icon-wrapper"><mat-icon>warning</mat-icon></div>
+      <div class="stat-data">
+        <span class="label">Low Stock</span>
+        <span class="value">{{ formatNumber(overview.lowStockCount) }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card danger">
+      <div class="stat-icon-wrapper"><mat-icon>remove_circle</mat-icon></div>
+      <div class="stat-data">
+        <span class="label">Out of Stock</span>
+        <span class="value">{{ formatNumber(overview.outOfStockCount) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="list-page-card">
+    <!-- Filters Section -->
+    <div class="list-filters-section">
+      <div class="filter-group-primary">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search Inventory</mat-label>
+          <input matInput [formControl]="searchControl" placeholder="Item name or code...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-group-secondary">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Warehouse</mat-label>
+          <mat-select [(value)]="selectedWarehouse" (selectionChange)="onFilterChange()">
+            <mat-option value="">All Warehouses</mat-option>
+            <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse._id">
+              {{ warehouse.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Category</mat-label>
+          <mat-select [(value)]="selectedCategory" (selectionChange)="onFilterChange()">
+            <mat-option value="">All Categories</mat-option>
+            <mat-option *ngFor="let category of categories" [value]="category._id">
+              {{ category.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Status</mat-label>
+          <mat-select [(value)]="selectedStockStatus" (selectionChange)="onFilterChange()">
+            <mat-option *ngFor="let status of stockStatusOptions" [value]="status.value">
+              {{ status.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-button class="clear-btn" (click)="clearFilters()">
+          <mat-icon>restart_alt</mat-icon>
+          Clear
+        </button>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-wrapper">
+      <table mat-table [dataSource]="dataSource" matSort class="data-table">
+        <!-- Item Code -->
+        <ng-container matColumnDef="itemCode">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Code</th>
+          <td mat-cell *matCellDef="let item" class="code-cell">{{ item.itemCode }}</td>
+        </ng-container>
+
+        <!-- Item Name -->
+        <ng-container matColumnDef="itemName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Item Name</th>
+          <td mat-cell *matCellDef="let item">
+             <div class="item-name-block">
+               <span class="name">{{ item.itemName }}</span>
+               <small class="meta">{{ item.categoryName }}</small>
+             </div>
+          </td>
+        </ng-container>
+
+        <!-- Category & Company Hidden in simple view or merged -->
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef>Category</th>
+          <td mat-cell *matCellDef="let item">{{ item.categoryName || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="company">
+          <th mat-header-cell *matHeaderCellDef>Company</th>
+          <td mat-cell *matCellDef="let item">{{ item.companyName || '-' }}</td>
+        </ng-container>
+
+        <!-- Warehouse -->
+        <ng-container matColumnDef="warehouse">
+          <th mat-header-cell *matHeaderCellDef>Warehouse</th>
+          <td mat-cell *matCellDef="let item">
+            <mat-chip class="warehouse-chip">{{ item.warehouseName }}</mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Quantity -->
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="text-right">Qty</th>
+          <td mat-cell *matCellDef="let item" class="text-right font-bold">{{ formatNumber(item.quantity) }}</td>
+        </ng-container>
+
+        <!-- Available -->
+        <ng-container matColumnDef="available">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="text-right">Available</th>
+          <td mat-cell *matCellDef="let item" class="text-right">
+            <span class="stock-badge" [class.low]="item.minimumLevel && item.availableQuantity <= item.minimumLevel">
+              {{ formatNumber(item.availableQuantity) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let item">
+            <mat-chip [class]="getStockStatusClass(item)" class="status-chip">
+              <mat-icon class="status-icon">{{ getStockStatusIcon(item) }}</mat-icon>
+              {{ getStockStatusLabel(item) }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Non-essential merged for brevity in Phase 2 unless user asks -->
+        <ng-container matColumnDef="reserved"><th mat-header-cell *matHeaderCellDef class="text-right">Reserved</th><td mat-cell *matCellDef="let item" class="text-right">{{ formatNumber(item.reservedQuantity) }}</td></ng-container>
+        <ng-container matColumnDef="minimumLevel"><th mat-header-cell *matHeaderCellDef class="text-right">Min</th><td mat-cell *matCellDef="let item" class="text-right">{{ item.minimumLevel || '-' }}</td></ng-container>
+        <ng-container matColumnDef="batchNumber"><th mat-header-cell *matHeaderCellDef>Batch</th><td mat-cell *matCellDef="let item">{{ item.batchNumber || '-' }}</td></ng-container>
+        <ng-container matColumnDef="expiryDate"><th mat-header-cell *matHeaderCellDef>Expiry</th><td mat-cell *matCellDef="let item"><span [class.expired]="isExpired(item.expiryDate)">{{ formatDate(item.expiryDate) }}</span></td></ng-container>
+
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+          <td mat-cell *matCellDef="let item" class="text-center">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu" class="action-btn">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item (click)="viewItemDetails(item)"><mat-icon>visibility</mat-icon><span>View Details</span></button>
+              <button mat-menu-item (click)="quickTransfer(item)"><mat-icon>swap_horiz</mat-icon><span>Quick Transfer</span></button>
+              <button mat-menu-item (click)="quickAdjustment(item)"><mat-icon>edit</mat-icon><span>Quick Adjustment</span></button>
+              <button mat-menu-item (click)="viewMovementHistory(item)"><mat-icon>history</mat-icon><span>Movement History</span></button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <!-- Empty State -->
+      <div class="list-empty-state" *ngIf="!loading && dataSource.data.length === 0">
+        <mat-icon>inventory_2</mat-icon>
+        <p>No stock data available</p>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div class="list-loading-overlay" *ngIf="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+
+      <mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions"
+        [pageIndex]="pageIndex" (page)="onPageChange($event)" showFirstLastButtons>
+      </mat-paginator>
+    </div>
+  </div>
+</div>

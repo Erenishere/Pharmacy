@@ -1,0 +1,404 @@
+<h2 mat-dialog-title>{{ mode === 'create' ? 'Add New Item' : 'Edit Item' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="itemForm">
+    <mat-tab-group>
+      <!-- Basic Information Tab -->
+      <mat-tab label="Basic Information">
+        <div class="tab-content">
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Item Name *</mat-label>
+              <input matInput formControlName="name" placeholder="Enter item name">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Item Code</mat-label>
+              <input matInput formControlName="code" placeholder="Auto-generated if empty">
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="2"></textarea>
+          </mat-form-field>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Company *</mat-label>
+              <mat-select formControlName="companyId">
+                <mat-option *ngFor="let company of companies" [value]="company._id">
+                  {{ company.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Selling Group</mat-label>
+              <mat-select formControlName="sellingGroup">
+                <mat-option value="">None</mat-option>
+                <mat-option value="A">Group A</mat-option>
+                <mat-option value="B">Group B</mat-option>
+                <mat-option value="C">Group C</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Formula/Generic</mat-label>
+              <mat-select formControlName="formulaId" (selectionChange)="onFormulaChange($event.value)">
+                <mat-option value="">None</mat-option>
+                <mat-option *ngFor="let formula of formulas" [value]="formula._id">
+                  {{ formula.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Generic Size</mat-label>
+              <mat-select formControlName="formulaSizeId">
+                <mat-option value="">None</mat-option>
+                <mat-option *ngFor="let size of formulaSizes" [value]="size._id">
+                  {{ size.size }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Category</mat-label>
+              <mat-select formControlName="categoryId" (selectionChange)="onCategoryChange($event.value)">
+                <mat-option value="">None</mat-option>
+                <mat-option *ngFor="let category of categories" [value]="category._id">
+                  {{ category.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Sub-Category</mat-label>
+              <mat-select formControlName="subCategoryId">
+                <mat-option value="">None</mat-option>
+                <mat-option *ngFor="let subCat of subCategories" [value]="subCat._id">
+                  {{ subCat.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Business Type</mat-label>
+            <mat-select formControlName="businessTypeId">
+              <mat-option value="">None</mat-option>
+              <mat-option *ngFor="let type of businessTypes" [value]="type._id">
+                {{ type.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Main Supplier</mat-label>
+            <mat-select formControlName="supplierId">
+              <mat-option value="">Select Supplier</mat-option>
+              <mat-option *ngFor="let company of companies" [value]="company._id">
+                {{ company.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </mat-tab>
+
+      <!-- Pricing Tab -->
+      <mat-tab label="Pricing">
+        <div class="tab-content">
+          <h3>Unit Pricing</h3>
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Purchase Price *</mat-label>
+              <input matInput type="number" formControlName="purchasePrice" min="0" step="0.01">
+              <span matPrefix>PKR&nbsp;</span>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Cost Price</mat-label>
+              <input matInput type="number" formControlName="costPrice" min="0" step="0.01">
+              <span matPrefix>PKR&nbsp;</span>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Sale Price *</mat-label>
+              <input matInput type="number" formControlName="salePrice" min="0" step="0.01">
+              <span matPrefix>PKR&nbsp;</span>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Trade Price</mat-label>
+              <input matInput type="number" formControlName="tradePrice" min="0" step="0.01">
+              <span matPrefix>PKR&nbsp;</span>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Retail Price</mat-label>
+              <input matInput type="number" formControlName="retailPrice" min="0" step="0.01">
+              <span matPrefix>PKR&nbsp;</span>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Wholesale Price</mat-label>
+              <input matInput type="number" formControlName="wholesalePrice" min="0" step="0.01">
+              <span matPrefix>PKR&nbsp;</span>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Distributor Price</mat-label>
+              <input matInput type="number" formControlName="distributorPrice" min="0" step="0.01">
+              <span matPrefix>PKR&nbsp;</span>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>MRP</mat-label>
+              <input matInput type="number" formControlName="mrp" min="0" step="0.01">
+              <span matPrefix>PKR&nbsp;</span>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Goods Charges/Unit</mat-label>
+              <input matInput type="number" formControlName="goodsChargesOnUnit" min="0" step="0.01">
+              <span matPrefix>PKR&nbsp;</span>
+            </mat-form-field>
+          </div>
+
+          <h3>Box/Dozen Pricing</h3>
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Box Purchase Price</mat-label>
+              <input matInput type="number" formControlName="boxPurchasePrice" min="0" step="0.01">
+              <span matPrefix>PKR&nbsp;</span>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Box Sale Price</mat-label>
+              <input matInput type="number" formControlName="boxSalePrice" min="0" step="0.01">
+              <span matPrefix>PKR&nbsp;</span>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Box Retail Price</mat-label>
+              <input matInput type="number" formControlName="boxRetailPrice" min="0" step="0.01">
+              <span matPrefix>PKR&nbsp;</span>
+            </mat-form-field>
+          </div>
+
+          <h3>Carton Pricing</h3>
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Carton Purchase Price</mat-label>
+              <input matInput type="number" formControlName="cartonPurchasePrice" min="0" step="0.01">
+              <span matPrefix>PKR&nbsp;</span>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Carton Sale Price</mat-label>
+              <input matInput type="number" formControlName="cartonSalePrice" min="0" step="0.01">
+              <span matPrefix>PKR&nbsp;</span>
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Inventory Tab -->
+      <mat-tab label="Inventory">
+        <div class="tab-content">
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Opening Stock</mat-label>
+              <input matInput type="number" formControlName="openingStock" min="0">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Min Stock Level</mat-label>
+              <input matInput type="number" formControlName="minStockLevel" min="0">
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Max Stock Level</mat-label>
+              <input matInput type="number" formControlName="maxStockLevel" min="0">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Reorder Point</mat-label>
+              <input matInput type="number" formControlName="reorderPoint" min="0">
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Lead Time (days)</mat-label>
+            <input matInput type="number" formControlName="leadTime" min="0">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Alert: No Sales From Days</mat-label>
+            <input matInput type="number" formControlName="alertNoSalesDays" min="0" placeholder="Days limit for no sales alert">
+          </mat-form-field>
+        </div>
+      </mat-tab>
+
+      <!-- Tax & Specifications Tab -->
+      <mat-tab label="Tax & Specifications">
+        <div class="tab-content">
+          <h3>Tax Information</h3>
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Tax Type</mat-label>
+              <mat-select formControlName="taxType">
+                <mat-option value="GST">GST</mat-option>
+                <mat-option value="VAT">VAT</mat-option>
+                <mat-option value="Exempt">Exempt</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>GST % (Filter)</mat-label>
+              <mat-select formControlName="gstRate">
+                <mat-option [value]="0">0%</mat-option>
+                <mat-option [value]="4">4%</mat-option>
+                <mat-option [value]="18">18%</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>GST % (Non-Filter)</mat-label>
+              <mat-select formControlName="gstRateNonFilter">
+                <mat-option [value]="0">0%</mat-option>
+                <mat-option [value]="4">4%</mat-option>
+                <mat-option [value]="18">18%</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>WHT Rate (%)</mat-label>
+              <input matInput type="number" formControlName="whtRate" min="0" max="100" step="0.01">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>HSN Code</mat-label>
+              <input matInput formControlName="hsnCode">
+            </mat-form-field>
+          </div>
+
+          <h3>Specifications</h3>
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Unit of Measurement *</mat-label>
+              <mat-select formControlName="unitOfMeasurement">
+                <mat-option value="PCS">Pieces</mat-option>
+                <mat-option value="BOX">Box</mat-option>
+                <mat-option value="STRIP">Strip</mat-option>
+                <mat-option value="BOTTLE">Bottle</mat-option>
+                <mat-option value="VIAL">Vial</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Packing Size</mat-label>
+              <input matInput type="number" formControlName="packingSize" min="1">
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Barcode</mat-label>
+            <input matInput formControlName="barcode">
+          </mat-form-field>
+
+          <div class="checkbox-group">
+            <mat-checkbox formControlName="batchTracking">Enable Batch Tracking</mat-checkbox>
+            <mat-checkbox formControlName="expiryTracking">Enable Expiry Tracking</mat-checkbox>
+            <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Packaging Tab -->
+      <mat-tab label="Packaging">
+        <div class="tab-content">
+          <h3>Carton Dimensions (cm)</h3>
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Length</mat-label>
+              <input matInput type="number" formControlName="cartonLength" min="0" step="0.01">
+              <span matSuffix>cm</span>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Width</mat-label>
+              <input matInput type="number" formControlName="cartonWidth" min="0" step="0.01">
+              <span matSuffix>cm</span>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Height</mat-label>
+              <input matInput type="number" formControlName="cartonHeight" min="0" step="0.01">
+              <span matSuffix>cm</span>
+            </mat-form-field>
+          </div>
+
+          <h3>Packaging Quantities</h3>
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Units in Carton</mat-label>
+              <input matInput type="number" formControlName="unitsInCarton" min="0">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Box in Carton</mat-label>
+              <input matInput type="number" formControlName="boxInCarton" min="0">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Units in Box/Dozen</mat-label>
+              <input matInput type="number" formControlName="unitsInBox" min="0">
+            </mat-form-field>
+          </div>
+
+          <h3>Weights (kg)</h3>
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Unit Weight</mat-label>
+              <input matInput type="number" formControlName="unitWeight" min="0" step="0.001">
+              <span matSuffix>kg</span>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Box Weight</mat-label>
+              <input matInput type="number" formControlName="boxWeight" min="0" step="0.001">
+              <span matSuffix>kg</span>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Carton Weight</mat-label>
+              <input matInput type="number" formControlName="cartonWeight" min="0" step="0.001">
+              <span matSuffix>kg</span>
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="loading">Cancel</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="loading || itemForm.invalid">
+    {{ loading ? 'Saving...' : (mode === 'create' ? 'Create' : 'Update') }}
+  </button>
+</mat-dialog-actions>

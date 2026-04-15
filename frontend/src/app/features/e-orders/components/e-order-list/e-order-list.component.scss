@@ -1,0 +1,26 @@
+@import "../../../../../styles/shared-list-styles";
+
+.e-order-list-page {
+  @include data-table;
+  @include paginator;
+
+  .stat-card {
+    &.primary { --stat-color: #{$purple}; }
+    &.warning { --stat-color: #{$warning}; }
+    &.success { --stat-color: #{$success}; }
+    &.info { --stat-color: #{$info}; }
+    &.primary-alt { --stat-color: #{$purple-dark}; }
+  }
+
+  .customer-info {
+    display: flex;
+    flex-direction: column;
+    .name { font-weight: 600; color: $grey-dark; }
+    .town { font-size: 11px; color: $grey-medium; }
+  }
+
+  tr.row-cancelled {
+    opacity: 0.6;
+    background-color: rgba($grey-very-light, 0.5);
+  }
+}

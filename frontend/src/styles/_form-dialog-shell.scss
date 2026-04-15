@@ -1,0 +1,354 @@
+@import 'styles/vuexy-vars';
+
+@mixin standard-form-dialog {
+  .form-dialog-shell {
+    background: $bg-card;
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    width: min(760px, 100%);
+    max-width: 100%;
+    max-height: 92vh;
+    box-shadow: $shadow-modal;
+  }
+
+  .form-dialog-shell .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 24px 28px;
+    background: linear-gradient(135deg, $primary 0%, darken($primary, 8%) 100%);
+    color: #ffffff;
+  }
+
+  .form-dialog-shell .title-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .form-dialog-shell .header-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      width: 22px;
+      height: 22px;
+      font-size: 22px;
+    }
+  }
+
+  .form-dialog-shell h2 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.2;
+    font-weight: 700;
+    color: #ffffff;
+  }
+
+  .form-dialog-shell .subtitle {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.86);
+  }
+
+  .form-dialog-shell .close-btn {
+    color: #ffffff;
+    opacity: 0.86;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-1px);
+    }
+  }
+
+  .form-dialog-shell .dialog-content {
+    padding: 28px !important;
+    margin: 0 !important;
+    background: #f8f9fc !important;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .form-dialog-shell .form-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .form-dialog-shell .form-section {
+    background: #ffffff;
+    border: 1px solid #ebe9f1;
+    border-radius: 12px;
+    padding: 22px 24px;
+    box-shadow: 0 4px 18px rgba(34, 41, 47, 0.05);
+  }
+
+  .form-dialog-shell .section-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f1f5;
+    color: $primary;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+
+    mat-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+    }
+  }
+
+  .form-dialog-shell .grid-row {
+    display: grid;
+    gap: 18px;
+    margin-bottom: 18px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &.two-cols {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    &.three-cols {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .form-dialog-shell .footer-meta {
+    max-width: 360px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: $text-body;
+
+    strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: $text-card-title;
+    }
+  }
+
+  .form-dialog-shell .dialog-footer {
+    padding: 20px 28px !important;
+    margin: 0 !important;
+    background: #ffffff;
+    border-top: 1px solid #ebe9f1;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between !important;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .form-dialog-shell .footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .form-dialog-shell .cancel-btn {
+    min-width: 110px;
+    height: 46px;
+    padding: 0 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: $secondary !important;
+    border-color: #d8d6de !important;
+
+    &:hover {
+      background: #f8f7fa !important;
+      border-color: #c7c3d2 !important;
+    }
+  }
+
+  .form-dialog-shell .submit-btn {
+    min-width: 132px;
+    height: 46px;
+    padding: 0 24px;
+    border-radius: 8px;
+    font-weight: 700;
+    color: #ffffff !important;
+    background: $primary !important;
+    box-shadow: 0 8px 20px rgba($primary, 0.26) !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba($primary, 0.33) !important;
+      background: darken($primary, 5%) !important;
+    }
+
+    &:disabled {
+      opacity: 0.65;
+      box-shadow: none !important;
+    }
+
+    mat-icon,
+    mat-spinner {
+      margin: 0;
+      width: 20px;
+      height: 20px;
+      font-size: 20px;
+    }
+  }
+
+  .form-dialog-shell textarea.mat-mdc-input-element {
+    min-height: 88px;
+    resize: vertical;
+  }
+
+  ::ng-deep .form-dialog-shell {
+    .mat-mdc-form-field {
+      width: 100%;
+
+      .mat-mdc-text-field-wrapper {
+        background: #fcfcfd !important;
+      }
+
+      .mdc-text-field--outlined {
+        border-radius: 10px !important;
+      }
+
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: #d8d6de !important;
+      }
+
+      &:hover .mdc-notched-outline__leading,
+      &:hover .mdc-notched-outline__notch,
+      &:hover .mdc-notched-outline__trailing,
+      &.mat-focused .mdc-notched-outline__leading,
+      &.mat-focused .mdc-notched-outline__notch,
+      &.mat-focused .mdc-notched-outline__trailing {
+        border-color: $primary !important;
+      }
+
+      .mat-mdc-floating-label,
+      .mdc-floating-label {
+        color: $text-card-title !important;
+        font-weight: 500;
+      }
+
+      &.mat-focused .mat-mdc-floating-label,
+      &.mat-focused .mdc-floating-label,
+      .mdc-floating-label--float-above {
+        color: $primary !important;
+      }
+
+      .mat-mdc-input-element,
+      .mat-mdc-select-value-text,
+      .mat-mdc-select-min-line {
+        color: $text-body !important;
+      }
+
+      .mat-mdc-form-field-icon-prefix,
+      .mat-mdc-form-field-icon-suffix,
+      .mat-datepicker-toggle-default-icon,
+      .mat-mdc-select-arrow,
+      .mat-icon {
+        color: $primary !important;
+      }
+
+      .mat-mdc-form-field-hint,
+      .mat-mdc-form-field-error {
+        font-size: 12px;
+      }
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+      min-height: 20px;
+    }
+  }
+
+  .form-dialog-shell .dialog-content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .form-dialog-shell .dialog-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .form-dialog-shell .dialog-content::-webkit-scrollbar-thumb {
+    background: rgba($primary, 0.25);
+    border-radius: 999px;
+  }
+
+  .form-dialog-shell .dialog-content::-webkit-scrollbar-thumb:hover {
+    background: rgba($primary, 0.45);
+  }
+
+  @media (max-width: 768px) {
+    .form-dialog-shell {
+      width: 100%;
+      max-height: 100vh;
+      border-radius: 0;
+    }
+
+    .form-dialog-shell .dialog-header,
+    .form-dialog-shell .dialog-content,
+    .form-dialog-shell .dialog-footer {
+      padding-left: 20px !important;
+      padding-right: 20px !important;
+    }
+
+    .form-dialog-shell .dialog-header {
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+
+    .form-dialog-shell .grid-row.two-cols,
+    .form-dialog-shell .grid-row.three-cols {
+      grid-template-columns: 1fr;
+    }
+
+    .form-dialog-shell .dialog-footer {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .form-dialog-shell .footer-actions {
+      width: 100%;
+      flex-direction: column-reverse;
+    }
+
+    .form-dialog-shell .cancel-btn,
+    .form-dialog-shell .submit-btn {
+      width: 100%;
+    }
+
+    .form-dialog-shell .footer-meta {
+      max-width: none;
+    }
+  }
+}

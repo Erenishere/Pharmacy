@@ -1,0 +1,130 @@
+<div class="report-container">
+  <div class="report-header">
+    <div class="header-left">
+      <button mat-icon-button class="back-btn" routerLink="/reports">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Stock Valuation Report</h1>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button class="refresh-btn" (click)="loadReport()">
+        <mat-icon>refresh</mat-icon> Refresh
+      </button>
+      <button mat-raised-button class="export-btn">
+        <mat-icon>download</mat-icon> Export
+      </button>
+    </div>
+  </div>
+
+  <div class="filters-card">
+    <div class="filters-row">
+      <mat-form-field class="filter-field">
+        <mat-label>Valuation Method</mat-label>
+        <mat-select [(ngModel)]="valuationMethod">
+          <mat-option value="FIFO">FIFO (First In First Out)</mat-option>
+          <mat-option value="LIFO">LIFO (Last In First Out)</mat-option>
+          <mat-option value="WeightedAverage">Weighted Average</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="filter-field">
+        <mat-label>As Of Date</mat-label>
+        <input matInput [matDatepicker]="asOfPicker" [(ngModel)]="asOfDate">
+        <mat-datepicker-toggle matSuffix [for]="asOfPicker"></mat-datepicker-toggle>
+        <mat-datepicker #asOfPicker></mat-datepicker>
+      </mat-form-field>
+
+      <div class="filter-actions">
+        <button mat-raised-button color="primary" (click)="applyFilters()">Apply</button>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading stock valuation...</p>
+    </div>
+  } @else {
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="icon-wrapper purple">
+          <mat-icon>inventory_2</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Total Items</div>
+          <div class="value">{{ formatNumber(summary.totalItems) }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper info">
+          <mat-icon>storage</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Total Quantity</div>
+          <div class="value">{{ formatNumber(summary.totalQuantity) }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper success">
+          <mat-icon>attach_money</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Total Value</div>
+          <div class="value">{{ formatCurrency(summary.totalValue) }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper warning">
+          <mat-icon>calculate</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Avg Unit Cost</div>
+          <div class="value">{{ formatCurrency(summary.avgUnitCost) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-card">
+      <div class="card-header">
+        <h2>Stock Valuation Details ({{ valuationMethod }})</h2>
+      </div>
+      <div class="table-container">
+        @if (reportData.length > 0) {
+          <table>
+            <thead>
+              <tr>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th class="text-right">Quantity</th>
+                <th class="text-right">Unit Cost</th>
+                <th class="text-right">Total Value</th>
+                <th>Warehouse</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of reportData; track item.item.code) {
+                <tr>
+                  <td>{{ item.item.code }}</td>
+                  <td>{{ item.item.name }}</td>
+                  <td class="text-right">{{ formatNumber(item.quantity) }}</td>
+                  <td class="text-right amount">{{ formatCurrency(item.unitCost) }}</td>
+                  <td class="text-right amount">{{ formatCurrency(item.totalValue) }}</td>
+                  <td>-</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <div class="empty-state">
+            <mat-icon>inbox</mat-icon>
+            <p>No stock valuation data found</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

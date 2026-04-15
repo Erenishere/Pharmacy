@@ -1,0 +1,138 @@
+<div class="preview-dialog">
+  <!-- Dialog Header -->
+  <div class="dialog-header">
+    <h2>Invoice Preview</h2>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="print()">
+        <mat-icon>print</mat-icon>
+        Print Invoice
+      </button>
+      <button mat-icon-button (click)="close()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Preview Content -->
+  <div class="preview-content">
+    <div id="invoice-print-content" class="invoice-container">
+      <!-- Invoice Header -->
+      <div class="invoice-header">
+        <div class="company-info">
+          <h1>{{ companyName }}</h1>
+          <p>{{ companyAddress }}</p>
+          <p>{{ companyPhone }}</p>
+          <p>{{ companyEmail }}</p>
+          <p>{{ companyNTN }}</p>
+        </div>
+        <div class="invoice-title">
+          <h2>INVOICE</h2>
+          <div class="invoice-number">#{{ invoice.invoiceNumber }}</div>
+          <div class="invoice-date">{{ formatDate(invoice.invoiceDate) }}</div>
+          <span class="status-badge" [ngClass]="getStatusClass(invoice.status)">
+            {{ invoice.status | uppercase }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Parties Section -->
+      <div class="parties-section">
+        <div class="party-box">
+          <h3>Bill To</h3>
+          <p class="name">{{ getCustomerName() }}</p>
+          <p *ngIf="getCustomerAddress()">{{ getCustomerAddress() }}</p>
+          <p *ngIf="getCustomerPhone()">Phone: {{ getCustomerPhone() }}</p>
+          <p *ngIf="getCustomerNtn()">NTN: {{ getCustomerNtn() }}</p>
+        </div>
+        <div class="party-box">
+          <h3>Invoice Details</h3>
+          <p><strong>Invoice Type:</strong> {{ invoice.taxInvoiceType === 'advance_tax' ? 'Advance Tax Invoice' : 'Normal Invoice' }}</p>
+          <p><strong>Sales Type:</strong> {{ invoice.salesType === 'return' ? 'Return Sales' : 'New Sales' }}</p>
+          <p><strong>Credit Days:</strong> {{ invoice.creditDays || 0 }}</p>
+          <p *ngIf="invoice.salesmanId"><strong>Salesman:</strong> {{ getSalesmanName() }}</p>
+        </div>
+      </div>
+
+      <!-- Items Table -->
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th style="width: 5%;">#</th>
+            <th style="width: 35%;">Item Description</th>
+            <th style="width: 10%;" class="qty">Qty</th>
+            <th style="width: 12%;" class="price">Unit Price</th>
+            <th style="width: 10%;" class="price">Disc %</th>
+            <th style="width: 12%;" class="price">GST</th>
+            <th style="width: 16%;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of invoice.items; track item.itemId; let i = $index) {
+            <tr>
+              <td>{{ i + 1 }}</td>
+              <td>
+                <div>{{ item.itemName || item.itemCode }}</div>
+                <div class="item-code">Code: {{ item.itemCode }}</div>
+              </td>
+              <td class="qty">{{ item.quantity }}</td>
+              <td class="price">{{ formatCurrency(item.unitPrice) }}</td>
+              <td class="price">{{ item.discount1Percent || 0 }}%</td>
+              <td class="price">{{ formatCurrency(item.taxAmount || 0) }}</td>
+              <td class="price">{{ formatCurrency(item.lineTotal) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Totals Section -->
+      <div class="totals-section">
+        <div class="totals-box">
+          <div class="totals-row subtotal">
+            <span>Subtotal:</span>
+            <span>{{ formatCurrency(invoice.totals.subtotal || 0) }}</span>
+          </div>
+          <div class="totals-row">
+            <span>Total Discount:</span>
+            <span>- {{ formatCurrency(invoice.totals.totalDiscount || 0) }}</span>
+          </div>
+          <div class="totals-row">
+            <span>GST (18%):</span>
+            <span>{{ formatCurrency(invoice.totals.gstTotal || invoice.totals.totalTax || 0) }}</span>
+          </div>
+          @if (invoice.previousBalance) {
+            <div class="totals-row">
+              <span>Previous Balance:</span>
+              <span>{{ formatCurrency(invoice.previousBalance) }}</span>
+            </div>
+          }
+          <div class="totals-row grand-total">
+            <span>Grand Total:</span>
+            <span>{{ formatCurrency(invoice.totals.grandTotal || 0) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="invoice-footer">
+        <div class="footer-notes">
+          <h4>Terms & Conditions</h4>
+          <p>1. Goods once sold will not be taken back or exchanged.</p>
+          <p>2. All disputes subject to local jurisdiction.</p>
+          <p>3. Payment due within {{ invoice.creditDays || 0 }} days from invoice date.</p>
+        </div>
+
+        <div class="signatures">
+          <div class="signature-box">
+            <div class="signature-line">Prepared By</div>
+          </div>
+          <div class="signature-box">
+            <div class="signature-line">Authorized Signature</div>
+          </div>
+          <div class="signature-box">
+            <div class="signature-line">Receiver's Signature</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

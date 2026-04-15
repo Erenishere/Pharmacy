@@ -1,0 +1,140 @@
+<div class="form-dialog-shell expense-dialog">
+  <div class="dialog-header">
+    <div class="title-section">
+      <div class="header-icon">
+        <mat-icon>{{ mode === 'create' ? 'receipt_long' : 'edit_note' }}</mat-icon>
+      </div>
+      <div class="text-group">
+        <h2 mat-dialog-title>{{ mode === 'create' ? 'New Expense' : 'Edit Expense' }}</h2>
+        <span class="subtitle">Capture the amount, account mapping, and optional branch allocation in one entry.</span>
+      </div>
+    </div>
+
+    <button mat-icon-button type="button" class="close-btn" aria-label="Close dialog" (click)="dialogRef.close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <form [formGroup]="form" class="form-shell">
+      <section class="form-section">
+        <div class="section-title">
+          <mat-icon>payments</mat-icon>
+          <span>Entry Details</span>
+        </div>
+
+        <div class="grid-row two-cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Date</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="date">
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            @if (form.get('date')?.hasError('required') && form.get('date')?.touched) {
+              <mat-error>Date is required</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Amount</mat-label>
+            <span matPrefix>PKR&nbsp;</span>
+            <input matInput type="number" formControlName="amount" min="0.01" placeholder="0.00">
+            @if (form.get('amount')?.hasError('required') && form.get('amount')?.touched) {
+              <mat-error>Amount is required</mat-error>
+            }
+            @if (form.get('amount')?.hasError('min') && form.get('amount')?.touched) {
+              <mat-error>Amount must be greater than zero</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="grid-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Detail</mat-label>
+            <textarea matInput formControlName="detail" rows="3" placeholder="Add a short explanation for this expense"></textarea>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <mat-icon>account_balance_wallet</mat-icon>
+          <span>Ledger Mapping</span>
+        </div>
+
+        <div class="grid-row two-cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Category</mat-label>
+            <mat-select formControlName="categoryId">
+              @for (cat of categories; track cat._id) {
+                <mat-option [value]="cat._id">{{ cat.categoryName }}</mat-option>
+              }
+            </mat-select>
+            @if (form.get('categoryId')?.hasError('required') && form.get('categoryId')?.touched) {
+              <mat-error>Category is required</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Expense Account</mat-label>
+            <mat-select formControlName="accountId">
+              @for (acc of accounts; track acc._id) {
+                <mat-option [value]="acc._id">{{ acc.name }} ({{ acc.code }})</mat-option>
+              }
+            </mat-select>
+            @if (form.get('accountId')?.hasError('required') && form.get('accountId')?.touched) {
+              <mat-error>Expense account is required</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="grid-row two-cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Cash Account</mat-label>
+            <mat-select formControlName="cashAccountId">
+              @for (acc of cashAccounts; track acc._id) {
+                <mat-option [value]="acc._id">{{ acc.name }} ({{ acc.code }})</mat-option>
+              }
+            </mat-select>
+            @if (form.get('cashAccountId')?.hasError('required') && form.get('cashAccountId')?.touched) {
+              <mat-error>Cash account is required</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Dimension</mat-label>
+            <mat-select formControlName="dimensionId">
+              <mat-option value="">None</mat-option>
+              @for (dim of dimensions; track dim._id) {
+                <mat-option [value]="dim._id">{{ dim.name }}</mat-option>
+              }
+            </mat-select>
+            <mat-hint>Optional branch or cost center allocation</mat-hint>
+          </mat-form-field>
+        </div>
+      </section>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-footer">
+    <div class="footer-meta">
+      <strong>{{ mode === 'create' ? 'Create Entry' : 'Update Entry' }}</strong>
+      Expense entries post against the selected expense and cash accounts as soon as you save.
+    </div>
+
+    <div class="footer-actions">
+      <button mat-stroked-button type="button" class="cancel-btn" (click)="dialogRef.close()" [disabled]="loading">
+        Cancel
+      </button>
+
+      <button mat-raised-button color="primary" type="button" class="submit-btn" (click)="onSubmit()" [disabled]="loading || form.invalid">
+        @if (loading) {
+          <mat-spinner diameter="20"></mat-spinner>
+        }
+        @if (!loading) {
+          <mat-icon>{{ mode === 'create' ? 'add' : 'save' }}</mat-icon>
+        }
+        <span>{{ loading ? 'Saving...' : (mode === 'create' ? 'Create Expense' : 'Update Expense') }}</span>
+      </button>
+    </div>
+  </mat-dialog-actions>
+</div>

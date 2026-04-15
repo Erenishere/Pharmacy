@@ -1,0 +1,340 @@
+@import 'styles/vuexy-vars';
+
+$purple: #867cf0;
+
+.statement-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .back-btn {
+      color: $text-body;
+    }
+
+    h1 {
+      color: #000000;
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0;
+      border-left: 4px solid $purple;
+      padding-left: 12px;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 12px;
+
+    button {
+      height: 40px;
+    }
+  }
+}
+
+.filters-card {
+  background: $bg-card;
+  border-radius: $radius-card;
+  box-shadow: $shadow-card;
+  border: $border-card;
+  padding: 20px;
+  margin-bottom: 24px;
+
+  .filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+
+    .filter-field {
+      flex: 1;
+      min-width: 200px;
+      max-width: 250px;
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 8px;
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: #000000;
+
+  p {
+    margin-top: 16px;
+    font-size: 14px;
+  }
+}
+
+.statement-card {
+  background: $bg-card;
+  border-radius: $radius-card;
+  box-shadow: $shadow-card;
+  border: $border-card;
+  padding: 32px;
+}
+
+.statement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid $border-card;
+
+  .company-info {
+    h2 {
+      margin: 0 0 8px 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: $purple;
+    }
+
+    p {
+      margin: 0;
+      color: $text-body;
+      font-size: 14px;
+    }
+  }
+
+  .investor-info {
+    text-align: right;
+
+    h3 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #000000;
+    }
+
+    p {
+      margin: 4px 0;
+      color: $text-body;
+      font-size: 13px;
+    }
+  }
+}
+
+.balance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-radius: $radius-card;
+  margin-bottom: 24px;
+
+  .label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #000000;
+  }
+
+  .value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #000000;
+  }
+
+  &.opening {
+    background: rgba($info, 0.08);
+    border: 1px solid rgba($info, 0.2);
+  }
+
+  &.closing {
+    background: rgba($success, 0.08);
+    border: 1px solid rgba($success, 0.2);
+    margin-bottom: 0;
+  }
+}
+
+.transactions-section {
+  margin-bottom: 24px;
+
+  h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #000000;
+  }
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: $border-table;
+  }
+
+  th {
+    background: $bg-page;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #000000;
+  }
+
+  td {
+    font-size: 14px;
+    color: #000000;
+  }
+
+  tr:hover td {
+    background: rgba($purple, 0.04);
+  }
+
+  .text-right {
+    text-align: right;
+  }
+
+  .amount {
+    font-weight: 600;
+
+    &.positive {
+      color: $success;
+    }
+
+    &.negative {
+      color: $danger;
+    }
+  }
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.investment {
+    background: rgba($success, 0.12);
+    color: $success;
+  }
+
+  &.withdrawal {
+    background: rgba($danger, 0.12);
+    color: $danger;
+  }
+
+  &.dividend {
+    background: rgba($info, 0.12);
+    color: $info;
+  }
+
+  &.profit_share {
+    background: rgba($warning, 0.12);
+    color: $warning;
+  }
+}
+
+.empty-transactions {
+  text-align: center;
+  padding: 40px 20px;
+  color: $text-muted;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: #000000;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    color: $text-muted;
+  }
+
+  p {
+    font-size: 16px;
+  }
+}
+
+.refresh-btn {
+  color: $purple;
+  border: 1px solid rgba($purple, 0.5);
+
+  &:hover {
+    background: rgba($purple, 0.08);
+  }
+}
+
+// Print Styles
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .statement-container {
+    padding: 0;
+  }
+
+  .statement-card {
+    box-shadow: none;
+    border: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .statement-container {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+
+    .header-actions {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+
+  .statement-header {
+    flex-direction: column;
+    gap: 16px;
+
+    .investor-info {
+      text-align: left;
+    }
+  }
+
+  .filters-card .filters-row {
+    flex-direction: column;
+
+    .filter-field {
+      max-width: none;
+      width: 100%;
+    }
+  }
+}

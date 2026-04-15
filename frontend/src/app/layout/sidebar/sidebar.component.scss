@@ -1,0 +1,237 @@
+@import 'styles/vuexy-vars';
+
+.sidebar-header {
+  padding: 20px 18px 14px;
+  background: #ffffff;
+  border-bottom: 1px solid rgba($grey-dark, 0.06);
+
+  .logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: rgba($primary, 0.1);
+
+    mat-icon {
+      color: darken($primary, 6%);
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  .logo-text {
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.2;
+
+    .brand {
+      color: darken($text-card-title, 5%);
+    }
+
+    .sub {
+      color: $text-muted;
+      font-weight: 600;
+    }
+  }
+}
+
+.sidebar-nav {
+  height: calc(100vh - 84px);
+  padding: 12px 10px 18px;
+  overflow-y: auto;
+  background: #ffffff;
+}
+
+::ng-deep .mat-mdc-list-item {
+  height: 48px;
+  width: 100%;
+  margin: 2px 0;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  font-family: $font-family;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &.mdc-list-item--disabled {
+    opacity: 1;
+  }
+
+  &:not(.active) {
+    .mdc-list-item__content,
+    .mdc-list-item__primary-text,
+    mat-icon {
+      color: #4f5565;
+    }
+  }
+
+  &:hover {
+    background: #f7f8fc;
+    border-color: rgba($grey-dark, 0.06);
+
+    .mdc-list-item__content,
+    .mdc-list-item__primary-text,
+    mat-icon {
+      color: #31374a;
+    }
+  }
+
+  &.active {
+    background: rgba($primary, 0.08);
+    border-color: rgba($primary, 0.16);
+    box-shadow: inset 3px 0 0 darken($primary, 4%);
+
+    .mdc-list-item__content,
+    .mdc-list-item__primary-text,
+    mat-icon {
+      color: darken($primary, 6%);
+    }
+
+    .badge {
+      background: #ffffff;
+      color: darken($primary, 4%);
+    }
+  }
+}
+
+.badge {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba($primary, 0.1);
+  color: darken($primary, 6%);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+mat-divider {
+  margin: 10px 8px;
+  border-top-color: rgba($grey-dark, 0.08);
+}
+
+.nav-section-title {
+  padding: 12px 14px 4px;
+  color: $text-muted;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.menu-section {
+  margin: 6px 0;
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 48px;
+    padding: 0 14px;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    color: #4f5565;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+
+    &:hover {
+      background: #f7f8fc;
+      border-color: rgba($grey-dark, 0.06);
+    }
+
+    &.active {
+      background: rgba($primary, 0.06);
+      border-color: rgba($primary, 0.12);
+
+      .section-icon,
+      .section-title,
+      .expand-icon {
+        color: darken($primary, 6%);
+      }
+    }
+  }
+
+  .section-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 14px;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: $font-family;
+  }
+
+  .expand-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: $text-muted;
+    transition: transform 0.25s ease;
+
+    &.expanded {
+      transform: rotate(90deg);
+    }
+  }
+
+  .submenu {
+    max-height: 0;
+    margin: 4px 0 0 22px;
+    padding-left: 12px;
+    overflow: hidden;
+    border-left: 1px solid rgba($grey-dark, 0.08);
+    transition: max-height 0.25s ease;
+
+    &.open {
+      max-height: 640px;
+      padding-top: 4px;
+      padding-bottom: 2px;
+    }
+
+    .submenu-item {
+      height: 40px;
+      width: 100% !important;
+      margin: 2px 0 !important;
+      padding-left: 10px !important;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+
+      &:not(.active) {
+        .mdc-list-item__content,
+        .mdc-list-item__primary-text,
+        mat-icon {
+          color: #5f6577;
+        }
+      }
+
+      &:hover {
+        background: #f8f9fc;
+      }
+
+      &.active {
+        background: rgba($primary, 0.08);
+        border-color: rgba($primary, 0.16);
+        box-shadow: none;
+
+        .mdc-list-item__content,
+        .mdc-list-item__primary-text,
+        mat-icon {
+          color: darken($primary, 6%);
+        }
+      }
+    }
+  }
+}

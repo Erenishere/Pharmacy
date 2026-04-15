@@ -1,0 +1,72 @@
+@import '../../../styles/report-common';
+
+.compliance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #EBE9F1;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .label {
+    font-size: 14px;
+    color: #000000;
+    font-weight: 500;
+  }
+
+  .value {
+    font-size: 14px;
+    color: #000000;
+    font-weight: 600;
+
+    &.amount {
+      font-size: 16px;
+    }
+  }
+
+  &.large {
+    padding: 16px 0;
+
+    .label {
+      font-size: 16px;
+    }
+
+    .value {
+      font-size: 18px;
+    }
+  }
+
+  &.total {
+    border-top: 2px solid $purple;
+    margin-top: 8px;
+    padding-top: 16px;
+
+    .label {
+      font-size: 18px;
+      font-weight: 600;
+      color: $purple;
+    }
+
+    .value {
+      font-size: 22px;
+      font-weight: 700;
+      color: $purple;
+    }
+  }
+}
+
+.highlight-card {
+  border: 2px solid $purple;
+  box-shadow: 0 6px 20px rgba($purple, 0.15);
+}
+
+.positive {
+  color: $success;
+}
+
+.negative {
+  color: $danger;
+}

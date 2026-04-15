@@ -1,0 +1,358 @@
+<div class="batch-management-container">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1>
+        <mat-icon>inventory</mat-icon>
+        Batch Management
+      </h1>
+      <div class="header-actions">
+        <button 
+          mat-icon-button 
+          [class.active]="autoRefreshEnabled"
+          (click)="toggleAutoRefresh()"
+          matTooltip="Toggle auto-refresh">
+          <mat-icon>{{autoRefreshEnabled ? 'sync' : 'sync_disabled'}}</mat-icon>
+        </button>
+        <button 
+          mat-icon-button 
+          (click)="refreshData()"
+          [disabled]="refreshing"
+          matTooltip="Refresh data">
+          <mat-icon [class.spinning]="refreshing">refresh</mat-icon>
+        </button>
+        <button mat-button (click)="generateExpiryReport()">
+          <mat-icon>warning</mat-icon>
+          Expiry Report
+        </button>
+        <button mat-button (click)="generateBatchReport()">
+          <mat-icon>assessment</mat-icon>
+          Batch Report
+        </button>
+        <button mat-button (click)="exportToExcel()">
+          <mat-icon>download</mat-icon>
+          Export Excel
+        </button>
+        <button mat-button (click)="exportToPDF()">
+          <mat-icon>picture_as_pdf</mat-icon>
+          Export PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="statistics-cards">
+    <mat-card class="stat-card primary">
+      <mat-card-content>
+        <div class="stat-icon">
+          <mat-icon>inventory_2</mat-icon>
+        </div>
+        <div class="stat-details">
+          <div class="stat-label">Total Batches</div>
+          <div class="stat-value">{{ formatNumber(statistics.totalBatches) }}</div>
+          <div class="stat-sublabel">{{ formatNumber(statistics.totalRemainingQuantity) }} units remaining</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card success">
+      <mat-card-content>
+        <div class="stat-icon">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="stat-details">
+          <div class="stat-label">Active Batches</div>
+          <div class="stat-value">{{ formatNumber(statistics.activeBatches) }}</div>
+          <div class="stat-sublabel">{{ formatCurrency(statistics.totalValue) }}</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card warning">
+      <mat-card-content>
+        <div class="stat-icon">
+          <mat-icon [matBadge]="statistics.nearExpiryBatches" matBadgeColor="warn">warning</mat-icon>
+        </div>
+        <div class="stat-details">
+          <div class="stat-label">Near Expiry</div>
+          <div class="stat-value">{{ formatNumber(statistics.nearExpiryBatches) }}</div>
+          <div class="stat-sublabel">Within {{ expiryDaysThreshold }} days</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card danger">
+      <mat-card-content>
+        <div class="stat-icon">
+          <mat-icon [matBadge]="statistics.expiredBatches" matBadgeColor="warn">error</mat-icon>
+        </div>
+        <div class="stat-details">
+          <div class="stat-label">Expired Batches</div>
+          <div class="stat-value">{{ formatNumber(statistics.expiredBatches) }}</div>
+          <div class="stat-sublabel">Requires action</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Filters Section -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-container">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search by item name or batch number</mat-label>
+          <input matInput [formControl]="searchControl" placeholder="Search...">
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Warehouse</mat-label>
+          <mat-select [(value)]="selectedWarehouse" (selectionChange)="onFilterChange()">
+            <mat-option value="">All Warehouses</mat-option>
+            <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse._id">
+              {{ warehouse.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select [(value)]="selectedStatus" (selectionChange)="onFilterChange()">
+            <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+              {{ status.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Near Expiry Days</mat-label>
+          <input 
+            matInput 
+            type="number" 
+            [(ngModel)]="expiryDaysThreshold" 
+            (change)="onFilterChange()"
+            min="1"
+            max="365">
+          <mat-hint>Days threshold for near-expiry warning</mat-hint>
+        </mat-form-field>
+
+        <button mat-stroked-button (click)="clearFilters()" class="clear-filters-btn">
+          <mat-icon>clear</mat-icon>
+          Clear Filters
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- FIFO/FEFO Recommendations Panel -->
+  <mat-expansion-panel class="recommendations-panel">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon>lightbulb</mat-icon>
+        FIFO/FEFO Batch Selection Recommendations
+      </mat-panel-title>
+      <mat-panel-description>
+        View batch usage priority based on expiry dates
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+    <div class="recommendations-content">
+      <div class="recommendation-legend">
+        <div class="legend-item fifo-expired">
+          <mat-icon>error</mat-icon>
+          <span>Do Not Use - Expired</span>
+        </div>
+        <div class="legend-item fifo-urgent">
+          <mat-icon>priority_high</mat-icon>
+          <span>Use First - Expiring Soon (≤30 days)</span>
+        </div>
+        <div class="legend-item fifo-soon">
+          <mat-icon>warning</mat-icon>
+          <span>Use Next - Near Expiry (≤90 days)</span>
+        </div>
+        <div class="legend-item fifo-normal">
+          <mat-icon>check_circle</mat-icon>
+          <span>Normal Priority (>90 days)</span>
+        </div>
+      </div>
+      <p class="recommendation-note">
+        <mat-icon>info</mat-icon>
+        Always use batches with earlier expiry dates first (FEFO - First Expired, First Out) to minimize waste and ensure product quality.
+      </p>
+    </div>
+  </mat-expansion-panel>
+
+  <!-- Batch Table -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" matSort class="batch-table">
+          
+          <!-- Batch Number Column -->
+          <ng-container matColumnDef="batchNumber">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Batch Number</th>
+            <td mat-cell *matCellDef="let batch">
+              <span class="batch-number">{{ batch.batchNumber }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Item Name Column -->
+          <ng-container matColumnDef="itemName">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Item Name</th>
+            <td mat-cell *matCellDef="let batch">
+              <span class="item-name">{{ batch.item?.name || '-' }}</span>
+              <br>
+              <span class="item-code">{{ batch.item?.code || '' }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Warehouse Column -->
+          <ng-container matColumnDef="warehouseName">
+            <th mat-header-cell *matHeaderCellDef>Warehouse</th>
+            <td mat-cell *matCellDef="let batch">
+              <mat-chip class="warehouse-chip">{{ batch.warehouse?.name || '-' }}</mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Manufacturing Date Column -->
+          <ng-container matColumnDef="manufacturingDate">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Mfg Date</th>
+            <td mat-cell *matCellDef="let batch">
+              {{ formatDate(batch.manufacturingDate) }}
+            </td>
+          </ng-container>
+
+          <!-- Expiry Date Column -->
+          <ng-container matColumnDef="expiryDate">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Expiry Date</th>
+            <td mat-cell *matCellDef="let batch">
+              <span 
+                class="expiry-date"
+                [class.expiring-soon]="isNearExpiry(batch.expiryDate)"
+                [class.expired]="isExpired(batch.expiryDate)"
+                [matTooltip]="getDaysUntilExpiry(batch.expiryDate) + ' days until expiry'">
+                {{ formatDate(batch.expiryDate) }}
+                <mat-icon *ngIf="isExpired(batch.expiryDate)" class="expiry-icon">error</mat-icon>
+                <mat-icon *ngIf="isNearExpiry(batch.expiryDate) && !isExpired(batch.expiryDate)" class="expiry-icon">warning</mat-icon>
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Quantity Column -->
+          <ng-container matColumnDef="quantity">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header class="text-right">Initial Qty</th>
+            <td mat-cell *matCellDef="let batch" class="text-right">
+              <span class="quantity-value">{{ formatNumber(batch.quantity) }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Remaining Quantity Column -->
+          <ng-container matColumnDef="remainingQuantity">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header class="text-right">Remaining Qty</th>
+            <td mat-cell *matCellDef="let batch" class="text-right">
+              <span 
+                class="remaining-value"
+                [class.depleted]="batch.remainingQuantity === 0"
+                [class.low]="batch.remainingQuantity > 0 && batch.remainingQuantity < batch.quantity * 0.2">
+                {{ formatNumber(batch.remainingQuantity) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Unit Cost Column -->
+          <ng-container matColumnDef="unitCost">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Unit Cost</th>
+            <td mat-cell *matCellDef="let batch" class="text-right">
+              {{ formatCurrency(batch.unitCost) }}
+            </td>
+          </ng-container>
+
+          <!-- Total Cost Column -->
+          <ng-container matColumnDef="totalCost">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Total Cost</th>
+            <td mat-cell *matCellDef="let batch" class="text-right">
+              {{ formatCurrency(batch.totalCost) }}
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let batch">
+              <mat-chip 
+                [class]="getBatchStatusClass(batch)"
+                class="status-chip">
+                <mat-icon class="status-icon">{{ getBatchStatusIcon(batch) }}</mat-icon>
+                {{ getBatchStatusLabel(batch) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- FIFO Recommendation Column -->
+          <ng-container matColumnDef="fifoRecommendation">
+            <th mat-header-cell *matHeaderCellDef>FIFO/FEFO Priority</th>
+            <td mat-cell *matCellDef="let batch">
+              <mat-chip 
+                [class]="getFifoRecommendationClass(batch)"
+                class="fifo-chip">
+                {{ getFifoRecommendation(batch) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+            <td mat-cell *matCellDef="let batch" class="text-center">
+              <button mat-icon-button [matMenuTriggerFor]="actionMenu" matTooltip="Actions">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #actionMenu="matMenu">
+                <button mat-menu-item (click)="viewBatchDetails(batch)">
+                  <mat-icon>visibility</mat-icon>
+                  <span>View Details</span>
+                </button>
+                <button mat-menu-item (click)="viewBatchHistory(batch)">
+                  <mat-icon>history</mat-icon>
+                  <span>View History</span>
+                </button>
+                <button mat-menu-item (click)="viewItemBatches(batch)">
+                  <mat-icon>list</mat-icon>
+                  <span>All Item Batches</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+          <!-- No Data Row -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length">
+              <div class="no-data-message">
+                <mat-icon>inventory_2</mat-icon>
+                <p>No batch data available</p>
+              </div>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Loading Spinner -->
+        <div *ngIf="loading" class="loading-overlay">
+          <mat-spinner diameter="50"></mat-spinner>
+        </div>
+      </div>
+
+      <!-- Paginator -->
+      <mat-paginator
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        [pageIndex]="pageIndex"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,213 @@
+<div class="return-workspace">
+
+    <!-- ═══════ SEARCH VIEW ═══════ -->
+    <ng-container *ngIf="viewState === 'search'">
+        <div class="page-header">
+            <mat-icon class="header-icon">assignment_return</mat-icon>
+            <div>
+                <h2>Sales Return</h2>
+                <p>Search for a confirmed invoice to process a return</p>
+            </div>
+        </div>
+
+        <div class="search-card">
+            <div class="search-bar">
+                <mat-icon class="search-icon">search</mat-icon>
+                <input
+                    type="text"
+                    class="search-input"
+                    placeholder="Search by invoice number, customer name..."
+                    [(ngModel)]="searchQuery"
+                    (keydown)="onSearchKeydown($event)"
+                    autofocus
+                />
+                <button mat-flat-button color="primary" (click)="searchInvoices()" [disabled]="searching">
+                    <mat-icon *ngIf="!searching">search</mat-icon>
+                    <mat-spinner *ngIf="searching" diameter="20"></mat-spinner>
+                    Search
+                </button>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div class="results-grid" *ngIf="searchResults.length > 0">
+            <div class="invoice-card" *ngFor="let inv of searchResults" (click)="selectInvoice(inv)">
+                <div class="card-top">
+                    <span class="invoice-number">{{ inv.invoiceNumber }}</span>
+                    <span class="invoice-status">Confirmed</span>
+                </div>
+                <div class="card-body">
+                    <div class="card-row">
+                        <mat-icon>person</mat-icon>
+                        <span>{{ getCustomerName(inv) }}</span>
+                    </div>
+                    <div class="card-row">
+                        <mat-icon>calendar_today</mat-icon>
+                        <span>{{ getInvoiceDate(inv) }}</span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <span class="invoice-total">{{ formatCurrency(getTotal(inv)) }}</span>
+                    <mat-icon class="arrow-icon">chevron_right</mat-icon>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-state" *ngIf="!searching && searchResults.length === 0 && searchQuery">
+            <mat-icon>search_off</mat-icon>
+            <p>No confirmed invoices found</p>
+        </div>
+    </ng-container>
+
+    <!-- ═══════ CREATE VIEW ═══════ -->
+    <ng-container *ngIf="viewState === 'create'">
+        <div class="page-header">
+            <button mat-icon-button (click)="goBack()" class="back-btn">
+                <mat-icon>arrow_back</mat-icon>
+            </button>
+            <div>
+                <h2>Return for {{ selectedInvoice?.invoiceNumber }}</h2>
+                <p>{{ getCustomerName(selectedInvoice) }} &middot; {{ getInvoiceDate(selectedInvoice) }} &middot; {{ formatCurrency(getTotal(selectedInvoice)) }}</p>
+            </div>
+        </div>
+
+        <!-- Return Reason -->
+        <div class="reason-section">
+            <mat-form-field appearance="outline" class="reason-select">
+                <mat-label>Return Reason</mat-label>
+                <mat-select [(ngModel)]="returnReason">
+                    <mat-option *ngFor="let r of returnReasons" [value]="r.value">{{ r.label }}</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="notes-input">
+                <mat-label>Notes (optional)</mat-label>
+                <input matInput [(ngModel)]="returnNotes" placeholder="Additional details..." />
+            </mat-form-field>
+        </div>
+
+        <!-- Items Table -->
+        <div class="items-card">
+            <div class="items-header">
+                <mat-checkbox
+                    [checked]="allSelected"
+                    [indeterminate]="someSelected"
+                    (change)="toggleAll($event.checked)">
+                    Select All ({{ selectedCount }}/{{ returnItems.length }})
+                </mat-checkbox>
+            </div>
+
+            <div class="items-table-wrapper">
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th class="col-check"></th>
+                            <th>Item</th>
+                            <th class="col-batch">Batch</th>
+                            <th class="col-num">Orig Qty</th>
+                            <th class="col-num">Return Qty</th>
+                            <th class="col-num">Price</th>
+                            <th class="col-num">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of returnItems" [class.selected-row]="item.selected">
+                            <td>
+                                <mat-checkbox [(ngModel)]="item.selected" (change)="toggleItem(item)"></mat-checkbox>
+                            </td>
+                            <td>
+                                <div class="cell-desc">
+                                    <span class="main-text">{{ item.itemName }}</span>
+                                    <span class="sub-text" *ngIf="item.itemCode">{{ item.itemCode }}</span>
+                                </div>
+                            </td>
+                            <td class="col-batch">{{ item.batchNumber || '-' }}</td>
+                            <td class="col-num">{{ item.originalQuantity }}</td>
+                            <td class="col-num">
+                                <input
+                                    type="number"
+                                    class="qty-input"
+                                    [(ngModel)]="item.returnQuantity"
+                                    [disabled]="!item.selected"
+                                    [max]="item.originalQuantity"
+                                    min="0"
+                                />
+                            </td>
+                            <td class="col-num">{{ formatCurrency(item.unitPrice) }}</td>
+                            <td class="col-num font-bold">{{ formatCurrency(lineTotal(item)) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Summary Bar -->
+        <div class="summary-bar">
+            <div class="summary-info">
+                <span class="summary-label">Credit Amount:</span>
+                <span class="summary-value">{{ formatCurrency(returnTotal) }}</span>
+            </div>
+            <button
+                mat-flat-button
+                color="primary"
+                class="process-btn"
+                (click)="onSubmit()"
+                [disabled]="selectedCount === 0">
+                <mat-icon>check_circle</mat-icon>
+                Process Return
+            </button>
+        </div>
+    </ng-container>
+
+    <!-- ═══════ SUBMITTING VIEW ═══════ -->
+    <ng-container *ngIf="viewState === 'submitting'">
+        <div class="center-state">
+            <mat-spinner diameter="48"></mat-spinner>
+            <h3>Processing Return...</h3>
+            <p>Creating return and restoring stock</p>
+        </div>
+    </ng-container>
+
+    <!-- ═══════ SUCCESS VIEW ═══════ -->
+    <ng-container *ngIf="viewState === 'success'">
+        <div class="center-state success-state">
+            <div class="success-icon-wrap">
+                <mat-icon>check_circle</mat-icon>
+            </div>
+            <h2>Return Processed</h2>
+            <p class="return-number" *ngIf="createdReturn?.returnNumber || createdReturn?.invoiceNumber">
+                {{ createdReturn?.returnNumber || createdReturn?.invoiceNumber }}
+            </p>
+
+            <div class="success-details">
+                <div class="detail-row">
+                    <span class="detail-label">Original Invoice</span>
+                    <span class="detail-value">{{ selectedInvoice?.invoiceNumber }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Customer</span>
+                    <span class="detail-value">{{ getCustomerName(selectedInvoice) }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Items Returned</span>
+                    <span class="detail-value">{{ selectedCount }} item(s)</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value status-badge">{{ createdReturn?.status || 'processed' }}</span>
+                </div>
+                <mat-divider></mat-divider>
+                <div class="detail-row credit-row">
+                    <span class="detail-label">Credit Amount</span>
+                    <span class="detail-value credit-amount">{{ formatCurrency(createdReturn?.totals?.grandTotal || createdReturn?.totals?.netBillTotal || returnTotal) }}</span>
+                </div>
+            </div>
+
+            <button mat-flat-button color="primary" class="new-return-btn" (click)="startNewReturn()">
+                <mat-icon>add</mat-icon>
+                New Return
+            </button>
+        </div>
+    </ng-container>
+
+</div>

@@ -1,0 +1,353 @@
+<div class="salary-sheet-container">
+  <h2>Create Salary Sheet & Sales Target</h2>
+
+  <form [formGroup]="salaryForm" (ngSubmit)="save()">
+    <!-- Ref# Auto -->
+    <div class="ref-section">
+      <span class="ref-label">Ref#</span>
+      <span class="ref-value">Auto</span>
+    </div>
+
+    <!-- Dimension Position -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Select Dimension Position</mat-label>
+        <mat-select formControlName="dimensionId">
+          <mat-option value="">-- Select Dimension --</mat-option>
+          <mat-option *ngFor="let dim of dimensions" [value]="dim._id">
+            {{ dim.name || dim.dimensionName }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Employee and Month -->
+    <div class="form-row two-col">
+      <div class="field-group">
+        <label>1. Select Employee Name</label>
+        <mat-form-field appearance="outline">
+          <mat-label>Select Employee</mat-label>
+          <mat-select formControlName="employeeId" required>
+            <mat-option value="">-- Select Employee --</mat-option>
+            <mat-option *ngFor="let emp of employees" [value]="emp._id">
+              {{ emp.name }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="salaryForm.get('employeeId')?.hasError('required')">
+            Employee is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="field-group">
+        <label>2. Select Month With Year for Salary</label>
+        <div class="month-year-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Month</mat-label>
+            <mat-select formControlName="month" required>
+              <mat-option *ngFor="let m of months" [value]="m.value">
+                {{ m.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Year</mat-label>
+            <mat-select formControlName="year" required>
+              <mat-option *ngFor="let y of years" [value]="y">{{ y }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <!-- Basic Pay -->
+    <div class="form-row">
+      <div class="field-group full-width">
+        <label>3. Basic Pay Fix Auto From Specific Created</label>
+        <mat-form-field appearance="outline">
+          <mat-label>Basic Pay</mat-label>
+          <input matInput type="number" formControlName="basicPay" min="0">
+          <span matSuffix>Auto</span>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Targets Section -->
+    <div class="section-header">Sales Targets & Incentives</div>
+
+    <div class="target-rows">
+      <!-- 4. Basic Sales Target -->
+      <div class="form-row target-row">
+        <label class="row-label">4. Basic Sales Target</label>
+        <mat-form-field appearance="outline" class="amount-field">
+          <input matInput type="number" formControlName="basicSalesTargetAmount" min="0">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="percent-field">
+          <input matInput type="number" formControlName="basicSalesTargetIncentive" min="0" max="100">
+          <span matSuffix>%</span>
+        </mat-form-field>
+        <span class="incentive-label">Incentives%</span>
+      </div>
+
+      <!-- 5. Cash Recovery Target -->
+      <div class="form-row target-row">
+        <label class="row-label">5. Cash Recovery Target</label>
+        <mat-form-field appearance="outline" class="amount-field">
+          <input matInput type="number" formControlName="cashRecoveryTargetAmount" min="0">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="percent-field">
+          <input matInput type="number" formControlName="cashRecoveryTargetIncentive" min="0" max="100">
+          <span matSuffix>%</span>
+        </mat-form-field>
+        <span class="incentive-label">Incentives%</span>
+      </div>
+
+      <!-- 6. Zero Credit Of Town -->
+      <div class="form-row target-row">
+        <label class="row-label">6. Zero Credit Of Town = Take incentive on complete Town sale</label>
+        <mat-form-field appearance="outline" class="amount-field">
+          <input matInput type="number" formControlName="zeroCreditTownAmount" min="0">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="percent-field">
+          <input matInput type="number" formControlName="zeroCreditTownIncentive" min="0" max="100">
+          <span matSuffix>%</span>
+        </mat-form-field>
+        <span class="incentive-label">Incentives%</span>
+      </div>
+
+      <!-- 7. Basic Profit Achievement Target -->
+      <div class="form-row target-row">
+        <label class="row-label">7. Basic Profit Achievement Target / Extra Earn Allowance</label>
+        <mat-form-field appearance="outline" class="amount-field">
+          <input matInput type="number" formControlName="profitAchievementAmount" min="0">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="percent-field">
+          <input matInput type="number" formControlName="profitAchievementIncentive" min="0" max="100">
+          <span matSuffix>%</span>
+        </mat-form-field>
+        <span class="incentive-label">Incentives%</span>
+      </div>
+
+      <!-- 8. Total Target Visit To Parties Order Invoices -->
+      <div class="form-row target-row">
+        <label class="row-label">8. Total Target Visit To Parties Order Invoices</label>
+        <mat-form-field appearance="outline" class="amount-field">
+          <input matInput type="number" formControlName="partyVisitTargetCount" min="0">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="percent-field">
+          <input matInput type="number" formControlName="partyVisitTargetIncentive" min="0" max="100">
+          <span matSuffix>%</span>
+        </mat-form-field>
+        <span class="incentive-label">Incentives%</span>
+      </div>
+    </div>
+
+    <!-- Allowances Section -->
+    <div class="section-header">Allowances & Benefits</div>
+
+    <div class="allowance-rows">
+      <!-- 10. Working Days -->
+      <div class="form-row allowance-row">
+        <label class="row-label">10. Working Days</label>
+        <mat-form-field appearance="outline">
+          <input matInput type="number" formControlName="workingDays" min="0" max="31">
+        </mat-form-field>
+      </div>
+
+      <!-- 11. Daily Allowance D.A -->
+      <div class="form-row allowance-row">
+        <label class="row-label">11. Daily Allowance D.A</label>
+        <mat-form-field appearance="outline">
+          <input matInput type="number" formControlName="dailyAllowance" min="0">
+        </mat-form-field>
+      </div>
+
+      <!-- 12. Petrol and Bike Maintenance -->
+      <div class="form-row allowance-row">
+        <label class="row-label">12. Petrol and Bike Maintenance</label>
+        <mat-form-field appearance="outline">
+          <input matInput type="number" formControlName="petrolAndMaintenance" min="0">
+        </mat-form-field>
+      </div>
+
+      <!-- 13. Call Mobile & Internet Services Package -->
+      <div class="form-row allowance-row">
+        <label class="row-label">13. Call Mobile & Internet Services Package</label>
+        <mat-form-field appearance="outline">
+          <input matInput type="number" formControlName="mobileInternetPackage" min="0">
+        </mat-form-field>
+      </div>
+
+      <!-- 14. Yearly Bonus On Good Performances (K) -->
+      <div class="form-row target-row">
+        <label class="row-label">14. Yearly Bonus On Good Performances (K)</label>
+        <mat-form-field appearance="outline" class="amount-field">
+          <input matInput type="number" formControlName="yearlyBonusAmount" min="0">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="percent-field">
+          <input matInput type="number" formControlName="yearlyBonusPercent" min="0" max="100">
+          <span matSuffix>%</span>
+        </mat-form-field>
+        <span class="incentive-label">Incentives%</span>
+      </div>
+
+      <!-- 15. Eid UI Fitr and Eid Al Adha Bonus -->
+      <div class="form-row allowance-row">
+        <label class="row-label">15. Eid UI Fitr and Eid Al Adha Bonus</label>
+        <mat-form-field appearance="outline">
+          <input matInput type="number" formControlName="eidBonus" min="0">
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Special and New Incentive -->
+    <div class="section-header">Special Incentives</div>
+
+    <!-- 16. Special or Band Item Sales -->
+    <div class="form-row target-row">
+      <label class="row-label">16. Special or Band Item Sales</label>
+      <mat-form-field appearance="outline" class="item-field">
+        <mat-label>Select Item</mat-label>
+        <mat-select formControlName="specialItemId">
+          <mat-option value="">-- Select Item --</mat-option>
+          <mat-option *ngFor="let item of items" [value]="item._id">
+            {{ item.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="percent-field">
+        <input matInput type="number" formControlName="specialItemIncentive" min="0" max="100">
+        <span matSuffix>%</span>
+      </mat-form-field>
+      <span class="incentive-label">Incentives%</span>
+    </div>
+
+    <!-- 17. New Incentive Optional -->
+    <div class="form-row target-row">
+      <label class="row-label">17. New Incentive Optional</label>
+      <mat-form-field appearance="outline" class="detail-field">
+        <input matInput type="text" formControlName="newIncentiveDetail" placeholder="Detail">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="percent-field">
+        <input matInput type="number" formControlName="newIncentivePercent" min="0" max="100">
+        <span matSuffix>%</span>
+      </mat-form-field>
+      <span class="incentive-label">Incentives%</span>
+    </div>
+
+    <!-- Status and Notes -->
+    <div class="form-row two-col">
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status">
+          <mat-option *ngFor="let s of statuses" [value]="s.value">
+            {{ s.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Notes</mat-label>
+        <textarea matInput formControlName="notes" rows="2"></textarea>
+      </mat-form-field>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button mat-raised-button color="primary" type="submit" [disabled]="saving">
+        <mat-icon *ngIf="!saving">save</mat-icon>
+        <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
+        {{ editingId ? 'Update' : 'Save' }}
+      </button>
+      <button mat-button type="button" (click)="cancelEdit()" *ngIf="editingId">
+        Cancel
+      </button>
+    </div>
+  </form>
+
+  <!-- List Section -->
+  <div class="list-section">
+    <h3>Created Sales Target & Salary List</h3>
+
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" class="salary-table">
+        <!-- S# -->
+        <ng-container matColumnDef="sno">
+          <th mat-header-cell *matHeaderCellDef>S#</th>
+          <td mat-cell *matCellDef="let row; let i = index">{{ (pageIndex * pageSize) + i + 1 }}</td>
+        </ng-container>
+
+        <!-- Reference Number -->
+        <ng-container matColumnDef="referenceNumber">
+          <th mat-header-cell *matHeaderCellDef>Ref#</th>
+          <td mat-cell *matCellDef="let row">{{ row.referenceNumber }}</td>
+        </ng-container>
+
+        <!-- Employee Name -->
+        <ng-container matColumnDef="employeeName">
+          <th mat-header-cell *matHeaderCellDef>Employee Name</th>
+          <td mat-cell *matCellDef="let row">{{ row.employeeName || row.employeeId?.name }}</td>
+        </ng-container>
+
+        <!-- Month/Year -->
+        <ng-container matColumnDef="monthYear">
+          <th mat-header-cell *matHeaderCellDef>Month/Year</th>
+          <td mat-cell *matCellDef="let row">{{ row.monthYear }}</td>
+        </ng-container>
+
+        <!-- Basic Pay -->
+        <ng-container matColumnDef="basicPay">
+          <th mat-header-cell *matHeaderCellDef>Basic Pay</th>
+          <td mat-cell *matCellDef="let row">{{ fmtNum(row.basicPay) }}</td>
+        </ng-container>
+
+        <!-- Total Target -->
+        <ng-container matColumnDef="totalTarget">
+          <th mat-header-cell *matHeaderCellDef>Total Target</th>
+          <td mat-cell *matCellDef="let row">{{ fmtNum(row.calculations?.totalTarget) }}</td>
+        </ng-container>
+
+        <!-- Status -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="status-badge" [class]="getStatusColor(row.status)">
+              {{ getStatusLabel(row.status) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-icon-button color="primary" (click)="edit(row)" matTooltip="Edit">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="accent" (click)="updateStatus(row, row.status === 'draft' ? 'active' : 'draft')"
+                    [matTooltip]="row.status === 'draft' ? 'Activate' : 'Set Draft'">
+              <mat-icon>{{ row.status === 'draft' ? 'check_circle' : 'unpublished' }}</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="delete(row)" matTooltip="Delete">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <div *ngIf="loading" class="loading-overlay">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    </div>
+
+    <mat-paginator [length]="totalItems"
+                   [pageSize]="pageSize"
+                   [pageSizeOptions]="[10, 20, 50, 100]"
+                   [pageIndex]="pageIndex"
+                   (page)="onPage($event)">
+    </mat-paginator>
+  </div>
+</div>

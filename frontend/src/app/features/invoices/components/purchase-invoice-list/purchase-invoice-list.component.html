@@ -1,0 +1,123 @@
+<div class="list-page-container">
+  <!-- Header Section -->
+  <div class="list-page-header">
+    <div class="header-content">
+      <h1>Purchase Invoices</h1>
+      <p>Manage supplier purchase transactions and inventory stock-ins</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="createInvoice()">
+      <mat-icon>add</mat-icon> New Invoice
+    </button>
+  </div>
+
+  <!-- Statistics Cards Row -->
+  <div class="statistics-cards mb-4" *ngIf="statistics">
+    <div class="stat-card">
+      <div class="stat-label">Total Invoices</div>
+      <div class="stat-value">{{ statistics.totalInvoices }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Amount</div>
+      <div class="stat-value">{{ formatCurrency(statistics.totalAmount) }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Pending Amount</div>
+      <div class="stat-value warn">{{ formatCurrency(statistics.pendingAmount) }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Paid Amount</div>
+      <div class="stat-value success">{{ formatCurrency(statistics.paidAmount) }}</div>
+    </div>
+  </div>
+
+  <!-- List Card -->
+  <div class="list-page-card">
+    <div class="list-filters-section">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Search</mat-label>
+        <input matInput [formControl]="searchControl" placeholder="Search by invoice number or supplier..." autocomplete="off">
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Status</mat-label>
+        <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onFilterChange()">
+          <mat-option *ngFor="let option of statusOptions; trackBy: trackByValue" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Payment Status</mat-label>
+        <mat-select [(ngModel)]="selectedPaymentStatus" (selectionChange)="onFilterChange()">
+          <mat-option *ngFor="let option of paymentStatusOptions; trackBy: trackByValue" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>From Date</mat-label>
+        <input matInput [matDatepicker]="fromPicker" [(ngModel)]="dateFrom" (dateChange)="onFilterChange()">
+        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>To Date</mat-label>
+        <input matInput [matDatepicker]="toPicker" [(ngModel)]="dateTo" (dateChange)="onFilterChange()">
+        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+        <mat-datepicker #toPicker></mat-datepicker>
+      </mat-form-field>
+
+      <button mat-icon-button color="warn" matTooltip="Clear All Filters" (click)="clearFilters()" *ngIf="searchControl.value || selectedStatus || selectedPaymentStatus || dateFrom || dateTo">
+        <mat-icon>filter_alt_off</mat-icon>
+      </button>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-wrapper px-3 pb-3" style="position: relative; min-height: 200px;">
+      <div class="loading-overlay" *ngIf="loading"
+           style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); display: flex; justify-content: center; align-items: center; z-index: 10;">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+
+      <app-data-table 
+        [data]="dataSource.data"
+        [columns]="tableColumns"
+        [totalItems]="totalInvoices"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="pageSizeOptions"
+        (pageChange)="onPageChange($event)"
+        (actionClick)="onTableAction($event)">
+      </app-data-table>
+
+      <!-- No Data Message -->
+      <div class="list-empty-state" *ngIf="!loading && dataSource.data.length === 0">
+        <mat-icon>inbox</mat-icon>
+        <p>No purchase invoices found</p>
+        <button mat-raised-button color="primary" (click)="createInvoice()">
+          Create First Invoice
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Footer -->
+  <div class="summary-footer" *ngIf="dataSource.data.length > 0">
+    <div class="summary-item">
+      <span class="label">Total Invoices:</span>
+      <span class="value">{{ totalInvoices }}</span>
+    </div>
+    <div class="summary-item">
+      <span class="label">Total Amount:</span>
+      <span class="value">{{ formatCurrency(calculateTotalAmount(dataSource.data)) }}</span>
+    </div>
+    <div class="summary-item">
+      <span class="label">Total GST (18% + 4%):</span>
+      <span class="value">{{ formatCurrency(calculateTotalGST(dataSource.data)) }}</span>
+    </div>
+  </div>
+</div>

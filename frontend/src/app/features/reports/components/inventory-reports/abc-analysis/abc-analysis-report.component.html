@@ -1,0 +1,113 @@
+<div class="report-container">
+  <div class="report-header">
+    <div class="header-left">
+      <button mat-icon-button class="back-btn" routerLink="/reports">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>ABC Analysis Report</h1>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button class="refresh-btn" (click)="loadReport()">
+        <mat-icon>refresh</mat-icon> Refresh
+      </button>
+      <button mat-raised-button class="export-btn">
+        <mat-icon>download</mat-icon> Export
+      </button>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading ABC analysis...</p>
+    </div>
+  } @else {
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="icon-wrapper success">
+          <mat-icon>star</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Category A (High Value)</div>
+          <div class="value">{{ formatNumber(summary.categoryA) }}</div>
+          <div class="sub-text">~70% of value</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper warning">
+          <mat-icon>star_half</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Category B (Medium Value)</div>
+          <div class="value">{{ formatNumber(summary.categoryB) }}</div>
+          <div class="sub-text">~20% of value</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper info">
+          <mat-icon>star_border</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Category C (Low Value)</div>
+          <div class="value">{{ formatNumber(summary.categoryC) }}</div>
+          <div class="sub-text">~10% of value</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper purple">
+          <mat-icon>attach_money</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Total Annual Value</div>
+          <div class="value">{{ formatCurrency(summary.totalValue) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-card">
+      <div class="card-header">
+        <h2>ABC Classification Details</h2>
+      </div>
+      <div class="table-container">
+        @if (reportData.length > 0) {
+          <table>
+            <thead>
+              <tr>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th class="text-right">Total Value</th>
+                <th class="text-right">Value %</th>
+                <th class="text-right">Cumulative %</th>
+                <th class="text-center">Category</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of reportData; track item.item.code) {
+                <tr>
+                  <td>{{ item.item.code }}</td>
+                  <td>{{ item.item.name }}</td>
+                  <td class="text-right amount">{{ formatCurrency(item.totalValue) }}</td>
+                  <td class="text-right">{{ formatPercent(item.percentage) }}</td>
+                  <td class="text-right">{{ formatPercent(item.cumulativePercentage) }}</td>
+                  <td class="text-center">
+                    <span class="category-badge" [ngClass]="getCategoryClass(item.classification)">
+                      {{ item.classification }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <div class="empty-state">
+            <mat-icon>inbox</mat-icon>
+            <p>No ABC analysis data found</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

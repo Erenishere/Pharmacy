@@ -1,0 +1,65 @@
+@import '../../../../../styles/vuexy-vars';
+@import '../../../../../styles/shared-list-styles';
+
+:host {
+  display: block;
+}
+
+.items-enhanced-page {
+  /* Inherits global .list-page-container styles */
+
+  .list-page-header {
+    h1 {
+      mat-icon {
+        color: $purple;
+      }
+    }
+  }
+
+  .data-table {
+    @include data-table;
+    
+    .item-name-block {
+      display: flex;
+      flex-direction: column;
+      
+      .item-name-text {
+        font-weight: 600;
+        color: $text-card-title;
+        line-height: 1.2;
+      }
+
+      .item-code-text {
+        font-size: 11px;
+        color: $grey-dark;
+        font-family: 'Inter', monospace;
+      }
+    }
+
+    .stock-value {
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba($success, 0.1);
+      color: $success;
+
+      &.low-stock {
+        background: rgba($danger, 0.1);
+        color: $danger;
+      }
+    }
+
+    .price-cell {
+      font-family: 'Inter', monospace;
+      font-weight: 500;
+      color: $text-body;
+    }
+  }
+
+  /* Standardize high-contrast chips */
+  ::ng-deep .mat-mdc-chip {
+    @include status-chip-base;
+  }
+}
+
+@include paginator;

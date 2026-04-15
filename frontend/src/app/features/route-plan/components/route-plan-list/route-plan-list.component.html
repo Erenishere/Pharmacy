@@ -1,0 +1,114 @@
+<div class="list-page-container route-plan-list-page">
+  <div class="list-page-header">
+    <div class="header-content">
+      <h1 class="page-title"><mat-icon>map</mat-icon> Route Plans</h1>
+      <p class="page-subtitle">Territory planning and target assignment</p>
+    </div>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" class="create-btn" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon> New Route Plan
+      </button>
+    </div>
+  </div>
+
+  <div class="list-page-card">
+    <div class="list-filters-section">
+      <div class="filter-group-primary">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Month (YYYY-MM)</mat-label>
+          <input matInput [formControl]="monthFilter" placeholder="2026-02" (change)="loadPlans()">
+        </mat-form-field>
+      </div>
+
+      <div class="filter-group-secondary">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Salesman</mat-label>
+          <mat-select [formControl]="salesmanFilter" (selectionChange)="loadPlans()">
+            <mat-option value="">All Salesmen</mat-option>
+            @for (s of salesmen; track s._id) {
+              <mat-option [value]="s._id">{{ s.username || s.fullName }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-button class="clear-btn" (click)="monthFilter.setValue(''); salesmanFilter.setValue(''); loadPlans()">
+          <mat-icon>restart_alt</mat-icon>
+          Clear
+        </button>
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="list-loading-overlay">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading route plans...</p>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        @if (dataSource.data.length === 0) {
+          <div class="list-empty-state">
+            <mat-icon>map</mat-icon>
+            <p>No route plans found</p>
+            <button mat-raised-button color="primary" class="create-btn" (click)="openCreateDialog()">Create First Plan</button>
+          </div>
+        } @else {
+          <table mat-table [dataSource]="dataSource" class="data-table">
+            <ng-container matColumnDef="monthYear">
+              <th mat-header-cell *matHeaderCellDef>Month</th>
+              <td mat-cell *matCellDef="let row"><strong>{{ row.monthYear }}</strong></td>
+            </ng-container>
+
+            <ng-container matColumnDef="salesman">
+              <th mat-header-cell *matHeaderCellDef>Salesman</th>
+              <td mat-cell *matCellDef="let row">{{ row.salesmanId?.username || row.salesmanId?.fullName || '-' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="dimension">
+              <th mat-header-cell *matHeaderCellDef>Dimension</th>
+              <td mat-cell *matCellDef="let row">
+                <mat-chip class="dimension-chip">{{ row.dimensionId?.name || '-' }}</mat-chip>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="salesTarget">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Sales Target</th>
+              <td mat-cell *matCellDef="let row" class="text-right amount-cell font-bold">{{ formatCurrency(row.salesTarget) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="recoveryTarget">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Recovery Target</th>
+              <td mat-cell *matCellDef="let row" class="text-right amount-cell">{{ formatCurrency(row.recoveryTarget) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="visitTarget">
+              <th mat-header-cell *matHeaderCellDef class="text-right">visit Target</th>
+              <td mat-cell *matCellDef="let row" class="text-right">{{ row.visitTarget }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+              <td mat-cell *matCellDef="let row" class="text-center">
+                <button mat-icon-button [matMenuTriggerFor]="actionMenu" class="action-btn">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #actionMenu="matMenu">
+                  <button mat-menu-item (click)="openEditDialog(row)">
+                    <mat-icon>edit</mat-icon> Edit Plan
+                  </button>
+                  <button mat-menu-item (click)="deletePlan(row)">
+                    <mat-icon color="warn">delete</mat-icon> Delete
+                  </button>
+                </mat-menu>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+
+          <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
+        }
+      </div>
+    }
+  </div>
+</div>

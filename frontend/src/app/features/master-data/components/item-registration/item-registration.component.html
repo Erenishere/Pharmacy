@@ -1,0 +1,459 @@
+<div class="ir-page">
+  <!-- Header -->
+  <div class="ir-header-bar">
+    <div class="ir-title">
+      <mat-icon>medical_services</mat-icon>
+      Item Registration
+    </div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="ir-form-card" [formGroup]="itemForm">
+    <div class="ir-section-title">Item Details</div>
+
+    <!-- Basic Information -->
+    <div class="ir-section">
+      <h3 class="ir-subsection-title">Basic Information</h3>
+      <div class="ir-field-grid">
+        <div class="ir-field span-2">
+          <label class="ir-label required-label">Item Name</label>
+          <input class="ir-input" type="text" formControlName="name" placeholder="Enter item name">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Item Code</label>
+          <input class="ir-input" type="text" formControlName="code" placeholder="Auto-generated if empty">
+        </div>
+
+        <div class="ir-field span-2">
+          <label class="ir-label required-label">Company</label>
+          <select class="ir-select" formControlName="companyId" (change)="onCompanyChange($any($event.target).value)">
+            <option value="">-- Select Company --</option>
+            <option *ngFor="let c of companies" [value]="c._id">{{ c.name }}</option>
+          </select>
+        </div>
+        <div class="ir-field">
+          <label class="ir-label">Selling Group</label>
+          <select class="ir-select" formControlName="companyGroupId">
+            <option value="">-- Select --</option>
+            <option *ngFor="let g of companyGroups" [value]="g._id">{{ g.name }}</option>
+          </select>
+        </div>
+
+        <div class="ir-field span-2">
+          <label class="ir-label required-label">Category</label>
+          <select class="ir-select" formControlName="categoryId" (change)="onCategoryChange($any($event.target).value)">
+            <option value="">-- Select Category --</option>
+            <option *ngFor="let c of categories" [value]="c._id">{{ c.name }}</option>
+          </select>
+        </div>
+
+        <div class="ir-field span-2">
+          <label class="ir-label">Sub Category</label>
+          <select class="ir-select" formControlName="subCategoryId">
+            <option value="">-- Select Sub Category --</option>
+            <option *ngFor="let sc of subCategories" [value]="sc._id">{{ sc.name }}</option>
+          </select>
+        </div>
+
+        <div class="ir-field span-2">
+          <label class="ir-label">Formula/Generic</label>
+          <select class="ir-select" formControlName="formulaId" (change)="onFormulaChange($any($event.target).value)">
+            <option value="">-- Select Formula --</option>
+            <option *ngFor="let f of formulas" [value]="f._id">{{ f.name }}</option>
+          </select>
+        </div>
+
+        <div class="ir-field span-2">
+          <label class="ir-label">Generic Size</label>
+          <select class="ir-select" formControlName="formulaSizeId">
+            <option value="">-- Select Size --</option>
+            <option *ngFor="let s of formulaSizes" [value]="s._id">{{ s.size }}</option>
+          </select>
+        </div>
+
+        <div class="ir-field span-2">
+          <label class="ir-label required-label">Business Type</label>
+          <select class="ir-select" formControlName="businessTypeId">
+            <option value="">-- Select Business Type --</option>
+            <option *ngFor="let b of businessTypes" [value]="b._id">{{ b.name }}</option>
+          </select>
+        </div>
+
+        <div class="ir-field span-2">
+          <label class="ir-label">Main Supplier</label>
+          <select class="ir-select" formControlName="supplierId">
+            <option value="">-- Select Supplier --</option>
+            <option *ngFor="let c of companies" [value]="c._id">{{ c.name }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pricing Section -->
+    <div class="ir-section">
+      <h3 class="ir-subsection-title">Unit Pricing</h3>
+      <div class="ir-field-grid">
+        <div class="ir-field">
+          <label class="ir-label required-label">Unit Purchase Price</label>
+          <input class="ir-input" type="number" formControlName="purchasePrice" min="0" step="0.01">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Cost Price</label>
+          <input class="ir-input" type="number" formControlName="costPrice" min="0" step="0.01">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label required-label">Unit Sell Price</label>
+          <input class="ir-input" type="number" formControlName="salePrice" min="0" step="0.01">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Trade Price</label>
+          <input class="ir-input" type="number" formControlName="tradePrice" min="0" step="0.01">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Retail Price (Unit)</label>
+          <input class="ir-input" type="number" formControlName="retailPrice" min="0" step="0.01">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Wholesale Price</label>
+          <input class="ir-input" type="number" formControlName="wholesalePrice" min="0" step="0.01">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Distributor Price</label>
+          <input class="ir-input" type="number" formControlName="distributorPrice" min="0" step="0.01">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">MRP</label>
+          <input class="ir-input" type="number" formControlName="mrp" min="0" step="0.01">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Goods Charges/Unit</label>
+          <input class="ir-input" type="number" formControlName="goodsChargesOnUnit" min="0" step="0.01">
+        </div>
+      </div>
+
+      <h3 class="ir-subsection-title">Box/Dozen Pricing</h3>
+      <div class="ir-field-grid">
+        <div class="ir-field">
+          <label class="ir-label">Box/Dozen Purchase Price</label>
+          <input class="ir-input" type="number" formControlName="boxPurchasePrice" min="0" step="0.01">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Box/Dozen Sell Price</label>
+          <input class="ir-input" type="number" formControlName="boxSalePrice" min="0" step="0.01">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Retail Price (Box/Dozen)</label>
+          <input class="ir-input" type="number" formControlName="boxRetailPrice" min="0" step="0.01">
+        </div>
+      </div>
+
+      <h3 class="ir-subsection-title">Carton Pricing</h3>
+      <div class="ir-field-grid">
+        <div class="ir-field">
+          <label class="ir-label">Carton Purchase Price</label>
+          <input class="ir-input" type="number" formControlName="cartonPurchasePrice" min="0" step="0.01">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Carton Sell Price</label>
+          <input class="ir-input" type="number" formControlName="cartonSalePrice" min="0" step="0.01">
+        </div>
+      </div>
+    </div>
+
+    <!-- Packaging Section -->
+    <div class="ir-section">
+      <h3 class="ir-subsection-title">Carton Dimensions (cm x cm x cm)</h3>
+      <div class="ir-field-grid">
+        <div class="ir-field">
+          <label class="ir-label">Length</label>
+          <input class="ir-input" type="number" formControlName="cartonLength" min="0" step="0.01">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Width</label>
+          <input class="ir-input" type="number" formControlName="cartonWidth" min="0" step="0.01">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Height</label>
+          <input class="ir-input" type="number" formControlName="cartonHeight" min="0" step="0.01">
+        </div>
+      </div>
+
+      <h3 class="ir-subsection-title">Packaging Quantities</h3>
+      <div class="ir-field-grid">
+        <div class="ir-field">
+          <label class="ir-label">Units in Carton</label>
+          <input class="ir-input" type="number" formControlName="unitsInCarton" min="0">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Units in Box/Dozen</label>
+          <input class="ir-input" type="number" formControlName="unitsInBox" min="0">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Box in Carton</label>
+          <input class="ir-input" type="number" formControlName="boxInCarton" min="0">
+        </div>
+      </div>
+
+      <h3 class="ir-subsection-title">Weights (kg)</h3>
+      <div class="ir-field-grid">
+        <div class="ir-field">
+          <label class="ir-label">Unit Weight</label>
+          <input class="ir-input" type="number" formControlName="unitWeight" min="0" step="0.001">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Box Weight</label>
+          <input class="ir-input" type="number" formControlName="boxWeight" min="0" step="0.001">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Carton Weight</label>
+          <input class="ir-input" type="number" formControlName="cartonWeight" min="0" step="0.001">
+        </div>
+      </div>
+    </div>
+
+    <!-- Tax Section -->
+    <div class="ir-section">
+      <h3 class="ir-subsection-title">Tax Information</h3>
+      <div class="ir-field-grid">
+        <div class="ir-field">
+          <label class="ir-label">Tax Type</label>
+          <select class="ir-select" formControlName="taxType">
+            <option value="GST">GST</option>
+            <option value="VAT">VAT</option>
+            <option value="Exempt">Exempt</option>
+          </select>
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">GST % (Filter)</label>
+          <select class="ir-select" formControlName="gstRate">
+            <option [value]="0">0%</option>
+            <option [value]="4">4%</option>
+            <option [value]="18">18%</option>
+          </select>
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">GST % (Non-Filter)</label>
+          <select class="ir-select" formControlName="gstRateNonFilter">
+            <option [value]="0">0%</option>
+            <option [value]="4">4%</option>
+            <option [value]="18">18%</option>
+          </select>
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">WHT Rate (%)</label>
+          <input class="ir-input" type="number" formControlName="whtRate" min="0" max="100" step="0.01">
+        </div>
+
+        <div class="ir-field span-2">
+          <label class="ir-label">HSN Code</label>
+          <input class="ir-input" type="text" formControlName="hsnCode">
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventory Section -->
+    <div class="ir-section">
+      <h3 class="ir-subsection-title">Inventory Settings</h3>
+      <div class="ir-field-grid">
+        <div class="ir-field">
+          <label class="ir-label">Opening Stock</label>
+          <input class="ir-input" type="number" formControlName="openingStock" min="0">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Min Stock Level</label>
+          <input class="ir-input" type="number" formControlName="minStockLevel" min="0">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Max Stock Level</label>
+          <input class="ir-input" type="number" formControlName="maxStockLevel" min="0">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Reorder Point</label>
+          <input class="ir-input" type="number" formControlName="reorderPoint" min="0">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Lead Time (days)</label>
+          <input class="ir-input" type="number" formControlName="leadTime" min="0">
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Alert: No Sales Days</label>
+          <input class="ir-input" type="number" formControlName="alertNoSalesDays" min="0" placeholder="Days limit">
+        </div>
+      </div>
+    </div>
+
+    <!-- Specifications Section -->
+    <div class="ir-section">
+      <h3 class="ir-subsection-title">Specifications</h3>
+      <div class="ir-field-grid">
+        <div class="ir-field">
+          <label class="ir-label required-label">Unit of Measurement</label>
+          <select class="ir-select" formControlName="unitOfMeasurement">
+            <option value="PCS">Pieces</option>
+            <option value="BOX">Box</option>
+            <option value="STRIP">Strip</option>
+            <option value="BOTTLE">Bottle</option>
+            <option value="VIAL">Vial</option>
+            <option value="TABLET">Tablet</option>
+            <option value="CAPSULE">Capsule</option>
+          </select>
+        </div>
+
+        <div class="ir-field">
+          <label class="ir-label">Packing Size</label>
+          <input class="ir-input" type="number" formControlName="packingSize" min="1">
+        </div>
+
+        <div class="ir-field span-2">
+          <label class="ir-label">Barcode</label>
+          <input class="ir-input" type="text" formControlName="barcode" placeholder="Different barcode for each item">
+        </div>
+      </div>
+
+      <div class="ir-checkbox-group">
+        <label class="ir-checkbox">
+          <input type="checkbox" formControlName="batchTracking">
+          <span>Enable Batch Tracking</span>
+        </label>
+        <label class="ir-checkbox">
+          <input type="checkbox" formControlName="expiryTracking">
+          <span>Enable Expiry Tracking</span>
+        </label>
+        <label class="ir-checkbox">
+          <input type="checkbox" formControlName="isActive">
+          <span>Active</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="ir-footer-row">
+      <button mat-button *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
+      <button mat-raised-button class="ir-save-btn" [disabled]="saving" (click)="save()">
+        <mat-spinner *ngIf="saving" diameter="18"></mat-spinner>
+        <mat-icon *ngIf="!saving">save</mat-icon>
+        {{ editingId ? 'Update' : 'Save' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Items List -->
+  <div class="ir-list-card">
+    <div class="ir-list-header">
+      <span class="ir-list-title">
+        <mat-icon>list_alt</mat-icon>
+        Registered Items
+      </span>
+      <button mat-icon-button (click)="loadItems()" matTooltip="Refresh">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    <div *ngIf="loading" class="ir-spinner">
+      <mat-spinner diameter="36"></mat-spinner>
+    </div>
+
+    <div class="ir-table-wrap" *ngIf="!loading">
+      <table mat-table [dataSource]="dataSource" class="ir-table">
+        <ng-container matColumnDef="sno">
+          <th mat-header-cell *matHeaderCellDef>S#</th>
+          <td mat-cell *matCellDef="let item; let i = index">{{ i + 1 + pageIndex * pageSize }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="code">
+          <th mat-header-cell *matHeaderCellDef>Code</th>
+          <td mat-cell *matCellDef="let item">{{ item.code }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let item">{{ item.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="company">
+          <th mat-header-cell *matHeaderCellDef>Company</th>
+          <td mat-cell *matCellDef="let item">{{ getCompanyName(item.companyId) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef>Category</th>
+          <td mat-cell *matCellDef="let item">{{ getCategoryName(item.categoryId) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="purchasePrice">
+          <th mat-header-cell *matHeaderCellDef class="num">Purchase</th>
+          <td mat-cell *matCellDef="let item" class="num">{{ fmtNum(item.pricing?.purchasePrice) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="salePrice">
+          <th mat-header-cell *matHeaderCellDef class="num">Sale</th>
+          <td mat-cell *matCellDef="let item" class="num">{{ fmtNum(item.pricing?.salePrice) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="stock">
+          <th mat-header-cell *matHeaderCellDef class="num">Stock</th>
+          <td mat-cell *matCellDef="let item" class="num">{{ fmtNum(item.inventory?.currentStock) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let item">
+            <span class="ir-chip" [ngClass]="item.isActive ? 'chip-active' : 'chip-inactive'">
+              {{ item.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+          <td mat-cell *matCellDef="let item" class="text-center">
+            <button mat-icon-button class="act-btn edit-btn" matTooltip="Edit" (click)="edit(item)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button class="act-btn del-btn" matTooltip="Delete" (click)="delete(item)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <div *ngIf="dataSource.data.length === 0" class="ir-no-data">
+        <mat-icon>inventory_2</mat-icon>
+        <p>No items found</p>
+      </div>
+    </div>
+
+    <mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageIndex]="pageIndex" [pageSizeOptions]="[20, 50, 100]"
+      (page)="onPage($event)" showFirstLastButtons>
+    </mat-paginator>
+  </div>
+</div>

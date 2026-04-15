@@ -1,0 +1,6 @@
+# Properties directory
+# This directory will contain property-based tests:
+# - syncProperties.test.js
+# - consistencyProperties.test.js
+# - concurrentProperties.test.js
+# - errorProperties.test.js

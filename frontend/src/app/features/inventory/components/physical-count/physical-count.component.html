@@ -1,0 +1,234 @@
+<div class="list-page-container physical-count-page">
+  <!-- Header -->
+  <div class="list-page-header">
+    <div class="header-content">
+      <h1 class="page-title"><mat-icon>fact_check</mat-icon> Physical Count Management</h1>
+      <p class="page-subtitle">Manage inventory audits and physical count sessions</p>
+    </div>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="toggleForm()" class="add-btn">
+        <mat-icon>{{ showForm ? 'close' : 'add' }}</mat-icon>
+        {{ showForm ? 'Cancel' : 'New Session' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Detail View -->
+  <div class="list-page-card detail-card" *ngIf="selectedCount">
+    <div class="card-title-section">
+      <h2>Session Details: {{ selectedCount.countNumber || selectedCount._id?.slice(-8).toUpperCase() }}</h2>
+      <div class="header-actions">
+        <button mat-icon-button (click)="closeDetail()"><mat-icon>close</mat-icon></button>
+      </div>
+    </div>
+    
+    <div class="card-content-grid">
+      <div class="audit-summary-strip">
+        <div class="summary-item">
+          <span class="label">Warehouse</span>
+          <span class="value">{{ selectedCount.warehouseName || getWarehouseName(selectedCount.warehouseId || selectedCount.warehouse) }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Date</span>
+          <span class="value">{{ formatDate(selectedCount.countDate || selectedCount.createdAt) }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Status</span>
+          <mat-chip [class]="getStatusClass(selectedCount.status)" class="status-chip">{{ getStatusLabel(selectedCount.status) }}</mat-chip>
+        </div>
+      </div>
+
+      <div class="audit-table-section" *ngIf="selectedCount.items?.length">
+        <h3>Audit Results</h3>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th class="text-right">System Qty</th>
+                <th class="text-right">Counted</th>
+                <th class="text-right">Variance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of selectedCount.items">
+                <td class="font-600">{{ item.itemName || getItemName(item.itemId) }}</td>
+                <td class="text-right">{{ formatNumber(item.systemQuantity || 0) }}</td>
+                <td class="text-right">{{ formatNumber(item.countedQuantity || 0) }}</td>
+                <td class="text-right" [class.variance-positive]="(item.countedQuantity - item.systemQuantity) > 0"
+                    [class.variance-negative]="(item.countedQuantity - item.systemQuantity) < 0">
+                  <span class="variance-badge">
+                    {{ (item.countedQuantity || 0) - (item.systemQuantity || 0) > 0 ? '+' : '' }}{{ formatNumber((item.countedQuantity || 0) - (item.systemQuantity || 0)) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="detail-footer-actions" *ngIf="['completed', 'in_progress'].includes(selectedCount.status)">
+        <button mat-raised-button color="primary" (click)="approveCount(selectedCount)">
+          <mat-icon>verified</mat-icon> Approve & Sync Stock
+        </button>
+        <button mat-button color="warn" (click)="cancelCount(selectedCount)">
+          <mat-icon>cancel</mat-icon> Cancel Session
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Count Form -->
+  <div class="list-page-card form-card" *ngIf="showForm">
+    <div class="card-title-section">
+      <h2>New Audit Session</h2>
+    </div>
+    
+    <form [formGroup]="countForm" (ngSubmit)="onSubmit()" class="premium-form">
+      <div class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Warehouse</mat-label>
+          <mat-select formControlName="warehouseId" required>
+            <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse._id">{{ warehouse.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Count Date</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="countDate" required>
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notes / Audit Scope</mat-label>
+          <textarea matInput formControlName="notes" rows="2"></textarea>
+        </mat-form-field>
+      </div>
+
+      <div class="dynamic-items-field">
+        <div class="field-header">
+          <h3>Items to Verify</h3>
+          <button mat-button type="button" (click)="addCountItem()" class="add-row-btn">
+            <mat-icon>add</mat-icon> Add Item
+          </button>
+        </div>
+
+        <div formArrayName="items" class="items-list">
+          <div *ngFor="let item of countItems.controls; let i = index" [formGroupName]="i" class="item-form-row">
+            <mat-form-field appearance="outline" class="flex-grow">
+              <mat-label>Select Item</mat-label>
+              <mat-select formControlName="itemId" required>
+                <mat-option *ngFor="let itm of items" [value]="itm._id">{{ itm.code }} - {{ itm.name }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="qty-field">
+              <mat-label>Physical Count</mat-label>
+              <input matInput type="number" formControlName="countedQuantity" min="0">
+            </mat-form-field>
+
+            <button mat-icon-button color="warn" type="button" (click)="removeCountItem(i)" class="remove-btn">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </div>
+
+          <div class="empty-items-notice" *ngIf="countItems.length === 0">
+            <mat-icon>inventory</mat-icon>
+            <span>No items added to this session yet.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-footer-actions">
+        <button mat-raised-button color="primary" type="submit" [disabled]="submitting" class="submit-btn">
+          <mat-icon *ngIf="!submitting">save</mat-icon>
+          <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+          Create Session
+        </button>
+        <button mat-button type="button" (click)="resetForm()" [disabled]="submitting">
+          <mat-icon>restart_alt</mat-icon> Reset
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Count Sessions List Card -->
+  <div class="list-page-card table-card">
+    <div class="card-title-section">
+      <h2>Audit History</h2>
+      <div class="header-actions">
+        <button mat-icon-button (click)="loadCounts()" matTooltip="Refresh History">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table mat-table [dataSource]="dataSource" matSort class="data-table">
+        <ng-container matColumnDef="countDate">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+          <td mat-cell *matCellDef="let c">{{ formatDate(c.countDate || c.createdAt) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="countNumber">
+          <th mat-header-cell *matHeaderCellDef>Audit #</th>
+          <td mat-cell *matCellDef="let c" class="font-600">{{ c.countNumber || c._id?.slice(-8).toUpperCase() }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="warehouse">
+          <th mat-header-cell *matHeaderCellDef>Warehouse</th>
+          <td mat-cell *matCellDef="let c">
+            <mat-chip class="warehouse-chip">{{ c.warehouseName || getWarehouseName(c.warehouseId || c.warehouse) }}</mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="itemCount">
+          <th mat-header-cell *matHeaderCellDef class="text-right">Items</th>
+          <td mat-cell *matCellDef="let c" class="text-right">{{ c.items?.length || 0 }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let c">
+            <mat-chip [class]="getStatusClass(c.status)" class="status-chip">{{ getStatusLabel(c.status) }}</mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+          <td mat-cell *matCellDef="let c" class="text-center">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu" class="action-btn">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item (click)="viewCount(c)"><mat-icon>visibility</mat-icon>Details</button>
+              <button mat-menu-item (click)="approveCount(c)" [disabled]="!['completed', 'in_progress'].includes(c.status)"><mat-icon color="primary">verified</mat-icon>Approve</button>
+              <button mat-menu-item (click)="cancelCount(c)" [disabled]="['approved', 'cancelled'].includes(c.status)"><mat-icon color="warn">cancel</mat-icon>Cancel</button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdBy"><th mat-header-cell *matHeaderCellDef>By</th><td mat-cell *matCellDef="let c">{{ c.createdBy }}</td></ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <!-- Empty State -->
+      <div class="list-empty-state" *ngIf="!loading && dataSource.data.length === 0">
+        <mat-icon>fact_check</mat-icon>
+        <p>No audit sessions found</p>
+      </div>
+
+      <!-- Loading Overlay -->
+      <div class="list-loading-overlay" *ngIf="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+
+      <mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions"
+        [pageIndex]="pageIndex" (page)="onPageChange($event)" showFirstLastButtons>
+      </mat-paginator>
+    </div>
+  </div>
+</div>

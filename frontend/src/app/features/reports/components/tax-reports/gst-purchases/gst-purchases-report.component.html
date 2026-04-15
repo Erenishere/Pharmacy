@@ -1,0 +1,131 @@
+<div class="report-container">
+  <div class="report-header">
+    <div class="header-left">
+      <button mat-icon-button class="back-btn" routerLink="/reports">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>GST Purchase Report</h1>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button class="refresh-btn" (click)="loadReport()">
+        <mat-icon>refresh</mat-icon> Refresh
+      </button>
+      <button mat-raised-button class="export-btn">
+        <mat-icon>download</mat-icon> Export
+      </button>
+    </div>
+  </div>
+
+  <div class="filters-card">
+    <div class="filters-row">
+      <mat-form-field class="filter-field">
+        <mat-label>Start Date</mat-label>
+        <input matInput [matDatepicker]="startPicker" [(ngModel)]="startDate">
+        <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field class="filter-field">
+        <mat-label>End Date</mat-label>
+        <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate">
+        <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+      </mat-form-field>
+
+      <div class="filter-actions">
+        <button mat-raised-button color="primary" (click)="applyFilters()">Apply</button>
+        <button mat-stroked-button (click)="resetFilters()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading GST purchase data...</p>
+    </div>
+  } @else {
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="icon-wrapper purple">
+          <mat-icon>receipt_long</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Total Invoices</div>
+          <div class="value">{{ formatNumber(summary.totalInvoices) }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper info">
+          <mat-icon>attach_money</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Taxable Amount</div>
+          <div class="value">{{ formatCurrency(summary.totalTaxableAmount) }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper success">
+          <mat-icon>account_balance</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Input Tax Credit</div>
+          <div class="value">{{ formatCurrency(summary.totalGSTAmount) }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="icon-wrapper warning">
+          <mat-icon>payments</mat-icon>
+        </div>
+        <div class="card-content">
+          <div class="label">Total Amount</div>
+          <div class="value">{{ formatCurrency(summary.totalAmount) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-card">
+      <div class="card-header">
+        <h2>GST Purchase Details</h2>
+      </div>
+      <div class="table-container">
+        @if (reportData.length > 0) {
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice No</th>
+                <th>Date</th>
+                <th>Supplier</th>
+                <th class="text-right">Taxable Amount</th>
+                <th class="text-right">GST Rate</th>
+                <th class="text-right">GST Amount</th>
+                <th class="text-right">Total Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of reportData; track item.invoiceNumber) {
+                <tr>
+                  <td>{{ item.invoiceNumber }}</td>
+                  <td>{{ item.invoiceDate | date:'mediumDate' }}</td>
+                  <td>{{ item.supplier?.name || 'N/A' }}</td>
+                  <td class="text-right amount">{{ formatCurrency(item.taxableAmount) }}</td>
+                  <td class="text-right">{{ formatPercent(item.gstRate) }}</td>
+                  <td class="text-right amount positive">{{ formatCurrency(item.gstAmount) }}</td>
+                  <td class="text-right amount">{{ formatCurrency(item.totalAmount) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <div class="empty-state">
+            <mat-icon>inbox</mat-icon>
+            <p>No GST purchase data found</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

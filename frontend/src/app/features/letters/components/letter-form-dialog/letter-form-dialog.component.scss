@@ -1,0 +1,9 @@
+@import 'styles/shared-list-styles';
+
+:host {
+  @include dialog-container;
+}
+
+textarea {
+  min-height: 120px;
+}

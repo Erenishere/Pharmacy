@@ -1,0 +1,211 @@
+<div class="item-master-container">
+  <div class="page-header">
+    <h1>
+      <mat-icon>inventory_2</mat-icon>
+      Item Master Management
+    </h1>
+    <p class="page-description">Manage pharmaceutical items with complete specifications</p>
+  </div>
+
+  <mat-card class="items-card">
+    <mat-card-header>
+      <mat-card-title>Items List</mat-card-title>
+      <mat-card-subtitle>{{ totalItems }} items found</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Filters Section -->
+      <div class="filters-section">
+        <div class="search-filters">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Search items</mat-label>
+            <input matInput [(ngModel)]="filters.search" (input)="onSearch()" placeholder="Search by name, code, barcode">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Company</mat-label>
+            <mat-select [(ngModel)]="filters.companyId" (selectionChange)="onFilterChange()">
+              <mat-option value="">All Companies</mat-option>
+              <mat-option *ngFor="let company of companies" [value]="company._id">
+                {{ company.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Category</mat-label>
+            <mat-select [(ngModel)]="filters.categoryId" (selectionChange)="onFilterChange()">
+              <mat-option value="">All Categories</mat-option>
+              <mat-option *ngFor="let category of categories" [value]="category._id">
+                {{ category.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Selling Group</mat-label>
+            <mat-select [(ngModel)]="filters.sellingGroup" (selectionChange)="onFilterChange()">
+              <mat-option value="">All Groups</mat-option>
+              <mat-option value="A">Group A</mat-option>
+              <mat-option value="B">Group B</mat-option>
+              <mat-option value="C">Group C</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-select [(ngModel)]="filters.isActive" (selectionChange)="onFilterChange()">
+              <mat-option [value]="true">Active</mat-option>
+              <mat-option [value]="false">Inactive</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="action-buttons">
+          <button mat-raised-button color="primary" (click)="addItem()">
+            <mat-icon>add</mat-icon>
+            Add Item
+          </button>
+          <button mat-stroked-button (click)="exportToExcel()">
+            <mat-icon>file_download</mat-icon>
+            Export Excel
+          </button>
+          <button mat-stroked-button (click)="exportToPDF()">
+            <mat-icon>picture_as_pdf</mat-icon>
+            Export PDF
+          </button>
+          <button mat-icon-button (click)="refreshItems()" matTooltip="Refresh">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Items Table -->
+      <div class="table-container" *ngIf="!loading; else loadingTemplate">
+        <table mat-table [dataSource]="items" class="items-table">
+          <!-- Code Column -->
+          <ng-container matColumnDef="code">
+            <th mat-header-cell *matHeaderCellDef>Code</th>
+            <td mat-cell *matCellDef="let item">
+              <span class="item-code">{{ item.code }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Item Name</th>
+            <td mat-cell *matCellDef="let item">
+              <div class="item-name">
+                <strong>{{ item.name }}</strong>
+                <small *ngIf="item.description">{{ item.description }}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Company Column -->
+          <ng-container matColumnDef="company">
+            <th mat-header-cell *matHeaderCellDef>Company</th>
+            <td mat-cell *matCellDef="let item">
+              {{ getCompanyName(item.companyId) }}
+              <mat-chip *ngIf="item.sellingGroup" class="group-chip">{{ item.sellingGroup }}</mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Category Column -->
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef>Category</th>
+            <td mat-cell *matCellDef="let item">
+              {{ getCategoryName(item.categoryId) }}
+            </td>
+          </ng-container>
+
+          <!-- Pricing Column -->
+          <ng-container matColumnDef="pricing">
+            <th mat-header-cell *matHeaderCellDef>Pricing</th>
+            <td mat-cell *matCellDef="let item">
+              <div class="pricing-info">
+                <div class="sale-price">Sale: PKR {{ item.pricing?.salePrice | number:'1.2-2' }}</div>
+                <div class="purchase-price">Purchase: PKR {{ item.pricing?.purchasePrice | number:'1.2-2' }}</div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Stock Column -->
+          <ng-container matColumnDef="stock">
+            <th mat-header-cell *matHeaderCellDef>Stock</th>
+            <td mat-cell *matCellDef="let item">
+              <div class="stock-info">
+                <mat-chip [class]="getStockStatusClass(item)">
+                  {{ item.inventory?.currentStock || 0 }}
+                </mat-chip>
+                <small>Min: {{ item.inventory?.minStockLevel || 0 }}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let item">
+              <mat-chip [class.active]="item.isActive" [class.inactive]="!item.isActive">
+                {{ item.isActive ? 'Active' : 'Inactive' }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let item">
+              <div class="action-buttons">
+                <button mat-icon-button (click)="viewItem(item)" matTooltip="View Details">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button mat-icon-button (click)="editItem(item)" matTooltip="Edit Item">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button (click)="toggleStatus(item)" 
+                        [matTooltip]="item.isActive ? 'Deactivate' : 'Activate'">
+                  <mat-icon>{{ item.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <!-- No Data Message -->
+        <div *ngIf="items.length === 0" class="no-data">
+          <mat-icon>inventory_2</mat-icon>
+          <h3>No items found</h3>
+          <p>{{ filters.search ? 'Try adjusting your search criteria' : 'Start by adding your first item' }}</p>
+          <button mat-raised-button color="primary" (click)="addItem()">
+            <mat-icon>add</mat-icon>
+            Add First Item
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading Template -->
+      <ng-template #loadingTemplate>
+        <div class="loading-container">
+          <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+          <p>Loading items...</p>
+        </div>
+      </ng-template>
+
+      <!-- Pagination -->
+      <mat-paginator
+        *ngIf="items.length > 0"
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[10, 25, 50, 100]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,113 @@
+<div class="list-page-container">
+  <!-- Header Section -->
+  <div class="list-page-header">
+    <div class="header-content">
+      <h1>Chart of Accounts</h1>
+      <p>Manage all business accounts and financial entities</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="onCreateAccount()">
+      <mat-icon>add</mat-icon> New Account
+    </button>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <mat-icon>account_balance</mat-icon>
+      <div class="stat-content">
+        <span class="stat-value">{{ statistics.totalAccounts }}</span>
+        <span class="stat-label">Total Accounts</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <mat-icon>check_circle</mat-icon>
+      <div class="stat-content">
+        <span class="stat-value">{{ statistics.activeAccounts }}</span>
+        <span class="stat-label">Active Accounts</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <mat-icon>payments</mat-icon>
+      <div class="stat-content">
+        <span class="stat-value">{{ formatCurrency(statistics.totalBalance) }}</span>
+        <span class="stat-label">Total Balance</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <mat-icon>shopping_cart</mat-icon>
+      <div class="stat-content">
+        <span class="stat-value">{{ statistics.customersCount }}</span>
+        <span class="stat-label">Customers</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <mat-icon>local_shipping</mat-icon>
+      <div class="stat-content">
+        <span class="stat-value">{{ statistics.suppliersCount }}</span>
+        <span class="stat-label">Suppliers</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accounts Table Area -->
+  <div class="list-page-card">
+    <div class="list-filters-section">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Search Accounts</mat-label>
+        <input matInput [formControl]="searchControl" placeholder="Search by name, code...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Account Type</mat-label>
+        <mat-select [formControl]="accountTypeFilter">
+          <mat-option *ngFor="let type of accountTypes" [value]="type.value">
+            {{ type.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Status</mat-label>
+        <mat-select [formControl]="statusFilter">
+          <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+            {{ status.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-icon-button color="warn" matTooltip="Clear All Filters" (click)="clearFilters()" *ngIf="searchControl.value || accountTypeFilter.value || townFilter.value || statusFilter.value !== 'active'">
+        <mat-icon>filter_alt_off</mat-icon>
+      </button>
+    </div>
+
+  <!-- Accounts Table -->
+    <div class="table-wrapper px-3 pb-3" style="position: relative; min-height: 200px;">
+      <div class="loading-overlay" *ngIf="loading"
+           style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); display: flex; justify-content: center; align-items: center; z-index: 10;">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+
+      <app-data-table 
+        [data]="dataSource.data"
+        [columns]="tableColumns"
+        [totalItems]="totalItems"
+        [pageSize]="pageSize"
+        [pageIndex]="currentPage"
+        [pageSizeOptions]="pageSizeOptions"
+        (pageChange)="onPageChange($event)"
+        (actionClick)="onTableAction($event)">
+      </app-data-table>
+
+      <div class="list-empty-state" *ngIf="!loading && dataSource.data.length === 0">
+        <mat-icon>account_balance_wallet</mat-icon>
+        <p>No accounts found</p>
+        <button mat-button color="primary" (click)="onCreateAccount()">Create New Account</button>
+      </div>
+    </div>
+  </div>
+</div>

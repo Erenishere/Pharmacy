@@ -1,0 +1,185 @@
+@import "../../../../styles/shared-list-styles";
+
+.cashbook-page {
+  @include data-table;
+  @include paginator;
+
+  .form-section-card {
+    @include layered-glass;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+
+    .form-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba($purple, 0.1);
+
+      .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: $purple;
+        margin: 0;
+        border-left: 3px solid $purple;
+        padding-left: 12px;
+      }
+    }
+
+    .form-body-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+
+      @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); }
+      @media (max-width: 600px) { grid-template-columns: 1fr; }
+
+      .span-2 { grid-column: span 2; @media (max-width: 600px) { grid-column: span 1; } }
+    }
+  }
+
+  .account-opt {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 20px;
+    .name { font-weight: 500; }
+    .balance { 
+      font-size: 11px; color: $success; 
+      &.negative { color: $danger; }
+    }
+  }
+
+  /* Invoice Allocation Table */
+  .invoice-allocation-section {
+    margin-top: 24px;
+    padding: 20px;
+    background: rgba($purple, 0.02);
+    border-radius: 8px;
+    border: 1px dashed rgba($purple, 0.2);
+
+    .sub-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: $purple-dark;
+      mat-icon { color: $purple; font-size: 20px; }
+    }
+
+    .allocation-table-wrapper {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .allocation-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+
+      th {
+        text-align: left;
+        padding: 8px 12px;
+        background: #ffffff;
+        color: $grey-dark;
+        font-weight: 600;
+        border-bottom: 2px solid $grey-very-light;
+      }
+
+      td {
+        padding: 10px 12px;
+        border-bottom: 1px solid $grey-very-light;
+        background: transparent;
+      }
+
+      .inv-info {
+        display: flex;
+        flex-direction: column;
+        .inv-no { font-weight: 600; color: $purple-dark; }
+        .inv-meta { font-size: 11px; color: $grey-medium; }
+      }
+
+      .days-chip {
+        padding: 2px 8px;
+        border-radius: 4px;
+        background: rgba($success, 0.1);
+        color: $success;
+        font-size: 11px;
+        font-weight: 600;
+        &.old { background: rgba($warning, 0.1); color: $warning; }
+      }
+
+      .allocation-input {
+        width: 100px;
+        height: 28px;
+        padding: 0 8px;
+        border: 1px solid $grey-medium;
+        border-radius: 4px;
+        text-align: right;
+        &:focus { border-color: $purple; outline: none; }
+      }
+
+      tfoot {
+        background: #ffffff;
+        font-weight: 700;
+        td { border-top: 2px solid $grey-very-light; padding: 12px; }
+        .total-highlight { color: $purple; font-size: 14px; }
+      }
+
+      .negative { color: $danger; }
+    }
+  }
+
+  .form-footer-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba($purple, 0.1);
+
+    @media (max-width: 768px) { flex-direction: column; align-items: stretch; gap: 20px; }
+
+    .bank-info-group {
+      display: flex;
+      gap: 12px;
+      .sm-field { width: 180px; @media (max-width: 600px) { width: 100%; } }
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      .save-btn {
+        height: 44px;
+        padding: 0 32px;
+        background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+        box-shadow: 0 4px 12px rgba($purple, 0.3);
+      }
+    }
+  }
+
+  /* List Styling */
+  .acc-info {
+    display: flex;
+    flex-direction: column;
+    .name { font-weight: 600; color: $purple-dark; }
+    .code { font-size: 11px; color: $grey-medium; }
+  }
+
+  .pdc-icon { color: $warning; font-size: 20px; }
+
+  .amount-cell {
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    &.positive { color: $success; }
+    &.negative { color: $danger; }
+  }
+
+  .row-receive { border-left: 4px solid $success !important; }
+  .row-payment { border-left: 4px solid $danger !important; }
+  .row-cancelled { opacity: 0.5; background: $grey-very-light !important; }
+}

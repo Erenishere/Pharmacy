@@ -1,0 +1,214 @@
+<div class="po-edit-container">
+  <div class="page-header">
+    <div class="header-content">
+      <button mat-icon-button (click)="onCancel()" class="back-button">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="title-section">
+        <h1>{{ isEditMode ? 'Edit Purchase Order' : 'Create Purchase Order' }}</h1>
+        <p class="page-description">
+          {{ isEditMode ? 'Update purchase order details and items' : 'Create a new purchase order for supplier' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading; else loadingTemplate">
+    <form [formGroup]="poForm" (ngSubmit)="onSubmit()" class="po-form">
+      <!-- PO Header Information -->
+      <mat-card class="header-card">
+        <mat-card-header>
+          <mat-card-title>Purchase Order Information</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>PO Date</mat-label>
+              <input matInput type="date" formControlName="poDate" required>
+              <mat-error *ngIf="poForm.get('poDate')?.hasError('required')">PO Date is required</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Supplier</mat-label>
+              <mat-select formControlName="supplierId" required>
+                <mat-option *ngFor="let supplier of suppliers" [value]="supplier._id">
+                  {{ supplier.name }} ({{ supplier.code }})
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="poForm.get('supplierId')?.hasError('required')">Supplier is required</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Bill Number</mat-label>
+              <input matInput formControlName="billNo" placeholder="Optional bill reference">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Notes</mat-label>
+              <textarea matInput formControlName="notes" rows="2" placeholder="Additional notes or instructions"></textarea>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Items Section -->
+      <mat-card class="items-card">
+        <mat-card-header>
+          <mat-card-title>Order Items</mat-card-title>
+          <div class="card-actions">
+            <button mat-raised-button color="primary" type="button" (click)="addItem()">
+              <mat-icon>add</mat-icon>
+              Add Item
+            </button>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="table-container" *ngIf="itemsArray.length > 0; else noItemsTemplate">
+            <table mat-table [dataSource]="itemsArray.controls" class="items-table">
+              <!-- Serial Number -->
+              <ng-container matColumnDef="sno">
+                <th mat-header-cell *matHeaderCellDef>#</th>
+                <td mat-cell *matCellDef="let item; let i = index">{{ i + 1 }}</td>
+              </ng-container>
+
+              <!-- Item Name -->
+              <ng-container matColumnDef="itemName">
+                <th mat-header-cell *matHeaderCellDef>Item</th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  <mat-form-field appearance="outline" class="compact-field">
+                    <mat-label>Item</mat-label>
+                    <mat-select [formControl]="getItemControl(i, 'itemId')">
+                      <mat-option *ngFor="let itemOpt of items" [value]="itemOpt._id">
+                        {{ itemOpt.name }} ({{ itemOpt.code }})
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <div class="item-display" *ngIf="getItemControl(i, 'itemName')?.value">
+                    <small>{{ getItemControl(i, 'itemName')?.value }}</small>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Box Packing -->
+              <ng-container matColumnDef="boxPacking">
+                <th mat-header-cell *matHeaderCellDef>Box Packing</th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  <mat-form-field appearance="outline" class="compact-field">
+                    <input matInput type="number" [formControl]="getItemControl(i, 'boxPacking')" min="1">
+                  </mat-form-field>
+                </td>
+              </ng-container>
+
+              <!-- Box Quantity -->
+              <ng-container matColumnDef="boxQty">
+                <th mat-header-cell *matHeaderCellDef>Box Qty</th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  <mat-form-field appearance="outline" class="compact-field">
+                    <input matInput type="number" [formControl]="getItemControl(i, 'boxQty')" min="0">
+                  </mat-form-field>
+                </td>
+              </ng-container>
+
+              <!-- Unit Quantity -->
+              <ng-container matColumnDef="unitQty">
+                <th mat-header-cell *matHeaderCellDef>Unit Qty</th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  <mat-form-field appearance="outline" class="compact-field">
+                    <input matInput type="number" [formControl]="getItemControl(i, 'unitQty')" min="0">
+                  </mat-form-field>
+                </td>
+              </ng-container>
+
+              <!-- Box TP -->
+              <ng-container matColumnDef="boxTP">
+                <th mat-header-cell *matHeaderCellDef>Box TP</th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  <mat-form-field appearance="outline" class="compact-field">
+                    <input matInput type="number" [formControl]="getItemControl(i, 'boxTP')" min="0" step="0.01">
+                  </mat-form-field>
+                </td>
+              </ng-container>
+
+              <!-- Unit TP -->
+              <ng-container matColumnDef="unitTP">
+                <th mat-header-cell *matHeaderCellDef>Unit TP</th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  <mat-form-field appearance="outline" class="compact-field">
+                    <input matInput type="number" [formControl]="getItemControl(i, 'unitTP')" min="0" step="0.01">
+                  </mat-form-field>
+                </td>
+              </ng-container>
+
+              <!-- Discount -->
+              <ng-container matColumnDef="discount">
+                <th mat-header-cell *matHeaderCellDef>Discount %</th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  <mat-form-field appearance="outline" class="compact-field">
+                    <input matInput type="number" [formControl]="getItemControl(i, 'discount')" min="0" max="100">
+                  </mat-form-field>
+                </td>
+              </ng-container>
+
+              <!-- Net Amount -->
+              <ng-container matColumnDef="netAmount">
+                <th mat-header-cell *matHeaderCellDef>Net Amount</th>
+                <td mat-cell *matCellDef="let item; let i = index" class="amount-cell">
+                  PKR {{ calculateLineTotal(i) | number:'1.2-2' }}
+                </td>
+              </ng-container>
+
+              <!-- Actions -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  <button mat-icon-button color="warn" (click)="removeItem(i)" type="button">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+
+          <!-- No Items Template -->
+          <ng-template #noItemsTemplate>
+            <div class="no-items-message">
+              <mat-icon>add_shopping_cart</mat-icon>
+              <h3>No items added yet</h3>
+              <p>Click "Add Item" to start building your purchase order</p>
+            </div>
+          </ng-template>
+
+          <!-- Total Summary -->
+          <div class="total-summary" *ngIf="itemsArray.length > 0">
+            <div class="total-row">
+              <strong>Total Amount: PKR {{ calculateGrandTotal() | number:'1.2-2' }}</strong>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <button mat-button type="button" (click)="onCancel()" [disabled]="submitting">
+          Cancel
+        </button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="poForm.invalid || submitting || itemsArray.length === 0">
+          <mat-icon *ngIf="!submitting">save</mat-icon>
+          <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+          {{ isEditMode ? 'Update Purchase Order' : 'Create Purchase Order' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading Template -->
+  <ng-template #loadingTemplate>
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading purchase order...</p>
+    </div>
+  </ng-template>
+</div>

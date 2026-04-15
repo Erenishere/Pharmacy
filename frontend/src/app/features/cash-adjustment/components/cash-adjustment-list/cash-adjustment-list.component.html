@@ -1,0 +1,204 @@
+<div class="list-page-container cash-adjustment-page">
+  <div class="list-page-header">
+    <div class="header-content">
+      <h1 class="page-title"><mat-icon>swap_horiz</mat-icon> Cash Adjustment</h1>
+      <p class="page-subtitle">Internal cash transfers and adjustments between accounts</p>
+    </div>
+  </div>
+
+  <!-- Create Adjustment Form -->
+  <div class="form-card" [formGroup]="form">
+    <div class="card-header">
+      <h3 class="section-title">Record Adjustment</h3>
+    </div>
+
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Adjustment Date</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="adjustmentDate">
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="span-2">
+        <mat-label>Adjustment Type</mat-label>
+        <mat-select formControlName="adjustmentType">
+          @for (t of adjustmentTypes; track t.value) {
+            <mat-option [value]="t.value">{{ t.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="span-2">
+        <mat-label>{{ fromLabel }}</mat-label>
+        <mat-select formControlName="fromAccountId">
+          <mat-option value="">-- Select Source --</mat-option>
+          @for (a of fromList; track a._id) {
+            <mat-option [value]="a._id">
+              <div class="account-opt">
+                <span class="name">{{ a.name || a.username }}</span>
+                <span class="balance">Bal: {{ fmtAmt(a.balance || 0) }}</span>
+              </div>
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="span-2">
+        <mat-label>{{ toLabel }}</mat-label>
+        <mat-select formControlName="toAccountId">
+          <mat-option value="">-- Select Destination --</mat-option>
+          @for (a of toList; track a._id) {
+            <mat-option [value]="a._id">
+              <div class="account-opt">
+                <span class="name">{{ a.name || a.username }}</span>
+                <span class="balance">Bal: {{ fmtAmt(a.balance || 0) }}</span>
+              </div>
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="span-2">
+        <mat-label>Detail / Reference</mat-label>
+        <input matInput formControlName="detailReference" placeholder="Notes or reference">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Amount</mat-label>
+        <input matInput type="number" formControlName="amount" placeholder="0.00">
+        <span matPrefix class="currency-prefix">PKR &nbsp;</span>
+      </mat-form-field>
+    </div>
+
+    <div class="form-actions">
+      <button mat-raised-button color="primary" class="save-btn" [disabled]="saving" (click)="save()">
+        <mat-icon>save</mat-icon> Save Adjustment
+      </button>
+    </div>
+  </div>
+
+  <!-- Adjustment List -->
+  <div class="list-page-card">
+    <div class="list-filters-section">
+      <div class="filter-group-primary">
+        <mat-form-field appearance="outline" class="filter-field sm">
+          <mat-label>Type</mat-label>
+          <mat-select [(ngModel)]="filterType">
+            <mat-option value="">All Types</mat-option>
+            @for (t of adjustmentTypes; track t.value) {
+              <mat-option [value]="t.value">{{ t.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field sm">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="filterStatus">
+            <mat-option value="">All Status</mat-option>
+            <mat-option value="pending">Pending</mat-option>
+            <mat-option value="completed">Completed</mat-option>
+            <mat-option value="cancelled">Cancelled</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-icon-button class="search-btn" (click)="applyFilters()">
+          <mat-icon>search</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="list-loading-overlay">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading adjustments...</p>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="dataSource" class="data-table">
+          <ng-container matColumnDef="sno">
+            <th mat-header-cell *matHeaderCellDef>S#</th>
+            <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let row">{{ fmtDate(row.adjustmentDate) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="userId">
+            <th mat-header-cell *matHeaderCellDef>Created By</th>
+            <td mat-cell *matCellDef="let row">{{ row.createdBy?.username || row.createdBy?.name || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="cashReceiveFrom">
+            <th mat-header-cell *matHeaderCellDef>Source (From)</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="acc-info">
+                <span class="name">{{ row.fromAccount?.name || row.fromAccountId?.name || '—' }}</span>
+                <span class="type-badge from">Sender</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="cashPaidTo">
+            <th mat-header-cell *matHeaderCellDef>Destination (To)</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="acc-info">
+                <span class="name">{{ row.toAccount?.name || row.toAccountId?.name || '—' }}</span>
+                <span class="type-badge to">Recipient</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="detailReference">
+            <th mat-header-cell *matHeaderCellDef>Detail / Ref</th>
+            <td mat-cell *matCellDef="let row" class="detail-cell">{{ row.detailReference || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
+            <td mat-cell *matCellDef="let row" class="text-right amount-cell highlight">
+              PKR {{ fmtAmt(row.amount) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status & Type</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="status-stack">
+                <span class="status-chip" [ngClass]="row.status">{{ row.status | titlecase }}</span>
+                <small class="type-hint">{{ typeLabel(row.adjustmentType) }}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+            <td mat-cell *matCellDef="let row" class="text-center">
+              <div class="action-buttons-inline">
+                <button mat-icon-button class="edit-btn" matTooltip="Edit"><mat-icon>edit</mat-icon></button>
+                <button mat-icon-button class="print-btn" matTooltip="Print Receipt"><mat-icon>print</mat-icon></button>
+                <button mat-icon-button class="del-btn" matTooltip="Delete" color="warn"><mat-icon>delete</mat-icon></button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        @if (dataSource.data.length === 0) {
+          <div class="list-empty-state">
+            <mat-icon>swap_horiz</mat-icon>
+            <p>No adjustments found</p>
+          </div>
+        }
+      </div>
+      
+      <mat-paginator [length]="dataSource.data.length" [pageSize]="pageSize"
+        [pageSizeOptions]="[10, 20, 50]" (page)="onPageChange($event)">
+      </mat-paginator>
+    }
+  </div>
+</div>

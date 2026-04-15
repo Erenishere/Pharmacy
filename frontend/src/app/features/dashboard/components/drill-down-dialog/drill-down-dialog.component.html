@@ -1,0 +1,13 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+<mat-dialog-content>
+  <mat-list>
+    <mat-list-item *ngFor="let item of data.data">
+      <mat-icon matListItemIcon>info</mat-icon>
+      <div matListItemTitle>{{ item.label }}</div>
+      <div matListItemLine>{{ item.value }}</div>
+    </mat-list-item>
+  </mat-list>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onClose()">Close</button>
+</mat-dialog-actions>

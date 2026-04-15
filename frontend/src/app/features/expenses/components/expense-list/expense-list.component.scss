@@ -1,0 +1,50 @@
+@import '../../../../../styles/shared-list-styles';
+
+.page-container {
+  @include page-container;
+}
+
+.page-header {
+  @include page-header;
+}
+
+.list-card {
+  @include list-card;
+}
+
+.filters-section {
+  @include filters-section;
+}
+
+@include form-field-overrides;
+
+.table-container {
+  @include table-container;
+}
+
+.expense-table {
+  @include data-table;
+}
+
+.amount-cell {
+  @include amount-cell;
+}
+
+.action-buttons {
+  @include action-buttons;
+}
+
+mat-chip {
+  @include status-chip-base;
+}
+
+@include paginator;
+
+.no-data,
+.loading-container {
+  @include empty-state;
+}
+
+.loading-container {
+  @include loading-container;
+}

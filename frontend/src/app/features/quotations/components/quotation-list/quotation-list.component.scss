@@ -1,0 +1,42 @@
+@import "../../../../../styles/shared-list-styles";
+
+.quotation-list-page {
+  @include data-table;
+  @include paginator;
+
+  .stat-card {
+    &.primary { --stat-color: #{$purple}; }
+    &.info { --stat-color: #{$info}; }
+    &.warning { --stat-color: #{$warning}; }
+    &.success { --stat-color: #{$success}; }
+    &.danger { --stat-color: #{$danger}; }
+    &.primary-alt { --stat-color: #{$purple-dark}; }
+  }
+
+  .party-info {
+    display: flex;
+    flex-direction: column;
+    .party-name { font-weight: 600; color: $grey-dark; }
+    .ref-num { font-size: 11px; color: $grey-medium; }
+  }
+
+  .status-chip {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    &.draft { background: rgba($grey-medium, 0.1); color: $grey-dark; }
+    &.sent { background: rgba($warning, 0.1); color: darken($warning, 15%); }
+    &.approved { background: rgba($success, 0.1); color: darken($success, 10%); }
+    &.converted { background: rgba($purple, 0.1); color: $purple; }
+    &.expired, &.cancelled { background: rgba($danger, 0.1); color: $danger; opacity: 0.7; }
+  }
+
+  tr.row-inactive {
+    opacity: 0.6;
+    background-color: rgba($grey-very-light, 0.5);
+  }
+}

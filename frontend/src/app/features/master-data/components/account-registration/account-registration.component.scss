@@ -1,0 +1,545 @@
+@import 'styles/vuexy-vars';
+
+$purple: #7367f0;
+$purple-light: rgba(115, 103, 240, 0.12);
+$green: #28c76f;
+$red: #ea5455;
+$text-dark: #2d3748;
+$text-muted: #4a5568;
+$border: #b4bccc;
+$page-bg: #f7f8fc;
+$card-bg: #ffffff;
+$field-bg: #ffffff;
+
+.account-registration-container {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: $page-bg;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  .header-text {
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+      color: $text-dark;
+      border-left: 4px solid $purple;
+      padding-left: 12px;
+    }
+
+    p {
+      margin: 4px 0 0 16px;
+      color: $text-muted;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+
+    .ghost-btn,
+    .primary-btn {
+      height: 38px;
+      padding: 0 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+
+      mat-icon {
+        margin-right: 6px;
+        font-size: 18px;
+      }
+    }
+
+    .ghost-btn {
+      border-color: rgba($purple, 0.55);
+      color: $purple;
+      background: #fff;
+
+      &:hover {
+        background: $purple-light;
+      }
+    }
+
+    .primary-btn {
+      background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+      color: #fff;
+      box-shadow: 0 4px 12px rgba($purple, 0.35);
+
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba($purple, 0.4);
+      }
+    }
+  }
+}
+
+.main-card {
+  background: $card-bg;
+  border: 1px solid rgba($border, 0.6);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.form-card {
+  padding: 16px;
+}
+
+.sheet-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: linear-gradient(118deg, $purple, rgba($purple, 0.86));
+
+  h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.2px;
+  }
+
+  .print-status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #fff;
+  }
+}
+
+.sheet-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2.25fr) minmax(280px, 1fr);
+  gap: 14px;
+}
+
+.sheet-panel {
+  border: 1px solid $border;
+  border-radius: 8px;
+  overflow: hidden;
+  background: $card-bg;
+}
+
+.biodata-title {
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: $purple;
+  background: $purple-light;
+  border-bottom: 1px solid $border;
+  border-left: 3px solid $purple;
+}
+
+.sheet-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 38%) 1fr;
+  min-height: 40px;
+  border-bottom: 1px solid rgba($border, 0.85);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.right-panel {
+  .sheet-row {
+    grid-template-columns: minmax(140px, 48%) 1fr;
+  }
+}
+
+.tall-row {
+  min-height: 48px;
+}
+
+.accent-row {
+  .sheet-label,
+  .sheet-control {
+    background: rgba($purple, 0.07);
+  }
+}
+
+.sheet-label {
+  display: flex;
+  align-items: center;
+  padding: 7px 10px;
+  border-right: 1px solid rgba($border, 0.9);
+  font-size: 12px;
+  font-weight: 700;
+  color: $text-muted;
+}
+
+.sheet-control {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+}
+
+.sheet-input,
+.sheet-select,
+.sheet-textarea {
+  width: 100%;
+  min-height: 30px;
+  padding: 5px 8px;
+  border: 1px solid $border;
+  border-radius: 6px;
+  background: $field-bg;
+  font-size: 12px;
+  color: $text-dark;
+  font-family: inherit;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: $purple;
+    box-shadow: 0 0 0 3px rgba($purple, 0.16);
+    background: #fff;
+  }
+
+  &::placeholder {
+    color: #9aa2b4;
+  }
+}
+
+.sheet-textarea {
+  min-height: 50px;
+  resize: vertical;
+}
+
+.account-type-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid $border;
+  border-radius: 6px;
+  overflow: hidden;
+  background: $field-bg;
+}
+
+.account-type-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: $text-muted;
+  border-right: 1px solid $border;
+
+  &:last-child {
+    border-right: 0;
+  }
+
+  input {
+    margin: 0;
+    accent-color: $purple;
+  }
+}
+
+.split-two {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px;
+  gap: 6px;
+}
+
+.split-three {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 6px;
+}
+
+.split-with-check {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.inline-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 1px solid $border;
+  border-radius: 6px;
+  background: $field-bg;
+  font-size: 12px;
+  font-weight: 700;
+  color: $text-muted;
+
+  input {
+    margin: 0;
+    accent-color: $purple;
+  }
+}
+
+.status-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.status-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 1px solid $border;
+  border-radius: 6px;
+  background: $field-bg;
+  font-size: 12px;
+  font-weight: 700;
+  color: $text-muted;
+
+  input {
+    margin: 0;
+    accent-color: $purple;
+  }
+}
+
+.error-label,
+.error-text {
+  color: $red;
+}
+
+.error-text {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.note-block {
+  margin-top: 14px;
+  padding: 8px 10px;
+  border: 1px solid $border;
+  border-radius: 8px;
+  background: rgba($purple, 0.06);
+  border-left: 3px solid $purple;
+  font-size: 12px;
+  font-weight: 600;
+  color: $text-dark;
+}
+
+.signatures-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 700;
+    color: $text-muted;
+  }
+}
+
+.form-actions {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba($border, 0.8);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  button {
+    height: 40px;
+    min-width: 130px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+
+    &[mat-raised-button] {
+      background: linear-gradient(118deg, $green, rgba($green, 0.8));
+      color: #fff;
+      box-shadow: 0 4px 12px rgba($green, 0.35);
+
+      &:hover:not(:disabled) {
+        box-shadow: 0 6px 16px rgba($green, 0.42);
+      }
+    }
+  }
+}
+
+.list-card {
+  margin-top: 16px;
+
+  .card-header {
+    padding: 16px 18px;
+    border-bottom: 1px solid rgba($border, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: $text-dark;
+      border-left: 4px solid $purple;
+      padding-left: 10px;
+    }
+  }
+
+  .table-container {
+    padding: 0 16px 16px;
+  }
+}
+
+@media (max-width: 1300px) {
+  .sheet-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .right-panel {
+    .sheet-row {
+      grid-template-columns: minmax(180px, 45%) 1fr;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .account-registration-container {
+    padding: 12px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .header-actions {
+      width: 100%;
+    }
+  }
+
+  .sheet-row,
+  .right-panel .sheet-row {
+    grid-template-columns: 1fr;
+
+    .sheet-label {
+      border-right: 0;
+      border-bottom: 1px solid rgba($border, 0.9);
+    }
+  }
+
+  .split-two,
+  .split-three {
+    grid-template-columns: 1fr;
+  }
+
+  .signatures-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .no-print,
+  .list-card {
+    display: none !important;
+  }
+
+  .account-registration-container {
+    padding: 0;
+    margin: 0;
+    max-width: none;
+    background: #fff;
+  }
+
+  .main-card,
+  .form-card {
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .sheet-title-row {
+    background: #fff !important;
+    border-radius: 0;
+    border-bottom: 2px solid #111;
+    margin-bottom: 6px;
+
+    h2 {
+      color: #000;
+      font-size: 20px;
+    }
+
+    .print-status {
+      color: #000;
+      background: transparent;
+      border-color: #111;
+    }
+  }
+
+  .sheet-layout {
+    gap: 8px;
+  }
+
+  .sheet-row {
+    min-height: 34px;
+  }
+
+  .sheet-panel,
+  .sheet-row,
+  .sheet-label,
+  .sheet-control,
+  .sheet-input,
+  .sheet-select,
+  .sheet-textarea,
+  .inline-check,
+  .status-option,
+  .account-type-grid,
+  .account-type-option,
+  .note-block,
+  .biodata-title {
+    border-color: #111 !important;
+    box-shadow: none !important;
+  }
+
+  .sheet-panel,
+  .sheet-label,
+  .sheet-control,
+  .biodata-title,
+  .note-block,
+  .accent-row .sheet-label,
+  .accent-row .sheet-control {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .sheet-input,
+  .sheet-select,
+  .sheet-textarea {
+    border-radius: 0;
+    color: #000;
+    background: #fff;
+  }
+}

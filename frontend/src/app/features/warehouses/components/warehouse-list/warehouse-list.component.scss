@@ -1,0 +1,35 @@
+@import '../../../../../styles/vuexy-vars';
+@import '../../../../../styles/shared-list-styles';
+
+:host {
+  display: block;
+}
+
+.warehouse-page {
+  /* Inherits global .list-page-container styles */
+
+  .list-page-header {
+    /* Inherits global header styles */
+    h1 {
+      mat-icon {
+        color: $purple;
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+      }
+    }
+  }
+
+  .data-table {
+    @include data-table;
+    
+    .warehouse-code {
+      font-weight: 600;
+      color: $purple;
+    }
+  }
+
+  /* Status chips are already standardized via @mixin status-chip-base in global styles */
+}
+
+@include paginator;

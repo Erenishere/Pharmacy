@@ -1,0 +1,197 @@
+<div class="list-page-container recovery-summary-page">
+  <div class="list-page-header">
+    <div class="header-content">
+      <h1 class="page-title"><mat-icon>summarize</mat-icon> Recovery Summary</h1>
+      <p class="page-subtitle">Outstanding balances, aging analysis, and recovery tracking</p>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="exportReport()" class="export-btn">
+        <mat-icon>download</mat-icon> Export CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Recovery Analytics Stats -->
+  <div class="dashboard-stats-grid recovery-analytics" *ngIf="!loading && dataSource.data.length > 0">
+    <div class="stat-card" style="--stat-color: #7367f0">
+      <div class="stat-icon-wrapper">
+        <mat-icon>account_balance_wallet</mat-icon>
+      </div>
+      <div class="stat-details">
+        <h3 class="stat-value">{{ formatCurrency(recoveryDetails.totalOutstanding) }}</h3>
+        <p class="stat-label">Total Outstanding</p>
+        <p class="stat-trend highlight">Current Portfolio</p>
+      </div>
+    </div>
+
+    <div class="stat-card" style="--stat-color: #ea5455">
+      <div class="stat-icon-wrapper">
+        <mat-icon>schedule</mat-icon>
+      </div>
+      <div class="stat-details">
+        <h3 class="stat-value">{{ formatCurrency(recoveryDetails.totalOverdue) }}</h3>
+        <p class="stat-label">Overdue Amount</p>
+        <p class="stat-trend danger">Action Required</p>
+      </div>
+    </div>
+
+    <div class="stat-card" style="--stat-color: #28c76f">
+      <div class="stat-icon-wrapper">
+        <mat-icon>trending_up</mat-icon>
+      </div>
+      <div class="stat-details">
+        <h3 class="stat-value">{{ recoveryDetails.recoveryRate.toFixed(1) }}%</h3>
+        <p class="stat-label">Recovery Rate</p>
+        <p class="stat-trend success">Performance</p>
+      </div>
+    </div>
+
+    <div class="stat-card" style="--stat-color: #ff9f43">
+      <div class="stat-icon-wrapper">
+        <mat-icon>timer</mat-icon>
+      </div>
+      <div class="stat-details">
+        <h3 class="stat-value">{{ recoveryDetails.agingAnalysis['0-30'].count }}</h3>
+        <p class="stat-label">0-30 Days</p>
+        <p class="stat-trend">PKR {{ formatCurrency(recoveryDetails.agingAnalysis['0-30'].amount) }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="list-page-card">
+    <div class="list-filters-section advanced">
+      <div class="filter-group-primary multi-row">
+        <mat-form-field appearance="outline" class="filter-field date">
+          <mat-label>From Date</mat-label>
+          <input matInput [matDatepicker]="fromPicker" [formControl]="fromDate">
+          <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
+          <mat-datepicker #fromPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field date">
+          <mat-label>To Date</mat-label>
+          <input matInput [matDatepicker]="toPicker" [formControl]="toDate">
+          <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
+          <mat-datepicker #toPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Salesman</mat-label>
+          <mat-select [formControl]="salesmanFilter">
+            <mat-option value="">All Salesmen</mat-option>
+            @for (s of salesmen; track s._id) {
+              <mat-option [value]="s._id">{{ s.username || s.fullName }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Dimension</mat-label>
+          <mat-select [formControl]="dimensionFilter">
+            <mat-option value="">All Dimensions</mat-option>
+            @for (d of dimensions; track d._id) {
+              <mat-option [value]="d._id">{{ d.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Aging Bucket</mat-label>
+          <mat-select [formControl]="agingFilter">
+            <mat-option value="">All Ages</mat-option>
+            <mat-option value="0-30">0-30 Days</mat-option>
+            <mat-option value="31-60">31-60 Days</mat-option>
+            <mat-option value="61-90">61-90 Days</mat-option>
+            <mat-option value="90+">90+ Days</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" class="generate-btn" (click)="loadReport()">
+          <mat-icon>search</mat-icon> Generate Report
+        </button>
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="list-loading-overlay">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Analyzing recovery data...</p>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="dataSource" class="data-table">
+          <ng-container matColumnDef="salesmanName">
+            <th mat-header-cell *matHeaderCellDef>Salesman</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="salesman-info">
+                <mat-icon class="sm-icon">person</mat-icon>
+                <span class="name">{{ row.salesmanName }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="totalSales">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Total Sales</th>
+            <td mat-cell *matCellDef="let row" class="text-right amount-cell">
+              {{ formatCurrency(row.totalSales) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="totalRecovery">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Total Recovery</th>
+            <td mat-cell *matCellDef="let row" class="text-right amount-cell positive">
+              {{ formatCurrency(row.totalRecovery) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="totalOutstanding">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Outstanding</th>
+            <td mat-cell *matCellDef="let row" class="text-right amount-cell" 
+                [ngClass]="row.totalOutstanding > 50000 ? 'critical' : 'warning'">
+              {{ formatCurrency(row.totalOutstanding) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="recoveryPercentage">
+            <th mat-header-cell *matHeaderCellDef>Recovery %</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="recovery-progress">
+                <div class="progress-bar">
+                  <div class="fill" [style.width.%]="row.recoveryPercentage" 
+                       [ngClass]="row.recoveryPercentage < 80 ? 'low' : (row.recoveryPercentage >= 95 ? 'good' : 'avg')">
+                  </div>
+                </div>
+                <span class="percent-label">{{ row.recoveryPercentage?.toFixed(1) }}%</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+            <td mat-cell *matCellDef="let row" class="text-center">
+              <div class="action-buttons-inline">
+                <button mat-icon-button (click)="viewCustomerDetails(row)" matTooltip="View Detail Breakdown">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button mat-icon-button class="reminder-btn" (click)="sendPaymentReminder(row)" 
+                  matTooltip="Send Payment Reminder" [disabled]="row.totalOutstanding === 0">
+                  <mat-icon>notification_important</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        @if (dataSource.data.length === 0) {
+          <div class="list-empty-state">
+            <mat-icon>assessment</mat-icon>
+            <p>No recovery data found. Adjust filters and click Generate Report.</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

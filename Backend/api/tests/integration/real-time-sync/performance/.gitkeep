@@ -1,0 +1,3 @@
+# Performance directory
+# This directory will contain performance benchmark tests:
+# - performanceBenchmarks.test.js

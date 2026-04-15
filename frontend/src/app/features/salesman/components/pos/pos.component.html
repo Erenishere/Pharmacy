@@ -1,0 +1,364 @@
+<div class="pos-workspace">
+    <!-- Header / Top Bar -->
+    <div class="pos-header">
+        <div class="customer-section">
+            <!-- Step 1: Customer Type Dropdown -->
+            <div class="customer-type-dropdown">
+                <mat-form-field appearance="outline" class="type-select">
+                    <mat-label>Customer Type</mat-label>
+                    <mat-select [(value)]="customerType" (selectionChange)="onCustomerTypeChange($event.value)">
+                        <mat-option value="walkin">
+                            <mat-icon>storefront</mat-icon>
+                            Walk-In Customer
+                        </mat-option>
+                        <mat-option value="registered">
+                            <mat-icon>business</mat-icon>
+                            Registered Customer
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <!-- Step 2: Customer Search (only for Registered) -->
+            <div class="customer-search-wrapper" *ngIf="customerType === 'registered'">
+                <div class="search-input-container">
+                    <mat-icon class="search-icon">search</mat-icon>
+                    <input [formControl]="customerControl" [matAutocomplete]="customerAuto"
+                        placeholder="Search by name, code, or phone..." class="customer-search-input">
+                    <mat-spinner diameter="18" *ngIf="isSearchingCustomers"></mat-spinner>
+                    <button mat-icon-button class="clear-btn" *ngIf="customerControl.value"
+                        (click)="clearCustomer(); $event.stopPropagation()">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </div>
+
+                <mat-autocomplete #customerAuto="matAutocomplete" [displayWith]="displayCustomer"
+                    (optionSelected)="onCustomerSelected($event.option.value)" class="customer-autocomplete-panel"
+                    panelClass="customer-autocomplete-panel">
+                    <mat-option *ngFor="let customer of customers" [value]="customer" class="customer-option">
+                        <div class="customer-row">
+                            <span class="name">{{ customer.name }}</span>
+                            <span class="code">{{ customer.code }}</span>
+                            <span class="type" [class.wholesaler]="customer.type === 'wholesale'">{{ customer.type
+                                }}</span>
+                        </div>
+                    </mat-option>
+                    <mat-option *ngIf="customers.length === 0 && customerControl.value" disabled>
+                        No customers found
+                    </mat-option>
+                </mat-autocomplete>
+            </div>
+
+            <!-- Selected Customer Display -->
+            <div class="selected-customer-badge" *ngIf="selectedCustomer">
+                <div class="customer-avatar">{{ selectedCustomer.name.charAt(0) }}</div>
+                <div class="customer-info">
+                    <span class="name">{{ selectedCustomer.name }}</span>
+                    <span class="code">{{ selectedCustomer.code }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions-section">
+            <button mat-stroked-button class="held-bills-btn"
+                (click)="loadHeldInvoices(); showHeldBills = !showHeldBills">
+                <mat-icon [matBadge]="heldInvoices.length" matBadgeColor="warn"
+                    [matBadgeHidden]="heldInvoices.length === 0">history</mat-icon>
+                Held Bills
+            </button>
+            <button mat-stroked-button class="preview-btn" (click)="toggleReceipt()" [disabled]="cart().length === 0">
+                <mat-icon>receipt</mat-icon>
+                Preview
+            </button>
+            <button mat-stroked-button class="clear-btn" (click)="clearCart()" [disabled]="cart().length === 0">
+                <mat-icon>restart_alt</mat-icon>
+                Reset
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Area: 2-Column Layout -->
+    <div class="pos-main-content">
+        <!-- Left Side: Item Search & Cart -->
+        <div class="cart-section">
+            <div class="product-entry-bar">
+                <mat-icon class="search-icon">qr_code_scanner</mat-icon>
+                <input [formControl]="itemSearchControl" [matAutocomplete]="itemAuto"
+                    (keyup.enter)="onProductInputEnter()" placeholder="Scan Barcode or Search Product (F2)..."
+                    class="product-input" #productInput>
+                <mat-spinner diameter="20" *ngIf="isSearchingItems"></mat-spinner>
+
+                <mat-autocomplete #itemAuto="matAutocomplete" panelClass="product-autocomplete-panel">
+                    <mat-option *ngFor="let item of searchItems" [value]="item" (click)="addToCart(item)">
+                        <div class="product-row">
+                            <div class="prod-info">
+                                <span class="prod-name">{{ item.name }}</span>
+                                <span class="prod-formula" *ngIf="item.formulaName">{{ item.formulaName }} - {{
+                                    item.formulaSize }}</span>
+                                <span class="prod-sku">SKU: {{ item.code || 'N/A' }}</span>
+                            </div>
+                            <div class="prod-meta">
+                                <span class="price">{{ formatCurrency(item.pricing?.salePrice || item.salePrice)
+                                    }}</span>
+                                <span class="stock-badge" [class.low]="item.stock < 10">{{ item.stock }} {{ item.unit
+                                    }}</span>
+                            </div>
+                        </div>
+                    </mat-option>
+                </mat-autocomplete>
+            </div>
+
+            <div class="invoice-table-wrapper">
+                <table class="invoice-table">
+                    <thead>
+                        <tr>
+                            <th width="5%">#</th>
+                            <th width="35%">Item / Formula</th>
+                            <th width="15%" class="text-right">Price</th>
+                            <th width="15%" class="text-center">Qty</th>
+                            <th width="10%" class="text-center">Disc (%)</th>
+                            <th width="15%" class="text-right">Total</th>
+                            <th width="5%"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of cart(); let i = index">
+                            <td>{{ i + 1 }}</td>
+                            <td>
+                                <div class="cell-desc">
+                                    <span class="main-text">{{ item.name }}</span>
+                                    <span class="formula-text" *ngIf="item.formulaName">{{ item.formulaName }} ({{
+                                        item.formulaSize }})</span>
+                                    <span class="sub-text">{{ item.manufacturer || 'N/A' }} | {{ item.selectedBatch ||
+                                        'No Batch' }}</span>
+                                </div>
+                            </td>
+                            <td class="text-right numeric">{{ formatCurrency(item.salePrice) }}</td>
+                            <td class="text-center">
+                                <div class="qty-stepper">
+                                    <button (click)="updateQuantity(item._id, -1)" tabindex="-1">−</button>
+                                    <input type="number" [ngModel]="item.quantity"
+                                        (ngModelChange)="updateManualQuantity(item._id, $event)">
+                                    <button (click)="updateQuantity(item._id, 1)" tabindex="-1">+</button>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <input type="number" [ngModel]="item.discount" readonly
+                                    class="row-input discount-input locked" title="Discount is managed by Admin">
+                            </td>
+                            <td class="text-right font-weight-bold numeric">
+                                {{ formatCurrency((item.quantity * item.salePrice) * (1 - (item.discount || 0)/100)) }}
+                            </td>
+                            <td class="text-center">
+                                <button class="icon-btn-danger" (click)="removeFromCart(item._id)" tabindex="-1">
+                                    <mat-icon>delete_outline</mat-icon>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr *ngIf="cart().length === 0">
+                            <td colspan="6">
+                                <div class="empty-state">
+                                    <mat-icon>shopping_basket</mat-icon>
+                                    <p>Your cart is empty. Start by searching for a product.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Right Side: Summary & Actions -->
+        <div class="summary-section">
+            <div class="summary-card">
+                <h4>Order Summary</h4>
+                <div class="totals-list">
+                    <div class="total-item">
+                        <span class="label">Items Selection</span>
+                        <span class="value">{{ cart().length }}</span>
+                    </div>
+                    <div class="total-item">
+                        <span class="label">Subtotal</span>
+                        <span class="value">{{ formatCurrency(totals().subtotal) }}</span>
+                    </div>
+                    <div class="total-item discount" *ngIf="totals().totalDiscount > 0">
+                        <span class="label">Total Discount</span>
+                        <span class="value">-{{ formatCurrency(totals().totalDiscount) }}</span>
+                    </div>
+                    <div class="total-item tax" *ngIf="totals().gstTotal > 0">
+                        <span class="label">GST (Sales Tax)</span>
+                        <span class="value">{{ formatCurrency(totals().gstTotal) }}</span>
+                    </div>
+                    <div class="total-item tax" *ngIf="totals().advanceTaxTotal > 0">
+                        <span class="label">Advance Tax</span>
+                        <span class="value">{{ formatCurrency(totals().advanceTaxTotal) }}</span>
+                    </div>
+                    <div class="total-item tax" *ngIf="totals().nonFilerGst > 0">
+                        <span class="label">Non-Filer GST (0.1%)</span>
+                        <span class="value">{{ formatCurrency(totals().nonFilerGst) }}</span>
+                    </div>
+
+                    <div class="grand-total">
+                        <span class="label">Total Payable</span>
+                        <span class="value">{{ formatCurrency(totals().grandTotal) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="process-actions">
+                <button mat-stroked-button (click)="clearCart()" [disabled]="cart().length === 0 || isSubmitting">
+                    <mat-icon>remove_shopping_cart</mat-icon>
+                    Clear Cart
+                </button>
+                <div class="action-buttons-group">
+                    <button mat-flat-button color="primary" class="pay-btn" (click)="openPaymentModal()"
+                        [disabled]="cart().length === 0 || !selectedCustomer || isSubmitting">
+                        <mat-icon>payment</mat-icon>
+                        <span *ngIf="!isSubmitting">Pay & Process</span>
+                        <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Held Bills Overlay -->
+    <div class="held-bills-overlay" *ngIf="showHeldBills" (click)="showHeldBills = false">
+        <div class="held-bills-panel" (click)="$event.stopPropagation()">
+            <div class="panel-header">
+                <h2>Held Bills</h2>
+                <button mat-icon-button (click)="showHeldBills = false">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </div>
+
+            <div class="panel-content">
+                <mat-spinner diameter="30" *ngIf="isLoadingHeld" class="panel-spinner"></mat-spinner>
+
+                <div class="no-bills" *ngIf="!isLoadingHeld && heldInvoices.length === 0">
+                    <mat-icon>receipt_long</mat-icon>
+                    <p>No held bills found</p>
+                </div>
+
+                <div class="held-bill-item" *ngFor="let bill of heldInvoices" (click)="recallBill(bill)">
+                    <div class="bill-main">
+                        <span class="bill-no">{{ bill.invoiceNumber }}</span>
+                        <span class="bill-date">{{ bill.heldAt | date:'short' }}</span>
+                    </div>
+                    <div class="bill-customer">
+                        <mat-icon>person</mat-icon>
+                        {{ bill.customerId?.name || 'Walk-in' }}
+                    </div>
+                    <div class="bill-footer">
+                        <span class="item-count">{{ bill.items?.length || 0 }} items</span>
+                        <span class="bill-total">{{ formatCurrency(bill.totals?.grandTotal || 0) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Receipt Overlay -->
+<div class="receipt-overlay" *ngIf="showReceipt" (click)="toggleReceipt()">
+    <div class="receipt-paper" (click)="$event.stopPropagation()">
+        <div class="receipt-header">
+            <h3>Indus Pharma</h3>
+            <p>123 Main Street, City</p>
+            <p>Phone: (123) 456-7890</p>
+        </div>
+
+        <div class="receipt-meta">
+            <div class="row">
+                <span>Date: {{ today | date:'dd/MM/yy HH:mm' }}</span>
+                <span>Bill #: {{ lastInvoice?.invoiceNumber || lastInvoice?.invoice?.invoiceNumber || '---' }}</span>
+            </div>
+            <div class="row" *ngIf="selectedCustomer">
+                <span>Cust: {{ selectedCustomer.name }}</span>
+            </div>
+            <div class="row" *ngIf="currentSalesman">
+                <span>Salesman: {{ currentSalesman.name }}</span>
+            </div>
+        </div>
+
+        <div class="receipt-divider">--------------------------------</div>
+
+        <div class="receipt-items">
+            <div class="item-header">
+                <span class="col-name">Item</span>
+                <span class="col-qty">Qty</span>
+                <span class="col-price">Amount</span>
+            </div>
+            <div class="receipt-divider">--------------------------------</div>
+
+            <div class="item-row" *ngFor="let item of cart()">
+                <div class="item-line-1">{{ item.name }}</div>
+                <div class="item-line-2">
+                    <span class="col-qty">{{ item.quantity }} x {{ item.salePrice }}</span>
+                    <span class="col-price">{{ formatCurrency(item.quantity * item.salePrice * (1 - (item.discount ||
+                        0)/100)) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="receipt-divider">--------------------------------</div>
+
+        <div class="receipt-totals">
+            <div class="row">
+                <span>Subtotal</span>
+                <span>{{ formatCurrency(totals().subtotal) }}</span>
+            </div>
+            <div class="row" *ngIf="totals().totalDiscount > 0">
+                <span>Discount</span>
+                <span>-{{ formatCurrency(totals().totalDiscount) }}</span>
+            </div>
+            <div class="row" *ngIf="totals().gstTotal > 0">
+                <span>GST</span>
+                <span>{{ formatCurrency(totals().gstTotal) }}</span>
+            </div>
+            <div class="row" *ngIf="totals().advanceTaxTotal > 0">
+                <span>Advance Tax</span>
+                <span>{{ formatCurrency(totals().advanceTaxTotal) }}</span>
+            </div>
+
+            <div class="grand-total">
+                <span class="label">Total Payable</span>
+                <span class="value">{{ formatCurrency(totals().grandTotal) }}</span>
+            </div>
+
+            <!-- Payment Info -->
+            <div class="payment-info" *ngIf="lastPayment">
+                <div class="receipt-divider">--------------------------------</div>
+                <div class="row">
+                    <span>Payment</span>
+                    <span style="text-transform: uppercase; font-weight: 600;">{{ lastPayment.mode }}</span>
+                </div>
+                <div class="row" *ngIf="lastPayment.mode === 'cash' && lastPayment.tendered">
+                    <span>Cash Tendered</span>
+                    <span>{{ formatCurrency(lastPayment.tendered) }}</span>
+                </div>
+                <div class="row change-row" *ngIf="lastPayment.mode === 'cash' && lastPayment.change > 0">
+                    <span><strong>Change Due</strong></span>
+                    <span><strong>{{ formatCurrency(lastPayment.change) }}</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="receipt-footer">
+            <p>Thank you for your purchase!</p>
+            <p>Goods once sold are not returnable</p>
+            <p>Software by Indus Traders</p>
+        </div>
+
+        <div class="receipt-actions">
+            <button mat-flat-button color="primary" class="print-btn" (click)="printReceipt()">
+                <mat-icon>print</mat-icon>
+                Print Receipt
+            </button>
+            <button mat-stroked-button color="warn" class="close-btn" (click)="onReceiptClose()">
+                <mat-icon>close</mat-icon>
+                Close & New Sale
+            </button>
+        </div>
+    </div>
+</div>

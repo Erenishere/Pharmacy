@@ -1,0 +1,98 @@
+@import 'styles/shared-list-styles';
+
+.page-container {
+  @include page-container;
+}
+
+.page-header {
+  @include page-header;
+}
+
+.form-card {
+  @include form-card;
+}
+
+@include form-field-overrides;
+
+.schedule-section {
+  margin-top: 16px;
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: $text-card-title;
+    border-left: 3px solid $purple;
+    padding-left: 10px;
+    margin-bottom: 16px;
+  }
+
+  .day-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba($border, 0.5);
+
+    .day-label {
+      min-width: 100px;
+      font-weight: 600;
+      color: $text-card-title;
+    }
+
+    mat-form-field {
+      flex: 1;
+    }
+
+    button {
+      margin-top: -20px;
+    }
+  }
+}
+
+.targets-section {
+  margin-top: 24px;
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: $text-card-title;
+    border-left: 3px solid $purple;
+    padding-left: 10px;
+    margin-bottom: 16px;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+
+    mat-form-field {
+      flex: 1;
+      min-width: 180px;
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+
+  button[mat-raised-button] {
+    background: linear-gradient(118deg, $purple, rgba($purple, .8));
+    box-shadow: 0 0 10px 1px rgba($purple, .4);
+    color: #fff;
+    font-weight: 500;
+
+    &:hover {
+      box-shadow: 0 0 14px 2px rgba($purple, .6);
+      transform: translateY(-1px);
+    }
+  }
+
+  button[mat-stroked-button] {
+    border: 2px solid $border;
+    color: $text-body;
+  }
+}

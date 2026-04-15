@@ -1,0 +1,145 @@
+@import "../../../../../styles/shared-list-styles";
+
+.target-dashboard-page {
+  @include dashboard-stats-grid;
+  @include data-table;
+
+  .target-summary {
+    grid-template-columns: repeat(4, 1fr);
+    @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 600px) { grid-template-columns: 1fr; }
+  }
+
+  .date-filters {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+
+    .refresh-btn {
+      height: 44px;
+      padding: 0 20px;
+      background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+    }
+  }
+
+  .employee-identity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .avatar-circle {
+      width: 36px;
+      height: 36px;
+      background: rgba($purple, 0.1);
+      color: $purple;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .info {
+      display: flex;
+      flex-direction: column;
+      .name { font-weight: 600; color: $grey-dark; }
+      .role { font-size: 11px; color: $grey-medium; }
+    }
+  }
+
+  .performance-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 160px;
+
+    .cell-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      .label { font-size: 11px; color: $grey-medium; }
+      .status-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        &.achieved { color: $success; }
+        &.not-achieved { color: $danger; }
+      }
+    }
+
+    .perf-progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .progress-bar {
+        flex: 1;
+        height: 4px;
+        background: rgba($grey-medium, 0.1);
+        border-radius: 2px;
+        overflow: hidden;
+        .fill {
+          height: 100%;
+          border-radius: 2px;
+          transition: width 0.4s ease;
+        }
+      }
+      .percentage {
+        font-size: 10px;
+        font-weight: 700;
+        color: $grey-dark;
+        width: 34px;
+      }
+    }
+
+    .target-val { font-size: 10px; color: $grey-medium; font-style: italic; }
+  }
+
+  .activity-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: $grey-dark;
+      mat-icon { font-size: 16px; width: 16px; height: 16px; color: $grey-medium; }
+    }
+  }
+
+  .brand-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+
+    .incentive-summary {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      .badge {
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        &.achieved { background: rgba($success, 0.1); color: $success; }
+        &.total { background: rgba($grey-medium, 0.1); color: $grey-medium; }
+      }
+      .sep { color: $grey-medium; font-size: 10px; }
+    }
+
+    .view-btn {
+      height: 24px;
+      line-height: 24px;
+      font-size: 11px;
+      color: $purple;
+      min-width: auto;
+      padding: 0 8px;
+    }
+
+    .no-incentive { color: $grey-very-light; font-style: italic; }
+  }
+}

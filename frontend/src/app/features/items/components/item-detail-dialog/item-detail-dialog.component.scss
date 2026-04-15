@@ -1,0 +1,229 @@
+@import 'styles/vuexy-vars';
+
+.item-detail-dialog {
+    width: 600px;
+    max-width: 95vw;
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+// ─── Header Section ───
+.dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 32px;
+    background-color: white;
+    border-bottom: 1px solid #f2f4f7;
+
+    h2 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+        color: $dark;
+        letter-spacing: -0.5px;
+
+        mat-icon {
+            color: $primary;
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+        }
+    }
+
+    button {
+        color: #98a2b3;
+
+        &:hover {
+            color: $dark;
+            background: #f9fafb;
+        }
+    }
+}
+
+mat-dialog-content {
+    padding: 0;
+    max-height: 75vh;
+    background-color: #fcfcfd;
+}
+
+.item-detail-content {
+    padding: 32px;
+}
+
+// ─── Avatar & Identity ───
+.item-avatar-section {
+    text-align: center;
+    padding: 0 0 32px 0;
+
+    .avatar-circle {
+        width: 112px;
+        height: 112px;
+        border-radius: 24px;
+        background: #f4f3ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        border: 1px solid rgba($primary, 0.1);
+        box-shadow: 0 8px 16px rgba($primary, 0.08);
+
+        mat-icon {
+            font-size: 64px;
+            width: 64px;
+            height: 64px;
+            color: $primary;
+        }
+    }
+
+    .item-name {
+        font-size: 24px;
+        font-weight: 700;
+        color: $dark;
+        margin: 0 0 8px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .item-code {
+        display: inline-block;
+        font-size: 14px;
+        font-family: 'Courier New', monospace;
+        color: $primary;
+        font-weight: 700;
+        background: rgba($primary, 0.08);
+        padding: 4px 12px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+    }
+
+    .item-category {
+        font-size: 14px;
+        font-weight: 600;
+        color: $grey-dark;
+        margin: 0;
+        opacity: 0.8;
+    }
+}
+
+// ─── Info Grid ───
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+
+    @media (max-width: 480px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #eaebf0;
+    transition: all 0.2s;
+
+    &:hover {
+        border-color: $primary;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .info-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #667085;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+
+        mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+            color: #98a2b3;
+        }
+    }
+
+    .info-value {
+        font-size: 15px;
+        font-weight: 600;
+        color: $dark;
+        word-break: break-word;
+
+        &.item-id {
+            font-family: monospace;
+            color: #667085;
+            font-size: 12px;
+        }
+
+        &.pricing-value {
+            color: #101828;
+            font-weight: 700;
+        }
+    }
+}
+
+// ─── Status Chips ───
+mat-chip {
+    --mdc-chip-label-text-weight: 700;
+    height: 28px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+
+    &.active-chip,
+    &.stock-in_stock,
+    &.status-in_stock {
+        background: #f0fdf4 !important;
+        color: #166534 !important;
+    }
+
+    &.inactive-chip,
+    &.stock-out_of_stock,
+    &.status-out_of_stock {
+        background: #fef2f2 !important;
+        color: #991b1b !important;
+    }
+
+    &.stock-low_stock,
+    &.status-low_stock {
+        background: #fff9f5 !important;
+        color: #9a3412 !important;
+    }
+}
+
+// ─── Dialog Actions ───
+mat-dialog-actions {
+    padding: 24px 32px;
+    background-color: white;
+    border-top: 1px solid #f2f4f7;
+    display: flex;
+    justify-content: flex-end;
+
+    button {
+        height: 48px;
+        padding: 0 24px;
+        background-color: $primary !important;
+        color: white !important;
+        font-weight: 700;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba($primary, 0.25);
+
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba($primary, 0.35);
+        }
+
+        mat-icon {
+            margin-right: 8px;
+        }
+    }
+}

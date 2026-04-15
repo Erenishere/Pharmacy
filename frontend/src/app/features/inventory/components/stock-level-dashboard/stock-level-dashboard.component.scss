@@ -1,0 +1,116 @@
+@import '../../../../../styles/vuexy-vars';
+@import '../../../../../styles/shared-list-styles';
+
+:host {
+  display: block;
+}
+
+.stock-dashboard-page {
+  /* Dashboard Stats Grid */
+  .dashboard-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+
+    .stat-card {
+      @include layered-glass;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      border: 1px solid $grey-very-light !important;
+      border-radius: 12px;
+
+      .stat-icon-wrapper {
+        width: 54px;
+        height: 54px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        mat-icon {
+          font-size: 28px;
+          width: 28px;
+          height: 28px;
+        }
+      }
+
+      .stat-data {
+        display: flex;
+        flex-direction: column;
+
+        .label {
+          color: $grey-dark;
+          font-size: 13px;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .value {
+          color: $text-card-title;
+          font-size: 24px;
+          font-weight: 700;
+          font-family: 'Outfit', sans-serif;
+        }
+      }
+
+      /* Variant colors */
+      &.primary {
+        .stat-icon-wrapper { background: rgba($purple, 0.1); mat-icon { color: $purple; } }
+      }
+      &.success {
+        .stat-icon-wrapper { background: rgba($success, 0.1); mat-icon { color: $success; } }
+      }
+      &.warning {
+        .stat-icon-wrapper { background: rgba($warning, 0.1); mat-icon { color: $warning; } }
+      }
+      &.danger {
+        .stat-icon-wrapper { background: rgba($danger, 0.1); mat-icon { color: $danger; } }
+      }
+    }
+  }
+
+  /* Data Table */
+  .data-table {
+    @include data-table;
+
+    .code-cell {
+      font-family: 'Inter', monospace;
+      font-weight: 600;
+      color: $purple;
+    }
+
+    .item-name-block {
+      display: flex;
+      flex-direction: column;
+      
+      .name {
+        font-weight: 600;
+        color: $text-card-title;
+      }
+      
+      .meta {
+        font-size: 11px;
+        color: $grey-dark;
+      }
+    }
+
+    .stock-badge {
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba($success, 0.1);
+      color: $success;
+
+      &.low {
+        background: rgba($danger, 0.1);
+        color: $danger;
+      }
+    }
+  }
+}
+
+@include paginator;

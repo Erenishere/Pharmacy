@@ -1,0 +1,189 @@
+<div class="item-form-dialog">
+    <div class="dialog-header">
+        <h2 mat-dialog-title>
+            <mat-icon>{{ isEditMode ? 'edit' : 'add_box' }}</mat-icon>
+            {{ isEditMode ? 'Edit Item' : 'Create New Item' }}
+        </h2>
+        <button mat-icon-button mat-dialog-close>
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <mat-dialog-content>
+        <form [formGroup]="itemForm" class="item-form">
+            <mat-tab-group>
+                <!-- General Tab -->
+                <mat-tab label="General">
+                    <div class="tab-content">
+                        <div class="form-section">
+                            <h3>Basic Information</h3>
+                            <div class="form-row">
+                                <mat-form-field appearance="outline" class="half-width">
+                                    <mat-label>Item Code</mat-label>
+                                    <input matInput formControlName="code" placeholder="Enter item code" required>
+                                    <mat-icon matPrefix>qr_code</mat-icon>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="half-width">
+                                    <mat-label>SKU</mat-label>
+                                    <input matInput formControlName="sku" placeholder="Enter SKU">
+                                    <mat-icon matPrefix>tag</mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Item Name</mat-label>
+                                <input matInput formControlName="name" placeholder="Enter item name" required>
+                                <mat-icon matPrefix>inventory_2</mat-icon>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Description</mat-label>
+                                <textarea matInput formControlName="description" placeholder="Enter description" rows="2"></textarea>
+                            </mat-form-field>
+
+                            <div class="form-row">
+                                <mat-form-field appearance="outline" class="half-width">
+                                    <mat-label>Category</mat-label>
+                                    <mat-select formControlName="category" required>
+                                        <mat-option *ngFor="let cat of categories" [value]="cat.value">
+                                            {{ cat.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="half-width">
+                                    <mat-label>Unit</mat-label>
+                                    <mat-select formControlName="unit" required>
+                                        <mat-option *ngFor="let unit of units" [value]="unit.value">
+                                            {{ unit.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>Pricing & Tax</h3>
+                            <div class="form-row">
+                                <mat-form-field appearance="outline" class="third-width">
+                                    <mat-label>Cost Price</mat-label>
+                                    <input matInput type="number" formControlName="costPrice" required>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="third-width">
+                                    <mat-label>Sale Price</mat-label>
+                                    <input matInput type="number" formControlName="salePrice" required>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="third-width">
+                                    <mat-label>Currency</mat-label>
+                                    <input matInput formControlName="currency" required>
+                                </mat-form-field>
+                            </div>
+                            <div class="form-row">
+                                <mat-form-field appearance="outline" class="half-width">
+                                    <mat-label>GST Rate (%)</mat-label>
+                                    <input matInput type="number" formControlName="gstRate">
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="half-width">
+                                    <mat-label>WHT Rate (%)</mat-label>
+                                    <input matInput type="number" formControlName="whtRate">
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+                </mat-tab>
+
+                <!-- Supplier Info Tab -->
+                <mat-tab label="Supplier Info">
+                    <div class="tab-content">
+                        <div class="form-section">
+                            <h3>Supplier Details</h3>
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Primary Supplier ID</mat-label>
+                                <input matInput formControlName="primarySupplierId" placeholder="Enter supplier ID">
+                            </mat-form-field>
+                            <div class="form-row">
+                                <mat-form-field appearance="outline" class="half-width">
+                                    <mat-label>Supplier Item Code</mat-label>
+                                    <input matInput formControlName="supplierItemCode" placeholder="Enter supplier's item code">
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="half-width">
+                                    <mat-label>Lead Time (Days)</mat-label>
+                                    <input matInput type="number" formControlName="leadTimeFromSupplier">
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+                </mat-tab>
+
+                <!-- Regulatory Tab -->
+                <mat-tab label="Regulatory">
+                    <div class="tab-content">
+                        <div class="form-section">
+                            <h3>Compliance & Regulatory</h3>
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Tax Registration Number</mat-label>
+                                <input matInput formControlName="taxRegistrationNumber">
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Compliance Status</mat-label>
+                                <mat-select formControlName="complianceStatus">
+                                    <mat-option *ngFor="let status of complianceStatuses" [value]="status.value">
+                                        {{ status.label }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </mat-tab>
+
+                <!-- Metadata Tab -->
+                <mat-tab label="Metadata & Specs">
+                    <div class="tab-content">
+                        <div class="form-section">
+                            <h3>Product Metadata</h3>
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Manufacturer</mat-label>
+                                <input matInput formControlName="manufacturer">
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Storage Conditions</mat-label>
+                                <textarea matInput formControlName="storageConditions" rows="2"></textarea>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Handling Instructions</mat-label>
+                                <textarea matInput formControlName="handlingInstructions" rows="2"></textarea>
+                            </mat-form-field>
+                        </div>
+                        <div class="form-section">
+                            <h3>Specifications</h3>
+                            <div class="form-row">
+                                <mat-form-field appearance="outline" class="half-width">
+                                    <mat-label>Barcode</mat-label>
+                                    <input matInput formControlName="barcode">
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="half-width">
+                                    <mat-label>Pack Size</mat-label>
+                                    <input matInput type="number" formControlName="packSize">
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+                </mat-tab>
+            </mat-tab-group>
+
+            <div class="status-toggle">
+                <mat-slide-toggle formControlName="isActive" color="primary">
+                    {{ itemForm.get('isActive')?.value ? 'Active' : 'Inactive' }}
+                </mat-slide-toggle>
+            </div>
+        </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button mat-dialog-close [disabled]="saving">Cancel</button>
+        <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="itemForm.invalid || saving">
+            <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
+            {{ saving ? 'Saving...' : (isEditMode ? 'Update' : 'Create') }}
+        </button>
+    </mat-dialog-actions>
+</div>

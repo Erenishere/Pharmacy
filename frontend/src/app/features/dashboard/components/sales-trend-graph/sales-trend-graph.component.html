@@ -1,0 +1,74 @@
+<mat-card class="sales-trend-card">
+  <mat-card-header>
+    <mat-card-title>Sales Trend Analysis</mat-card-title>
+    <mat-card-subtitle>Real-time sales performance and trends</mat-card-subtitle>
+  </mat-card-header>
+  
+  <mat-card-content>
+    <div class="filter-controls">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Time Period</mat-label>
+        <mat-select [(value)]="selectedPeriod" (selectionChange)="onPeriodChange($event.value)">
+          <mat-option value="7d">Last 7 Days</mat-option>
+          <mat-option value="30d">Last 30 Days</mat-option>
+          <mat-option value="90d">Last 90 Days</mat-option>
+          <mat-option value="1y">Last Year</mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Granularity</mat-label>
+        <mat-select [(value)]="selectedGranularity" (selectionChange)="onGranularityChange($event.value)">
+          <mat-option value="daily">Daily</mat-option>
+          <mat-option value="weekly">Weekly</mat-option>
+          <mat-option value="monthly">Monthly</mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <div class="action-buttons">
+        <button mat-icon-button (click)="onRefresh()" matTooltip="Refresh data">
+          <mat-icon>refresh</mat-icon>
+        </button>
+        <button mat-icon-button (click)="onDownload()" matTooltip="Download data">
+          <mat-icon>download</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading sales data...</p>
+    </div>
+
+    <div *ngIf="error" class="error-container">
+      <mat-icon color="warn">error</mat-icon>
+      <p>{{ error }}</p>
+    </div>
+
+    <div *ngIf="!loading && !error" class="chart-container">
+      <div class="chart-wrapper">
+        <canvas baseChart
+          [type]="chartType"
+          [data]="chartData"
+          [options]="chartOptions"
+          height="320">
+        </canvas>
+      </div>
+      
+      <div class="summary-stats">
+        <div class="stat-card">
+          <div class="stat-value">{{ formatCurrency(totalSales) }}</div>
+          <div class="stat-label">Total Sales</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ formatCurrency(averageOrderValue) }}</div>
+          <div class="stat-label">Avg Order Value</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ totalOrders }}</div>
+          <div class="stat-label">Total Orders</div>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

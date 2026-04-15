@@ -1,0 +1,117 @@
+<div class="form-dialog-shell investor-dialog">
+  <div class="dialog-header">
+    <div class="title-section">
+      <div class="header-icon">
+        <mat-icon>{{ mode === 'create' ? 'account_balance' : 'manage_accounts' }}</mat-icon>
+      </div>
+      <div class="text-group">
+        <h2 mat-dialog-title>{{ mode === 'create' ? 'Add New Investor' : 'Edit Investor' }}</h2>
+        <span class="subtitle">Maintain investor identity, contact details, and opening capital balance from one form.</span>
+      </div>
+    </div>
+
+    <button mat-icon-button type="button" class="close-btn" aria-label="Close dialog" (click)="onCancel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <form [formGroup]="investorForm" class="form-shell">
+      <section class="form-section">
+        <div class="section-title">
+          <mat-icon>badge</mat-icon>
+          <span>Investor Profile</span>
+        </div>
+
+        <div class="grid-row two-cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Investor Code</mat-label>
+            <input matInput formControlName="code" placeholder="INV-001" [readonly]="mode === 'edit'">
+            @if (investorForm.get('code')?.hasError('required') && investorForm.get('code')?.touched) {
+              <mat-error>Code is required</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Investor Name</mat-label>
+            <input matInput formControlName="name" placeholder="Enter investor name">
+            @if (investorForm.get('name')?.hasError('required') && investorForm.get('name')?.touched) {
+              <mat-error>Name is required</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="grid-row two-cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Contact Person</mat-label>
+            <input matInput formControlName="contactPerson" placeholder="Enter contact person name">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Opening Balance</mat-label>
+            <span matPrefix>PKR&nbsp;</span>
+            <input matInput formControlName="openingBalance" type="number" placeholder="0">
+            @if (investorForm.get('openingBalance')?.hasError('required') && investorForm.get('openingBalance')?.touched) {
+              <mat-error>Opening balance is required</mat-error>
+            }
+            @if (investorForm.get('openingBalance')?.hasError('min') && investorForm.get('openingBalance')?.touched) {
+              <mat-error>Balance cannot be negative</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <mat-icon>contact_phone</mat-icon>
+          <span>Contact Details</span>
+        </div>
+
+        <div class="grid-row two-cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Phone</mat-label>
+            <input matInput formControlName="phone" placeholder="+92 300 1234567">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" type="email" placeholder="investor@example.com">
+            @if (investorForm.get('email')?.hasError('email') && investorForm.get('email')?.touched) {
+              <mat-error>Invalid email format</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="grid-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Address</mat-label>
+            <textarea matInput formControlName="address" rows="3" placeholder="Enter address"></textarea>
+          </mat-form-field>
+        </div>
+      </section>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-footer">
+    <div class="footer-meta">
+      <strong>{{ mode === 'create' ? 'Register Investor' : 'Update Investor' }}</strong>
+      Opening balance initializes the investor capital position and can be adjusted later through entries.
+    </div>
+
+    <div class="footer-actions">
+      <button mat-stroked-button type="button" class="cancel-btn" (click)="onCancel()" [disabled]="loading">
+        Cancel
+      </button>
+
+      <button mat-raised-button color="primary" type="button" class="submit-btn" (click)="onSubmit()" [disabled]="loading || investorForm.invalid">
+        @if (loading) {
+          <mat-spinner diameter="20"></mat-spinner>
+        }
+        @if (!loading) {
+          <mat-icon>{{ mode === 'create' ? 'add' : 'save' }}</mat-icon>
+        }
+        <span>{{ loading ? 'Saving...' : (mode === 'create' ? 'Create Investor' : 'Update Investor') }}</span>
+      </button>
+    </div>
+  </mat-dialog-actions>
+</div>

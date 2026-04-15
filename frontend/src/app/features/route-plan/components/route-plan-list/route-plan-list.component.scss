@@ -1,0 +1,20 @@
+@import "../../../../../styles/shared-list-styles";
+
+.route-plan-list-page {
+  @include data-table;
+  @include paginator;
+
+  .dimension-chip {
+    background: rgba($purple, 0.1);
+    color: $purple;
+    font-weight: 500;
+    font-size: 11px;
+    height: 24px;
+    padding: 0 10px;
+  }
+
+  .amount-cell {
+    font-weight: 600;
+    color: $purple-dark;
+  }
+}

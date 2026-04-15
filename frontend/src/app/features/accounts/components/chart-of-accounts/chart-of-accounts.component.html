@@ -1,0 +1,170 @@
+<div class="chart-of-accounts-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-icon">
+        <mat-icon>account_tree</mat-icon>
+      </div>
+      <div>
+        <h1>Chart of Accounts</h1>
+        <p class="subtitle">Hierarchical view of all account categories and sub-accounts</p>
+      </div>
+    </div>
+    <button mat-flat-button color="primary" (click)="onCreateAccountHead()">
+      <mat-icon>add</mat-icon> New Account Head
+    </button>
+  </div>
+
+  <!-- Search and Filters -->
+  <mat-card class="search-card">
+    <div class="search-row">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search Account Heads</mat-label>
+        <input matInput [(ngModel)]="searchQuery" placeholder="Search by name or code..." (keydown.enter)="onSearch()">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+      <button mat-stroked-button (click)="onSearch()">
+        <mat-icon>search</mat-icon> Search
+      </button>
+    </div>
+  </mat-card>
+
+  <!-- Account Tree -->
+  <mat-card class="tree-card">
+    <mat-card-header>
+      <mat-card-title>Account Hierarchy</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="loading-container" *ngIf="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading chart of accounts...</p>
+      </div>
+
+      <div class="tree-container" *ngIf="!loading">
+        <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="account-tree">
+
+          <!-- Tree Node Template -->
+          <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding class="tree-node">
+            <div class="node-content">
+              <div class="node-info">
+                <mat-icon [style.color]="getNodeColor(node)" class="node-icon">
+                  {{ getNodeIcon(node) }}
+                </mat-icon>
+                <div class="node-details">
+                  <span class="node-name">{{ node.name }}</span>
+                  <span class="node-code">{{ node.code }}</span>
+                  <div class="node-meta" *ngIf="node.accountCount">
+                    <span class="account-count">{{ node.accountCount }} accounts</span>
+                    <span class="separator">•</span>
+                    <span class="total-balance" [class]="node.totalBalance && node.totalBalance >= 0 ? 'positive' : 'negative'">
+                      {{ formatCurrency(node.totalBalance || 0) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="node-actions">
+                <button mat-icon-button [matMenuTriggerFor]="nodeMenu" matTooltip="Actions">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #nodeMenu="matMenu">
+                  <button mat-menu-item (click)="onViewAccounts(node)">
+                    <mat-icon>visibility</mat-icon> View Accounts
+                  </button>
+                  <button mat-menu-item (click)="onEditAccountHead(node)">
+                    <mat-icon>edit</mat-icon> Edit
+                  </button>
+                  <button mat-menu-item (click)="onAddSubAccount(node)" *ngIf="node.level < 3">
+                    <mat-icon>add</mat-icon> Add Sub-Account
+                  </button>
+                  <mat-divider></mat-divider>
+                  <button mat-menu-item (click)="onDeleteAccountHead(node)" class="delete-action">
+                    <mat-icon>delete</mat-icon> Delete
+                  </button>
+                </mat-menu>
+              </div>
+            </div>
+          </mat-tree-node>
+
+          <!-- Tree Node with Children Template -->
+          <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding class="tree-node expandable">
+            <div class="node-content">
+              <div class="node-info">
+                <button mat-icon-button matTreeNodeToggle
+                        [attr.aria-label]="'Toggle ' + node.name">
+                  <mat-icon class="mat-icon-rtl-mirror">
+                    {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+                  </mat-icon>
+                </button>
+                <mat-icon [style.color]="getNodeColor(node)" class="node-icon">
+                  {{ getNodeIcon(node) }}
+                </mat-icon>
+                <div class="node-details">
+                  <span class="node-name">{{ node.name }}</span>
+                  <span class="node-code">{{ node.code }}</span>
+                  <div class="node-meta" *ngIf="node.accountCount">
+                    <span class="account-count">{{ node.accountCount }} accounts</span>
+                    <span class="separator">•</span>
+                    <span class="total-balance" [class]="node.totalBalance && node.totalBalance >= 0 ? 'positive' : 'negative'">
+                      {{ formatCurrency(node.totalBalance || 0) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="node-actions">
+                <button mat-icon-button [matMenuTriggerFor]="nodeMenu" matTooltip="Actions">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #nodeMenu="matMenu">
+                  <button mat-menu-item (click)="onViewAccounts(node)">
+                    <mat-icon>visibility</mat-icon> View Accounts
+                  </button>
+                  <button mat-menu-item (click)="onEditAccountHead(node)">
+                    <mat-icon>edit</mat-icon> Edit
+                  </button>
+                  <button mat-menu-item (click)="onAddSubAccount(node)" *ngIf="node.level < 3">
+                    <mat-icon>add</mat-icon> Add Sub-Account
+                  </button>
+                  <mat-divider></mat-divider>
+                  <button mat-menu-item (click)="onDeleteAccountHead(node)" class="delete-action">
+                    <mat-icon>delete</mat-icon> Delete
+                  </button>
+                </mat-menu>
+              </div>
+            </div>
+          </mat-tree-node>
+
+        </mat-tree>
+
+        <!-- Legend -->
+        <div class="tree-legend">
+          <h4>Account Types Legend</h4>
+          <div class="legend-items">
+            <div class="legend-item">
+              <mat-icon style="color: #4CAF50">account_balance</mat-icon>
+              <span>Assets</span>
+            </div>
+            <div class="legend-item">
+              <mat-icon style="color: #F44336">account_balance</mat-icon>
+              <span>Liabilities</span>
+            </div>
+            <div class="legend-item">
+              <mat-icon style="color: #FF9800">account_balance</mat-icon>
+              <span>Equity</span>
+            </div>
+            <div class="legend-item">
+              <mat-icon style="color: #2196F3">account_balance</mat-icon>
+              <span>Income</span>
+            </div>
+            <div class="legend-item">
+              <mat-icon style="color: #9C27B0">account_balance</mat-icon>
+              <span>Expenses</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

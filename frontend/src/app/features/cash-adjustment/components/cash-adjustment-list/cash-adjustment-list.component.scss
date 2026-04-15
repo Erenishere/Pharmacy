@@ -1,0 +1,94 @@
+@import "../../../../../styles/shared-list-styles";
+
+.cash-adjustment-page {
+  @include data-table;
+  @include paginator;
+
+  .form-card {
+    @include layered-glass;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+
+    .card-header {
+      margin-bottom: 20px;
+      .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: $purple;
+        margin: 0;
+        border-left: 3px solid $purple;
+        padding-left: 12px;
+      }
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+
+      @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); }
+      @media (max-width: 600px) { grid-template-columns: 1fr; }
+
+      .span-2 { grid-column: span 2; @media (max-width: 600px) { grid-column: span 1; } }
+    }
+
+    .form-actions {
+      display: flex;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba($purple, 0.1);
+
+      .save-btn {
+        height: 44px;
+        padding: 0 32px;
+        background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+        box-shadow: 0 4px 12px rgba($purple, 0.3);
+      }
+    }
+  }
+
+  .account-opt {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    .name { font-weight: 500; }
+    .balance { font-size: 10px; color: $grey-medium; }
+  }
+
+  .acc-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    .name { font-weight: 600; color: $grey-dark; }
+    .type-badge {
+      font-size: 9px;
+      text-transform: uppercase;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      &.from { background: rgba($danger, 0.1); color: $danger; }
+      &.to { background: rgba($success, 0.1); color: $success; }
+    }
+  }
+
+  .status-stack {
+    display: flex;
+    flex-direction: column;
+    .type-hint { font-size: 10px; color: $grey-medium; margin-top: 2px; }
+  }
+
+  .action-buttons-inline {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    .edit-btn { color: $purple; }
+    .print-btn { color: $info; }
+    .del-btn { color: $danger; }
+  }
+
+  .amount-cell.highlight {
+    color: $purple-dark;
+    font-weight: 700;
+  }
+}

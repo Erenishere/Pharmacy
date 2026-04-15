@@ -1,0 +1,150 @@
+@import '../../../../../styles/vuexy-vars';
+@import '../../../../../styles/shared-list-styles';
+
+:host {
+  display: block;
+}
+
+.physical-count-page {
+  /* Detail Card Premium Styling */
+  .detail-card {
+    margin-bottom: 24px;
+    border: 1px solid rgba($purple, 0.1) !important;
+    
+    .audit-summary-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+      padding: 16px 24px;
+      background: rgba($purple, 0.05);
+      border-radius: 8px;
+      margin-bottom: 24px;
+
+      .summary-item {
+        display: flex;
+        flex-direction: column;
+        
+        .label {
+          font-size: 11px;
+          text-transform: uppercase;
+          color: $grey-dark;
+          letter-spacing: 0.5px;
+          margin-bottom: 2px;
+        }
+        
+        .value {
+          font-weight: 600;
+          color: $text-card-title;
+        }
+      }
+    }
+
+    .audit-table-section {
+      h3 {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: $purple;
+      }
+    }
+
+    .variance-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    .variance-positive {
+      .variance-badge { background: rgba($success, 0.1); color: $success; }
+    }
+    
+    .variance-negative {
+      .variance-badge { background: rgba($danger, 0.1); color: $danger; }
+    }
+
+    .detail-footer-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid $grey-very-light;
+    }
+  }
+
+  /* Form Card Premium Styling */
+  .form-card {
+    margin-bottom: 24px;
+    background: #fff;
+    
+    .dynamic-items-field {
+      margin: 24px 0;
+      padding: 20px;
+      background: rgba($grey-very-light, 0.3);
+      border-radius: 12px;
+      border: 1px solid $grey-very-light;
+
+      .field-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        
+        h3 {
+          font-size: 14px;
+          font-weight: 600;
+          color: $text-card-title;
+          margin: 0;
+        }
+
+        .add-row-btn {
+          color: $purple;
+          font-weight: 600;
+          border: 1px dashed $purple;
+          
+          &:hover { background: rgba($purple, 0.05); }
+        }
+      }
+
+      .item-form-row {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 12px;
+        animation: fadeIn 0.3s ease-out;
+
+        .flex-grow { flex: 1; }
+        .qty-field { width: 150px; }
+        
+        .remove-btn {
+          color: $danger;
+          &:hover { background: rgba($danger, 0.05); }
+        }
+      }
+
+      .empty-items-notice {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 32px;
+        color: $grey-dark;
+        gap: 8px;
+        
+        mat-icon { font-size: 48px; width: 48px; height: 48px; opacity: 0.3; }
+        span { font-size: 13px; }
+      }
+    }
+  }
+
+  /* Data Table */
+  .data-table {
+    @include data-table;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@include paginator;

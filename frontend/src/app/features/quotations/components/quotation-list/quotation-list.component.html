@@ -1,0 +1,212 @@
+<div class="list-page-container quotation-list-page">
+  <div class="list-page-header">
+    <div class="header-content">
+      <h1 class="page-title"><mat-icon>request_quote</mat-icon> Quotations</h1>
+      <p class="page-subtitle">Manage and track customer quotations</p>
+    </div>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="openCreate()" class="create-btn">
+        <mat-icon>add</mat-icon> New Quotation
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="dashboard-stats-grid">
+    <div class="stat-card primary">
+      <div class="stat-icon-wrapper"><mat-icon>description</mat-icon></div>
+      <div class="stat-data">
+        <span class="label">Total</span>
+        <span class="value">{{ summary.totalQuotations }}</span>
+      </div>
+    </div>
+    <div class="stat-card info">
+      <div class="stat-icon-wrapper"><mat-icon>edit</mat-icon></div>
+      <div class="stat-data">
+        <span class="label">Draft</span>
+        <span class="value">{{ summary.draftQuotations }}</span>
+      </div>
+    </div>
+    <div class="stat-card warning">
+      <div class="stat-icon-wrapper"><mat-icon>send</mat-icon></div>
+      <div class="stat-data">
+        <span class="label">Sent</span>
+        <span class="value">{{ summary.sentQuotations }}</span>
+      </div>
+    </div>
+    <div class="stat-card success">
+      <div class="stat-icon-wrapper"><mat-icon>receipt</mat-icon></div>
+      <div class="stat-data">
+        <span class="label">Converted</span>
+        <span class="value">{{ summary.convertedQuotations }}</span>
+      </div>
+    </div>
+    <div class="stat-card danger">
+      <div class="stat-icon-wrapper"><mat-icon>schedule</mat-icon></div>
+      <div class="stat-data">
+        <span class="label">Expired</span>
+        <span class="value">{{ summary.expiredQuotations }}</span>
+      </div>
+    </div>
+    <div class="stat-card primary-alt">
+      <div class="stat-icon-wrapper"><mat-icon>payments</mat-icon></div>
+      <div class="stat-data">
+        <span class="label">Total Value</span>
+        <span class="value amount">PKR {{ formatCurrency(summary.totalValue) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="list-page-card">
+    <!-- Filters -->
+    <div class="list-filters-section">
+      <div class="filter-group-primary">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Customer Name</mat-label>
+          <input matInput [formControl]="customerFilter" placeholder="Search by name...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-group-secondary">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Status</mat-label>
+          <mat-select [formControl]="statusFilter" (selectionChange)="applyFilters()">
+            @for (opt of statusOptions; track opt.value) {
+              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>From Date</mat-label>
+          <input matInput [matDatepicker]="fromPicker" [formControl]="dateFrom" (dateChange)="applyFilters()">
+          <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
+          <mat-datepicker #fromPicker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>To Date</mat-label>
+          <input matInput [matDatepicker]="toPicker" [formControl]="dateTo" (dateChange)="applyFilters()">
+          <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
+          <mat-datepicker #toPicker></mat-datepicker>
+        </mat-form-field>
+        <button mat-button class="clear-btn" (click)="statusFilter.setValue(''); customerFilter.setValue(''); applyFilters()">
+          <mat-icon>restart_alt</mat-icon>
+          Clear
+        </button>
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="list-loading-overlay">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading quotations...</p>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        @if (dataSource.data.length === 0) {
+          <div class="list-empty-state">
+            <mat-icon>request_quote</mat-icon>
+            <p>No quotations found</p>
+            <button mat-raised-button color="primary" (click)="openCreate()">Create First Quotation</button>
+          </div>
+        } @else {
+          <table mat-table [dataSource]="dataSource" class="data-table">
+
+            <ng-container matColumnDef="quotationDate">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let row">{{ row.createdAt | date:'dd/MM/yyyy' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="partyName">
+              <th mat-header-cell *matHeaderCellDef>Party Name</th>
+              <td mat-cell *matCellDef="let row">
+                <div class="party-info">
+                  <span class="party-name">{{ row.customerId?.name || '—' }}</span>
+                  <small class="ref-num">{{ row.quotationNumber }}</small>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="referenceNumber">
+              <th mat-header-cell *matHeaderCellDef>Reference No</th>
+              <td mat-cell *matCellDef="let row">{{ row.referenceNumber || '—' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="grandTotal">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
+              <td mat-cell *matCellDef="let row" class="text-right amount-cell font-bold">
+                PKR {{ formatCurrency(row.grandTotal) }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="status-chip" [ngClass]="row.status">
+                  {{ row.status | titlecase }}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+              <td mat-cell *matCellDef="let row" class="text-center">
+                <button mat-icon-button [matMenuTriggerFor]="actionMenu"
+                  [disabled]="processingId === row._id" matTooltip="Actions" class="action-btn">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #actionMenu="matMenu">
+                  <button mat-menu-item (click)="viewDetails(row)">
+                    <mat-icon>visibility</mat-icon> View Details
+                  </button>
+                  @if (row.status === 'draft') {
+                    <button mat-menu-item (click)="openEdit(row)">
+                      <mat-icon>edit</mat-icon> Edit
+                    </button>
+                    <button mat-menu-item (click)="markAsSent(row)">
+                      <mat-icon>send</mat-icon> Mark as Sent
+                    </button>
+                    <button mat-menu-item (click)="deleteQuotation(row)">
+                      <mat-icon color="warn">delete</mat-icon> Delete
+                    </button>
+                  }
+                  @if (row.status === 'sent') {
+                    <button mat-menu-item (click)="approve(row)">
+                      <mat-icon color="primary">thumb_up</mat-icon> Approve
+                    </button>
+                    <button mat-menu-item (click)="cancel(row)">
+                      <mat-icon color="warn">cancel</mat-icon> Cancel
+                    </button>
+                  }
+                  @if (row.status === 'approved') {
+                    <button mat-menu-item (click)="convertToInvoice(row)">
+                      <mat-icon color="primary">receipt</mat-icon> Convert to Invoice
+                    </button>
+                    <button mat-menu-item (click)="convertToOrder(row)">
+                      <mat-icon>shopping_cart</mat-icon> Convert to E-Order
+                    </button>
+                    <button mat-menu-item (click)="cancel(row)">
+                      <mat-icon color="warn">cancel</mat-icon> Cancel
+                    </button>
+                  }
+                </mat-menu>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+              [class.row-inactive]="row.status === 'cancelled' || row.status === 'expired'"></tr>
+          </table>
+
+          <mat-paginator
+            [length]="totalCount"
+            [pageSize]="pageSize"
+            [pageIndex]="pageIndex"
+            [pageSizeOptions]="[10, 20, 50, 100]"
+            (page)="onPageChange($event)">
+          </mat-paginator>
+        }
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,243 @@
+<div class="quotation-detail-container" *ngIf="!loading; else loadingTemplate">
+  <!-- Header -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="title-section">
+        <button mat-icon-button (click)="onBack()" class="back-button">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="title-info">
+          <h1>Quotation {{ quotation?.quotationNumber }}</h1>
+          <div class="meta-info">
+            <span class="customer">{{ quotation?.customerId?.name ?? '-' }}</span>
+            <span class="separator">•</span>
+            <span class="date">{{ quotation && quotation.quotationDate ? formatDate(quotation.quotationDate) : '-' }}</span>
+            <span class="separator">•</span>
+            <span class="validity">Valid until: {{ quotation && quotation.validUntil ? formatDate(quotation.validUntil) : '-' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-section">
+        <mat-chip [style.background-color]="getStatusColor(quotation?.status || '')" class="status-chip">
+          {{ getStatusLabel(quotation?.status || '') }}
+        </mat-chip>
+
+        <mat-chip *ngIf="isExpired(quotation?.validUntil || '')" class="status-chip expired-chip">
+          <mat-icon>warning</mat-icon>
+          Expired
+        </mat-chip>
+
+        <mat-chip *ngIf="isExpiringSoon(quotation?.validUntil || '') && !isExpired(quotation?.validUntil || '')" class="status-chip warning-chip">
+          <mat-icon>schedule</mat-icon>
+          Expires Soon
+        </mat-chip>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button mat-button (click)="onPrint()" class="print-button">
+        <mat-icon>print</mat-icon>
+        Print
+      </button>
+
+      <button mat-raised-button color="primary" (click)="onEdit()" *ngIf="canEdit()" [disabled]="processing">
+        <mat-icon>edit</mat-icon>
+        Edit
+      </button>
+
+      <button mat-raised-button color="accent" (click)="onMarkAsSent()" *ngIf="canMarkAsSent()" [disabled]="processing">
+        <mat-icon>send</mat-icon>
+        Mark as Sent
+      </button>
+
+      <button mat-raised-button color="primary" (click)="onApprove()" *ngIf="canApprove()" [disabled]="processing">
+        <mat-icon>check_circle</mat-icon>
+        Approve
+      </button>
+
+      <button mat-raised-button color="warn" (click)="onCancel()" *ngIf="canCancel()" [disabled]="processing">
+        <mat-icon>cancel</mat-icon>
+        Cancel
+      </button>
+
+      <button mat-raised-button color="primary" (click)="onConvertToInvoice()" *ngIf="canConvert()" [disabled]="processing">
+        <mat-icon>receipt</mat-icon>
+        Convert to Invoice
+      </button>
+
+      <button mat-raised-button color="primary" (click)="onConvertToOrder()" *ngIf="canConvert()" [disabled]="processing">
+        <mat-icon>shopping_cart</mat-icon>
+        Convert to E-Order
+      </button>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+    <!-- Quotation Information -->
+    <mat-card class="info-card">
+      <mat-card-header>
+        <mat-card-title>Quotation Information</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Quotation Number:</label>
+            <span>{{ quotation?.quotationNumber }}</span>
+          </div>
+          <div class="info-item">
+            <label>Quotation Date:</label>
+            <span>{{ quotation?.quotationDate ? formatDate(quotation?.quotationDate) : '-' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Customer:</label>
+            <span>{{ quotation?.customerId?.name }}</span>
+          </div>
+          <div class="info-item" *ngIf="quotation?.salesmanId">
+            <label>Salesman:</label>
+            <span>{{ quotation?.salesmanId?.name }}</span>
+          </div>
+          <div class="info-item" *ngIf="quotation?.referenceNumber">
+            <label>Reference Number:</label>
+            <span>{{ quotation?.referenceNumber }}</span>
+          </div>
+          <div class="info-item" *ngIf="quotation?.tenderNumber">
+            <label>Tender Number:</label>
+            <span>{{ quotation?.tenderNumber }}</span>
+          </div>
+          <div class="info-item">
+            <label>Validity Period:</label>
+            <span>{{ quotation?.validityPeriod }}</span>
+          </div>
+          <div class="info-item">
+            <label>Total Amount:</label>
+            <span class="amount">{{ formatCurrency(quotation?.grandTotal || 0) }}</span>
+          </div>
+          <div class="info-item" *ngIf="quotation?.notes">
+            <label>Notes:</label>
+            <span>{{ quotation?.notes }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Items Table -->
+    <mat-card class="items-card">
+      <mat-card-header>
+        <mat-card-title>Quoted Items</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container" *ngIf="quotation?.items?.length; else noItemsTemplate">
+          <table mat-table [dataSource]="quotation?.items || []" class="items-table">
+            <!-- Serial Number -->
+            <ng-container matColumnDef="sno">
+              <th mat-header-cell *matHeaderCellDef>#</th>
+              <td mat-cell *matCellDef="let item; let i = index">{{ i + 1 }}</td>
+            </ng-container>
+
+            <!-- Item Name -->
+            <ng-container matColumnDef="itemName">
+              <th mat-header-cell *matHeaderCellDef>Item</th>
+              <td mat-cell *matCellDef="let item">
+                <div class="item-info">
+                  <strong>{{ item.itemName || item.item?.name }}</strong>
+                  <small class="item-code">{{ item.item?.code }}</small>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Quantity -->
+            <ng-container matColumnDef="quantity">
+              <th mat-header-cell *matHeaderCellDef>Quantity</th>
+              <td mat-cell *matCellDef="let item">{{ item.quantity }}</td>
+            </ng-container>
+
+            <!-- Unit Price -->
+            <ng-container matColumnDef="unitPrice">
+              <th mat-header-cell *matHeaderCellDef>Unit Price</th>
+              <td mat-cell *matCellDef="let item">{{ formatCurrency(item.unitPrice) }}</td>
+            </ng-container>
+
+            <!-- Discount -->
+            <ng-container matColumnDef="discount">
+              <th mat-header-cell *matHeaderCellDef>Discount %</th>
+              <td mat-cell *matCellDef="let item">{{ item.discount || 0 }}%</td>
+            </ng-container>
+
+            <!-- GST Rate -->
+            <ng-container matColumnDef="gstRate">
+              <th mat-header-cell *matHeaderCellDef>GST %</th>
+              <td mat-cell *matCellDef="let item">{{ item.gstRate || 0 }}%</td>
+            </ng-container>
+
+            <!-- GST Amount -->
+            <ng-container matColumnDef="gstAmount">
+              <th mat-header-cell *matHeaderCellDef>GST Amount</th>
+              <td mat-cell *matCellDef="let item">{{ formatCurrency(item.gstAmount || 0) }}</td>
+            </ng-container>
+
+            <!-- Line Total -->
+            <ng-container matColumnDef="lineTotal">
+              <th mat-header-cell *matHeaderCellDef>Line Total</th>
+              <td mat-cell *matCellDef="let item" class="amount-cell">
+                {{ formatCurrency(item.lineTotal || 0) }}
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+
+        <!-- No Items Template -->
+        <ng-template #noItemsTemplate>
+          <div class="no-items-message">
+            <mat-icon>inventory_2</mat-icon>
+            <h3>No items in quotation</h3>
+          </div>
+        </ng-template>
+
+        <!-- Total Summary -->
+        <div class="total-summary" *ngIf="quotation?.items?.length">
+          <div class="total-row">
+            <div class="total-item">
+              <span>Subtotal:</span>
+              <strong>{{ formatCurrency(quotation?.subtotal || 0) }}</strong>
+            </div>
+            <div class="total-item">
+              <span>Discount:</span>
+              <strong>{{ formatCurrency(quotation?.totalDiscount || 0) }}</strong>
+            </div>
+            <div class="total-item">
+              <span>GST:</span>
+              <strong>{{ formatCurrency(quotation?.totalGST || 0) }}</strong>
+            </div>
+            <div class="total-item grand-total">
+              <span>Grand Total:</span>
+              <strong>{{ formatCurrency(quotation?.grandTotal || 0) }}</strong>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Terms & Conditions -->
+    <mat-card class="terms-card" *ngIf="quotation?.termsAndConditions">
+      <mat-card-header>
+        <mat-card-title>Terms & Conditions</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="terms-content">{{ quotation?.termsAndConditions }}</div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+
+<!-- Loading Template -->
+<ng-template #loadingTemplate>
+  <div class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading quotation details...</p>
+  </div>
+</ng-template>

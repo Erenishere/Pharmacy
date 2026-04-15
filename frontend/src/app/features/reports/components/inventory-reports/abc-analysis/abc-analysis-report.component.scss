@@ -1,0 +1,26 @@
+@import '../../../styles/report-common';
+
+.category-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.category-a {
+    background: rgba($success, 0.12);
+    color: $success;
+  }
+
+  &.category-b {
+    background: rgba($warning, 0.12);
+    color: $warning;
+  }
+
+  &.category-c {
+    background: rgba($info, 0.12);
+    color: $info;
+  }
+}

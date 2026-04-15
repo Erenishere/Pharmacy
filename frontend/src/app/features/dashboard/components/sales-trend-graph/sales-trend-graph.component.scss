@@ -1,0 +1,232 @@
+.sales-trend-card {
+  margin: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  background: white;
+
+  mat-card-header {
+    padding: 20px 24px 0;
+    
+    mat-card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+    
+    mat-card-subtitle {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-bottom: 16px;
+    }
+  }
+
+  mat-card-content {
+    padding: 0 24px 24px;
+  }
+}
+
+.filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 24px;
+  
+  .filter-field {
+    flex: 1;
+    min-width: 180px;
+    
+    mat-form-field {
+      width: 100%;
+    }
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+    
+    button {
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 320px;
+  gap: 16px;
+  
+  p {
+    color: #6b7280;
+    font-size: 0.875rem;
+  }
+}
+
+.error-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  
+  mat-icon {
+    flex-shrink: 0;
+  }
+  
+  p {
+    margin: 0;
+    color: #dc2626;
+    font-size: 0.875rem;
+  }
+}
+
+.chart-container {
+  .chart-wrapper {
+    height: 320px;
+    margin-bottom: 24px;
+    background: #fafafa;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  
+  .summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    
+    .stat-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+        transform: translateY(-1px);
+      }
+      
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 4px;
+      }
+      
+      .stat-label {
+        font-size: 0.875rem;
+        color: #64748b;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .sales-trend-card {
+    margin: 12px;
+    
+    mat-card-header {
+      padding: 16px 16px 0;
+    }
+    
+    mat-card-content {
+      padding: 0 16px 16px;
+    }
+  }
+  
+  .filter-controls {
+    flex-direction: column;
+    align-items: stretch;
+    
+    .filter-field {
+      min-width: auto;
+    }
+    
+    .action-buttons {
+      margin-left: 0;
+      justify-content: flex-end;
+    }
+  }
+  
+  .chart-container {
+    .summary-stats {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// Accessibility improvements
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .sales-trend-card {
+    border: 2px solid #000;
+  }
+  
+  .stat-card {
+    border-width: 2px;
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .sales-trend-card {
+    background: #1f2937;
+    color: #f9fafb;
+    
+    mat-card-title {
+      color: #f9fafb;
+    }
+    
+    mat-card-subtitle {
+      color: #d1d5db;
+    }
+  }
+  
+  .chart-container {
+    .chart-wrapper {
+      background: #374151;
+    }
+    
+    .summary-stats {
+      .stat-card {
+        background: #374151;
+        border-color: #4b5563;
+        
+        &:hover {
+          background: #4b5563;
+        }
+        
+        .stat-value {
+          color: #f9fafb;
+        }
+        
+        .stat-label {
+          color: #d1d5db;
+        }
+      }
+    }
+  }
+}

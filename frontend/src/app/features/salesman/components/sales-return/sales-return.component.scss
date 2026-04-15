@@ -1,0 +1,475 @@
+@import 'styles/vuexy-vars';
+
+.return-workspace {
+    padding: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: calc(100vh - 80px);
+}
+
+// ─── Page Header ─────────────────────────────────────────────────
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+    .header-icon {
+        font-size: 36px;
+        width: 36px;
+        height: 36px;
+        color: $primary;
+    }
+
+    .back-btn {
+        color: $text-body;
+    }
+
+    h2 {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: $text-card-title;
+    }
+
+    p {
+        margin: 2px 0 0;
+        font-size: 0.85rem;
+        color: $text-body;
+    }
+}
+
+// ─── Search ──────────────────────────────────────────────────────
+.search-card {
+    background: $bg-card;
+    border-radius: $radius-card;
+    box-shadow: $shadow-card;
+    border: $border-card;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .search-icon {
+        color: $grey-dark;
+    }
+
+    .search-input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        font-size: 1.05rem;
+        outline: none;
+        color: $text-card-title;
+        font-weight: 500;
+        font-family: $font-family;
+    }
+
+    button {
+        height: 42px;
+        white-space: nowrap;
+        font-weight: 600;
+        border-radius: $radius-btn;
+
+        mat-icon, mat-spinner {
+            margin-right: 6px;
+        }
+    }
+}
+
+// ─── Results Grid ────────────────────────────────────────────────
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.invoice-card {
+    background: $bg-card;
+    border-radius: $radius-card;
+    border: $border-card;
+    box-shadow: $shadow-card;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        border-color: $primary;
+        box-shadow: 0 4px 16px rgba($primary, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+
+        .invoice-number {
+            font-weight: 700;
+            color: $text-card-title;
+            font-size: 1rem;
+        }
+
+        .invoice-status {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: $success;
+            background: rgba($success, 0.1);
+            padding: 2px 8px;
+            border-radius: $radius-chip;
+        }
+    }
+
+    .card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        margin-bottom: 0.75rem;
+
+        .card-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: $text-body;
+            font-size: 0.85rem;
+
+            mat-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+                color: $grey-dark;
+            }
+        }
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 0.75rem;
+        border-top: 1px dashed lighten($grey-light, 10%);
+
+        .invoice-total {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: $primary;
+        }
+
+        .arrow-icon {
+            color: $grey-light;
+        }
+    }
+}
+
+// ─── Reason Section ──────────────────────────────────────────────
+.reason-section {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    .reason-select {
+        width: 250px;
+    }
+
+    .notes-input {
+        flex: 1;
+    }
+}
+
+// ─── Items Card ──────────────────────────────────────────────────
+.items-card {
+    background: $bg-card;
+    border-radius: $radius-card;
+    box-shadow: $shadow-card;
+    border: $border-card;
+    overflow: hidden;
+    margin-bottom: 1rem;
+
+    .items-header {
+        padding: 0.75rem 1.25rem;
+        background: rgba($primary, 0.04);
+        border-bottom: $border-card;
+        font-weight: 600;
+        color: $text-card-title;
+    }
+}
+
+.items-table-wrapper {
+    overflow-x: auto;
+}
+
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: $text-body;
+        font-weight: 600;
+        background: rgba(0, 0, 0, 0.02);
+        border-bottom: $border-table;
+    }
+
+    td {
+        padding: 0.75rem 1rem;
+        border-bottom: $border-table;
+        vertical-align: middle;
+        color: $text-card-title;
+        font-size: 0.9rem;
+    }
+
+    .col-check {
+        width: 48px;
+    }
+
+    .col-batch {
+        min-width: 100px;
+    }
+
+    .col-num {
+        text-align: right;
+        white-space: nowrap;
+        min-width: 90px;
+    }
+
+    .font-bold {
+        font-weight: 700;
+    }
+
+    .selected-row {
+        background: rgba($primary, 0.04);
+    }
+
+    .cell-desc {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .main-text {
+            font-weight: 600;
+            color: $text-card-title;
+        }
+
+        .sub-text {
+            font-size: 0.75rem;
+            color: $text-body;
+        }
+    }
+
+    .qty-input {
+        width: 70px;
+        height: 32px;
+        border: $border-input;
+        border-radius: $radius-input;
+        text-align: center;
+        font-weight: 600;
+        font-family: $font-family;
+        color: $text-card-title;
+        background: $bg-card;
+
+        &:focus {
+            outline: none;
+            border-color: $primary;
+            box-shadow: 0 0 0 2px rgba($primary, 0.1);
+        }
+
+        &:disabled {
+            background: rgba(0, 0, 0, 0.04);
+            color: $text-muted;
+            cursor: not-allowed;
+        }
+    }
+}
+
+// ─── Summary Bar ─────────────────────────────────────────────────
+.summary-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 2rem;
+    padding: 1rem 1.25rem;
+    background: $bg-card;
+    border-radius: $radius-card;
+    box-shadow: $shadow-card;
+    border: $border-card;
+
+    .summary-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+
+        .summary-label {
+            font-weight: 600;
+            color: $text-body;
+            font-size: 1rem;
+        }
+
+        .summary-value {
+            font-weight: 800;
+            color: $primary;
+            font-size: 1.5rem;
+        }
+    }
+
+    .process-btn {
+        height: 48px;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 0 2rem;
+        border-radius: $radius-btn;
+        background: linear-gradient(118deg, $primary, rgba($primary, 0.7));
+        box-shadow: $shadow-btn-raised;
+
+        mat-icon {
+            margin-right: 8px;
+        }
+
+        &:hover:not(:disabled) {
+            box-shadow: 0 8px 20px rgba($primary, 0.4);
+        }
+
+        &:disabled {
+            background: $grey-light;
+            box-shadow: none;
+        }
+    }
+}
+
+// ─── Center State (Spinner / Success) ────────────────────────────
+.center-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+
+    h3 {
+        margin: 1.5rem 0 0.5rem;
+        color: $text-card-title;
+        font-weight: 600;
+    }
+
+    p {
+        color: $text-body;
+        font-size: 0.95rem;
+    }
+}
+
+.success-state {
+    .success-icon-wrap {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba($success, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        mat-icon {
+            font-size: 48px;
+            width: 48px;
+            height: 48px;
+            color: $success;
+        }
+    }
+
+    h2 {
+        margin: 1.25rem 0 0.25rem;
+        font-weight: 700;
+        color: $text-card-title;
+    }
+
+    .return-number {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: $primary;
+        margin: 0 0 1.5rem;
+    }
+
+    .success-details {
+        background: $bg-card;
+        border-radius: $radius-card;
+        border: $border-card;
+        box-shadow: $shadow-card;
+        padding: 1.5rem 2rem;
+        width: 100%;
+        max-width: 400px;
+        margin-bottom: 1.5rem;
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+
+            .detail-label {
+                color: $text-body;
+                font-size: 0.9rem;
+            }
+
+            .detail-value {
+                font-weight: 600;
+                color: $text-card-title;
+                font-size: 0.9rem;
+            }
+
+            .status-badge {
+                text-transform: capitalize;
+                color: $success;
+            }
+        }
+
+        .credit-row {
+            padding-top: 1rem;
+
+            .credit-amount {
+                font-size: 1.3rem;
+                font-weight: 800;
+                color: $primary;
+            }
+        }
+
+        mat-divider {
+            margin: 0.5rem 0;
+        }
+    }
+
+    .new-return-btn {
+        height: 44px;
+        font-weight: 600;
+        padding: 0 2rem;
+
+        mat-icon {
+            margin-right: 6px;
+        }
+    }
+}
+
+// ─── Empty State ─────────────────────────────────────────────────
+.empty-state {
+    text-align: center;
+    padding: 4rem 0;
+    color: $text-muted;
+
+    mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        opacity: 0.4;
+    }
+
+    p {
+        margin-top: 1rem;
+        font-size: 1rem;
+    }
+}

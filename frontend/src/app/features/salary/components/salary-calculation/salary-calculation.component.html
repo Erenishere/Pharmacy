@@ -1,0 +1,274 @@
+<div class="salary-calculation-container">
+  <mat-card class="calculation-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>calculate</mat-icon>
+        Salary Calculation
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Calculation Form -->
+      <form [formGroup]="calculationForm" (ngSubmit)="onCalculate()" class="calculation-form">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Select Employee</mat-label>
+            <mat-select formControlName="employeeId" required>
+              <mat-option *ngFor="let employee of employees" [value]="employee._id">
+                {{ employee.name }} ({{ employee.code }})
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="calculationForm.get('employeeId')?.hasError('required')">
+              Employee is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Month</mat-label>
+            <mat-select formControlName="month" required>
+              <mat-option *ngFor="let month of months" [value]="month">
+                {{ month }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="calculationForm.get('month')?.hasError('required')">
+              Month is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Year</mat-label>
+            <mat-select formControlName="year" required>
+              <mat-option *ngFor="let year of years" [value]="year">
+                {{ year }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="calculationForm.get('year')?.hasError('required')">
+              Year is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            [disabled]="calculating || loading">
+            <mat-icon *ngIf="!calculating">calculate</mat-icon>
+            <mat-spinner *ngIf="calculating" diameter="20"></mat-spinner>
+            {{ calculating ? 'Calculating...' : 'Calculate Salary' }}
+          </button>
+        </div>
+      </form>
+
+      <mat-divider *ngIf="calculation"></mat-divider>
+
+      <!-- Calculation Results -->
+      <div *ngIf="calculation" class="calculation-results">
+        <div class="results-header">
+          <h2>Salary Breakdown</h2>
+          <div class="employee-info">
+            <span class="employee-name">{{ calculation.employeeName }}</span>
+            <span class="calculation-period">{{ calculation.month }} {{ calculation.year }}</span>
+          </div>
+        </div>
+
+        <!-- Fixed Components -->
+        <div class="section">
+          <h3 class="section-title">Fixed Components</h3>
+          <div class="component-grid">
+            <div class="component-item">
+              <span class="component-label">Basic Pay</span>
+              <span class="component-value">{{ formatCurrency(calculation.basicPay) }}</span>
+            </div>
+            <div class="component-item">
+              <span class="component-label">Daily Allowance</span>
+              <span class="component-value">{{ formatCurrency(calculation.dailyAllowance) }}</span>
+            </div>
+            <div class="component-item">
+              <span class="component-label">Petrol Allowance</span>
+              <span class="component-value">{{ formatCurrency(calculation.petrolAllowance) }}</span>
+            </div>
+            <div class="component-item">
+              <span class="component-label">Mobile Package</span>
+              <span class="component-value">{{ formatCurrency(calculation.mobilePackage) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Target-Based Incentives -->
+        <div class="section">
+          <h3 class="section-title">Target-Based Incentives</h3>
+          
+          <div class="incentive-card">
+            <div class="incentive-header">
+              <span class="incentive-name">Sales Incentive</span>
+              <span class="incentive-amount">{{ formatCurrency(calculation.salesIncentive.amount) }}</span>
+            </div>
+            <div class="incentive-details">
+              <div class="detail-item">
+                <span class="detail-label">Target:</span>
+                <span class="detail-value">{{ formatCurrency(calculation.salesIncentive.target) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Achieved:</span>
+                <span class="detail-value">{{ formatCurrency(calculation.salesIncentive.achieved) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Achievement:</span>
+                <span class="detail-value" [class.achieved]="calculation.salesIncentive.percentage >= 100" [class.not-achieved]="calculation.salesIncentive.percentage < 100">
+                  {{ calculation.salesIncentive.percentage.toFixed(2) }}%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="incentive-card">
+            <div class="incentive-header">
+              <span class="incentive-name">Recovery Incentive</span>
+              <span class="incentive-amount">{{ formatCurrency(calculation.recoveryIncentive.amount) }}</span>
+            </div>
+            <div class="incentive-details">
+              <div class="detail-item">
+                <span class="detail-label">Target:</span>
+                <span class="detail-value">{{ formatCurrency(calculation.recoveryIncentive.target) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Achieved:</span>
+                <span class="detail-value">{{ formatCurrency(calculation.recoveryIncentive.achieved) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Achievement:</span>
+                <span class="detail-value" [class.achieved]="calculation.recoveryIncentive.percentage >= 100" [class.not-achieved]="calculation.recoveryIncentive.percentage < 100">
+                  {{ calculation.recoveryIncentive.percentage.toFixed(2) }}%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="incentive-card">
+            <div class="incentive-header">
+              <span class="incentive-name">Party Visit Incentive</span>
+              <span class="incentive-amount">{{ formatCurrency(calculation.partyVisitIncentive.amount) }}</span>
+            </div>
+            <div class="incentive-details">
+              <div class="detail-item">
+                <span class="detail-label">Target:</span>
+                <span class="detail-value">{{ calculation.partyVisitIncentive.target }} visits</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Achieved:</span>
+                <span class="detail-value">{{ calculation.partyVisitIncentive.achieved }} visits</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Achievement:</span>
+                <span class="detail-value" [class.achieved]="calculation.partyVisitIncentive.achieved >= calculation.partyVisitIncentive.target" [class.not-achieved]="calculation.partyVisitIncentive.achieved < calculation.partyVisitIncentive.target">
+                  {{ calculation.partyVisitIncentive.target > 0 ? ((calculation.partyVisitIncentive.achieved / calculation.partyVisitIncentive.target) * 100).toFixed(2) : 0 }}%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Incentives -->
+        <div class="section">
+          <h3 class="section-title">Mobile Incentives</h3>
+          <div class="component-grid">
+            <div class="component-item">
+              <span class="component-label">Mobile Order Incentive</span>
+              <span class="component-sublabel">{{ calculation.mobileOrderIncentive.ordersCreated }} orders created</span>
+              <span class="component-value">{{ formatCurrency(calculation.mobileOrderIncentive.amount) }}</span>
+            </div>
+            <div class="component-item">
+              <span class="component-label">Mobile Cash Recovery</span>
+              <span class="component-sublabel">{{ formatCurrency(calculation.mobileCashRecoveryIncentive.amountRecovered) }} recovered</span>
+              <span class="component-value">{{ formatCurrency(calculation.mobileCashRecoveryIncentive.amount) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Brand Incentives -->
+        <div class="section" *ngIf="calculation.brandIncentives.length > 0">
+          <h3 class="section-title">Brand Incentives</h3>
+          <div class="brand-incentives-list">
+            <div class="brand-incentive-item" *ngFor="let incentive of calculation.brandIncentives">
+              <div class="brand-info">
+                <span class="brand-name">{{ incentive.itemName }}</span>
+                <span class="brand-target">Target: {{ incentive.target }} | Achieved: {{ incentive.achieved }}</span>
+              </div>
+              <span class="brand-amount">{{ formatCurrency(incentive.amount) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bonuses -->
+        <div class="section" *ngIf="calculation.bonuses.length > 0">
+          <h3 class="section-title">Bonuses</h3>
+          <div class="component-grid">
+            <div class="component-item" *ngFor="let bonus of calculation.bonuses">
+              <span class="component-label">{{ bonus.type }}</span>
+              <span class="component-sublabel">{{ bonus.detail }}</span>
+              <span class="component-value">{{ formatCurrency(bonus.amount) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gross Salary -->
+        <div class="section">
+          <div class="total-row gross-salary">
+            <span class="total-label">Gross Salary</span>
+            <span class="total-value">{{ formatCurrency(calculation.grossSalary) }}</span>
+          </div>
+        </div>
+
+        <!-- Deductions -->
+        <div class="section">
+          <h3 class="section-title">Deductions</h3>
+          <div class="component-grid">
+            <div class="component-item">
+              <span class="component-label">Tax</span>
+              <span class="component-value deduction">-{{ formatCurrency(calculation.deductions.tax) }}</span>
+            </div>
+            <div class="component-item">
+              <span class="component-label">Advance</span>
+              <span class="component-value deduction">-{{ formatCurrency(calculation.deductions.advance) }}</span>
+            </div>
+            <div class="component-item">
+              <span class="component-label">Loan</span>
+              <span class="component-value deduction">-{{ formatCurrency(calculation.deductions.loan) }}</span>
+            </div>
+            <div class="component-item">
+              <span class="component-label">Other</span>
+              <span class="component-value deduction">-{{ formatCurrency(calculation.deductions.other) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Net Salary -->
+        <div class="section">
+          <div class="total-row net-salary">
+            <span class="total-label">NET SALARY</span>
+            <span class="total-value">{{ formatCurrency(calculation.netSalary) }}</span>
+          </div>
+        </div>
+
+        <!-- Print Button -->
+        <div class="print-actions">
+          <button 
+            mat-raised-button 
+            color="accent" 
+            (click)="onPrintSalarySheet()">
+            <mat-icon>print</mat-icon>
+            Print Salary Sheet
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading-container">
+        <mat-spinner></mat-spinner>
+        <p>Loading employees...</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

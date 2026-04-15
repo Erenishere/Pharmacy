@@ -1,0 +1,78 @@
+<mat-card class="customer-behavior-card">
+  <mat-card-header>
+    <mat-card-title>Customer Behavior Analytics</mat-card-title>
+    <mat-card-subtitle>Understand customer acquisition, retention, and value patterns</mat-card-subtitle>
+  </mat-card-header>
+  
+  <mat-card-content>
+    <div class="filter-controls">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Time Period</mat-label>
+        <mat-select [(value)]="selectedPeriod" (selectionChange)="onPeriodChange($event.value)">
+          <mat-option value="7d">Last 7 Days</mat-option>
+          <mat-option value="30d">Last 30 Days</mat-option>
+          <mat-option value="90d">Last 90 Days</mat-option>
+          <mat-option value="1y">Last Year</mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Customer Segment</mat-label>
+        <mat-select [(value)]="selectedSegment" (selectionChange)="onSegmentChange($event.value)">
+          <mat-option value="all">All Segments</mat-option>
+          <mat-option value="new">New Customers</mat-option>
+          <mat-option value="returning">Returning Customers</mat-option>
+          <mat-option value="vip">VIP Customers</mat-option>
+          <mat-option value="at-risk">At Risk</mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Channel</mat-label>
+        <mat-select [(value)]="selectedChannel" (selectionChange)="onChannelChange($event.value)">
+          <mat-option value="all">All Channels</mat-option>
+          <mat-option value="online">Online</mat-option>
+          <mat-option value="in-store">In-Store</mat-option>
+          <mat-option value="mobile">Mobile App</mat-option>
+          <mat-option value="phone">Phone</mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <div class="action-buttons">
+        <button mat-icon-button (click)="onRefresh()" matTooltip="Refresh data">
+          <mat-icon>refresh</mat-icon>
+        </button>
+        <button mat-icon-button (click)="onDownload()" matTooltip="Download data">
+          <mat-icon>download</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <div *ngIf="loading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading customer behavior data...</p>
+      </div>
+      
+      <div *ngIf="error && !loading" class="error-container">
+        <mat-icon color="warn">error_outline</mat-icon>
+        <p>{{ error }}</p>
+        <button mat-button (click)="onRefresh()">Retry</button>
+      </div>
+      
+      <div *ngIf="!loading && !error && data.length > 0" class="chart-wrapper">
+        <canvas baseChart
+          [type]="chartType"
+          [data]="chartData"
+          [options]="chartOptions"
+          height="400">
+        </canvas>
+      </div>
+      
+      <div *ngIf="!loading && !error && data.length === 0" class="no-data-container">
+        <mat-icon>people</mat-icon>
+        <p>No customer behavior data available</p>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

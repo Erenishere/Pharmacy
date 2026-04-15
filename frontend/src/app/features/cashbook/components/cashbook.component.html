@@ -1,0 +1,333 @@
+<div class="list-page-container cashbook-page">
+  <div class="list-page-header">
+    <div class="header-content">
+      <h1 class="page-title"><mat-icon>account_balance_wallet</mat-icon> Cash Book</h1>
+      <p class="page-subtitle">Manage cash receipts and payments with invoice allocation</p>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="resetForm()" class="reset-btn">
+        <mat-icon>refresh</mat-icon> Reset Form
+      </button>
+    </div>
+  </div>
+
+  <!-- Entry Form Section -->
+  <div class="form-section-card" [formGroup]="form">
+    <div class="form-header">
+      <h3 class="section-title">New Transaction</h3>
+      <div class="transaction-type-toggle">
+        <mat-button-toggle-group formControlName="transactionType" aria-label="Transaction Type">
+          <mat-button-toggle value="receive">Cash Receive</mat-button-toggle>
+          <mat-button-toggle value="payment">Cash Payment</mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+    </div>
+
+    <div class="form-body-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Transaction Date</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="date">
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="span-2">
+        <mat-label>{{ accountLabel }}</mat-label>
+        <mat-select formControlName="accountId" (selectionChange)="onAccountChange()">
+          <mat-option value="">-- Select Account --</mat-option>
+          @for (a of accountList; track a._id) {
+            <mat-option [value]="a._id">
+              <div class="account-opt">
+                <span class="name">{{ a.name }}</span>
+                <span class="balance" [class.negative]="a.balance < 0">Bal: PKR {{ formatAmt(a.balance || 0) }}</span>
+              </div>
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Cash Account</mat-label>
+        <mat-select formControlName="cashAccount">
+          @for (opt of cashAccountOptions; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Salesman</mat-label>
+        <mat-select formControlName="salesmanId">
+          <mat-option value="">-- None --</mat-option>
+          @for (s of salesmen; track s._id) {
+            <mat-option [value]="s._id">{{ s.name || s.username }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="span-2">
+        <mat-label>Detail / Reference</mat-label>
+        <input matInput formControlName="detailReference" placeholder="Notes or reference number">
+      </mat-form-field>
+    </div>
+
+    <!-- Invoice Allocation (Receipt Only) -->
+    @if (isReceive && form.get('accountId')?.value) {
+      <div class="invoice-allocation-section">
+        <div class="sub-section-header">
+          <mat-icon>assignment</mat-icon>
+          <span>Invoice Allocation</span>
+        </div>
+
+        @if (loadingInvoices) {
+          <div class="allocation-loading"><mat-spinner diameter="30"></mat-spinner></div>
+        } @else {
+          <div class="allocation-table-wrapper">
+            <table class="allocation-table">
+              <thead>
+                <tr>
+                  <th>S#</th>
+                  <th>Invoice Detail</th>
+                  <th>Days</th>
+                  <th class="text-right">Due</th>
+                  <th class="text-right">Received</th>
+                  <th class="text-right">Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of invoiceRows; track row.invoiceNumber; let i = $index) {
+                  <tr>
+                    <td>{{ i + 1 }}</td>
+                    <td>
+                      <div class="inv-info">
+                        <span class="inv-no">#{{ row.invoiceNumber }}</span>
+                        <span class="inv-meta">{{ row.invoiceDate | date:'dd MMM yyyy' }} | PKR {{ formatAmt(row.invoiceAmount) }}</span>
+                      </div>
+                    </td>
+                    <td><span class="days-chip" [class.old]="row.daysOld > 30">{{ row.daysOld }}</span></td>
+                    <td class="text-right font-medium">{{ formatAmt(row.dueAmount) }}</td>
+                    <td class="text-right">
+                      <input class="allocation-input" type="number" [(ngModel)]="row.receivedAmount"
+                        [ngModelOptions]="{standalone: true}" (input)="updateDifference(row)" min="0">
+                    </td>
+                    <td class="text-right" [class.negative]="row.difference < 0">{{ formatAmt(row.difference) }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="6" class="empty-allocation">No pending invoices for this account</td>
+                  </tr>
+                }
+              </tbody>
+              @if (invoiceRows.length > 0) {
+                <tfoot>
+                  <tr>
+                    <td colspan="3" class="text-right">Total</td>
+                    <td class="text-right">{{ formatAmt(invoiceTotals.due) }}</td>
+                    <td class="text-right total-highlight">{{ formatAmt(invoiceTotals.received) }}</td>
+                    <td class="text-right" [class.negative]="invoiceTotals.difference < 0">{{ formatAmt(invoiceTotals.difference) }}</td>
+                  </tr>
+                </tfoot>
+              }
+            </table>
+          </div>
+        }
+      </div>
+    }
+
+    <div class="form-footer-actions">
+      <div class="bank-info-group">
+        <mat-form-field appearance="outline" class="sm-field">
+          <mat-label>Bank Name</mat-label>
+          <input matInput formControlName="bankName">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="sm-field">
+          <mat-label>Cheque #</mat-label>
+          <input matInput formControlName="chequeNumber">
+        </mat-form-field>
+      </div>
+
+      <div class="action-buttons">
+        <button mat-raised-button color="primary" class="save-btn" [disabled]="saving" (click)="save()">
+          <mat-icon>{{ editingId ? 'update' : 'save' }}</mat-icon>
+          {{ editingId ? 'Update Entry' : 'Save Entry' }}
+        </button>
+        @if (editingId) {
+          <button mat-stroked-button (click)="resetForm()">Cancel</button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- List Section -->
+  <div class="list-page-card">
+    <div class="list-filters-section">
+      <div class="filter-group-primary">
+        <mat-form-field appearance="outline" class="filter-field sm">
+          <mat-label>Type</mat-label>
+          <mat-select [(ngModel)]="listFilterType">
+            <mat-option value="">All Types</mat-option>
+            <mat-option value="receive">Receive</mat-option>
+            <mat-option value="payment">Payment</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field sm">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="listFilterStatus">
+            <mat-option value="">All Status</mat-option>
+            <mat-option value="pending">Pending</mat-option>
+            <mat-option value="cleared">Cleared</mat-option>
+            <mat-option value="cancelled">Cancelled</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field date">
+          <mat-label>From</mat-label>
+          <input matInput [matDatepicker]="fromPicker" [ngModel]="listFilterFrom" (ngModelChange)="onFilterFromChange($event)">
+          <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
+          <mat-datepicker #fromPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field date">
+          <mat-label>To</mat-label>
+          <input matInput [matDatepicker]="toPicker" [ngModel]="listFilterTo" (ngModelChange)="onFilterToChange($event)">
+          <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
+          <mat-datepicker #toPicker></mat-datepicker>
+        </mat-form-field>
+
+        <button mat-icon-button class="search-btn" (click)="applyListFilters()">
+          <mat-icon>search</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    @if (loadingList) {
+      <div class="list-loading-overlay">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Fetching entries...</p>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="dataSource" class="data-table">
+          <ng-container matColumnDef="sno">
+            <th mat-header-cell *matHeaderCellDef>S#</th>
+            <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="accountTitle">
+            <th mat-header-cell *matHeaderCellDef>Account Details</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="acc-info">
+                <span class="name">{{ row.accountTitle || '—' }}</span>
+                <span class="code">{{ row.number }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="cashAccount">
+            <th mat-header-cell *matHeaderCellDef>Cash Acc</th>
+            <td mat-cell *matCellDef="let row">{{ row.cashAccount || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="salesman">
+            <th mat-header-cell *matHeaderCellDef>Salesman</th>
+            <td mat-cell *matCellDef="let row">{{ row.salesman || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="userId">
+            <th mat-header-cell *matHeaderCellDef>User</th>
+            <td mat-cell *matCellDef="let row">{{ row.userId || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="receive">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Receive</th>
+            <td mat-cell *matCellDef="let row" class="text-right amount-cell positive">
+              {{ row.receive ? formatAmt(row.receive) : '—' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="paid">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Paid</th>
+            <td mat-cell *matCellDef="let row" class="text-right amount-cell negative">
+              {{ row.paid ? formatAmt(row.paid) : '—' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="difference">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Net</th>
+            <td mat-cell *matCellDef="let row" class="text-right amount-cell">{{ formatAmt(row.receive - row.paid) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let row">{{ formatDate(row.date) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="postDateCheq">
+            <th mat-header-cell *matHeaderCellDef>PDC</th>
+            <td mat-cell *matCellDef="let row">
+              @if (row.postDatedCheque) {
+                <mat-icon class="pdc-icon" matTooltip="Post Dated Cheque">event_upcoming</mat-icon>
+              } @else {
+                <span class="muted">—</span>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="bankName">
+            <th mat-header-cell *matHeaderCellDef>Bank</th>
+            <td mat-cell *matCellDef="let row">{{ row.bankName || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="chequeNumber">
+            <th mat-header-cell *matHeaderCellDef>Cheq#</th>
+            <td mat-cell *matCellDef="let row">{{ row.chequeNumber || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="status-chip" [ngClass]="row.status">{{ row.status | titlecase }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="detail">
+            <th mat-header-cell *matHeaderCellDef>Detail</th>
+            <td mat-cell *matCellDef="let row" class="detail-cell" [matTooltip]="row.detail">{{ row.detail || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+            <td mat-cell *matCellDef="let row" class="text-center">
+              <div class="action-buttons-inline">
+                <button mat-icon-button class="edit-btn" (click)="editEntry(row)" matTooltip="Edit"
+                  [disabled]="row.status !== 'pending'">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button class="del-btn" (click)="deleteEntry(row)" matTooltip="Cancel"
+                  [disabled]="row.status !== 'pending'">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="listColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: listColumns;" [class.row-receive]="row.entryType === 'receive'"
+            [class.row-payment]="row.entryType === 'payment'" [class.row-cancelled]="row.status === 'cancelled'"></tr>
+        </table>
+
+        @if (dataSource.data.length === 0) {
+          <div class="list-empty-state">
+            <mat-icon>receipt_long</mat-icon>
+            <p>No transactions found for selected criteria</p>
+          </div>
+        }
+      </div>
+      
+      <mat-paginator [length]="dataSource.data.length" [pageSize]="pageSize" [pageIndex]="pageIndex"
+        [pageSizeOptions]="[10, 20, 50, 100]" (page)="onPageChange($event)">
+      </mat-paginator>
+    }
+  </div>
+</div>

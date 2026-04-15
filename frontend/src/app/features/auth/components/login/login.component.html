@@ -1,0 +1,64 @@
+<div class="auth-wrapper">
+  <div class="auth-inner">
+    <div class="card">
+      <div class="card-body">
+        <a href="javascript:void(0);" class="brand-logo">
+          <h2 class="brand-text">Industraders</h2>
+        </a>
+
+        <h4 class="card-title">Welcome! 👋</h4>
+        <p class="card-text">Please sign-in to your account</p>
+
+        <form class="auth-login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label for="identifier" class="form-label">Username or Email</label>
+            <input type="text" class="form-control" id="identifier" formControlName="identifier"
+              placeholder="john@example.com" autofocus tabindex="1" autocomplete="username" />
+            <div *ngIf="loginForm.get('identifier')?.invalid && loginForm.get('identifier')?.touched"
+              class="text-danger">
+              Username or email is required (min 3 characters)
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="d-flex justify-content-between">
+              <label class="form-label" for="password">Password</label>
+              <a routerLink="/forgot-password">
+                <small>Forgot Password?</small>
+              </a>
+            </div>
+            <div class="password-input-wrapper">
+              <input [type]="showPassword ? 'text' : 'password'" class="form-control" id="password"
+                formControlName="password" placeholder="············" tabindex="2" autocomplete="current-password" />
+              <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()" tabindex="-1">
+                <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                  </path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              </button>
+            </div>
+            <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="text-danger">
+              Password is required (min 6 characters)
+            </div>
+          </div>
+
+          <div class="alert alert-danger" *ngIf="errorMessage">
+            {{ errorMessage }}
+          </div>
+
+          <button class="btn-primary" tabindex="3" [disabled]="loginForm.invalid || isLoading">
+            {{ isLoading ? 'Logging in...' : 'Sign in' }}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

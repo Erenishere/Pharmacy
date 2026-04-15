@@ -1,0 +1,26 @@
+@import '../../../styles/report-common';
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.status-success {
+    background: rgba($success, 0.12);
+    color: $success;
+  }
+
+  &.status-warning {
+    background: rgba($warning, 0.12);
+    color: $warning;
+  }
+
+  &.status-danger {
+    background: rgba($danger, 0.12);
+    color: $danger;
+  }
+}

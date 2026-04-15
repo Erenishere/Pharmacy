@@ -1,0 +1,912 @@
+// Import Vuexy Variables
+@import 'styles/vuexy-vars';
+
+.pos-workspace {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 80px);
+    /* Adjust based on navbar height */
+    background-color: $bg-page;
+    overflow: hidden;
+
+    // Header Area
+    .pos-header {
+        background: $bg-card;
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: $border-card;
+        z-index: 10;
+        height: 70px;
+        flex-shrink: 0;
+
+        .customer-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+
+            // Customer Type Dropdown
+            .customer-type-dropdown {
+                .type-select {
+                    width: 220px;
+
+                    ::ng-deep {
+                        .mat-mdc-form-field-subscript-wrapper {
+                            display: none;
+                        }
+
+                        .mdc-line-ripple {
+                            display: none; // Hide default line ripple
+                        }
+
+                        .mdc-notched-outline {
+                            // Custom border style
+                            border: 1px solid rgba($primary, 0.4) !important;
+                            border-radius: 6px;
+                            background: rgba($primary, 0.05);
+                        }
+
+                        .mdc-notched-outline__leading,
+                        .mdc-notched-outline__notch,
+                        .mdc-notched-outline__trailing {
+                            border: none !important; // Remove default material borders
+                        }
+
+                        .mat-mdc-select-value {
+                            color: $primary;
+                            font-weight: 600;
+                            padding-left: 8px;
+                        }
+
+                        .mat-mdc-text-field-wrapper {
+                            background: transparent;
+                            padding: 0;
+                            height: 46px;
+                        }
+
+                        .mat-mdc-form-field-flex {
+                            height: 46px;
+                            align-items: center;
+                        }
+
+                        .mat-mdc-select-arrow {
+                            color: $primary;
+                        }
+                    }
+
+                    mat-icon {
+                        margin-right: 8px;
+                        color: $primary;
+                        vertical-align: middle;
+                        margin-left: 8px;
+                    }
+                }
+            }
+
+            // Customer Search (for Registered)
+            .customer-search-wrapper {
+                flex: 1;
+                max-width: 350px;
+
+                .search-input-container {
+                    display: flex;
+                    align-items: center;
+                    background: $bg-page;
+                    border-radius: $radius-input;
+                    padding: 0 1rem;
+                    height: 46px;
+                    border: 1px solid transparent;
+                    transition: all 0.2s ease;
+
+                    &:focus-within {
+                        background: $bg-card;
+                        border-color: $primary;
+                        box-shadow: 0 0 0 3px rgba($primary, 0.1);
+                    }
+
+                    .search-icon {
+                        color: $grey-dark;
+                        margin-right: 0.75rem;
+                    }
+
+                    .customer-search-input {
+                        flex: 1;
+                        border: none;
+                        background: transparent;
+                        outline: none;
+                        font-size: 0.95rem;
+                        color: $text-card-title;
+                        font-weight: 500;
+                    }
+
+                    .clear-btn {
+                        width: 24px;
+                        height: 24px;
+                        line-height: 24px;
+                        min-height: 24px;
+                        padding: 0;
+                        color: $grey-dark;
+
+                        mat-icon {
+                            font-size: 16px;
+                            width: 16px;
+                            height: 16px;
+                        }
+
+                        &:hover {
+                            color: $danger;
+                            background: rgba($danger, 0.1);
+                        }
+                    }
+                }
+            }
+
+            // Selected Customer Badge
+            .selected-customer-badge {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                background: rgba($primary, 0.08);
+                padding: 8px 16px;
+                border-radius: $radius-chip;
+                border: 1px solid rgba($primary, 0.2);
+
+                .customer-avatar {
+                    width: 32px;
+                    height: 32px;
+                    background: $primary;
+                    color: white;
+                    border-radius: $radius-avatar;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 700;
+                    font-size: 0.9rem;
+                }
+
+                .customer-info {
+                    display: flex;
+                    flex-direction: column;
+
+                    .name {
+                        font-weight: 600;
+                        color: $text-card-title;
+                        font-size: 0.9rem;
+                    }
+
+                    .code {
+                        font-size: 0.75rem;
+                        color: $text-body;
+                    }
+                }
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .actions-section {
+            display: flex;
+            gap: 0.75rem;
+        }
+    }
+
+    // New 2-Column Layout
+    .pos-main-content {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+        padding: 1.5rem;
+        gap: 1.5rem;
+
+        // Left Side: Cart
+        .cart-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: $bg-card;
+            border-radius: $radius-card;
+            box-shadow: $shadow-card;
+            overflow: hidden;
+            border: $border-card;
+
+            .product-entry-bar {
+                padding: 1.25rem;
+                background: $bg-page;
+                border-bottom: $border-card;
+                display: flex;
+                align-items: center;
+
+                .search-icon {
+                    color: $primary;
+                    margin-right: 1rem;
+                }
+
+                .product-input {
+                    width: 100%;
+                    border: none;
+                    background: transparent;
+                    font-size: 1.2rem;
+                    outline: none;
+                    color: $text-card-title;
+                    font-weight: 500;
+                }
+            }
+
+            .invoice-table-wrapper {
+                flex: 1;
+                overflow-y: auto;
+
+                .invoice-table {
+                    width: 100%;
+                    border-collapse: collapse;
+
+                    th {
+                        position: sticky;
+                        top: 0;
+                        background: $bg-page;
+                        padding: 1rem;
+                        text-align: left;
+                        font-size: 0.8rem;
+                        text-transform: uppercase;
+                        color: $text-body;
+                        font-weight: 600;
+                        border-bottom: $border-table;
+                        z-index: 1;
+                    }
+
+                    td {
+                        padding: 1rem;
+                        border-bottom: $border-table;
+                        vertical-align: middle;
+
+                        &.numeric {
+                            font-family: $font-family;
+                            font-weight: 500;
+                        }
+                    }
+
+                    .qty-stepper {
+                        display: inline-flex;
+                        align-items: center;
+                        background: $bg-page;
+                        border-radius: $radius-btn;
+                        padding: 2px;
+
+                        button {
+                            background: transparent;
+                            border: none;
+                            width: 28px;
+                            height: 28px;
+                            cursor: pointer;
+                            color: $text-card-title;
+                            font-size: 1.2rem;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+
+                            &:hover {
+                                background: rgba($primary, 0.1);
+                            }
+                        }
+
+                        input {
+                            width: 50px;
+                            background: $bg-card;
+                            border: none;
+                            border-radius: $radius-badge;
+                            text-align: center;
+                            font-weight: 600;
+                            height: 24px;
+                            margin: 0 4px;
+                            color: $text-card-title;
+                        }
+                    }
+
+                    .discount-input {
+                        width: 50px;
+                        background: $bg-page;
+                        border: 1px solid transparent;
+                        border-radius: $radius-btn;
+                        text-align: center;
+                        font-weight: 600;
+                        height: 32px;
+                        margin: 0 auto;
+                        display: block; // Ensure centering works
+                        color: $text-card-title;
+                        transition: all 0.2s;
+
+                        &:focus {
+                            background: $bg-card;
+                            border-color: $primary;
+                            outline: none;
+                        }
+
+                        &.locked {
+                            background-color: $bg-page;
+                            color: $text-body;
+                            cursor: not-allowed;
+                            pointer-events: none;
+                            border: 1px solid transparent;
+                        }
+                    }
+
+                    .empty-state {
+                        padding: 5rem 0;
+                        text-align: center;
+                        color: $text-muted;
+                        opacity: 0.5;
+
+                        mat-icon {
+                            font-size: 64px;
+                            width: 64px;
+                            height: 64px;
+                        }
+                    }
+
+                    // Item description cell styling
+                    .cell-desc {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 2px;
+
+                        .main-text {
+                            font-weight: 600;
+                            color: $text-card-title;
+                            font-size: 0.95rem;
+                        }
+
+                        .formula-text {
+                            font-size: 0.8rem;
+                            color: $primary;
+                            font-weight: 500;
+                            margin-bottom: 2px;
+                        }
+
+                        .sub-text {
+                            font-size: 0.75rem;
+                            color: $text-body;
+                            opacity: 0.8;
+                        }
+                    }
+
+                    // Text alignment utilities
+                    .text-right {
+                        text-align: right;
+                        color: $text-card-title;
+                    }
+
+                    .text-center {
+                        text-align: center;
+                        color: $text-card-title;
+                    }
+
+                    .font-weight-bold {
+                        font-weight: 700;
+                    }
+
+                    // Delete button
+                    .icon-btn-danger {
+                        background: transparent;
+                        border: none;
+                        cursor: pointer;
+                        color: $danger;
+                        padding: 4px;
+                        border-radius: 4px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+
+                        mat-icon {
+                            font-size: 20px;
+                            width: 20px;
+                            height: 20px;
+                        }
+
+                        &:hover {
+                            background: rgba($danger, 0.1);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Right Side: Summary
+        .summary-section {
+            width: 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+
+            .summary-card {
+                background: $bg-card;
+                border-radius: $radius-card;
+                box-shadow: $shadow-card;
+                padding: 1.5rem;
+                border: $border-card;
+
+                h4 {
+                    margin: 0 0 1.5rem;
+                    color: $text-card-title;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    font-size: 0.9rem;
+                    letter-spacing: 1px;
+                }
+
+                .totals-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1rem;
+
+                    .total-item {
+                        display: flex;
+                        justify-content: space-between;
+                        color: $text-body;
+                        font-size: 1rem;
+
+                        &.discount {
+                            color: $danger;
+                        }
+
+                        &.tax {
+                            color: $text-card-title;
+                        }
+
+                        .value {
+                            font-weight: 600;
+                            color: $text-card-title;
+                        }
+                    }
+
+                    .grand-total {
+                        margin-top: 1rem;
+                        padding-top: 1.5rem;
+                        border-top: 2px dashed lighten($grey-light, 10%);
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+
+                        .label {
+                            font-weight: 700;
+                            color: $text-card-title;
+                            font-size: 1.2rem;
+                        }
+
+                        .value {
+                            font-weight: 800;
+                            color: $primary;
+                            font-size: 1.8rem;
+                        }
+                    }
+                }
+            }
+
+            .process-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+
+                // Action Buttons Group (Hold, Recall, Pay)
+                .action-buttons-group {
+                    display: flex;
+                    gap: 0.75rem;
+
+                    .action-btn {
+                        height: 50px;
+                        font-weight: 600;
+                        flex: 1; // Distribute space
+                        white-space: nowrap;
+
+                        mat-icon {
+                            margin-right: 6px;
+                            width: 20px;
+                            height: 20px;
+                            font-size: 20px;
+                        }
+                    }
+
+                    .pay-btn {
+                        flex: 1.5; // Make pay button larger
+                        height: 50px;
+                        font-size: 1rem;
+                        font-weight: 700;
+                        border-radius: $radius-btn;
+                        background: linear-gradient(118deg, $primary, rgba($primary, 0.7));
+                        box-shadow: $shadow-btn-raised;
+                        border: none;
+                        color: white;
+
+                        &:hover:not(:disabled) {
+                            box-shadow: 0 8px 20px 0 rgba($primary, 0.4);
+                        }
+
+                        &:disabled {
+                            background: $grey-light;
+                            box-shadow: none;
+                        }
+
+                        mat-icon {
+                            margin-right: 8px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Receipt Overlay Styles
+.receipt-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+
+    .receipt-paper {
+        background: #fff;
+        width: 340px;
+        max-height: 85vh;
+        overflow-y: auto;
+        border-radius: 8px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 24px 20px;
+        font-family: 'Courier New', 'Lucida Console', monospace;
+        font-size: 13px;
+        color: #000;
+        animation: slideUp 0.3s ease;
+
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 12px;
+
+            h3 {
+                margin: 0;
+                font-size: 20px;
+                font-weight: 800;
+                letter-spacing: 1px;
+            }
+
+            p {
+                margin: 2px 0;
+                font-size: 11px;
+                color: #555;
+            }
+        }
+
+        .receipt-meta {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #aaa;
+
+            .row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 3px;
+                font-size: 11px;
+            }
+        }
+
+        .receipt-divider {
+            text-align: center;
+            color: #ccc;
+            font-size: 10px;
+            letter-spacing: 2px;
+            margin: 6px 0;
+            overflow: hidden;
+        }
+
+        .receipt-items {
+            margin-bottom: 8px;
+
+            .item-header {
+                display: flex;
+                font-weight: 700;
+                font-size: 11px;
+                border-bottom: 1px dashed #aaa;
+                padding-bottom: 4px;
+                margin-bottom: 6px;
+
+                .col-name {
+                    flex: 2;
+                }
+
+                .col-qty {
+                    flex: 1;
+                    text-align: center;
+                }
+
+                .col-price {
+                    flex: 1;
+                    text-align: right;
+                }
+            }
+
+            .item-row {
+                margin-bottom: 8px;
+
+                .item-line-1 {
+                    font-weight: 600;
+                    font-size: 12px;
+                    margin-bottom: 2px;
+                }
+
+                .item-line-2 {
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 11px;
+                    color: #444;
+                }
+            }
+        }
+
+        .receipt-totals {
+            border-top: 1px dashed #aaa;
+            padding-top: 8px;
+
+            .row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 4px;
+                font-size: 12px;
+            }
+
+            .grand-total {
+                margin-top: 8px;
+                padding-top: 8px;
+                border-top: 2px dashed #000;
+                display: flex;
+                justify-content: space-between;
+                font-size: 18px;
+                font-weight: 800;
+
+                .label {
+                    color: #000;
+                }
+
+                .value {
+                    color: $primary;
+                }
+            }
+
+            .payment-info {
+                margin-top: 8px;
+
+                .change-row {
+                    color: $primary;
+                    font-size: 13px;
+                }
+            }
+        }
+
+        .receipt-footer {
+            text-align: center;
+            margin-top: 16px;
+            padding-top: 8px;
+            border-top: 1px dashed #aaa;
+            font-size: 10px;
+            color: #777;
+
+            p {
+                margin: 3px 0;
+            }
+        }
+
+        .receipt-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #eee;
+
+            button {
+                flex: 1;
+                height: 44px;
+                font-weight: 600;
+                font-family: inherit;
+                border-radius: 8px;
+
+                mat-icon {
+                    margin-right: 6px;
+                    font-size: 18px;
+                    width: 18px;
+                    height: 18px;
+                    vertical-align: middle;
+                }
+            }
+        }
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Dialog Styles
+::ng-deep {
+    .held-bills-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 0.5rem 0;
+        max-height: 400px;
+        overflow-y: auto;
+
+        .held-bill-card {
+            background: #ffffff;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &:hover {
+                border-color: $primary;
+                background: rgba($primary, 0.04);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            }
+
+            .bill-header {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 0.5rem;
+
+                .customer-name {
+                    font-weight: 600;
+                    color: $text-card-title;
+                    font-size: 1rem;
+                }
+
+                .bill-time {
+                    color: $text-body;
+                    font-size: 0.85rem;
+                    background: #f1f1f1;
+                    padding: 2px 8px;
+                    border-radius: 4px;
+                }
+            }
+
+            .bill-details {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                .bill-amount {
+                    font-weight: 700;
+                    color: $primary;
+                    font-size: 1.1rem;
+                }
+
+                .bill-items {
+                    font-size: 0.85rem;
+                    color: $text-body;
+                }
+            }
+
+            .bill-reason {
+                margin-top: 0.75rem;
+                font-size: 0.85rem;
+                color: $text-muted;
+                font-style: italic;
+                padding-top: 0.5rem;
+                border-top: 1px dashed #e1e4e8;
+            }
+        }
+    }
+
+    .no-records {
+        text-align: center;
+        padding: 2rem;
+        color: $text-muted;
+        font-style: italic;
+    }
+}
+
+// Global Mat Autocomplete Overrides for POS
+::ng-deep {
+    .product-autocomplete-panel {
+        min-width: 400px !important;
+        border-radius: 8px !important;
+        margin-top: 8px !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+
+        .mat-mdc-option {
+            height: auto !important;
+            min-height: 60px !important;
+            padding: 12px 16px !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+            &:last-child {
+                border-bottom: none;
+            }
+
+            .product-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 16px;
+                width: 100%;
+
+                .prod-info {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 2px;
+                    flex: 1;
+
+                    .prod-name {
+                        font-weight: 700;
+                        color: #333;
+                        font-size: 1rem;
+                        line-height: 1.2;
+                    }
+
+                    .prod-formula {
+                        font-size: 0.85rem;
+                        color: $primary;
+                        font-weight: 500;
+                    }
+
+                    .prod-sku {
+                        font-size: 0.75rem;
+                        color: #888;
+                    }
+                }
+
+                .prod-meta {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-end;
+                    gap: 4px;
+
+                    .price {
+                        font-weight: 800;
+                        color: #222;
+                        font-size: 1.1rem;
+                    }
+
+                    .stock-badge {
+                        font-size: 0.75rem;
+                        padding: 2px 8px;
+                        border-radius: 4px;
+                        background: rgba($success, 0.1);
+                        color: $success;
+                        font-weight: 600;
+
+                        &.low {
+                            background: rgba($danger, 0.1);
+                            color: $danger;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

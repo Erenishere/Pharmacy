@@ -1,0 +1,327 @@
+<div class="inventory-reports-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>
+      <mat-icon>analytics</mat-icon>
+      Inventory Reports
+    </h1>
+    <mat-form-field appearance="outline" class="warehouse-filter">
+      <mat-label>Filter by Warehouse</mat-label>
+      <mat-select [(ngModel)]="selectedWarehouseId" (selectionChange)="onWarehouseChange()">
+        <mat-option value="">All Warehouses</mat-option>
+        <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse._id">
+          {{ warehouse.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Tabs -->
+  <mat-tab-group (selectedIndexChange)="onTabChange($event)" [selectedIndex]="activeTab" class="report-tabs">
+    <!-- Summary Tab -->
+    <mat-tab label="Summary">
+      <div class="tab-content">
+        <div *ngIf="loading.summary" class="loading-center">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        <div *ngIf="!loading.summary && summaryData" class="summary-grid">
+          <mat-card class="summary-card blue">
+            <mat-icon>inventory_2</mat-icon>
+            <div class="card-info">
+              <span class="card-value">{{ formatNumber(summaryData.totalItems || summaryData.totalProducts || 0) }}</span>
+              <span class="card-label">Total Items</span>
+            </div>
+          </mat-card>
+          <mat-card class="summary-card green">
+            <mat-icon>local_shipping</mat-icon>
+            <div class="card-info">
+              <span class="card-value">{{ formatNumber(summaryData.totalQuantity || summaryData.totalStock || 0) }}</span>
+              <span class="card-label">Total Stock</span>
+            </div>
+          </mat-card>
+          <mat-card class="summary-card purple">
+            <mat-icon>account_balance_wallet</mat-icon>
+            <div class="card-info">
+              <span class="card-value">{{ formatCurrency(summaryData.totalValue || summaryData.inventoryValue || 0) }}</span>
+              <span class="card-label">Total Value</span>
+            </div>
+          </mat-card>
+          <mat-card class="summary-card orange">
+            <mat-icon>warning</mat-icon>
+            <div class="card-info">
+              <span class="card-value">{{ formatNumber(summaryData.lowStockCount || summaryData.lowStock || 0) }}</span>
+              <span class="card-label">Low Stock Items</span>
+            </div>
+          </mat-card>
+          <mat-card class="summary-card red">
+            <mat-icon>error</mat-icon>
+            <div class="card-info">
+              <span class="card-value">{{ formatNumber(summaryData.outOfStockCount || summaryData.outOfStock || 0) }}</span>
+              <span class="card-label">Out of Stock</span>
+            </div>
+          </mat-card>
+          <mat-card class="summary-card teal">
+            <mat-icon>category</mat-icon>
+            <div class="card-info">
+              <span class="card-value">{{ formatNumber(summaryData.totalCategories || summaryData.categories || 0) }}</span>
+              <span class="card-label">Categories</span>
+            </div>
+          </mat-card>
+        </div>
+        <div *ngIf="!loading.summary && !summaryData" class="empty-state">
+          <mat-icon>assessment</mat-icon>
+          <p>No summary data available</p>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Fast Moving Tab -->
+    <mat-tab label="Fast Moving">
+      <div class="tab-content">
+        <div *ngIf="loading.fastMoving" class="loading-center">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        <div *ngIf="!loading.fastMoving">
+          <table class="report-table" *ngIf="fastMovingItems.length > 0">
+            <thead>
+              <tr>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th class="text-right">Total Sold</th>
+                <th class="text-right">Current Stock</th>
+                <th class="text-right">Avg Daily Sales</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of fastMovingItems">
+                <td class="item-code">{{ item.itemCode || item.code || '-' }}</td>
+                <td>{{ item.itemName || item.name || '-' }}</td>
+                <td class="text-right">{{ formatNumber(item.totalSold || item.totalQuantity || 0) }}</td>
+                <td class="text-right">{{ formatNumber(item.currentStock || item.stock || 0) }}</td>
+                <td class="text-right">{{ formatNumber(item.avgDailySales || item.avgDaily || 0) }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="empty-state" *ngIf="fastMovingItems.length === 0">
+            <mat-icon>trending_up</mat-icon>
+            <p>No fast moving items found</p>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Slow Moving Tab -->
+    <mat-tab label="Slow Moving">
+      <div class="tab-content">
+        <div *ngIf="loading.slowMoving" class="loading-center">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        <div *ngIf="!loading.slowMoving">
+          <table class="report-table" *ngIf="slowMovingItems.length > 0">
+            <thead>
+              <tr>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th class="text-right">Days Since Last Sale</th>
+                <th class="text-right">Current Stock</th>
+                <th class="text-right">Stock Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of slowMovingItems">
+                <td class="item-code">{{ item.itemCode || item.code || '-' }}</td>
+                <td>{{ item.itemName || item.name || '-' }}</td>
+                <td class="text-right">{{ item.daysSinceLastSale || item.daysInactive || '-' }}</td>
+                <td class="text-right">{{ formatNumber(item.currentStock || item.stock || 0) }}</td>
+                <td class="text-right">{{ formatCurrency(item.stockValue || item.value || 0) }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="empty-state" *ngIf="slowMovingItems.length === 0">
+            <mat-icon>trending_down</mat-icon>
+            <p>No slow moving items found</p>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Dead Stock Tab -->
+    <mat-tab label="Dead Stock">
+      <div class="tab-content">
+        <div *ngIf="loading.deadStock" class="loading-center">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        <div *ngIf="!loading.deadStock">
+          <table class="report-table" *ngIf="deadStockItems.length > 0">
+            <thead>
+              <tr>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th class="text-right">Days Inactive</th>
+                <th class="text-right">Quantity</th>
+                <th class="text-right">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of deadStockItems">
+                <td class="item-code">{{ item.itemCode || item.code || '-' }}</td>
+                <td>{{ item.itemName || item.name || '-' }}</td>
+                <td class="text-right">{{ item.daysInactive || item.daysSinceLastMovement || '-' }}</td>
+                <td class="text-right">{{ formatNumber(item.quantity || item.stock || 0) }}</td>
+                <td class="text-right">{{ formatCurrency(item.value || item.stockValue || 0) }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="empty-state" *ngIf="deadStockItems.length === 0">
+            <mat-icon>inventory</mat-icon>
+            <p>No dead stock items found</p>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Low Stock Tab -->
+    <mat-tab label="Low Stock">
+      <div class="tab-content">
+        <div *ngIf="loading.lowStock" class="loading-center">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        <div *ngIf="!loading.lowStock">
+          <table class="report-table" *ngIf="lowStockItems.length > 0">
+            <thead>
+              <tr>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th class="text-right">Current Stock</th>
+                <th class="text-right">Min Level</th>
+                <th class="text-right">Reorder Level</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of lowStockItems">
+                <td class="item-code">{{ item.itemCode || item.code || '-' }}</td>
+                <td>{{ item.itemName || item.name || '-' }}</td>
+                <td class="text-right">{{ formatNumber(item.currentStock || item.quantity || 0) }}</td>
+                <td class="text-right">{{ formatNumber(item.minimumLevel || item.minLevel || 0) }}</td>
+                <td class="text-right">{{ formatNumber(item.reorderLevel || item.reorderPoint || 0) }}</td>
+                <td>
+                  <mat-chip [class]="(item.currentStock || item.quantity || 0) === 0 ? 'status-out' : 'status-low'">
+                    {{ (item.currentStock || item.quantity || 0) === 0 ? 'Out of Stock' : 'Low Stock' }}
+                  </mat-chip>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="empty-state" *ngIf="lowStockItems.length === 0">
+            <mat-icon>check_circle</mat-icon>
+            <p>All items are well-stocked</p>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Aging Tab -->
+    <mat-tab label="Stock Aging">
+      <div class="tab-content">
+        <div *ngIf="loading.aging" class="loading-center">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        <div *ngIf="!loading.aging && agingData">
+          <div class="aging-summary" *ngIf="agingData.summary || agingData.brackets || agingData">
+            <mat-card class="aging-card" *ngFor="let bracket of (agingData.brackets || agingData.summary || [])">
+              <div class="bracket-label">{{ bracket.label || bracket.range || bracket.bracket || 'N/A' }}</div>
+              <div class="bracket-value">{{ formatNumber(bracket.count || bracket.items || bracket.quantity || 0) }} items</div>
+              <div class="bracket-amount">{{ formatCurrency(bracket.value || bracket.totalValue || 0) }}</div>
+            </mat-card>
+          </div>
+          <div *ngIf="agingData.items?.length" class="aging-items-table">
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th class="text-right">Quantity</th>
+                  <th class="text-right">Age (Days)</th>
+                  <th class="text-right">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of agingData.items">
+                  <td>{{ item.itemName || item.name || '-' }}</td>
+                  <td class="text-right">{{ formatNumber(item.quantity || 0) }}</td>
+                  <td class="text-right">{{ item.ageDays || item.age || '-' }}</td>
+                  <td class="text-right">{{ formatCurrency(item.value || 0) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div *ngIf="!loading.aging && !agingData" class="empty-state">
+          <mat-icon>hourglass_empty</mat-icon>
+          <p>No aging data available</p>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Valuation Tab -->
+    <mat-tab label="Valuation">
+      <div class="tab-content">
+        <div class="valuation-controls">
+          <mat-form-field appearance="outline">
+            <mat-label>Valuation Method</mat-label>
+            <mat-select [(ngModel)]="valuationMethod" (selectionChange)="loadValuation()">
+              <mat-option value="weighted_average">Weighted Average</mat-option>
+              <mat-option value="fifo">FIFO</mat-option>
+              <mat-option value="lifo">LIFO</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div *ngIf="loading.valuation" class="loading-center">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        <div *ngIf="!loading.valuation && valuationData">
+          <div class="valuation-summary">
+            <mat-card class="summary-card purple">
+              <mat-icon>account_balance_wallet</mat-icon>
+              <div class="card-info">
+                <span class="card-value">{{ formatCurrency(valuationData.totalValue || valuationData.totalInventoryValue || 0) }}</span>
+                <span class="card-label">Total Inventory Value</span>
+              </div>
+            </mat-card>
+            <mat-card class="summary-card blue">
+              <mat-icon>inventory_2</mat-icon>
+              <div class="card-info">
+                <span class="card-value">{{ formatNumber(valuationData.totalItems || valuationData.itemCount || 0) }}</span>
+                <span class="card-label">Items Valued</span>
+              </div>
+            </mat-card>
+          </div>
+          <div *ngIf="valuationData.items?.length" class="valuation-items-table">
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th class="text-right">Quantity</th>
+                  <th class="text-right">Unit Cost</th>
+                  <th class="text-right">Total Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of valuationData.items">
+                  <td>{{ item.itemName || item.name || '-' }}</td>
+                  <td class="text-right">{{ formatNumber(item.quantity || 0) }}</td>
+                  <td class="text-right">{{ formatCurrency(item.unitCost || item.avgCost || 0) }}</td>
+                  <td class="text-right">{{ formatCurrency(item.totalValue || item.value || 0) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div *ngIf="!loading.valuation && !valuationData" class="empty-state">
+          <mat-icon>account_balance</mat-icon>
+          <p>No valuation data available</p>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

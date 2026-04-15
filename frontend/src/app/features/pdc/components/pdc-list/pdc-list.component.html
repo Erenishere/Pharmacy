@@ -1,0 +1,173 @@
+<div class="list-page-container pdc-list-page">
+  <div class="list-page-header">
+    <div class="header-content">
+      <h1 class="page-title"><mat-icon>account_balance</mat-icon> Post-Dated Cheques (PDC)</h1>
+      <p class="page-subtitle">Monitoring and clearing post-dated payment instruments</p>
+    </div>
+  </div>
+
+  <div class="dashboard-stats-grid">
+    <div class="stat-card" style="--stat-color: #ff9f43">
+      <div class="stat-icon-wrapper">
+        <mat-icon>hourglass_empty</mat-icon>
+      </div>
+      <div class="stat-details">
+        <h3 class="stat-value">{{ totalPending }}</h3>
+        <p class="stat-label">Pending</p>
+        <p class="stat-trend highlight">PKR {{ formatCurrency(totalPendingAmount) }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card" style="--stat-color: #28c76f">
+      <div class="stat-icon-wrapper">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <div class="stat-details">
+        <h3 class="stat-value">{{ totalCleared }}</h3>
+        <p class="stat-label">Cleared</p>
+        <p class="stat-trend">Successfully Processed</p>
+      </div>
+    </div>
+
+    <div class="stat-card" style="--stat-color: #ea5455">
+      <div class="stat-icon-wrapper">
+        <mat-icon>cancel</mat-icon>
+      </div>
+      <div class="stat-details">
+        <h3 class="stat-value">{{ totalBounced }}</h3>
+        <p class="stat-label">Bounced</p>
+        <p class="stat-trend danger">Action Required</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="list-page-card">
+    <div class="list-filters-section">
+      <div class="filter-group-primary">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Filter by Status</mat-label>
+          <mat-select [formControl]="statusFilter" (selectionChange)="loadPDCs()">
+            @for (opt of statusOptions; track opt.value) {
+              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="filter-group-secondary">
+        <button mat-icon-button (click)="loadPDCs()" matTooltip="Refresh List" class="refresh-btn">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="list-loading-overlay">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading PDC records...</p>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="dataSource" class="data-table">
+
+          <ng-container matColumnDef="receiptNumber">
+            <th mat-header-cell *matHeaderCellDef>Receipt #</th>
+            <td mat-cell *matCellDef="let row">
+              <strong>{{ row.receiptNumber }}</strong>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="customer">
+            <th mat-header-cell *matHeaderCellDef>Customer</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="customer-info">
+                <span class="name">{{ row.customerId?.name || '—' }}</span>
+                <small class="code">{{ row.customerId?.code || '' }}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="bank">
+            <th mat-header-cell *matHeaderCellDef>Bank & Cheque Details</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="bank-details">
+                <span class="bank">{{ row.bankDetails?.bankName || '—' }}</span>
+                <span class="cheque-no">#{{ row.bankDetails?.chequeNumber || '—' }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="chequeNumber">
+            <th mat-header-cell *matHeaderCellDef>Cheque #</th>
+            <td mat-cell *matCellDef="let row">{{ row.bankDetails?.chequeNumber || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="chequeDate">
+            <th mat-header-cell *matHeaderCellDef>Due Date</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="date-chip" [class.overdue]="isOverdue(row.bankDetails?.chequeDate) && row.chequeStatus === 'pending'">
+                {{ row.bankDetails?.chequeDate | date:'dd/MM/yyyy' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
+            <td mat-cell *matCellDef="let row" class="text-right amount-cell font-bold">
+              PKR {{ formatCurrency(row.amount) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="status-stack">
+                <span class="status-chip" [ngClass]="row.chequeStatus">
+                  {{ row.chequeStatus | titlecase }}
+                </span>
+                @if (row.bounceReason) {
+                  <small class="bounce-hint" [matTooltip]="row.bounceReason">{{ row.bounceReason }}</small>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+            <td mat-cell *matCellDef="let row" class="text-center">
+              @if (row.chequeStatus === 'pending') {
+                <div class="action-buttons-inline">
+                  <button mat-icon-button class="clear-btn"
+                    [disabled]="processingId === row._id"
+                    (click)="clearPDC(row)"
+                    matTooltip="Mark as Cleared">
+                    <mat-icon>check_circle</mat-icon>
+                  </button>
+                  <button mat-icon-button class="bounce-btn"
+                    [disabled]="processingId === row._id"
+                    (click)="bouncePDC(row)"
+                    matTooltip="Mark as Bounced">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </div>
+              } @else {
+                <mat-icon class="done-icon" [ngClass]="row.chequeStatus">
+                  {{ row.chequeStatus === 'cleared' ? 'verified' : 'error' }}
+                </mat-icon>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.row-bounced]="row.chequeStatus === 'bounced'"></tr>
+        </table>
+
+        @if (dataSource.data.length === 0) {
+          <div class="list-empty-state">
+            <mat-icon>account_balance</mat-icon>
+            <p>No post-dated cheques found</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

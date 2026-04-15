@@ -1,0 +1,67 @@
+@import 'styles/vuexy-vars';
+@import 'styles/shared-list-styles';
+
+:host {
+  display: block;
+}
+
+.data-table-container {
+  position: relative;
+  min-height: 200px;
+  background-color: transparent !important;
+  border-radius: 8px;
+  border: none !important; // Cards handle borders globally
+}
+
+.table-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.6);
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 
+   The main table logic is now unified with the global design system.
+   This ensures that the "Perfect Hover" and row spacing are consistent 
+   across ALL modules using this shared component.
+*/
+.data-table {
+  @include data-table;
+  
+  /* Reset some internal material-table constraints */
+  width: 100%;
+}
+
+.numeric-val {
+  font-family: 'Inter', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.fw-bold {
+  font-weight: 500;
+}
+
+.status-chip-sm {
+  @include status-chip-base;
+}
+
+/* Base Loader */
+.loader {
+  border: 4px solid rgba($purple, 0.2);
+  border-left-color: $purple;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin { 
+  0% { transform: rotate(0deg); } 
+  100% { transform: rotate(360deg); } 
+}
+
+/* Paginator Standardization */
+@include paginator;

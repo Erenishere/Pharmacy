@@ -1,0 +1,39 @@
+@import '../../../styles/report-common';
+
+.movement-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.movement-in {
+    background: rgba($success, 0.12);
+    color: $success;
+  }
+
+  &.movement-out {
+    background: rgba($danger, 0.12);
+    color: $danger;
+  }
+
+  &.movement-transfer {
+    background: rgba($info, 0.12);
+    color: $info;
+  }
+
+  &.movement-adjustment {
+    background: rgba($warning, 0.12);
+    color: $warning;
+  }
+}
+
+.positive {
+  color: $success;
+}
+
+.negative {
+  color: $danger;
+}
