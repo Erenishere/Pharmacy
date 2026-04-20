@@ -754,3 +754,39 @@ p {
     border-color: #EBE9F1 !important;
     color: #6E6B7B !important;
 }
+
+/* ===== Global mat-option styling ===== */
+.mat-mdc-option {
+    background-color: var(--color-bg-card, #FFFFFF) !important;
+    color: var(--color-text-body, #6E6B7B) !important;
+    transition: color 0.2s ease, padding-left 0.2s ease !important;
+}
+
+.mat-mdc-option:hover,
+.mat-mdc-option:focus,
+.mat-mdc-option.mat-mdc-option-active,
+.mat-mdc-option.mdc-list-item--selected {
+    background-color: var(--color-bg-card, #FFFFFF) !important;
+    color: var(--color-primary, #7367F0) !important;
+}
+
+.mat-mdc-option:hover .mdc-list-item__primary-text,
+.mat-mdc-option.mat-mdc-option-active .mdc-list-item__primary-text,
+.mat-mdc-option.mdc-list-item--selected .mdc-list-item__primary-text {
+    color: var(--color-primary, #7367F0) !important;
+}
+
+/* For dark mode support if enabled later */
+@media (prefers-color-scheme: dark) {
+    .mat-mdc-option {
+        background-color: var(--color-bg-card, #283046) !important;
+        color: var(--color-text-body, #B4B7BD) !important;
+    }
+    .mat-mdc-option:hover,
+    .mat-mdc-option:focus,
+    .mat-mdc-option.mat-mdc-option-active,
+    .mat-mdc-option.mdc-list-item--selected {
+        background-color: var(--color-bg-card, #283046) !important;
+        color: var(--color-primary, #7367F0) !important;
+    }
+}
