@@ -6,6 +6,34 @@
 
 .list-page-header {
   @include page-header;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .btn-create, .btn-export {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-export {
+      transition: all 0.3s ease;
+      &:hover {
+        background-color: rgba(var(--color-primary-rgb), 0.05);
+        color: var(--color-primary);
+      }
+      &:active {
+        transform: scale(0.98);
+      }
+    }
+  }
 }
 
 // ─── Main List Card ────────────────────────────────────────────
@@ -14,12 +42,42 @@
   overflow: hidden;
 }
 
+.list-filters-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 24px;
+  background: var(--color-bg-card);
+  border-bottom: 1px solid var(--color-border);
+
+  .filter-group-primary {
+    flex: 1 1 300px;
+    display: flex;
+  }
+
+  .filter-group-secondary {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+    flex: 2 1 500px;
+  }
+
+  .search-field {
+    width: 100%;
+  }
+}
+
 .filter-field {
-  min-width: 180px;
+  flex: 1 1 200px;
 }
 
 .filter-checkbox {
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  height: 56px; // match mat-form-field height
 }
 
 // ─── Loading Overlay ──────────────────────────────────────────
@@ -56,7 +114,6 @@
       }
       
       .mat-mdc-header-row {
-        background-color: $primary !important;
         .mat-mdc-header-cell {
           color: #ffffff !important;
           font-weight: 600;
@@ -64,7 +121,7 @@
       }
 
       .mat-mdc-row:hover {
-        background-color: rgba($primary, 0.05) !important;
+        background-color: rgba(var(--color-primary-rgb), 0.05) !important;
       }
       
       .low-stock-text {

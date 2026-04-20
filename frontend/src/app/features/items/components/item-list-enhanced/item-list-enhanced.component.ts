@@ -303,6 +303,12 @@ export class ItemListEnhancedComponent implements OnInit {
     });
   }
 
+  onExport(): void {
+    console.log('Export functionality triggered');
+    // Implement actual export logic here
+    // For example, downloading CSV or Excel of the current items
+  }
+
   viewItem(item: ItemDisplay): void {
     // Open view dialog or navigate to detail page
     this.toastService.info('View item details: ' + item.name);

@@ -46,7 +46,7 @@
   // ============================================
   .mat-mdc-header-row,
   thead tr {
-    background: linear-gradient(135deg, var(--color-bg-page) 0%, rgba(var(--color-primary-rgb), 0.86) 100%) !important;
+    background: linear-gradient(135deg, var(--color-primary) 0%, rgba(var(--color-primary-rgb), 0.86) 100%) !important;
     height: var(--table-header-height);
     
     th,
@@ -154,7 +154,7 @@
 // ============================================
 @mixin paginator {
   margin-top: var(--space-4);
-  background: linear-gradient(135deg, var(--color-bg-page) 0%, rgba(var(--color-primary-rgb), 0.86) 100%) !important;
+  background: linear-gradient(135deg, var(--color-primary) 0%, rgba(var(--color-primary-rgb), 0.86) 100%) !important;
   color: var(--color-text-inverse) !important;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);

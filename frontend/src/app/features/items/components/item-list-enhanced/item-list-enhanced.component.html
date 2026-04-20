@@ -6,8 +6,11 @@
       <p class="page-description">Manage your inventory items, pricing, and stock levels</p>
     </div>
     <div class="header-actions">
-      <button mat-raised-button class="btn-create" (click)="openCreateDialog()">
+      <button mat-raised-button color="primary" class="btn-create" (click)="openCreateDialog()">
         <mat-icon>add</mat-icon> New Item
+      </button>
+      <button mat-stroked-button class="btn-export" style="margin-left: 12px;" (click)="onExport()">
+        <mat-icon>file_download</mat-icon> Export
       </button>
     </div>
   </div>
@@ -17,7 +20,7 @@
     <div class="list-filters-section">
       <div class="filter-group-primary">
         <!-- Search -->
-        <mat-form-field appearance="outline" class="search-field">
+        <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
           <mat-label>Search Inventory</mat-label>
           <input matInput [(ngModel)]="searchQuery" (ngModelChange)="onSearch()"
                  placeholder="Search by name, code, barcode...">
@@ -27,7 +30,7 @@
 
       <div class="filter-group-secondary">
         <!-- Company Filter -->
-        <mat-form-field appearance="outline" class="filter-field">
+        <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
           <mat-label>Company</mat-label>
           <mat-select [(ngModel)]="selectedCompany" (ngModelChange)="onFilterChange()">
             <mat-option [value]="''">All Companies</mat-option>
@@ -38,7 +41,7 @@
         </mat-form-field>
 
         <!-- Category Filter -->
-        <mat-form-field appearance="outline" class="filter-field">
+        <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
           <mat-label>Category</mat-label>
           <mat-select [(ngModel)]="selectedCategory" (ngModelChange)="onFilterChange()">
             <mat-option [value]="''">All Categories</mat-option>
