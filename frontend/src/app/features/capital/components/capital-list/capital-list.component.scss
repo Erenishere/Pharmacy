@@ -5,9 +5,8 @@
   @include paginator;
 
   .form-card {
-    @include layered-glass;
+    @include list-card;
     padding: 24px;
-    border-radius: 12px;
     margin-bottom: 24px;
 
     .card-header {
@@ -45,7 +44,7 @@
       .save-btn {
         height: 44px;
         padding: 0 32px;
-        background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+        background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.8));
         box-shadow: 0 4px 12px rgba($purple, 0.3);
       }
     }
@@ -63,7 +62,7 @@
       border-radius: 4px;
       font-weight: 700;
       width: fit-content;
-      &.proprietor { background: rgba($purple, 0.1); color: $purple; }
+      &.proprietor { background: rgba(var(--color-bg-page), 0.1); color: $purple; }
       &.investor { background: rgba($info, 0.1); color: $info; }
     }
   }
@@ -91,4 +90,11 @@
     .edit-btn { color: $purple; }
     .del-btn { color: $danger; }
   }
+  @include page-container;
+  @include page-header;
+
+  .dashboard-stats-grid { @include dashboard-stats-grid; }
+
+  .list-page-card { @include list-card; }
 }
+

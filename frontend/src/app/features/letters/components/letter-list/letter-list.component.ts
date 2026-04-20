@@ -18,6 +18,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { LetterService } from '../../services/letter.service';
 import { Letter } from '../../models/letter.model';
 import { LetterFormDialogComponent } from '../letter-form-dialog/letter-form-dialog.component';
+import { DataTableColumn, TableActionClickEvent } from '../../../../shared/models/data-table.model';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+
 
 @Component({
   selector: 'app-letter-list',
@@ -25,8 +28,9 @@ import { LetterFormDialogComponent } from '../letter-form-dialog/letter-form-dia
   imports: [
     CommonModule, ReactiveFormsModule, MatTableModule, MatPaginatorModule, MatSortModule,
     MatButtonModule, MatIconModule, MatFormFieldModule, MatSelectModule, MatInputModule,
-    MatDialogModule, MatSnackBarModule, MatCardModule, MatChipsModule,
-    MatProgressSpinnerModule, MatTooltipModule
+    MatChipsModule, MatDialogModule, MatSnackBarModule, MatCardModule,
+    MatProgressSpinnerModule, MatTooltipModule,
+    DataTableComponent
   ],
   templateUrl: './letter-list.component.html',
   styleUrl: './letter-list.component.scss'
@@ -35,11 +39,23 @@ export class LetterListComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  displayedColumns = ['date', 'letterType', 'subject', 'account', 'status', 'actions'];
-  dataSource = new MatTableDataSource<Letter>([]);
   loading = false;
   typeFilter = new FormControl('');
   statusFilter = new FormControl('');
+  letters: Letter[] = [];
+
+  tableColumns: DataTableColumn[] = [
+    { key: 'date', label: 'Date', getValue: (row: any) => new Date(row.date).toLocaleDateString(), sortable: true },
+    { key: 'letterType', label: 'Type', getValue: (row: any) => row.letterType?.toUpperCase() },
+    { key: 'subject', label: 'Subject', getCellClass: (row: any) => 'subject-cell' },
+    { key: 'account', label: 'Account', getValue: (row: any) => row.accountId?.name || 'N/A' },
+    { key: 'status', label: 'Status', getCellClass: (row: any) => `status-badge ${row.status?.toLowerCase()}` },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [
+      { icon: 'visibility', label: 'View/Print', actionKey: 'print' },
+      { icon: 'edit', label: 'Edit', actionKey: 'edit' },
+      { icon: 'delete', label: 'Delete', actionKey: 'delete', color: 'warn' }
+    ]}
+  ];
 
   constructor(private letterService: LetterService, private dialog: MatDialog, private snackBar: MatSnackBar) {}
 
@@ -54,10 +70,19 @@ export class LetterListComponent implements OnInit {
     this.letterService.getLetters(filters).subscribe({
       next: (res) => {
         this.loading = false;
-        if (res.success) { this.dataSource.data = res.data; this.dataSource.paginator = this.paginator; this.dataSource.sort = this.sort; }
+        if (res.success) { this.letters = res.data; }
       },
       error: () => { this.loading = false; }
     });
+  }
+
+  onTableAction(event: TableActionClickEvent): void {
+    const row = event.row as Letter;
+    switch(event.action) {
+      case 'print': this.printLetter(row); break;
+      case 'edit': this.openEditDialog(row); break;
+      case 'delete': this.deleteLetter(row); break;
+    }
   }
 
   openCreateDialog(): void {

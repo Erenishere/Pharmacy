@@ -1,29 +1,28 @@
-<div class="list-page-container">
-    <!-- Header -->
+<div class="list-page-container items-enhanced-page">
     <div class="list-page-header">
         <div class="header-content">
-            <h1>Customer Management</h1>
-            <p>Manage and organize all your clients and account titles</p>
+            <h1 class="page-title"><mat-icon>group</mat-icon> Customer Management</h1>
+            <p class="page-subtitle">Manage and organize all your clients and account titles (Total: {{ totalCustomers }})</p>
         </div>
-        <button mat-raised-button color="primary" (click)="openCreateCustomerDialog()">
-            <mat-icon>add</mat-icon>
-            New Customer
-        </button>
+        <div class="header-actions">
+            <button mat-raised-button color="primary" (click)="openCreateCustomerDialog()" class="create-btn">
+                <mat-icon>add</mat-icon>
+                New Customer
+            </button>
+        </div>
     </div>
 
-    <!-- Card Container -->
     <div class="list-page-card">
-        <!-- Filters -->
         <div class="list-filters-section">
-            <!-- Search -->
-            <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Search customers</mat-label>
-                <input matInput [formControl]="searchControl" placeholder="Search by name, code or phone">
-                <mat-icon matPrefix>search</mat-icon>
-            </mat-form-field>
+            <div class="filter-group-primary">
+                <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Search Customers</mat-label>
+                    <input matInput [formControl]="searchControl" placeholder="Search by name, code or phone">
+                    <mat-icon matPrefix>search</mat-icon>
+                </mat-form-field>
+            </div>
 
-            <div class="filter-actions d-flex align-items-center gap-2">
-                <!-- Type Filter -->
+            <div class="filter-group-secondary">
                 <mat-form-field appearance="outline" class="type-filter" subscriptSizing="dynamic">
                     <mat-label>Filter by Type</mat-label>
                     <mat-select [(value)]="selectedType" (selectionChange)="onTypeFilterChange($event.value)">
@@ -35,19 +34,13 @@
                 </mat-form-field>
 
                 <mat-slide-toggle [(ngModel)]="showDeleted" (change)="toggleShowDeleted()" color="primary">
-                    Show Inactive Only
+                    Show Inactive
                 </mat-slide-toggle>
             </div>
         </div>
 
-        <!-- Summary Stats (Optional but standard looks good) -->
-        <div class="list-summary-bar px-4 py-2 border-bottom" *ngIf="!loading">
-            <span class="text-muted"><mat-icon inline="true" class="me-1">business</mat-icon> Showing {{ dataSource.data.length }} of {{ totalCustomers }} customers</span>
-        </div>
-
-        <!-- Generic Reusable Table Component -->
-        <div class="table-wrapper" style="position: relative; min-height: 200px;">
-            <div *ngIf="loading" class="loading-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); display: flex; justify-content: center; align-items: center; z-index: 10;">
+        <div class="table-wrapper">
+            <div *ngIf="loading" class="loading-overlay">
                 <mat-spinner diameter="40"></mat-spinner>
             </div>
 
@@ -55,15 +48,11 @@
                 [data]="dataSource.data"
                 [columns]="tableColumns"
                 [totalItems]="totalCustomers"
-                [totalItems]="totalCustomers"
                 [pageSize]="pageSize"
                 [pageIndex]="pageIndex"
                 (pageChange)="onPageChange($event)"
                 (actionClick)="onTableAction($event)">
-                
-                <!-- If you need custom cell overrides for complex switches (like the Active/Inactive Slide Toggle)
-                     you can add ngProjectAs or ContentChild capabilities to the generic table later! -->
             </app-data-table>
         </div>
     </div>
-</div>
+</div>

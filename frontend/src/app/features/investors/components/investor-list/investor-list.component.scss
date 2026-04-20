@@ -44,7 +44,7 @@ $purple: #867cf0;
     }
 
     button[mat-raised-button] {
-      background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+      background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.8));
       box-shadow: 0 0 10px 1px rgba($purple, 0.4);
       color: #fff;
       font-weight: 500;
@@ -112,7 +112,7 @@ $purple: #867cf0;
   }
 
   &.purple .icon-wrapper {
-    background: linear-gradient(135deg, $purple 0%, rgba($purple, 0.7) 100%);
+    background: linear-gradient(135deg, var(--color-bg-page) 0%, rgba(var(--color-bg-page), 0.7) 100%);
   }
 
   &.success .icon-wrapper {
@@ -198,7 +198,7 @@ $purple: #867cf0;
     }
 
     &:hover {
-      background-color: $purple !important;
+      background-color: var(--color-bg-page) !important;
       box-shadow: 0 8px 24px rgba($purple, 0.35);
       transform: translateY(-2px);
 
@@ -293,7 +293,7 @@ $purple: #867cf0;
   border: 1px solid rgba($purple, 0.5);
 
   &:hover {
-    background: rgba($purple, 0.08);
+    background: rgba(var(--color-bg-page), 0.08);
   }
 }
 

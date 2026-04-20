@@ -474,22 +474,18 @@ export class DashboardComponent implements OnInit {
   }
 
   formatCurrency(value: number): string {
-    return new Intl.NumberFormat('en-PK', {
-      style: 'currency',
-      currency: 'PKR',
+    return `Rs. ${new Intl.NumberFormat('en-PK', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(value || 0);
+    }).format(value || 0)}`;
   }
 
   formatCompactCurrency(value: number): string {
-    return new Intl.NumberFormat('en-PK', {
-      style: 'currency',
-      currency: 'PKR',
+    return `Rs. ${new Intl.NumberFormat('en-PK', {
       notation: 'compact',
       minimumFractionDigits: 0,
       maximumFractionDigits: 1,
-    }).format(value || 0);
+    }).format(value || 0)}`;
   }
 
   formatNumber(value: number): string {

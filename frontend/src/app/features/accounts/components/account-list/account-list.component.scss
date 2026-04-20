@@ -1,74 +1,88 @@
-@import '../../../../../styles/vuexy-vars';
+@import '../../../../../styles/shared-list-styles';
+
+$p-bg: #f8f7fa;
+$p-border: #ebe9f1;
 
 :host {
-    display: block;
+  display: block;
+  background: $p-bg;
+  min-height: 100vh;
 }
 
-/* 
-   Global utility classes handle most of the layout and styling:
-   .list-page-container, .list-page-header, .list-page-card, .list-filters-section
-*/
+.list-page-container {
+  @include page-container;
+}
 
-/* Custom statistics grid for accounts */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+.list-page-header {
+  @include page-header;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
 
-    .stat-card {
-        display: flex;
-        align-items: center;
-        gap: 1.25rem;
-        padding: 1.25rem;
-        background: #fff;
-        border-radius: 0.75rem;
-        box-shadow: 0 4px 18px rgba(75, 70, 92, 0.04);
-        border: 1px solid #ebe9f1;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-        &:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 18px rgba(115, 103, 240, 0.1);
-        }
-
-        mat-icon {
-            color: $primary;
-            font-size: 2rem;
-            width: 2rem;
-            height: 2rem;
-            opacity: 0.8;
-        }
-
-        .stat-content {
-            .stat-value {
-                display: block;
-                font-size: 1.5rem;
-                font-weight: 600;
-                color: $text-card-title;
-                line-height: 1.2;
-                margin-bottom: 0.25rem;
-            }
-
-            .stat-label {
-                font-size: 0.8rem;
-                color: $text-muted;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                font-weight: 500;
-            }
-        }
+  .header-actions {
+    .btn-create {
+      background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.82)) !important;
+      color: #fff !important;
+      font-weight: 600;
+      font-size: 14px;
+      height: 42px;
+      padding: 0 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba($purple, 0.35);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s ease;
+      &:hover {
+        box-shadow: 0 6px 18px rgba($purple, 0.5);
+        transform: translateY(-1px);
+      }
     }
+  }
 }
 
-/* Specific filter widths */
+.dashboard-stats-grid { @include dashboard-stats-grid; }
+
+.list-page-card {
+  @include list-card;
+  border: 1px solid $p-border;
+  overflow: hidden; 
+}
+
 .list-filters-section {
-    mat-form-field {
-        min-width: 180px;
-        
-        &.search-field {
-            flex: 1;
-            min-width: 300px;
-        }
+  padding: 20px 24px !important;
+  border-bottom: 1px solid $p-border;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+
+  mat-form-field {
+    min-width: 180px;
+    &.search-field { flex: 1; min-width: 300px; }
+  }
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+}
+
+::ng-deep {
+  .list-page-container {
+    app-data-table {
+      @include data-table;
     }
+
+    .mat-mdc-paginator {
+      @include paginator;
+    }
+  }
 }

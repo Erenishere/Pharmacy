@@ -21,7 +21,9 @@ import { ExpenseService } from '../../services/expense.service';
 import { Expense, ExpenseCategory } from '../../models/expense.model';
 import { ExpenseFormDialogComponent } from '../expense-form-dialog/expense-form-dialog.component';
 import { ExpenseCategoryListComponent } from '../expense-category-list/expense-category-list.component';
-import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table/data-table.component';
+import { DataTableColumn, TableActionClickEvent } from '../../../../shared/models/data-table.model';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+
 
 @Component({
   selector: 'app-expense-list',
@@ -34,17 +36,17 @@ import { DataTableComponent, TableColumn } from '../../../../shared/components/d
     DataTableComponent
   ],
   template: `
-    <div class="list-page-container">
+    <div class="list-page-container items-enhanced-page">
       <div class="list-page-header">
         <div class="header-content">
-          <h1><mat-icon>account_balance_wallet</mat-icon> Pharmacy Expenses</h1>
-          <p>Manage and track all pharmaceutical operating expenses</p>
+          <h1 class="page-title"><mat-icon>account_balance_wallet</mat-icon> Expense Management</h1>
+          <p class="page-subtitle">Manage and track all pharmaceutical operating expenses</p>
         </div>
         <div class="header-actions">
-          <button mat-stroked-button color="primary" class="me-2" (click)="openCategoryDialog()">
+          <button mat-stroked-button color="primary" (click)="openCategoryDialog()" class="me-2">
             <mat-icon>category</mat-icon> Categories
           </button>
-          <button mat-raised-button color="primary" (click)="openCreateDialog()">
+          <button mat-raised-button color="primary" (click)="openCreateDialog()" class="create-btn">
             <mat-icon>add</mat-icon> New Expense
           </button>
         </div>
@@ -52,38 +54,41 @@ import { DataTableComponent, TableColumn } from '../../../../shared/components/d
 
       <div class="list-page-card">
         <div class="list-filters-section">
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Category</mat-label>
-            <mat-select [formControl]="categoryFilter" (selectionChange)="loadExpenses()">
-              <mat-option value="">All Categories</mat-option>
-              @for (cat of categories; track cat._id) {
-                <mat-option [value]="cat._id">{{ cat.categoryName }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
+          <div class="filter-group-primary">
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Category</mat-label>
+              <mat-select [formControl]="categoryFilter" (selectionChange)="loadExpenses()">
+                <mat-option value="">All Categories</mat-option>
+                @for (cat of categories; track cat._id) {
+                  <mat-option [value]="cat._id">{{ cat.categoryName }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
 
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>From Date</mat-label>
-            <input matInput [matDatepicker]="fromPicker" [formControl]="fromDate" (dateChange)="loadExpenses()">
-            <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
-            <mat-datepicker #fromPicker></mat-datepicker>
-          </mat-form-field>
+          <div class="filter-group-secondary">
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>From Date</mat-label>
+              <input matInput [matDatepicker]="fromPicker" [formControl]="fromDate" (dateChange)="loadExpenses()">
+              <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fromPicker></mat-datepicker>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>To Date</mat-label>
-            <input matInput [matDatepicker]="toPicker" [formControl]="toDate" (dateChange)="loadExpenses()">
-            <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
-            <mat-datepicker #toPicker></mat-datepicker>
-          </mat-form-field>
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>To Date</mat-label>
+              <input matInput [matDatepicker]="toPicker" [formControl]="toDate" (dateChange)="loadExpenses()">
+              <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
+              <mat-datepicker #toPicker></mat-datepicker>
+            </mat-form-field>
 
-          <button mat-icon-button color="warn" matTooltip="Clear Filters" (click)="clearFilters()">
-            <mat-icon>filter_alt_off</mat-icon>
-          </button>
+            <button mat-icon-button color="warn" (click)="clearFilters()" matTooltip="Clear Filters">
+              <mat-icon>filter_alt_off</mat-icon>
+            </button>
+          </div>
         </div>
 
-        <div class="table-wrapper" style="position: relative; min-height: 200px;">
-          <div class="loading-overlay" *ngIf="loading" 
-               style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); display: flex; justify-content: center; align-items: center; z-index: 10;">
+        <div class="table-wrapper">
+          <div class="loading-overlay" *ngIf="loading">
             <mat-spinner diameter="40"></mat-spinner>
           </div>
 
@@ -94,11 +99,6 @@ import { DataTableComponent, TableColumn } from '../../../../shared/components/d
             [pageSizeOptions]="[10, 25, 50]"
             (actionClick)="onTableAction($event)">
           </app-data-table>
-
-          <div class="list-empty-state" *ngIf="!loading && dataSource.data.length === 0">
-            <mat-icon>receipt_long</mat-icon>
-            <p>No expenses found</p>
-          </div>
         </div>
       </div>
     </div>
@@ -112,7 +112,7 @@ export class ExpenseListComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  tableColumns: TableColumn[] = [
+  tableColumns: DataTableColumn[] = [
     { key: 'date', label: 'Date', type: 'date', sortable: true },
     { key: 'category', label: 'Category', sortable: true },
     { key: 'account', label: 'Account', sortable: true },
@@ -120,7 +120,7 @@ export class ExpenseListComponent implements OnInit {
     { key: 'amount', label: 'Amount', type: 'currency', sortable: true },
     { key: 'dimension', label: 'Dimension' },
     { key: 'actions', label: 'Actions', type: 'action', actions: [
-      { icon: 'edit', label: 'Edit', actionKey: 'edit', color: 'primary' },
+      { icon: 'edit', label: 'Edit', actionKey: 'edit' },
       { icon: 'delete', label: 'Delete', actionKey: 'delete', color: 'warn' }
     ]}
   ];
@@ -221,10 +221,11 @@ export class ExpenseListComponent implements OnInit {
     });
   }
 
-  onTableAction(event: { action: string, row: any }): void {
+  onTableAction(event: TableActionClickEvent): void {
+    const row = event.row as Expense;
     switch(event.action) {
-      case 'edit': this.openEditDialog(event.row); break;
-      case 'delete': this.deleteExpense(event.row); break;
+      case 'edit': this.openEditDialog(row); break;
+      case 'delete': this.deleteExpense(row); break;
     }
   }
 

@@ -1,0 +1,14 @@
+// ============================================
+// PREMIUM DESIGN SYSTEM - MIXINS LIBRARY
+// ============================================
+// Barrel export for all mixin modules
+// Import this file to access all mixins
+// ============================================
+
+@forward 'buttons';
+@forward 'cards';
+@forward 'tables';
+@forward 'forms';
+@forward 'dialogs';
+@forward 'animations';
+@forward 'utilities';

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "autonomous-skill": {
+      "source": "feiskyer/claude-code-settings",
+      "sourceType": "github",
+      "computedHash": "a8776b933540ab1d644d69881dab0a38e3bb0baee256ab384e8040d7ed9e14e7"
+    }
+  }
+}

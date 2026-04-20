@@ -88,12 +88,12 @@ $purple: #7367F0; // Standardize to premium purple
             }
 
             &[color="primary"] {
-                background-color: $purple !important;
+                background-color: var(--color-bg-page) !important;
                 color: #FFFFFF !important;
                 border: 2px solid $purple !important;
 
                 &:hover {
-                    background-color: darken($purple, 8%) !important;
+                    background-color: darken(var(--color-bg-page), 8%) !important;
                     border-color: darken($purple, 8%) !important;
                     box-shadow: 0 4px 12px rgba(115, 103, 240, 0.3);
                     transform: translateY(-1px);

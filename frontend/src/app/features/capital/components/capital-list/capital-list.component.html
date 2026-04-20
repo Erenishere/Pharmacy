@@ -178,14 +178,22 @@
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+          <tr class="mat-row empty-state-row" *matNoDataRow>
+            <td class="mat-cell" colspan="12">
+              <div class="empty-state-premium">
+                <div class="icon-wrapper">
+                  <mat-icon>inbox</mat-icon>
+                  <div class="icon-bg-glow"></div>
+                </div>
+                <h4>No capital entries found</h4>
+                <p>There is no data to display matching the current criteria.</p>
+              </div>
+            </td>
+          </tr>
         </table>
 
-        @if (dataSource.data.length === 0) {
-          <div class="list-empty-state">
-            <mat-icon>account_balance_wallet</mat-icon>
-            <p>No capital entries found</p>
-          </div>
-        }
+        
       </div>
 
       <mat-paginator

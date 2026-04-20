@@ -19,7 +19,9 @@ import { ToastService } from '../../../../shared/services/toast.service';
 import { Customer, CustomerType, CustomerFilters } from '../../../../core/models/customer.model';
 import { CustomerFormDialogComponent } from '../customer-form/customer-form-dialog.component';
 import { CustomerDetailDialogComponent } from '../customer-detail/customer-detail-dialog.component';
-import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table/data-table.component';
+import { DataTableColumn, TableActionClickEvent } from '../../../../shared/models/data-table.model';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+
 
 @Component({
     selector: 'app-customer-list',
@@ -49,19 +51,18 @@ export class CustomerListComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild(MatPaginator) paginator!: MatPaginator;
     @ViewChild(MatSort) sort!: MatSort;
 
-    tableColumns: TableColumn[] = [
+    tableColumns: DataTableColumn[] = [
         { key: 'code', label: 'Code', sortable: true },
         { key: 'name', label: 'Name', sortable: true },
         { key: 'email', label: 'Email' },
         { key: 'phone', label: 'Phone' },
-        { key: 'type', label: 'Type', type: 'status', colorMap: {'retailer': 'primary', 'wholesaler': 'accent'} },
-        { key: 'isActive', label: 'Status', type: 'custom' }, // We'll handle custom templates in HTML for slide toggle or use chip
-        { key: 'createdAt', label: 'Created', type: 'date', sortable: true },
+        { key: 'type', label: 'Type', getValue: (row: any) => row.type?.toUpperCase() },
+        { key: 'createdAt', label: 'Created', getValue: (row: any) => this.formatDate(row.createdAt), sortable: true },
         { key: 'actions', label: 'Actions', type: 'action', actions: [
             { icon: 'visibility', label: 'View', actionKey: 'view' },
-            { icon: 'edit', label: 'Edit', actionKey: 'edit', color: 'primary' },
-            { icon: 'delete', label: 'Delete', actionKey: 'delete', color: 'warn' },
-            { icon: 'restore', label: 'Restore', actionKey: 'restore', color: 'primary' }
+            { icon: 'edit', label: 'Edit', actionKey: 'edit', showIf: (row: any) => row.isActive },
+            { icon: 'delete', label: 'Deactivate', actionKey: 'delete', color: 'warn', showIf: (row: any) => row.isActive },
+            { icon: 'restore', label: 'Restore', actionKey: 'restore', showIf: (row: any) => !row.isActive }
         ]}
     ];
 
@@ -358,7 +359,7 @@ export class CustomerListComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-    onTableAction(event: { action: string, row: any }): void {
+    onTableAction(event: TableActionClickEvent): void {
         const customer = event.row as Customer;
         switch(event.action) {
             case 'view': this.viewCustomerDetail(customer); break;

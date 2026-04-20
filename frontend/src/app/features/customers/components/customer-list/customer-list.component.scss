@@ -1,36 +1,43 @@
-@import '../../../../../styles/vuexy-vars';
+@import 'styles/shared-list-styles';
 
-:host {
-    display: block;
+.list-page-card {
+  @include list-card;
+  border: 1px solid $p-border;
+  overflow: hidden;
 }
 
-/* 
-   Most styles are now handled by global utility classes:
-   .list-page-container, .list-page-header, .list-page-card, .list-filters-section
-   defined in styles.scss
-*/
+.list-filters-section {
+  padding: 24px !important;
+  border-bottom: 1px solid $p-border;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
 
-.type-filter {
-    width: 200px;
-}
-
-.search-field {
+  .filter-group-primary {
     flex: 1;
-    max-width: 400px;
-}
+    min-width: 300px;
+    
+    .search-field {
+      width: 100%;
+    }
+  }
 
-/* Custom summary bar styling */
-.list-summary-bar {
-    background-color: #fafafb;
-    font-size: 0.85rem;
+  .filter-group-secondary {
     display: flex;
     align-items: center;
-    
-    .mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        color: $primary;
-        opacity: 0.7;
+    gap: 20px;
+
+    .type-filter {
+      min-width: 200px;
     }
+  }
+}
+
+::ng-deep {
+  .items-enhanced-page app-data-table {
+    min-width: 1200px;
+    display: block;
+  }
 }

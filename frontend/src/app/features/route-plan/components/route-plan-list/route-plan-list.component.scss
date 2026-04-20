@@ -1,11 +1,17 @@
 @import "../../../../../styles/shared-list-styles";
 
 .route-plan-list-page {
+  @include page-container;
+  @include page-header;
   @include data-table;
   @include paginator;
 
+  .dashboard-stats-grid { @include dashboard-stats-grid; }
+
+  .list-page-card { @include list-card; }
+
   .dimension-chip {
-    background: rgba($purple, 0.1);
+    background: rgba(var(--color-bg-page), 0.1);
     color: $purple;
     font-weight: 500;
     font-size: 11px;
@@ -18,3 +24,4 @@
     color: $purple-dark;
   }
 }
+

@@ -9,17 +9,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-export interface TableColumn {
-  key: string;
-  label: string;
-  type?: 'text' | 'numeric' | 'currency' | 'date' | 'status' | 'action' | 'custom';
-  sortable?: boolean;
-  align?: 'left' | 'center' | 'right';
-  actions?: { icon: string; label: string; actionKey: string; color?: string; tooltip?: string; showIf?: (row: any) => boolean }[];
-  colorMap?: Record<string, string>; // Maps status string to color (e.g., 'active' -> 'primary')
-  classMap?: Record<string, string>; // Maps status string to CSS class
-  pipeFormat?: string; // e.g. 'dd/MM/yyyy' for date
-}
+import { DataTableColumn, TableActionClickEvent } from '../../models/data-table.model';
+
 
 @Component({
   selector: 'app-data-table',
@@ -42,7 +33,8 @@ export class DataTableComponent implements AfterViewInit {
   @Input() set data(value: any[]) {
     this.dataSource.data = value || [];
   }
-  @Input() columns: TableColumn[] = [];
+  @Input() columns: DataTableColumn[] = [];
+  @Input() getRowClass: (row: any) => string = () => '';
   
   @Input() totalItems = 0;
   @Input() pageSize = 10;
@@ -53,7 +45,7 @@ export class DataTableComponent implements AfterViewInit {
 
   @Output() pageChange = new EventEmitter<PageEvent>();
   @Output() sortChange = new EventEmitter<Sort>();
-  @Output() actionClick = new EventEmitter<{ action: string; row: any }>();
+  @Output() actionClick = new EventEmitter<TableActionClickEvent>();
 
   dataSource = new MatTableDataSource<any>([]);
 
@@ -76,9 +68,9 @@ export class DataTableComponent implements AfterViewInit {
     this.sortChange.emit(sortState);
   }
 
-  onActionClick(action: string, row: any, event: Event) {
+  onActionClick(actionKey: string, row: any, event: Event) {
     event.stopPropagation();
-    this.actionClick.emit({ action, row });
+    this.actionClick.emit({ action: actionKey, row });
   }
 
   trackByRowId(index: number, row: any): string {

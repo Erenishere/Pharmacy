@@ -2,13 +2,12 @@
   <!-- Header -->
   <div class="list-page-header">
     <div class="header-content">
-      <h1 class="page-title"><mat-icon>inventory_2</mat-icon> Item Management</h1>
-      <p class="page-subtitle">Manage your inventory items, pricing, and stock levels</p>
+      <h1><mat-icon>inventory_2</mat-icon> Item Management</h1>
+      <p class="page-description">Manage your inventory items, pricing, and stock levels</p>
     </div>
     <div class="header-actions">
-      <button mat-raised-button color="primary" (click)="openCreateDialog()" class="create-btn">
-        <mat-icon>add</mat-icon>
-        New Item
+      <button mat-raised-button class="btn-create" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon> New Item
       </button>
     </div>
   </div>
@@ -50,149 +49,28 @@
         </mat-form-field>
 
         <!-- Low Stock Toggle -->
-        <div class="low-stock-toggle-wrapper px-3">
-          <mat-checkbox [(ngModel)]="showLowStockOnly" (ngModelChange)="onFilterChange()">
-            Low Stock Only
-          </mat-checkbox>
-        </div>
+        <mat-checkbox [(ngModel)]="showLowStockOnly" (ngModelChange)="onFilterChange()" class="filter-checkbox">
+          Low Stock Only
+        </mat-checkbox>
       </div>
     </div>
 
     <!-- Table Section -->
     <div class="table-wrapper">
-      @if (loading) {
-        <div class="list-loading-overlay">
-          <mat-spinner diameter="40"></mat-spinner>
-          <p>Loading items...</p>
-        </div>
-      } 
-      
-      <table mat-table [dataSource]="dataSource" matSort class="data-table">
-        <!-- Serial Number Column -->
-        <ng-container matColumnDef="serial">
-          <th mat-header-cell *matHeaderCellDef>S#</th>
-          <td mat-cell *matCellDef="let item; let i = index">
-            {{ (paginator?.pageIndex || 0) * (paginator?.pageSize || 25) + i + 1 }}
-          </td>
-        </ng-container>
+      <div class="loading-overlay" *ngIf="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
 
-        <!-- Company Column -->
-        <ng-container matColumnDef="company">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Company</th>
-          <td mat-cell *matCellDef="let item">{{ item.companyName }}</td>
-        </ng-container>
-
-        <!-- Name Column -->
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Item Name</th>
-          <td mat-cell *matCellDef="let item">
-            <div class="item-name-block">
-              <span class="item-name-text">{{ item.name }}</span>
-              <small class="item-code-text">{{ item.code }}</small>
-            </div>
-          </td>
-        </ng-container>
-
-        <!-- Available QTY Column -->
-        <ng-container matColumnDef="availableQty">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Qty</th>
-          <td mat-cell *matCellDef="let item">
-            <span class="stock-value" [class.low-stock]="isLowStock(item)">
-              {{ formatNumber(item.currentStock) }}
-            </span>
-          </td>
-        </ng-container>
-
-        <!-- Last P.Price Column -->
-        <ng-container matColumnDef="lastPPrice">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>P.Price</th>
-          <td mat-cell *matCellDef="let item" class="price-cell">
-            {{ formatCurrency(item.unitPurchaseTP) }}
-          </td>
-        </ng-container>
-
-        <!-- Avg P.Rate Column -->
-        <ng-container matColumnDef="avgPRate">
-          <th mat-header-cell *matHeaderCellDef>Avg Rate</th>
-          <td mat-cell *matCellDef="let item" class="price-cell">
-            {{ formatCurrency(item.unitPurchaseTP) }}
-          </td>
-        </ng-container>
-
-        <!-- Total Cost Column -->
-        <ng-container matColumnDef="totalCost">
-          <th mat-header-cell *matHeaderCellDef>Total Cost</th>
-          <td mat-cell *matCellDef="let item" class="price-cell">
-            {{ formatCurrency(item.currentStock * item.unitPurchaseTP) }}
-          </td>
-        </ng-container>
-
-        <!-- Sale Rate Column -->
-        <ng-container matColumnDef="saleRate">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Sale Rate</th>
-          <td mat-cell *matCellDef="let item" class="price-cell">
-            {{ formatCurrency(item.unitRetailPrice || item.unitSaleTP) }}
-          </td>
-        </ng-container>
-
-        <!-- Category Column -->
-        <ng-container matColumnDef="category">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Category</th>
-          <td mat-cell *matCellDef="let item">{{ item.categoryName }}</td>
-        </ng-container>
-
-        <!-- Actions Column -->
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let item">
-            <button mat-icon-button [matMenuTriggerFor]="menu" class="action-btn">
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <mat-menu #menu="matMenu">
-              <button mat-menu-item (click)="viewItem(item)">
-                <mat-icon>visibility</mat-icon>
-                <span>View</span>
-              </button>
-              <button mat-menu-item (click)="openEditDialog(item)">
-                <mat-icon>edit</mat-icon>
-                <span>Edit</span>
-              </button>
-              <button mat-menu-item (click)="printBarcode(item)">
-                <mat-icon>qr_code</mat-icon>
-                <span>Print Barcode</span>
-              </button>
-              <mat-divider></mat-divider>
-              <button mat-menu-item (click)="deleteItem(item)" class="delete-action">
-                <mat-icon>delete</mat-icon>
-                <span>Delete</span>
-              </button>
-            </mat-menu>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-        <!-- No Data Row -->
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
-            <div class="list-empty-state">
-              <mat-icon>inventory_2</mat-icon>
-              <p>No items found matching your filters</p>
-              <button mat-button color="primary" (click)="clearFilters()">Clear Filters</button>
-            </div>
-          </td>
-        </tr>
-      </table>
-
-      <!-- Paginator -->
-      <mat-paginator
-        [length]="totalItems"
-        [pageSize]="25"
-        [pageSizeOptions]="[10, 25, 50, 100]"
-        (page)="onPageChange()"
-        showFirstLastButtons>
-      </mat-paginator>
+      <app-data-table
+        [data]="dataSource.data"
+        [columns]="tableColumns"
+        [totalItems]="totalItems"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="pageSizeOptions"
+        (pageChange)="onPageChange($event)"
+        (actionClick)="onTableAction($event)">
+      </app-data-table>
     </div>
   </div>
 </div>

@@ -29,7 +29,7 @@
 
   <!-- Summary Stats -->
   <div class="dashboard-stats-grid target-summary" *ngIf="dashboardData && !loading">
-    <div class="stat-card" style="--stat-color: #7367f0">
+    <div class="stat-card primary">
       <div class="stat-icon-wrapper"><mat-icon>people</mat-icon></div>
       <div class="stat-details">
         <h3 class="stat-value">{{ dashboardData.summary.totalEmployees }}</h3>
@@ -37,7 +37,7 @@
       </div>
     </div>
 
-    <div class="stat-card" style="--stat-color: #28c76f">
+    <div class="stat-card success">
       <div class="stat-icon-wrapper"><mat-icon>trending_up</mat-icon></div>
       <div class="stat-details">
         <h3 class="stat-value">{{ dashboardData.summary.salesTargetAchievers }}</h3>
@@ -45,7 +45,7 @@
       </div>
     </div>
 
-    <div class="stat-card" style="--stat-color: #00cfe8">
+    <div class="stat-card info">
       <div class="stat-icon-wrapper"><mat-icon>account_balance_wallet</mat-icon></div>
       <div class="stat-details">
         <h3 class="stat-value">{{ dashboardData.summary.recoveryTargetAchievers }}</h3>
@@ -53,7 +53,7 @@
       </div>
     </div>
 
-    <div class="stat-card" style="--stat-color: #ff9f43">
+    <div class="stat-card warning">
       <div class="stat-icon-wrapper"><mat-icon>groups</mat-icon></div>
       <div class="stat-details">
         <h3 class="stat-value">{{ dashboardData.summary.partyVisitTargetAchievers }}</h3>
@@ -190,14 +190,20 @@
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          
+          <tr class="mat-row empty-state-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+              <div class="empty-state-premium">
+                <div class="icon-wrapper">
+                  <mat-icon>insights</mat-icon>
+                  <div class="icon-bg-glow"></div>
+                </div>
+                <h4>No Performance Records Found</h4>
+                <p>There is no data to display matching the current criteria.</p>
+              </div>
+            </td>
+          </tr>
         </table>
-
-        @if (dashboardData?.employees?.length === 0) {
-          <div class="list-empty-state">
-            <mat-icon>insights</mat-icon>
-            <p>No dashboard data available for this period</p>
-          </div>
-        }
       </div>
     }
   </div>

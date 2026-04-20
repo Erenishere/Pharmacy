@@ -1,50 +1,28 @@
-@import '../../../../../styles/shared-list-styles';
+@import 'styles/shared-list-styles';
 
-.page-container {
-  @include page-container;
-}
-
-.page-header {
-  @include page-header;
-}
-
-.list-card {
+.list-page-card {
   @include list-card;
+  border: 1px solid $p-border;
+  overflow: hidden; 
 }
 
-.filters-section {
-  @include filters-section;
+.list-filters-section {
+  padding: 24px !important;
+  border-bottom: 1px solid $p-border;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+
+  .filter-field {
+    flex: 1;
+    min-width: 200px;
+  }
 }
 
-@include form-field-overrides;
-
-.table-container {
-  @include table-container;
-}
-
-.expense-table {
-  @include data-table;
-}
-
-.amount-cell {
-  @include amount-cell;
-}
-
-.action-buttons {
-  @include action-buttons;
-}
-
-mat-chip {
-  @include status-chip-base;
-}
-
-@include paginator;
-
-.no-data,
-.loading-container {
-  @include empty-state;
-}
-
-.loading-container {
-  @include loading-container;
+::ng-deep {
+  .items-enhanced-page app-data-table {
+    min-width: 100%;
+    display: block;
+  }
 }

@@ -2,12 +2,11 @@
   <div class="list-page-header">
     <div class="header-content">
       <h1><mat-icon>warehouse</mat-icon> Warehouses / Branches</h1>
-      <p class="subtitle">Manage your pharma warehouse locations and branches</p>
+      <p class="page-description">Manage your pharma warehouse locations and branches</p>
     </div>
     <div class="header-actions">
-      <button mat-raised-button color="primary" (click)="openCreateDialog()" class="add-btn">
-        <mat-icon>add</mat-icon>
-        New Warehouse
+      <button mat-raised-button class="btn-create" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon> New Warehouse
       </button>
     </div>
   </div>
@@ -32,7 +31,7 @@
     </div>
 
     <div class="table-wrapper">
-      <div class="list-loading-overlay" *ngIf="loading">
+      <div class="loading-overlay" *ngIf="loading">
         <mat-spinner diameter="40"></mat-spinner>
       </div>
 

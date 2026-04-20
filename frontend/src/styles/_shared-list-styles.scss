@@ -1,9 +1,27 @@
-@import 'vuexy-vars';
+// ============================================
+// SHARED LIST STYLES
+// ============================================
+// This file provides backward-compatible mixins
+// that delegate to the new design system mixins.
+// All new code should use the mixins from _mixins/
+// directly via @import 'styles/mixins';
+// ============================================
 
-$page-bg: #f8f7fa;
+// Import vuexy vars for backward compatibility fallbacks
+@import 'styles/vuexy-vars';
+
+// Import the new design system mixins
+// These mixins are now defined in _mixins/ and provide
+// the same functionality with design token support
+@import 'styles/mixins';
+
+// Local color variables for backward compatibility
+// These are kept for any legacy SCSS variable usage
+$page-bg: #ffffff;
 $card-bg: #ffffff;
 $field-bg: #ffffff;
 $border: #e9ecef;
+$p-border: #ebe9f1;
 $purple: #7367f0;
 $purple-dark: #5a4cf5;
 $purple-light: #9e95f5;
@@ -17,19 +35,22 @@ $info: #00cfe8;
 $warning: #ff9f43;
 $danger: #ea5455;
 
+// ============================================
+// LAYERED GLASS EFFECT
+// ============================================
 @mixin layered-glass {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px 0 rgba($purple, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(var(--color-primary-rgb, 115, 103, 240), 0.1);
 }
 
 // ============================================
 // PAGE CONTAINER
 // ============================================
 @mixin page-container {
-  padding: 24px;
+  padding: var(--space-6, $space-6);
   max-width: 1400px;
   margin: 0 auto;
   background-color: $page-bg;
@@ -40,28 +61,28 @@ $danger: #ea5455;
 // PAGE HEADER
 // ============================================
 @mixin page-header {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6, $space-6);
 
   h1, h2 {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--space-3, $space-3);
     margin: 0;
-    font-size: 24px;
-    font-weight: 600;
-    color: $text-card-title;
-    border-left: 4px solid $purple;
-    padding-left: 12px;
+    font-size: var(--font-size-2xl, $h3-size);
+    font-weight: var(--font-weight-semibold, 600);
+    color: var(--color-text-primary, $text-card-title);
+    border-left: 4px solid var(--color-primary, $purple);
+    padding-left: var(--space-3, $space-3);
 
     mat-icon {
-      color: $purple;
+      color: var(--color-primary, $purple);
     }
   }
 
   .page-description {
-    margin: 4px 0 0 16px;
-    color: $text-muted;
-    font-size: 14px;
+    margin: var(--space-1, $space-1) 0 0 var(--space-4, $space-4);
+    color: var(--color-text-muted, $text-muted);
+    font-size: var(--font-size-base, $font-size-base);
   }
 }
 
@@ -69,483 +90,46 @@ $danger: #ea5455;
 // CARD
 // ============================================
 @mixin list-card {
-  background: $card-bg;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+  background: var(--color-bg-card, $card-bg);
+  border-radius: var(--radius-lg, $radius-card);
+  box-shadow: var(--shadow-card, 0 2px 10px rgba(0, 0, 0, .08));
   border: none;
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4, $space-4);
 
   mat-card-header {
-    padding: 24px 24px 0;
-    margin-bottom: 16px;
+    padding: var(--space-6, $space-6) var(--space-6, $space-6) 0;
+    margin-bottom: var(--space-4, $space-4);
 
     mat-card-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: $text-card-title;
+      font-size: var(--font-size-lg, $h5-size);
+      font-weight: var(--font-weight-semibold, 600);
+      color: var(--color-text-primary, $text-card-title);
     }
 
     mat-card-subtitle {
-      color: $text-muted;
-      margin-top: 4px;
+      color: var(--color-text-muted, $text-muted);
+      margin-top: var(--space-1, $space-1);
     }
   }
 
   mat-card-content {
-    padding: 0 0 24px;
+    padding: 0 0 var(--space-6, $space-6);
   }
 }
 
 // ============================================
-// DASHBOARD STATS GRID
+// DASHBOARD STATS GRID (Premium Professional)
+// Uses design system tokens
 // ============================================
 @mixin dashboard-stats-grid {
-  .dashboard-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 24px;
-    margin-bottom: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-5, $space-5);
+  margin-bottom: 28px;
 
-    .stat-card {
-      @include layered-glass;
-      padding: 24px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      border: 1px solid $grey-very-light !important;
-      border-radius: 12px;
-
-      .stat-icon-wrapper {
-        width: 54px;
-        height: 54px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        mat-icon {
-          font-size: 28px;
-          width: 28px;
-          height: 28px;
-        }
-      }
-
-      .stat-data {
-        display: flex;
-        flex-direction: column;
-
-        .label {
-          color: $grey-dark;
-          font-size: 13px;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .value {
-          color: $text-card-title;
-          font-size: 24px;
-          font-weight: 700;
-          font-family: 'Outfit', sans-serif;
-        }
-      }
-
-      &.primary {
-        .stat-icon-wrapper {
-          background: rgba($purple, 0.1);
-
-          mat-icon {
-            color: $purple;
-          }
-        }
-      }
-
-      &.success {
-        .stat-icon-wrapper {
-          background: rgba($success, 0.1);
-
-          mat-icon {
-            color: $success;
-          }
-        }
-      }
-
-      &.warning {
-        .stat-icon-wrapper {
-          background: rgba($warning, 0.1);
-
-          mat-icon {
-            color: $warning;
-          }
-        }
-      }
-
-      &.danger {
-        .stat-icon-wrapper {
-          background: rgba($danger, 0.1);
-
-          mat-icon {
-            color: $danger;
-          }
-        }
-      }
-    }
+  .stat-card {
+    @include stat-card;
   }
-}
-
-// ============================================
-// FILTERS SECTION
-// ============================================
-@mixin filters-section {
-  padding: 16px 24px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
-
-  .search-filters {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    flex: 1;
-
-    .search-field {
-      min-width: 250px;
-      flex: 1;
-    }
-
-    .filter-field {
-      min-width: 180px;
-    }
-  }
-
-  .action-buttons {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-
-    button[mat-raised-button] {
-      background: linear-gradient(118deg, $purple, rgba($purple, .8));
-      box-shadow: 0 0 10px 1px rgba($purple, .4);
-      color: #fff;
-      font-weight: 500;
-      transition: all .25s ease;
-
-      &:hover {
-        box-shadow: 0 0 14px 2px rgba($purple, .6);
-        transform: translateY(-1px);
-      }
-
-      mat-icon {
-        margin-right: 6px;
-      }
-    }
-
-    button[mat-stroked-button] {
-      border: 2px solid $purple;
-      color: $purple;
-      background: white;
-      font-weight: 600;
-      transition: all .25s ease;
-
-      &:hover {
-        background: $purple;
-        color: white;
-        transform: translateY(-1px);
-      }
-
-      mat-icon {
-        margin-right: 6px;
-      }
-    }
-  }
-}
-
-// ============================================
-// FORM FIELD OVERRIDES (Vuexy Style)
-// ============================================
-@mixin form-field-overrides {
-  ::ng-deep {
-    .mat-mdc-form-field {
-      .mdc-text-field--outline {
-        background-color: #ffffff !important;
-      }
-
-      .mdc-notched-outline__leading,
-      .mdc-notched-outline__notch,
-      .mdc-notched-outline__trailing {
-        border-color: rgba($purple, 0.5) !important;
-        border-width: 1px !important;
-      }
-
-      &:hover,
-      &.mat-focused {
-        .mdc-notched-outline__leading,
-        .mdc-notched-outline__notch,
-        .mdc-notched-outline__trailing {
-          border-color: $purple !important;
-          border-width: 2px !important;
-        }
-      }
-
-      .mdc-floating-label {
-        color: #000000 !important;
-        font-weight: 500 !important;
-      }
-
-      &.mat-focused .mdc-floating-label {
-        color: $purple !important;
-      }
-
-      .mat-mdc-input-element {
-        color: #000000 !important;
-        caret-color: #000000 !important;
-      }
-
-      .mat-mdc-input-element::placeholder {
-        color: rgba(0, 0, 0, 0.6) !important;
-      }
-
-      .mat-mdc-select-value {
-        color: #000000 !important;
-      }
-
-      .mat-mdc-select-arrow {
-        color: $purple !important;
-      }
-
-      .mat-mdc-form-field-icon-suffix {
-        color: #000000 !important;
-      }
-    }
-  }
-}
-
-// ============================================
-// TABLE STYLING
-// ============================================
-@mixin data-table {
-  width: 100%;
-  background: transparent !important;
-  border-collapse: separate;
-  border-spacing: 0 8px;
-
-  .mat-mdc-header-row {
-    background-color: $purple !important;
-    height: 48px;
-
-    th {
-      color: #ffffff !important;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      border: none;
-      padding: 0 16px;
-
-      /* Ensure sort icons are white */
-      ::ng-deep .mat-sort-header-arrow {
-        color: #ffffff !important;
-        opacity: 0.8;
-      }
-    }
-  }
-
-  .mat-mdc-row {
-    background: #ffffff;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, .05);
-    transition: all .25s ease;
-
-    td {
-      border: none;
-      padding: 12px 16px;
-      color: #4a4a4a;
-      font-size: 14px;
-    }
-
-    &:hover {
-      background-color: $purple !important;
-      border-color: $purple !important;
-      box-shadow: 0 8px 24px rgba($purple, 0.35);
-      transform: translateY(-2px);
-      z-index: 5;
-      position: relative; // Ensure lift is visible over other rows
-
-      td,
-      td span:not(.mat-mdc-chip-label),
-      td strong,
-      td a,
-      td mat-icon,
-      td .cell-text,
-      td .amount-cell,
-      td .warehouse-code {
-        color: #ffffff !important;
-      }
-
-      /* Handle buttons inside hovered row */
-      .mat-mdc-button, 
-      .mat-mdc-icon-button,
-      .mat-mdc-unelevated-button,
-      .mat-mdc-outlined-button {
-        color: #ffffff !important;
-        mat-icon { color: #ffffff !important; }
-        
-        &:hover {
-          background-color: rgba(255, 255, 255, 0.2) !important;
-        }
-      }
-
-      /* Handle chips on purple background */
-      mat-chip {
-        color: #ffffff !important;
-        background-color: rgba(255, 255, 255, 0.2) !important;
-        border-color: #ffffff !important;
-      }
-    }
-  }
-}
-
-// ============================================
-// TABLE CONTAINER
-// ============================================
-@mixin table-container {
-  padding: 0 24px;
-}
-
-// ============================================
-// ACTION BUTTONS (table row)
-// ============================================
-@mixin action-buttons {
-  display: flex;
-  gap: 4px;
-
-  button.mat-icon-button {
-    transition: background-color .2s, color .2s;
-    width: 36px;
-    height: 36px;
-
-    mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-    }
-
-    &[color="warn"], &.delete-btn {
-      color: #e91e63;
-      &:hover {
-        background-color: rgba(#e91e63, .12);
-      }
-    }
-
-    &[color="primary"], &.edit-btn {
-      color: $purple;
-      &:hover {
-        background-color: rgba($purple, .12);
-      }
-    }
-  }
-}
-
-// ============================================
-// CHIPS
-// ============================================
-@mixin status-chip-base {
-  height: auto !important;
-  padding: 0 !important;
-  font-weight: 700 !important;
-  font-size: 13px !important;
-  min-height: unset !important;
-
-  &.chip-active, &.chip-success, &.chip-distributed {
-    background-color: rgba(#28c76f, 0.12) !important;
-    color: #28c76f !important;
-    ::ng-deep .mdc-evolution-chip__text-label { color: #28c76f !important; }
-  }
-
-  &.chip-inactive, &.chip-draft, &.chip-pending {
-    background-color: rgba(#ff9f43, 0.12) !important;
-    color: #ff9f43 !important;
-    ::ng-deep .mdc-evolution-chip__text-label { color: #ff9f43 !important; }
-  }
-
-  &.chip-danger, &.chip-deleted {
-    background-color: rgba(#ea5455, 0.12) !important;
-    color: #ea5455 !important;
-    ::ng-deep .mdc-evolution-chip__text-label { color: #ea5455 !important; }
-  }
-
-  &.chip-info {
-    background-color: rgba(#00cfe8, 0.12) !important;
-    color: #00cfe8 !important;
-    ::ng-deep .mdc-evolution-chip__text-label { color: #00cfe8 !important; }
-  }
-
-  &.chip-purple {
-    background-color: rgba($purple, 0.12) !important;
-    color: $purple !important;
-    ::ng-deep .mdc-evolution-chip__text-label { color: $purple !important; }
-  }
-}
-
-// ============================================
-// PAGINATOR
-// ============================================
-@mixin paginator {
-  ::ng-deep .mat-mdc-paginator {
-    margin-top: 16px;
-    background-color: $purple !important;
-    color: #ffffff !important;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-    box-shadow: 0 4px 12px rgba($purple, 0.2);
-    
-    /* Force all text and icons to white for contrast */
-    .mat-mdc-paginator-range-label,
-    .mat-mdc-paginator-page-size-label,
-    .mat-mdc-select-value,
-    .mat-mdc-select-arrow,
-    .mat-mdc-button-base {
-      color: #ffffff !important;
-    }
-
-    .mat-mdc-icon-button[disabled] {
-      color: rgba(255, 255, 255, 0.3) !important;
-    }
-
-    /* Shared select dropdown inside paginator */
-    .mat-mdc-form-field-focus-indicator {
-      background: rgba(255, 255, 255, 0.1) !important;
-    }
-  }
-}
-
-// ============================================
-// EMPTY STATE / LOADING
-// ============================================
-@mixin empty-state {
-  padding: 48px;
-  text-align: center;
-  color: $text-muted;
-
-  mat-icon {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
-    margin-bottom: 16px;
-    opacity: 0.5;
-  }
-
-  p {
-    margin: 8px 0 0;
-    font-size: 16px;
-  }
-}
-
-@mixin loading-container {
-  display: flex;
-  justify-content: center;
-  padding: 48px;
 }
 
 // ============================================
@@ -553,33 +137,33 @@ $danger: #ea5455;
 // ============================================
 @mixin amount-cell {
   text-align: right;
-  font-weight: 600;
-  color: $purple;
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--color-primary, $purple);
 }
 
 // ============================================
 // FORM CARD (inline add forms)
 // ============================================
 @mixin form-card {
-  background: $card-bg;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+  background: var(--color-bg-card, $card-bg);
+  border-radius: var(--radius-lg, $radius-card);
+  box-shadow: var(--shadow-card, 0 2px 10px rgba(0, 0, 0, .08));
   border: none;
-  padding: 24px;
-  margin-bottom: 16px;
+  padding: var(--space-6, $space-6);
+  margin-bottom: var(--space-4, $space-4);
 
   h3 {
-    margin: 0 0 16px 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: $text-card-title;
-    border-left: 4px solid $purple;
-    padding-left: 12px;
+    margin: 0 0 var(--space-4, $space-4) 0;
+    font-size: var(--font-size-lg, $h5-size);
+    font-weight: var(--font-weight-semibold, 600);
+    color: var(--color-text-primary, $text-card-title);
+    border-left: 4px solid var(--color-primary, $purple);
+    padding-left: var(--space-3, $space-3);
   }
 
   .form-row {
     display: flex;
-    gap: 16px;
+    gap: var(--space-4, $space-4);
     flex-wrap: wrap;
     align-items: flex-start;
 
@@ -594,93 +178,53 @@ $danger: #ea5455;
 }
 
 // ============================================
-// DIALOG STYLING
+// EXPANSION PANEL OVERRIDES
 // ============================================
-@mixin dialog-container {
-  @include form-field-overrides;
+@mixin expansion-panel {
+  ::ng-deep .mat-expansion-panel {
+    background: var(--color-bg-card, $card-bg);
+    border-radius: var(--radius-lg, $radius-card) !important;
+    box-shadow: var(--shadow-card, 0 2px 10px rgba(0, 0, 0, .08)) !important;
+    border: none;
+    margin-bottom: var(--space-4, $space-4);
 
-  .dialog-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-
-    h2 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: $text-card-title;
-      border-left: 4px solid $purple;
-      padding-left: 12px;
+    .mat-expansion-panel-header {
+      font-weight: var(--font-weight-semibold, 600);
+      color: var(--color-text-primary, $text-card-title);
     }
-  }
 
-  .dialog-form {
-    .form-row {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
+    .mat-expansion-panel-header-title {
+      color: var(--color-text-primary, $text-card-title);
+      align-items: center;
+      gap: var(--space-2, $space-2);
 
-      mat-form-field {
-        flex: 1;
-        min-width: 200px;
+      mat-icon {
+        color: var(--color-primary, $purple);
       }
-    }
-
-    mat-form-field {
-      width: 100%;
-    }
-  }
-
-  .dialog-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 16px;
-
-    button[mat-raised-button] {
-      background: linear-gradient(118deg, $purple, rgba($purple, .8));
-      box-shadow: 0 0 10px 1px rgba($purple, .4);
-      color: #fff;
-      font-weight: 500;
-
-      &:hover {
-        box-shadow: 0 0 14px 2px rgba($purple, .6);
-        transform: translateY(-1px);
-      }
-    }
-
-    button[mat-stroked-button] {
-      border: 2px solid $border;
-      color: $text-body;
     }
   }
 }
 
 // ============================================
-// EXPANSION PANEL OVERRIDES
+// LOADING CONTAINER
 // ============================================
-@mixin expansion-panel {
-  ::ng-deep .mat-expansion-panel {
-    background: $card-bg;
-    border-radius: 8px !important;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, .08) !important;
-    border: none;
-    margin-bottom: 16px;
+@mixin loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
 
-    .mat-expansion-panel-header {
-      font-weight: 600;
-      color: $text-card-title;
-    }
+// ============================================
+// GLOBAL CLASS MAPPINGS
+// These expose mixins as CSS classes for convenience
+// ============================================
 
-    .mat-expansion-panel-header-title {
-      color: $text-card-title;
-      align-items: center;
-      gap: 8px;
+.list-filters-section {
+  @include filter-section;
+}
 
-      mat-icon {
-        color: $purple;
-      }
-    }
-  }
+.empty-state-row td.mat-cell {
+  background: var(--color-bg-card, white) !important;
+  border-bottom: none !important;
+  border-radius: 0 0 var(--radius-lg, $radius-lg) var(--radius-lg, $radius-lg);
 }

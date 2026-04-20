@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
 import { SupplierService } from '../../services/supplier.service';
 import { ToastService } from '../../../../shared/services/toast.service';
@@ -36,6 +37,7 @@ import { Supplier, SupplierFormData } from '../../models/supplier.model';
         MatIconModule,
         MatProgressSpinnerModule,
         MatCheckboxModule,
+        MatTabsModule,
         MatDividerModule
     ],
     templateUrl: './supplier-form.component.html',

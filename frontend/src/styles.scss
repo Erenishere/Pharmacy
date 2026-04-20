@@ -1,5 +1,25 @@
 /* You can add global styles to this file, and also import other style files */
+
+// ============================================
+// PREMIUM DESIGN SYSTEM
+// ============================================
+// Import order matters:
+// 1. Design tokens (CSS custom properties)
+// 2. SCSS variables (for compile-time use)
+// 3. Mixins library
+// 4. Shared styles
+// ============================================
+
+// Design Tokens - CSS Custom Properties
+@import 'styles/design-tokens';
+
+// SCSS Variables
 @import 'styles/vuexy-vars';
+
+// Mixins Library
+@import 'styles/mixins';
+
+// Shared Styles & Helpers
 @import 'styles/vuexy-helpers';
 @import 'styles/shared-list-styles';
 
@@ -58,15 +78,28 @@ body {
     scrollbar-color: rgba($primary, 0.2) transparent;
 }
 
-/* Typography Overrides */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+/* Typography Overrides: Progressive Scale & Hierarchy */
+h1, h2, h3, h4, h5, h6 {
     color: $text-card-title;
-    font-weight: 500;
+    font-weight: 600;
+    line-height: 1.25; /* Tighter heading line-height */
+    margin-bottom: 0.5em;
+    font-family: 'Outfit', sans-serif;
+}
+
+h1 { font-size: clamp(1.75rem, 5vw, 2.25rem); }
+h2 { font-size: clamp(1.5rem, 4vw, 1.875rem); }
+h3 { font-size: 1.25rem; }
+
+p {
+    line-height: 1.6;
+    max-width: 70ch; /* Optimal measure for reading */
+    margin-bottom: 1rem;
+}
+
+.text-muted {
+    color: $text-muted !important;
+    font-size: 0.875rem;
 }
 
 
@@ -97,12 +130,24 @@ h6 {
 }
 
 /* Material Overrides for Vuexy Look */
+.mat-mdc-raised-button, 
+.mat-mdc-unelevated-button,
+.mat-mdc-button,
+.mat-mdc-stroked-button {
+    /* FITTS' LAW: Standard button height/hitbox */
+    min-height: 44px !important;
+    padding: 0 20px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px;
+    border-radius: 6px !important;
+}
+
 .mat-mdc-raised-button.mat-primary {
     background-color: var(--primary-color) !important;
     box-shadow: 0 2px 4px 0 rgba(var(--primary-color-rgb), 0.4) !important;
 
     &:hover {
-        box-shadow: 0 4px 8px 0 rgba(var(--primary-color-rgb), 0.6) !important;
+        box-shadow: 0 4px 12px 0 rgba(var(--primary-color-rgb), 0.6) !important;
         transform: translateY(-1px);
     }
 }
@@ -595,18 +640,8 @@ h6 {
     }
 }
 
-/* Specific container cleanup to follow global purple footer (for legacy pages) */
-.batch-list-container .mat-mdc-paginator,
-.batch-list-container .mat-paginator,
-.batch-pagination .mat-mdc-paginator,
-.batch-pagination .mat-paginator,
-.batch-pagination,
-.pagination-card {
-    background: #7367F0 !important;
-    background-color: #7367F0 !important;
-    color: #ffffff !important;
-    border-top: none !important;
-}
+/* paginator overrides removed - now handled by shared mixins */
+
 
 .mat-mdc-dialog-content {
     background-color: #ffffff !important;
@@ -709,6 +744,10 @@ h6 {
 .list-status-chip { @include status-chip-base; }
 .list-paginator-wrapper { @include paginator; }
 .list-empty-state { @include empty-state; }
+
+/* Apply standardize Material appearance across all modules */
+@include form-field-overrides;
+
 
 /* Global helper for better button contrast on white */
 .mat-mdc-stroked-button:not(.mat-primary):not(.mat-warn) {

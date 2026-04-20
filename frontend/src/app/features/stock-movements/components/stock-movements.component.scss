@@ -105,7 +105,7 @@ $purple: #867cf0;
   }
 
   &.adjustments {
-    background: linear-gradient(135deg, $purple 0%, rgba($purple, 0.8) 100%);
+    background: linear-gradient(135deg, var(--color-bg-page) 0%, rgba(var(--color-bg-page), 0.8) 100%);
     color: white;
   }
 
@@ -213,7 +213,7 @@ $purple: #867cf0;
     color: $purple;
 
     &:hover {
-      background-color: rgba($purple, 0.08);
+      background-color: rgba(var(--color-bg-page), 0.08);
     }
   }
 }
@@ -250,7 +250,7 @@ $purple: #867cf0;
     border-top: 1px solid $border;
 
     button[mat-raised-button] {
-      background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+      background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.8));
       color: #fff;
     }
   }
@@ -315,7 +315,7 @@ $purple: #867cf0;
     margin-bottom: 8px;
 
     &:hover {
-      background-color: $purple;
+      background-color: var(--color-bg-page);
       border-color: $purple;
       box-shadow: 0 8px 24px rgba($purple, 0.35);
       transform: translateY(-2px);
@@ -442,7 +442,7 @@ $purple: #867cf0;
 }
 
 ::ng-deep .mat-mdc-paginator {
-  background: $purple !important;
+  background: var(--color-bg-page) !important;
   border-radius: 0 0 8px 8px;
 
   .mat-mdc-paginator-page-size-label,

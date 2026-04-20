@@ -17,7 +17,7 @@ $text-light: #64748b;
 // Header
 .dialog-header {
     padding: 28px 32px;
-    background: linear-gradient(135deg, $purple 0%, $purple-dark 100%);
+    background: linear-gradient(135deg, var(--color-bg-page) 0%, var(--color-bg-page) 100%);
     color: white;
     flex-shrink: 0;
 }
@@ -99,7 +99,7 @@ $text-light: #64748b;
 .section-icon {
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, $purple 0%, $purple-dark 100%);
+    background: linear-gradient(135deg, var(--color-bg-page) 0%, var(--color-bg-page) 100%);
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -203,7 +203,7 @@ $text-light: #64748b;
             }
 
             .mdc-checkbox--selected .mdc-checkbox__background {
-                background-color: $purple !important;
+                background-color: var(--color-bg-page) !important;
             }
 
             .mdc-label {
@@ -247,7 +247,7 @@ $text-light: #64748b;
 }
 
 .btn-submit {
-    background: linear-gradient(135deg, $purple 0%, $purple-dark 100%) !important;
+    background: linear-gradient(135deg, var(--color-bg-page) 0%, var(--color-bg-page) 100%) !important;
     color: white !important;
     box-shadow: 0 4px 12px rgba($purple, 0.3) !important;
 

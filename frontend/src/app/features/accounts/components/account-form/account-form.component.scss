@@ -1,22 +1,22 @@
 /* Account Form Component Styles */
+@use '../../../../../styles/mixins' as mixins;
 
 .account-form-container {
-  padding: 24px;
+  @include mixins.page-container;
   max-width: 1200px;
-  margin: 0 auto;
 }
 
 .page-header {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
 
   .header-content {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: var(--space-4);
 
     .header-icon {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 12px;
+      background: linear-gradient(135deg, var(--color-bg-page) 0%, var(--color-bg-page) 100%);
+      border-radius: var(--radius-2xl);
       width: 48px;
       height: 48px;
       display: flex;
@@ -24,7 +24,7 @@
       justify-content: center;
 
       mat-icon {
-        color: white;
+        color: var(--color-text-inverse);
         font-size: 24px;
         width: 24px;
         height: 24px;
@@ -32,37 +32,37 @@
     }
 
     h1 {
-      margin: 0 0 4px 0;
-      font-size: 28px;
-      font-weight: 600;
-      color: #444050;
+      margin: 0 0 var(--space-1) 0;
+      font-size: var(--font-size-3xl);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
     }
 
     .subtitle {
       margin: 0;
-      color: #777;
-      font-size: 14px;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
     }
   }
 }
 
 .account-form {
   .form-card {
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e0e0e0;
-    margin-bottom: 24px;
+    @include mixins.card-base;
+    margin-bottom: var(--space-6);
 
     mat-card-content {
-      padding: 24px;
+      @include mixins.card-padding;
     }
   }
 }
 
 .account-tabs {
+  @include mixins.tabs-override;
+  
   ::ng-deep .mat-mdc-tab-header {
-    border-bottom: 1px solid #e0e0e0;
-    margin-bottom: 24px;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-6);
   }
 
   ::ng-deep .mat-mdc-tab {
@@ -70,14 +70,14 @@
   }
 
   .tab-content {
-    padding: 16px 0;
+    padding: var(--space-4) 0;
   }
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
+  gap: var(--space-4);
   align-items: start;
 
   .full-width {
@@ -87,17 +87,17 @@
   .checkbox-field {
     display: flex;
     align-items: center;
-    min-height: 56px; // Match mat-form-field height
-    padding: 8px 0;
+    min-height: var(--input-height); // Match mat-form-field height
+    padding: var(--space-2) 0;
 
     mat-checkbox {
       ::ng-deep .mdc-checkbox__native-control:enabled:checked ~ .mdc-checkbox__background {
-        background-color: #667eea;
-        border-color: #667eea;
+        background-color: var(--color-bg-page);
+        border-color: var(--color-primary);
       }
 
       ::ng-deep .mdc-checkbox__checkmark {
-        color: white;
+        color: var(--color-text-inverse);
       }
     }
   }
@@ -106,19 +106,19 @@
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 16px;
-  padding: 24px 0;
+  gap: var(--space-4);
+  padding: var(--space-6) 0;
 
   button {
     min-width: 120px;
-    height: 40px;
+    height: var(--button-height-sm);
 
     mat-icon {
-      margin-right: 8px;
+      margin-right: var(--space-2);
     }
 
     mat-spinner {
-      margin-right: 8px;
+      margin-right: var(--space-2);
     }
   }
 }
@@ -129,125 +129,56 @@
   align-items: center;
   justify-content: center;
   min-height: 300px;
-  gap: 16px;
+  gap: var(--space-4);
 
   mat-spinner {
     ::ng-deep circle {
-      stroke: #667eea;
+      stroke: var(--color-primary);
     }
   }
 
   p {
-    color: #777;
-    font-size: 14px;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
     margin: 0;
   }
 }
 
 // Material Design Overrides
-::ng-deep .mat-mdc-form-field {
-  .mat-mdc-text-field-wrapper {
-    background-color: transparent;
-  }
+@include mixins.form-field-overrides;
 
-  .mat-mdc-form-field-focus-overlay {
-    background-color: rgba(102, 126, 234, 0.04);
-  }
+// Tab overrides are handled by tabs-override mixin
 
-  .mdc-notched-outline__leading,
-  .mdc-notched-outline__notch,
-  .mdc-notched-outline__trailing {
-    border-color: #e0e0e0;
-    border-width: 1px;
-  }
-
-  &.mat-focused .mdc-notched-outline__leading,
-  &.mat-focused .mdc-notched-outline__notch,
-  &.mat-focused .mdc-notched-outline__trailing {
-    border-color: #667eea;
-    border-width: 2px;
-  }
-}
-
-::ng-deep .mat-mdc-input-element {
-  padding: 8px 0;
-}
-
-::ng-deep .mat-mdc-form-field-label {
-  color: #666;
-
-  &.mdc-floating-label--float-above {
-    color: #667eea;
-  }
-}
-
-::ng-deep .mat-mdc-select-arrow {
-  color: #666;
-}
-
-::ng-deep .mat-mdc-tab-group {
-  .mat-mdc-tab-list {
-    .mdc-tab-indicator__content--underline {
-      border-color: #667eea;
-    }
-  }
-
-  .mdc-tab--active .mdc-tab__text-label {
-    color: #667eea;
-  }
-}
-
-::ng-deep .mat-mdc-button {
-  border-radius: 8px;
-  text-transform: none;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-
-  &.mat-mdc-raised-button {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.2s ease;
-
-    &:hover:not(:disabled) {
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-  }
-
-  &.mat-mdc-button-base.mat-primary {
-    background-color: #667eea;
-
-    &:hover:not(:disabled) {
-      background-color: #5a6fd8;
-    }
-  }
-}
+// Button overrides
+@include mixins.material-button-overrides;
 
 // Error styling
 ::ng-deep .mat-mdc-form-field-error {
-  color: #f44336;
-  font-size: 12px;
+  color: var(--color-danger);
+  font-size: var(--font-size-xs);
 }
 
 // Responsive Design
 @media (max-width: 1024px) {
   .account-form-container {
-    padding: 16px;
+    padding: var(--space-4);
   }
 
   .page-header {
     .header-content {
       flex-direction: column;
       text-align: center;
-      gap: 12px;
+      gap: var(--space-3);
     }
 
     h1 {
-      font-size: 24px;
+      font-size: var(--font-size-2xl);
     }
   }
 
   .form-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: var(--space-3);
   }
 
   .form-actions {
@@ -256,7 +187,7 @@
 
     button {
       width: 100%;
-      margin-bottom: 8px;
+      margin-bottom: var(--space-2);
 
       &:last-child {
         margin-bottom: 0;
@@ -268,27 +199,27 @@
 @media (max-width: 768px) {
   .account-form {
     .form-card mat-card-content {
-      padding: 16px;
+      padding: var(--space-4);
     }
   }
 
   .account-tabs {
     .tab-content {
-      padding: 12px 0;
+      padding: var(--space-3) 0;
     }
 
     ::ng-deep .mat-mdc-tab {
       min-width: 100px;
-      font-size: 12px;
+      font-size: var(--font-size-xs);
     }
   }
 
   .form-grid {
-    gap: 8px;
+    gap: var(--space-2);
 
     mat-form-field {
       ::ng-deep .mat-mdc-form-field-subscript-wrapper {
-        margin-top: 4px;
+        margin-top: var(--space-1);
       }
     }
 
@@ -298,7 +229,7 @@
   }
 
   .form-actions {
-    padding: 16px 0;
+    padding: var(--space-4) 0;
   }
 }
 
@@ -314,45 +245,18 @@
   align-items: center;
   justify-content: center;
   z-index: 10;
-  border-radius: 12px;
+  border-radius: var(--radius-2xl);
 }
 
 // Animation for form transitions
 .account-form {
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  @include mixins.fade-in(var(--transition-slow));
+  @include mixins.slide-up(10px, var(--transition-slow));
 }
 
 // Custom scrollbar for tab content
 .tab-content {
   max-height: 600px;
   overflow-y: auto;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-
-    &:hover {
-      background: #a8a8a8;
-    }
-  }
+  @include mixins.scroll-container(vertical);
 }

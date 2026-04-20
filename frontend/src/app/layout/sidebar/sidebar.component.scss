@@ -75,30 +75,30 @@
   }
 
   &:hover {
-    background: #f7f8fc;
-    border-color: rgba($grey-dark, 0.06);
+    background: rgba($primary, 0.08) !important;
+    border-color: rgba($primary, 0.15);
 
     .mdc-list-item__content,
     .mdc-list-item__primary-text,
     mat-icon {
-      color: #31374a;
+      color: $primary !important;
     }
   }
 
   &.active {
-    background: rgba($primary, 0.08);
-    border-color: rgba($primary, 0.16);
-    box-shadow: inset 3px 0 0 darken($primary, 4%);
+    background: linear-gradient(118deg, $primary, rgba($primary, 0.8)) !important;
+    border-color: transparent !important;
+    box-shadow: 0 4px 12px rgba($primary, 0.35) !important;
 
     .mdc-list-item__content,
     .mdc-list-item__primary-text,
     mat-icon {
-      color: darken($primary, 6%);
+      color: #ffffff !important;
     }
 
     .badge {
       background: #ffffff;
-      color: darken($primary, 4%);
+      color: $primary;
     }
   }
 }
@@ -143,18 +143,25 @@ mat-divider {
     transition: background-color 0.2s ease, border-color 0.2s ease;
 
     &:hover {
-      background: #f7f8fc;
-      border-color: rgba($grey-dark, 0.06);
-    }
-
-    &.active {
-      background: rgba($primary, 0.06);
-      border-color: rgba($primary, 0.12);
+      background: rgba($primary, 0.08) !important;
+      border-color: rgba($primary, 0.15);
 
       .section-icon,
       .section-title,
       .expand-icon {
-        color: darken($primary, 6%);
+        color: $primary !important;
+      }
+    }
+
+    &.active {
+      background: linear-gradient(118deg, $primary, rgba($primary, 0.8)) !important;
+      border-color: transparent !important;
+      box-shadow: 0 4px 12px rgba($primary, 0.25) !important;
+
+      .section-icon,
+      .section-title,
+      .expand-icon {
+        color: #ffffff !important;
       }
     }
   }
@@ -218,18 +225,24 @@ mat-divider {
       }
 
       &:hover {
-        background: #f8f9fc;
+        background: rgba($primary, 0.04) !important;
+        
+        .mdc-list-item__content,
+        .mdc-list-item__primary-text,
+        mat-icon {
+          color: $primary !important;
+        }
       }
 
       &.active {
-        background: rgba($primary, 0.08);
-        border-color: rgba($primary, 0.16);
-        box-shadow: none;
+        background: linear-gradient(118deg, $primary, rgba($primary, 0.8)) !important;
+        border-color: transparent !important;
+        box-shadow: 0 2px 8px rgba($primary, 0.2) !important;
 
         .mdc-list-item__content,
         .mdc-list-item__primary-text,
         mat-icon {
-          color: darken($primary, 6%);
+          color: #ffffff !important;
         }
       }
     }

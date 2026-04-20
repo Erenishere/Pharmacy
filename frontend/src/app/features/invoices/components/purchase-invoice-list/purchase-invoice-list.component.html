@@ -2,31 +2,56 @@
   <!-- Header Section -->
   <div class="list-page-header">
     <div class="header-content">
-      <h1>Purchase Invoices</h1>
-      <p>Manage supplier purchase transactions and inventory stock-ins</p>
+      <h1><mat-icon>shopping_cart</mat-icon> Purchase Invoices</h1>
+      <p class="page-description">Manage supplier purchase transactions and inventory stock-ins</p>
     </div>
-    <button mat-raised-button color="primary" (click)="createInvoice()">
-      <mat-icon>add</mat-icon> New Invoice
-    </button>
+    <div class="header-actions">
+      <button mat-raised-button class="btn-create" (click)="createInvoice()">
+        <mat-icon>add</mat-icon> New Invoice
+      </button>
+    </div>
   </div>
 
-  <!-- Statistics Cards Row -->
-  <div class="statistics-cards mb-4" *ngIf="statistics">
-    <div class="stat-card">
-      <div class="stat-label">Total Invoices</div>
-      <div class="stat-value">{{ statistics.totalInvoices }}</div>
+  <!-- Standardized Statistics Grid -->
+  <div class="dashboard-stats-grid">
+    <div class="stat-card primary">
+      <div class="stat-icon-wrapper">
+        <mat-icon>receipt</mat-icon>
+      </div>
+      <div class="stat-data">
+        <span class="value">{{ totalInvoices }}</span>
+        <span class="label">Total Invoices</span>
+      </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Total Amount</div>
-      <div class="stat-value">{{ formatCurrency(statistics.totalAmount) }}</div>
+
+    <div class="stat-card success">
+      <div class="stat-icon-wrapper">
+        <mat-icon>account_balance_wallet</mat-icon>
+      </div>
+      <div class="stat-data">
+        <span class="value">Rs. {{ formatCurrency(statistics?.totalAmount || 0) }}</span>
+        <span class="label">Total Amount</span>
+      </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Pending Amount</div>
-      <div class="stat-value warn">{{ formatCurrency(statistics.pendingAmount) }}</div>
+
+    <div class="stat-card warning">
+      <div class="stat-icon-wrapper">
+        <mat-icon>pending</mat-icon>
+      </div>
+      <div class="stat-data">
+        <span class="value">Rs. {{ formatCurrency(statistics?.pendingAmount || 0) }}</span>
+        <span class="label">Pending Amount</span>
+      </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Paid Amount</div>
-      <div class="stat-value success">{{ formatCurrency(statistics.paidAmount) }}</div>
+    
+    <div class="stat-card danger">
+      <div class="stat-icon-wrapper">
+        <mat-icon>done_all</mat-icon>
+      </div>
+      <div class="stat-data">
+        <span class="value">{{ formatCurrency(statistics?.paidAmount || 0) }}</span>
+        <span class="label">Paid Amount</span>
+      </div>
     </div>
   </div>
 
@@ -77,9 +102,8 @@
     </div>
 
     <!-- Table Section -->
-    <div class="table-wrapper px-3 pb-3" style="position: relative; min-height: 200px;">
-      <div class="loading-overlay" *ngIf="loading"
-           style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); display: flex; justify-content: center; align-items: center; z-index: 10;">
+    <div class="table-wrapper" style="position: relative; min-height: 200px;">
+      <div class="loading-overlay" *ngIf="loading">
         <mat-spinner diameter="40"></mat-spinner>
       </div>
 
@@ -90,18 +114,10 @@
         [pageSize]="pageSize"
         [pageIndex]="pageIndex"
         [pageSizeOptions]="pageSizeOptions"
+        [getRowClass]="getRowClass"
         (pageChange)="onPageChange($event)"
         (actionClick)="onTableAction($event)">
       </app-data-table>
-
-      <!-- No Data Message -->
-      <div class="list-empty-state" *ngIf="!loading && dataSource.data.length === 0">
-        <mat-icon>inbox</mat-icon>
-        <p>No purchase invoices found</p>
-        <button mat-raised-button color="primary" (click)="createInvoice()">
-          Create First Invoice
-        </button>
-      </div>
     </div>
   </div>
 

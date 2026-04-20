@@ -21,7 +21,8 @@ import { Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { AccountService, Account } from '../../services/account.service';
-import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table/data-table.component';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+import { DataTableColumn } from '../../../../shared/models/data-table.model';
 
 @Component({
   selector: 'app-account-list',
@@ -52,7 +53,7 @@ import { DataTableComponent, TableColumn } from '../../../../shared/components/d
   styleUrls: ['./account-list.component.scss']
 })
 export class AccountListComponent implements OnInit {
-  tableColumns: TableColumn[] = [
+  tableColumns: DataTableColumn[] = [
     { key: 'accountNumber', label: 'Account #', sortable: true },
     { key: 'name', label: 'Name', sortable: true },
     { key: 'typeLabel', label: 'Type', type: 'status', colorMap: {

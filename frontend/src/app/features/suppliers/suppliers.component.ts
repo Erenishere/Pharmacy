@@ -22,7 +22,9 @@ import { UserRole } from '../../core/models/user.model';
 import { SupplierFormComponent } from './components/supplier-form/supplier-form.component';
 import { SupplierDetailComponent } from './components/supplier-detail/supplier-detail.component';
 import { SupplierStatsComponent } from './components/supplier-stats/supplier-stats.component';
-import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
+import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
+import { DataTableColumn, TableActionClickEvent } from '../../shared/models/data-table.model';
+
 
 /**
  * Suppliers Component
@@ -62,19 +64,41 @@ export class SuppliersComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild(MatSort) sort!: MatSort;
 
     // Table configuration
-    tableColumns: TableColumn[] = [
+    tableColumns: DataTableColumn[] = [
         { key: 'code', label: 'Code', sortable: true },
         { key: 'name', label: 'Name', sortable: true },
         { key: 'type', label: 'Type', type: 'status', colorMap: {'customer': 'primary', 'supplier': 'accent', 'both': 'warn'} },
         { key: 'phone', label: 'Phone' },
         { key: 'email', label: 'Email' },
         { key: 'city', label: 'City' },
-        { key: 'isActive', label: 'Status', type: 'custom' },
+        { 
+          key: 'isActive', 
+          label: 'Status', 
+          type: 'status',
+          getValue: (row: any) => row.isActive ? 'Active' : 'Inactive',
+          colorMap: { 'Active': 'primary', 'Inactive': 'warn' }
+        },
         { key: 'actions', label: 'Actions', type: 'action', actions: [
-            { icon: 'visibility', label: 'View', actionKey: 'view', color: 'primary' },
-            { icon: 'edit', label: 'Edit', actionKey: 'edit', color: 'accent', showIf: () => this.canEdit },
-            { icon: 'delete', label: 'Delete', actionKey: 'delete', color: 'warn', showIf: (row) => this.canDelete && row.isActive },
-            { icon: 'restore', label: 'Restore', actionKey: 'restore', color: 'primary', showIf: (row) => this.canRestore && !row.isActive }
+            { icon: 'visibility', label: 'View', actionKey: 'view' },
+            { 
+              icon: 'edit', 
+              label: 'Edit', 
+              actionKey: 'edit',
+              showIf: () => this.canEdit 
+            },
+            { 
+              icon: 'delete', 
+              label: 'Delete', 
+              actionKey: 'delete', 
+              color: 'warn', 
+              showIf: (row: any) => this.canDelete && row.isActive 
+            },
+            { 
+              icon: 'restore', 
+              label: 'Restore', 
+              actionKey: 'restore', 
+              showIf: (row: any) => this.canRestore && !row.isActive 
+            }
         ]}
     ];
 
@@ -760,12 +784,24 @@ export class SuppliersComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     /**
-     * Toggle supplier active status
-     * Requirements: 7.1, 7.2, 7.3, 7.4, 7.5
+     * Handle table action clicks
+     * @param event The action event
      */
-    toggleStatus(supplier: Supplier, event: any): void {
-        // Prevent event propagation
-        event.stopPropagation();
+    onTableAction(event: TableActionClickEvent): void {
+        const supplier = event.row as Supplier;
+        switch(event.action) {
+            case 'view': this.openDetailDialog(supplier); break;
+            case 'edit': this.openEditDialog(supplier); break;
+            case 'delete': this.confirmDelete(supplier); break;
+            case 'restore': this.restoreSupplier(supplier); break;
+        }
+    }
+
+    /**
+     * Toggle supplier active status
+     */
+    toggleStatus(supplier: Supplier, event?: any): void {
+        if (event) event.stopPropagation();
 
         const supplierId = supplier._id;
         const previousStatus = supplier.isActive;
@@ -865,12 +901,4 @@ export class SuppliersComponent implements OnInit, OnDestroy, AfterViewInit {
         return `An error occurred while ${operation}. Please try again.`;
     }
 
-    onTableAction(event: { action: string, row: any }): void {
-        const item = event.row;
-        switch(event.action) {
-            case 'view': this.openDetailDialog(item); break;
-            case 'edit': this.openEditDialog(item); break;
-            case 'delete': this.confirmDelete(item); break;
-        }
-    }
 }

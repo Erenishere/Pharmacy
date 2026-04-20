@@ -16,8 +16,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { HttpClient } from '@angular/common/http';
-import { SchemeService } from '../../scheme.service';
+import { DataTableColumn, TableActionClickEvent } from '../../../../shared/models/data-table.model';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { environment } from '../../../../../environments/environment';
+import { SchemeService } from '../../scheme.service';
+
+
 
 @Component({
   selector: 'app-scheme-list',
@@ -28,7 +32,8 @@ import { environment } from '../../../../../environments/environment';
     MatFormFieldModule, MatInputModule, MatSelectModule,
     MatDatepickerModule, MatNativeDateModule,
     MatCardModule, MatProgressSpinnerModule, MatTooltipModule,
-    MatPaginatorModule, MatSnackBarModule, MatChipsModule
+    MatPaginatorModule, MatSnackBarModule, MatChipsModule,
+    DataTableComponent
   ],
   templateUrl: './scheme-list.component.html',
   styleUrl: './scheme-list.component.scss'
@@ -54,11 +59,26 @@ export class SchemeListComponent implements OnInit {
   loadingCA = false;
 
   // ── Schemes list (bottom) ─────────────────────────────────
-  schemeColumns = ['sno', 'claimDate', 'company', 'group', 'discount2', 'scheme2', 'to2', 'claimAccount', 'actions'];
+  schemeTableColumns: DataTableColumn[] = [
+    { key: 'serial', label: 'S#', getValue: (row: any, i?: number) => (this.pageIndex * this.pageSize) + (i !== undefined ? i + 1 : 0) },
+    { key: 'createdAt', label: 'Creation Date', getValue: (row: any) => this.fmtDate(row.createdAt) },
+    { key: 'company', label: 'Company', getValue: (row: any) => row.company?.name || this.companyName(row.company), sortable: true },
+    { key: 'group', label: 'Group' },
+    { key: 'discount2Percent', label: 'Discount 2 (%)', type: 'numeric', getValue: (row: any) => (row.discount2Percent || 0) + '%' },
+    { key: 'schemeFormat', label: 'Scheme Format' },
+    { key: 'to2Percent', label: 'TO.2', type: 'numeric', getValue: (row: any) => (row.to2Percent || 0) + '%' },
+    { key: 'claimAccount', label: 'Linked Account', getValue: (row: any) => row.claimAccountId?.name || this.caName(row.claimAccountId) },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [
+      { icon: 'edit', label: 'Edit', actionKey: 'edit' },
+      { icon: 'delete', label: 'Delete', actionKey: 'delete', color: 'warn' }
+    ]}
+  ];
+
   schemeDataSource = new MatTableDataSource<any>([]);
   loadingSchemes = false;
   pageSize = 20;
   pageIndex = 0;
+  totalSchemes = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -103,7 +123,7 @@ export class SchemeListComponent implements OnInit {
   loadClaimAccounts(): void {
     this.loadingCA = true;
     this.service.getClaimAccounts({ limit: 200 }).subscribe({
-      next: (res) => { this.loadingCA = false; this.claimAccounts = res.data || []; this.caDataSource.data = res.data || []; },
+      next: (res: any) => { this.loadingCA = false; this.claimAccounts = res.data || []; this.caDataSource.data = res.data || []; },
       error: () => { this.loadingCA = false; }
     });
   }
@@ -111,9 +131,19 @@ export class SchemeListComponent implements OnInit {
   loadSchemes(): void {
     this.loadingSchemes = true;
     this.service.getSchemes({ page: this.pageIndex + 1, limit: this.pageSize }).subscribe({
-      next: (res) => { this.loadingSchemes = false; this.schemeDataSource.data = res.data || []; },
+      next: (res: any) => { 
+        this.loadingSchemes = false; 
+        this.schemeDataSource.data = res.data || []; 
+        this.totalSchemes = res.pagination?.totalItems || this.schemeDataSource.data.length;
+      },
       error: () => { this.loadingSchemes = false; }
     });
+  }
+
+  onSchemeTableAction(event: TableActionClickEvent): void {
+    const row = event.row;
+    if (event.action === 'edit') this.editScheme(row);
+    if (event.action === 'delete') this.deleteScheme(row);
   }
 
   // ── Save Claim (Scheme) ───────────────────────────────────
@@ -149,7 +179,7 @@ export class SchemeListComponent implements OnInit {
         });
         this.loadSchemes();
       },
-      error: (e) => { this.savingClaim = false; this.snackBar.open(e?.error?.message || 'Failed', 'Close', { duration: 3000 }); }
+      error: (e: any) => { this.savingClaim = false; this.snackBar.open(e?.error?.message || 'Failed', 'Close', { duration: 3000 }); }
     });
   }
 
@@ -174,7 +204,7 @@ export class SchemeListComponent implements OnInit {
     if (!confirm('Delete this claim?')) return;
     this.service.deleteScheme(row._id).subscribe({
       next: () => { this.snackBar.open('Deleted', 'Close', { duration: 2000 }); this.loadSchemes(); },
-      error: (e) => this.snackBar.open(e?.error?.message || 'Failed', 'Close', { duration: 3000 })
+      error: (e: any) => this.snackBar.open(e?.error?.message || 'Failed', 'Close', { duration: 3000 })
     });
   }
 
@@ -194,7 +224,7 @@ export class SchemeListComponent implements OnInit {
         this.caForm.reset({ caDate: new Date().toISOString().split('T')[0] });
         this.loadClaimAccounts();
       },
-      error: (e) => { this.savingCA = false; this.snackBar.open(e?.error?.message || 'Failed', 'Close', { duration: 3000 }); }
+      error: (e: any) => { this.savingCA = false; this.snackBar.open(e?.error?.message || 'Failed', 'Close', { duration: 3000 }); }
     });
   }
 

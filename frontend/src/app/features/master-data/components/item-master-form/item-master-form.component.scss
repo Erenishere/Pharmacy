@@ -42,7 +42,7 @@ mat-dialog-actions {
   border-top: 1px solid $purple;
 
   button[mat-raised-button] {
-    background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+    background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.8));
     box-shadow: 0 0 10px 1px rgba($purple, 0.4);
     color: #fff;
     font-weight: 500;

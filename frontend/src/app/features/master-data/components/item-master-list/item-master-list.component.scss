@@ -1,221 +1,66 @@
-@import 'styles/vuexy-vars';
+@import 'styles/shared-list-styles';
 
-$page-bg: #f8f7fa;
-$card-bg: #ffffff;
-$border: #e9ecef;
-$purple: #867cf0;
-
-.item-master-container {
-  padding: 24px;
-  max-width: 1600px;
-  margin: 0 auto;
-  background-color: $page-bg;
-  min-height: 100vh;
+.list-page-card {
+  @include list-card;
+  border: 1px solid $p-border;
 }
 
-.page-header {
-  margin-bottom: 24px;
-
-  h1 {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0;
-    font-size: 24px;
-    font-weight: 600;
-    color: $text-card-title;
-    border-left: 4px solid $purple;
-    padding-left: 12px;
-  }
-
-  .page-description {
-    margin: 4px 0 0 16px;
-    color: $text-muted;
-    font-size: 14px;
-  }
-}
-
-.main-card {
-  background: $card-bg;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  padding: 24px;
-}
-
-.filters-section {
+.list-filters-section {
+  padding: 24px !important;
+  border-bottom: 1px solid $p-border;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  gap: 16px;
+  gap: 20px;
   flex-wrap: wrap;
 
-  .search-filters {
+  .filter-group-primary {
+    flex: 1;
+    min-width: 300px;
+  }
+
+  .filter-group-secondary {
     display: flex;
+    align-items: center;
     gap: 16px;
     flex-wrap: wrap;
-    flex: 1;
 
-    mat-form-field {
-      min-width: 200px;
-
-      &.search-field {
-        min-width: 300px;
-      }
-    }
-
-    ::ng-deep .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,
-    ::ng-deep .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,
-    ::ng-deep .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing {
-      border-color: $purple !important;
-    }
-
-    ::ng-deep .mat-mdc-form-field.mat-focused .mdc-floating-label,
-    ::ng-deep .mdc-floating-label--float-above {
-      color: $purple !important;
-      font-weight: 600 !important;
-      background: #ffffff !important;
-      padding: 0 4px !important;
-    }
-  }
-
-  .action-buttons {
-    display: flex;
-    gap: 12px;
-
-    button[color="primary"] {
-      background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
-      box-shadow: 0 0 10px 1px rgba($purple, 0.4);
-
-      &:hover {
-        box-shadow: 0 0 14px 2px rgba($purple, 0.6);
-      }
+    .filter-field {
+      width: 220px;
     }
   }
 }
 
-.table-container {
-  background: transparent;
-  border-radius: 8px;
-}
+::ng-deep {
+  .stock-cell {
+    font-weight: 700;
+    
+    &.stock-out {
+      color: #ea5455; // Red
+      background: rgba(234, 84, 85, 0.1);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    
+    &.stock-low {
+      color: #ff9f43; // Orange
+      background: rgba(255, 159, 67, 0.1);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    
+    &.stock-over {
+      color: #00cfe8; // Cyan
+    }
+    
+    &.stock-normal {
+      color: #28c76f; // Green
+    }
+  }
 
-.items-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 8px;
-
-  th {
-    background-color: #ffffff;
-    color: $text-card-title;
+  .amount-cell {
+    font-family: 'Roboto Mono', monospace;
     font-weight: 600;
-    font-size: 12px;
-    padding: 16px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid $border;
+    color: #444;
   }
-
-  tr.mat-mdc-row {
-    background: #ffffff !important;
-    border: 1px solid $border;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transition: all 0.25s ease;
-
-    &:hover {
-      background-color: $purple !important;
-      border-color: $purple;
-      box-shadow: 0 8px 24px rgba($purple, 0.35);
-      transform: translateY(-2px);
-
-      .mat-mdc-cell,
-      .item-code,
-      .item-name strong,
-      .item-name small,
-      .pricing-info .sale-price,
-      .pricing-info .purchase-price,
-      .stock-info small,
-      mat-icon {
-        color: #ffffff !important;
-      }
-
-      .status-badge {
-        border-color: #ffffff;
-        color: #ffffff;
-      }
-    }
-  }
-
-  td {
-    padding: 16px;
-    font-size: 14px;
-    border: none;
-  }
-
-  .item-code {
-    font-family: monospace;
-    font-weight: 600;
-    color: $purple;
-  }
-
-  .item-name {
-    strong {
-      display: block;
-      font-size: 15px;
-      color: $text-card-title;
-    }
-
-    small {
-      color: $text-muted;
-    }
-  }
-
-  .status-badge {
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    border: 1px solid #ea5455;
-    color: #ea5455;
-
-    &.active {
-      border-color: #28c76f;
-      color: #28c76f;
-    }
-  }
-
-  .pricing-info {
-    .sale-price {
-      font-weight: 600;
-      color: #28c76f;
-      display: block;
-    }
-
-    .purchase-price {
-      font-size: 12px;
-      color: $text-muted;
-    }
-  }
-}
-
-.no-data,
-.loading-container {
-  text-align: center;
-  padding: 64px 24px;
-  color: $text-muted;
-
-  mat-icon {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
-    margin-bottom: 16px;
-    opacity: 0.5;
-  }
-}
-
-mat-paginator {
-  background: #ffffff !important;
-  border-radius: 0 0 8px 8px;
-  margin-top: 8px;
 }

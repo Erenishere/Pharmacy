@@ -70,12 +70,12 @@ $field-bg: #ffffff;
       background: #fff;
 
       &:hover {
-        background: $purple-light;
+        background: var(--color-bg-page);
       }
     }
 
     .primary-btn {
-      background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+      background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.8));
       color: #fff;
       box-shadow: 0 4px 12px rgba($purple, 0.35);
 
@@ -107,7 +107,7 @@ $field-bg: #ffffff;
   margin-bottom: 12px;
   padding: 10px 12px;
   border-radius: 8px;
-  background: linear-gradient(118deg, $purple, rgba($purple, 0.86));
+  background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.86));
 
   h2 {
     margin: 0;
@@ -151,7 +151,7 @@ $field-bg: #ffffff;
   font-size: 13px;
   font-weight: 700;
   color: $purple;
-  background: $purple-light;
+  background: var(--color-bg-page);
   border-bottom: 1px solid $border;
   border-left: 3px solid $purple;
 }
@@ -180,7 +180,7 @@ $field-bg: #ffffff;
 .accent-row {
   .sheet-label,
   .sheet-control {
-    background: rgba($purple, 0.07);
+    background: rgba(var(--color-bg-page), 0.07);
   }
 }
 
@@ -339,7 +339,7 @@ $field-bg: #ffffff;
   padding: 8px 10px;
   border: 1px solid $border;
   border-radius: 8px;
-  background: rgba($purple, 0.06);
+  background: rgba(var(--color-bg-page), 0.06);
   border-left: 3px solid $purple;
   font-size: 12px;
   font-weight: 600;

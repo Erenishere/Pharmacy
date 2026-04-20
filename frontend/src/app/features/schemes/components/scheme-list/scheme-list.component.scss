@@ -1,9 +1,6 @@
-@import "../../../../../styles/shared-list-styles";
+@import 'styles/shared-list-styles';
 
 .schemes-page {
-  @include data-table;
-  @include paginator;
-
   .schemes-grid {
     display: grid;
     grid-template-columns: 1fr 340px;
@@ -17,13 +14,11 @@
   }
 
   .form-card {
-    @include layered-glass;
+    background: #ffffff;
     padding: 24px;
     border-radius: 12px;
-
-    &.secondary {
-      background: #ffffff;
-    }
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    border: 1px solid $p-border;
 
     .card-header {
       margin-bottom: 20px;
@@ -52,12 +47,12 @@
       gap: 12px;
       margin-top: 20px;
       padding-top: 20px;
-      border-top: 1px solid rgba($purple, 0.1);
+      border-top: 1px solid $p-border;
 
       .save-btn {
-        background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
-        box-shadow: 0 4px 12px rgba($purple, 0.3);
-        height: 40px;
+        height: 44px;
+        background-color: var(--color-bg-page);
+        color: white;
       }
     }
   }
@@ -66,7 +61,6 @@
   .ca-input-section {
     margin-bottom: 20px;
     .w-full { width: 100%; }
-    .ca-save-btn { color: $purple; }
   }
 
   .ca-list-section {
@@ -90,7 +84,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 10px 12px;
-      background: $grey-very-light;
+      background: #f8f8f8;
       border-radius: 8px;
       border-left: 3px solid transparent;
       transition: all 0.2s;
@@ -100,50 +94,48 @@
         background: rgba($success, 0.05);
       }
 
+      &:hover {
+        transform: translateX(4px);
+        background: #f0f0f0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      }
+
       .ca-info {
         display: flex;
         flex-direction: column;
-        .ca-name { font-weight: 600; color: $grey-dark; font-size: 13px; }
-        .ca-date { font-size: 10px; color: $grey-medium; }
+        .ca-name { font-weight: 600; color: #444; font-size: 13px; }
+        .ca-date { font-size: 10px; color: #888; }
       }
 
       .ca-actions {
         display: flex;
         gap: 4px;
+        
+        button {
+          width: 32px;
+          height: 32px;
+          line-height: normal;
+          mat-icon { font-size: 18px; width: 18px; height: 18px; }
+        }
+
         .edit-btn { color: $purple; }
         .status-btn { 
-          color: $grey-medium; 
+          color: #aaa; 
           .active-icon { color: $success; }
         }
       }
-
-      &:hover {
-        transform: translateX(4px);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      }
     }
-
-    .empty-hint {
-      text-align: center;
-      padding: 20px;
-      color: $grey-medium;
-      font-style: italic;
-      font-size: 12px;
-    }
-  }
-
-  .chip-scheme {
-    background: rgba($purple, 0.1);
-    color: $purple;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-weight: 700;
-    font-size: 11px;
-    font-family: monospace;
-  }
-
-  .amount-cell {
-    font-weight: 600;
-    color: $purple-dark;
   }
 }
+
+.list-page-card {
+  @include list-card;
+}
+
+::ng-deep {
+  .schemes-page {
+    @include data-table;
+    @include paginator;
+  }
+}
+

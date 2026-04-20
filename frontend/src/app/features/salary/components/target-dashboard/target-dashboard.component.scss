@@ -18,7 +18,7 @@
     .refresh-btn {
       height: 44px;
       padding: 0 20px;
-      background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+      background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.8));
     }
   }
 
@@ -30,7 +30,7 @@
     .avatar-circle {
       width: 36px;
       height: 36px;
-      background: rgba($purple, 0.1);
+      background: rgba(var(--color-bg-page), 0.1);
       color: $purple;
       display: flex;
       align-items: center;
@@ -143,3 +143,8 @@
     .no-incentive { color: $grey-very-light; font-style: italic; }
   }
 }
+
+.list-page-container { @include page-container; }
+.list-page-header { @include page-header; }
+.list-page-card { @include list-card; }
+.dashboard-stats-grid { @include dashboard-stats-grid; }

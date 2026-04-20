@@ -45,13 +45,6 @@
       </div>
     } @else {
       <div class="table-wrapper">
-        @if (dataSource.data.length === 0) {
-          <div class="list-empty-state">
-            <mat-icon>map</mat-icon>
-            <p>No route plans found</p>
-            <button mat-raised-button color="primary" class="create-btn" (click)="openCreateDialog()">Create First Plan</button>
-          </div>
-        } @else {
           <table mat-table [dataSource]="dataSource" class="data-table">
             <ng-container matColumnDef="monthYear">
               <th mat-header-cell *matHeaderCellDef>Month</th>
@@ -104,10 +97,22 @@
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+          <tr class="mat-row empty-state-row" *matNoDataRow>
+            <td class="mat-cell" colspan="12">
+              <div class="empty-state-premium">
+                <div class="icon-wrapper">
+                  <mat-icon>inbox</mat-icon>
+                  <div class="icon-bg-glow"></div>
+                </div>
+                <h4>No route plans found</h4>
+                <p>There is no data to display matching the current criteria.</p>
+              </div>
+            </td>
+          </tr>
           </table>
 
           <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
-        }
       </div>
     }
   </div>

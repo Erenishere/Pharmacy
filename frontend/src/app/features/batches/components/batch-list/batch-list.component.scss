@@ -11,77 +11,71 @@
     color: $purple;
   }
 
-  /* View Mode Toggle Styling */
+  /* View Mode Toggle Styling - Premium Glassmorphism */
   .view-mode-container {
-    margin: 20px 0;
+    margin: 24px 0;
     display: flex;
     justify-content: center;
 
     .view-mode-toggle {
-      border: 1px solid $grey-very-light;
-      border-radius: 8px;
-      overflow: hidden;
-      background-color: #fff;
+      border: none !important;
+      @include layered-glass;
+      border-radius: 12px;
+      padding: 4px;
+      background: rgba(255, 255, 255, 0.6) !important;
 
-      .mat-button-toggle {
-        border: none;
-        border-right: 1px solid $grey-very-light;
-        
-        &:last-child {
-          border-right: none;
+      ::ng-deep .mat-button-toggle {
+        border: none !important;
+        background-color: transparent !important;
+        border-radius: 8px !important;
+        margin: 0 2px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        .mat-button-toggle-label-content {
+          line-height: 40px !important;
+          padding: 0 20px !important;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          color: $grey-dark;
+          font-weight: 500;
+          font-size: 14px;
         }
 
         &.mat-button-toggle-checked {
-          background-color: $purple !important;
-          color: #fff !important;
+          background-color: var(--color-bg-page) !important;
+          box-shadow: 0 4px 12px rgba($purple, 0.25);
+          
+          .mat-button-toggle-label-content {
+            color: #ffffff !important;
+          }
           
           mat-icon {
-            color: #fff !important;
+            color: #ffffff !important;
           }
         }
 
         &:not(.mat-button-toggle-checked):hover {
-          background-color: $grey-very-light !important;
-          color: $purple !important;
+          background-color: rgba(var(--color-bg-page), 0.08) !important;
+          
+          .mat-button-toggle-label-content {
+            color: $purple !important;
+          }
+          
+          mat-icon {
+            color: $purple !important;
+          }
         }
       }
-    }
-  }
 
-  /* Data Table */
-  .data-table {
-    @include data-table;
-
-    .item-info {
-      display: flex;
-      flex-direction: column;
-      
-      .item-name {
-        font-weight: 600;
-        color: $text-card-title;
-      }
-
-      .item-code {
-        font-size: 11px;
-        color: $grey-dark;
-      }
-    }
-
-    .quantity-info {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      
-      .remaining {
-        font-weight: 600;
-        color: $purple;
-      }
-
-      .total {
-        color: $grey-dark;
+      /* Remove default MDC borders */
+      ::ng-deep .mat-button-toggle-group-appearance-standard {
+        border: none !important;
       }
     }
   }
+
+
 
   /* Grouped View Styles */
   .grouped-view {
@@ -141,7 +135,7 @@
           transition: all 0.2s ease;
 
           &:hover {
-            background-color: rgba($purple, 0.05);
+            background-color: rgba(var(--color-bg-page), 0.05);
             
             .batch-number {
               color: $purple;
@@ -170,15 +164,7 @@
     }
   }
 
-  /* Expiry Styling */
-  .expiry-date {
-    font-weight: 600;
-    
-    &.expired { color: $danger; }
-    &.expiring-soon { color: $warning; }
-    &.expiring-warning { color: $danger; }
-    &.normal { color: $success; }
-  }
+
 
   /* Chips */
   ::ng-deep .mat-mdc-chip {
@@ -190,4 +176,6 @@
   }
 }
 
-@include paginator;
+.mat-mdc-paginator {
+  @include paginator;
+}

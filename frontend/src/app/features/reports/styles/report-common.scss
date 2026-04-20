@@ -138,7 +138,7 @@ $purple: #7367F0;
         }
 
         &.purple {
-          background: linear-gradient(135deg, $purple 0%, rgba($purple, 0.7) 100%);
+          background: linear-gradient(135deg, var(--color-bg-page) 0%, rgba(var(--color-bg-page), 0.7) 100%);
         }
 
         &.success {
@@ -246,7 +246,7 @@ $purple: #7367F0;
         }
 
         tr:hover td {
-          background: rgba($purple, 0.04);
+          background: rgba(var(--color-bg-page), 0.04);
         }
 
         .text-right {
@@ -315,7 +315,7 @@ $purple: #7367F0;
   }
 
   .export-btn {
-    background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+    background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.8));
     color: #fff;
 
     &:hover {
@@ -328,7 +328,7 @@ $purple: #7367F0;
     border: 1px solid rgba($purple, 0.5);
 
     &:hover {
-      background: rgba($purple, 0.08);
+      background: rgba(var(--color-bg-page), 0.08);
     }
   }
 

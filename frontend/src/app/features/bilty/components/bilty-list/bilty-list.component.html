@@ -135,15 +135,22 @@
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+          <tr class="mat-row empty-state-row" *matNoDataRow>
+            <td class="mat-cell" colspan="12">
+              <div class="empty-state-premium">
+                <div class="icon-wrapper">
+                  <mat-icon>inbox</mat-icon>
+                  <div class="icon-bg-glow"></div>
+                </div>
+                <h4>No bilty receipts found</h4>
+                <p>There is no data to display matching the current criteria.</p>
+              </div>
+            </td>
+          </tr>
         </table>
 
-        @if (dataSource.data.length === 0) {
-          <div class="list-empty-state">
-            <mat-icon>local_shipping</mat-icon>
-            <p>No bilty receipts found</p>
-            <button mat-raised-button color="primary" class="create-btn" (click)="openCreate()">Create First Bilty</button>
-          </div>
-        }
+        
 
         <mat-paginator
           [length]="totalItems"

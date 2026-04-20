@@ -1,0 +1,12 @@
+
+.list-page-card { @include list-card; }
+
+.list-page-container { @include page-container; }
+
+.list-page-header { @include page-header; }
+
+.dashboard-stats-grid { @include dashboard-stats-grid; }
+
+::ng-deep { @include data-table; }
+
+::ng-deep { @include paginator; }

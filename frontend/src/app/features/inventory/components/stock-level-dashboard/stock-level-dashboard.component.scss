@@ -6,12 +6,20 @@
 }
 
 .stock-dashboard-page {
-  /* Dashboard Stats Grid */
+  /* Dashboard Stats Grid - Balanced 4-column layout */
   .dashboard-stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 24px;
     margin-bottom: 24px;
+
+    @media (max-width: 1200px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+    }
 
     .stat-card {
       @include layered-glass;
@@ -59,7 +67,7 @@
 
       /* Variant colors */
       &.primary {
-        .stat-icon-wrapper { background: rgba($purple, 0.1); mat-icon { color: $purple; } }
+        .stat-icon-wrapper { background: rgba(var(--color-bg-page), 0.1); mat-icon { color: $purple; } }
       }
       &.success {
         .stat-icon-wrapper { background: rgba($success, 0.1); mat-icon { color: $success; } }
@@ -73,9 +81,57 @@
     }
   }
 
+  /* Enhanced Filter Alignment */
+  .list-filters-section {
+    flex-wrap: nowrap; /* Prevent items from dropping to next line on large desktop */
+    align-items: center;
+    gap: 16px;
+
+    .filter-group-primary {
+      flex: 1;
+      max-width: 450px;
+    }
+
+    .filter-group-secondary {
+      flex: 2;
+      justify-content: flex-end;
+      flex-wrap: nowrap; /* Keep dropdowns in line */
+      
+      .filter-field {
+        min-width: 140px;
+        flex: 1;
+      }
+
+      .clear-btn {
+        margin-left: 8px;
+        white-space: nowrap;
+      }
+    }
+
+    @media (max-width: 1400px) {
+      flex-wrap: wrap;
+      
+      .filter-group-secondary {
+        justify-content: flex-start;
+      }
+    }
+  }
+
+  /* Table Wrapper Horizontal Scroll */
+  .table-wrapper {
+    overflow-x: auto !important;
+    width: 100% !important;
+    position: relative;
+    &::-webkit-scrollbar { height: 8px; }
+    &::-webkit-scrollbar-track { background: #f1f1f1; }
+    &::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
+    &::-webkit-scrollbar-thumb:hover { background: #b1b1b1; }
+  }
+
   /* Data Table */
   .data-table {
     @include data-table;
+    min-width: 1300px;
 
     .code-cell {
       font-family: 'Inter', monospace;
@@ -113,4 +169,6 @@
   }
 }
 
-@include paginator;
+.mat-mdc-paginator {
+  @include paginator;
+}

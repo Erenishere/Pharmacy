@@ -194,6 +194,17 @@ export class UserListComponent implements OnInit, OnDestroy, AfterViewInit {
         this.loadUsers();
     }
 
+    clearFilters(): void {
+        this.searchControl.setValue('');
+        this.selectedRole = '';
+        this.showDeleted = false;
+        this.pageIndex = 0;
+        if (this.paginator) {
+            this.paginator.pageIndex = 0;
+        }
+        this.loadUsers();
+    }
+
     toggleShowDeleted(): void {
         this.pageIndex = 0;
         if (this.paginator) {

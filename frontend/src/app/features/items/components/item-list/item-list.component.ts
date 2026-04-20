@@ -17,7 +17,8 @@ import { PosService, Item } from '../../../../core/services/pos.service';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { ItemFormDialogComponent } from '../item-form-dialog/item-form-dialog.component';
 import { ItemDetailDialogComponent } from '../item-detail-dialog/item-detail-dialog.component';
-import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table/data-table.component';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+import { DataTableColumn } from '../../../../shared/models/data-table.model';
 
 @Component({
   selector: 'app-item-list',
@@ -127,7 +128,7 @@ export class ItemListComponent implements OnInit, OnDestroy {
   selectedCategory = '';
   selectedStockStatus = '';
   
-  tableColumns: TableColumn[] = [
+  tableColumns: DataTableColumn[] = [
     { key: 'serial', label: 'S#' },
     { key: 'company', label: 'Manufacturer' },
     { key: 'name', label: 'Name' },

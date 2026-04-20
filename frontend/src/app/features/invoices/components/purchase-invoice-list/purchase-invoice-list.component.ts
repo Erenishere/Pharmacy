@@ -21,7 +21,9 @@ import { InvoiceService } from '../../services/invoice.service';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { Invoice, InvoiceStatistics, InvoiceQueryParams } from '../../models/invoice.model';
 import { InvoiceFormComponent, InvoiceFormData } from '../invoice-form/invoice-form.component';
-import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table/data-table.component';
+import { DataTableColumn, TableActionClickEvent } from '../../../../shared/models/data-table.model';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+
 
 @Component({
   selector: 'app-purchase-invoice-list',
@@ -54,7 +56,7 @@ export class PurchaseInvoiceListComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  tableColumns: TableColumn[] = [
+  tableColumns: DataTableColumn[] = [
     { key: 'invoiceNumber', label: 'Invoice No', sortable: true },
     { key: 'invoiceDate', label: 'Date', type: 'date', sortable: true },
     { key: 'type', label: 'Purchase Type Tag' },
@@ -335,13 +337,11 @@ export class PurchaseInvoiceListComponent implements OnInit, OnDestroy {
 
   formatCurrency(amount: number): string {
     if (amount === undefined || amount === null || isNaN(amount)) {
-      return 'PKR 0';
+      return 'Rs. 0';
     }
-    return new Intl.NumberFormat('en-PK', {
-      style: 'currency',
-      currency: 'PKR',
+    return `Rs. ${new Intl.NumberFormat('en-PK', {
       maximumFractionDigits: 0
-    }).format(amount);
+    }).format(amount)}`;
   }
 
   formatDate(date: string): string {
@@ -445,7 +445,11 @@ export class PurchaseInvoiceListComponent implements OnInit, OnDestroy {
   trackByValue(index: number, item: any): any { return item.value; }
   trackById(index: number, item: any): string { return item._id; }
 
-  onTableAction(event: { action: string, row: any }): void {
+  getRowClass = (row: any): string => {
+    return this.isReturnInvoice(row) ? 'return-row' : '';
+  };
+
+  onTableAction(event: TableActionClickEvent): void {
     const inv = event.row as Invoice;
     switch(event.action) {
       case 'view': this.viewInvoice(inv); break;

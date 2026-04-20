@@ -1,0 +1,30 @@
+// ============================================
+// PREMIUM DESIGN SYSTEM - MIXINS LIBRARY
+// ============================================
+// This file imports all mixins from the _mixins/ directory
+// for backward compatibility with @import 'styles/mixins'
+// ============================================
+
+// Import all mixin modules from the _mixins subdirectory
+@import '_mixins/buttons';
+@import '_mixins/cards';
+@import '_mixins/tables';
+@import '_mixins/forms';
+@import '_mixins/dialogs';
+@import '_mixins/animations';
+@import '_mixins/utilities';
+
+// ============================================
+// BACKWARD COMPATIBILITY ALIASES
+// These provide the old mixin names that map to the new ones
+// ============================================
+
+// Alias: status-chip-base -> status-chip
+@mixin status-chip-base {
+  @include status-chip;
+}
+
+// Alias: filters-section -> filter-section
+@mixin filters-section {
+  @include filter-section;
+}

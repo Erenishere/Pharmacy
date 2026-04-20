@@ -1,8 +1,12 @@
 @import "../../../../../styles/shared-list-styles";
 
 .quotation-list-page {
+  @include page-container;
+  @include page-header;
   @include data-table;
   @include paginator;
+
+  .dashboard-stats-grid { @include dashboard-stats-grid; }
 
   .stat-card {
     &.primary { --stat-color: #{$purple}; }
@@ -31,7 +35,7 @@
     &.draft { background: rgba($grey-medium, 0.1); color: $grey-dark; }
     &.sent { background: rgba($warning, 0.1); color: darken($warning, 15%); }
     &.approved { background: rgba($success, 0.1); color: darken($success, 10%); }
-    &.converted { background: rgba($purple, 0.1); color: $purple; }
+    &.converted { background: rgba(var(--color-bg-page), 0.1); color: $purple; }
     &.expired, &.cancelled { background: rgba($danger, 0.1); color: $danger; opacity: 0.7; }
   }
 
@@ -40,3 +44,6 @@
     background-color: rgba($grey-very-light, 0.5);
   }
 }
+
+.list-page-card { @include list-card; }
+

@@ -13,14 +13,14 @@ $danger: #ea5455;
   width: min(980px, 96vw);
   max-width: 100%;
   max-height: 92vh;
-  background: $surface;
-  color: $text;
+  background: #ffffff;
+  color: #333;
   border-radius: 14px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   font-family: 'Inter', 'Roboto', sans-serif;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.15);
 }
 
 .bf-header {
@@ -28,8 +28,8 @@ $danger: #ea5455;
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
-  padding: 16px 20px;
-  background: linear-gradient(118deg, $purple, rgba($purple, 0.84));
+  padding: 18px 24px;
+  background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.84));
 
   .bf-title-wrap {
     display: flex;
@@ -41,20 +41,22 @@ $danger: #ea5455;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-size: 32px;
+    font-size: 28px;
     line-height: 1;
     font-weight: 700;
+    color: #ffffff;
 
     mat-icon {
-      width: 22px;
-      height: 22px;
-      font-size: 22px;
+      width: 24px;
+      height: 24px;
+      font-size: 24px;
+      color: #ffffff;
     }
   }
 
   .bf-subtitle {
-    margin: 0;
-    font-size: 12px;
+    margin: 4px 0 0 0;
+    font-size: 13px;
     color: rgba(255, 255, 255, 0.86);
     font-weight: 500;
   }
@@ -65,7 +67,7 @@ $danger: #ea5455;
     border: 0;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.14);
-    color: #fff;
+    color: #ffffff;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -86,30 +88,39 @@ $danger: #ea5455;
 }
 
 .bf-body {
-  padding: 16px 20px;
+  padding: 24px;
+  background: #f8f9fc;
   overflow: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
 }
 
 .bf-card {
-  border: 1px solid rgba($border, 0.7);
+  border: 1px solid #ebe9f1;
   border-radius: 10px;
-  background: rgba($surface-alt, 0.88);
-  padding: 12px;
+  background: #ffffff;
+  padding: 24px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
 }
 
 .bf-section-title {
-  font-size: 12px;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: #fff;
-  background: rgba($purple, 0.24);
-  border-left: 3px solid $purple;
-  border-radius: 0 6px 6px 0;
-  padding: 6px 10px;
-  margin-bottom: 10px;
-  letter-spacing: 0.3px;
+  color: #5e5873;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  &::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 18px;
+    background-color: var(--color-bg-page);
+    border-radius: 4px;
+  }
 }
 
 .bf-grid {
@@ -203,16 +214,17 @@ $danger: #ea5455;
 
   thead {
     tr {
-      background: linear-gradient(118deg, $purple, rgba($purple, 0.86));
+      background-color: #f8f7fa;
     }
 
     th {
-      color: #fff;
-      padding: 10px 12px;
+      color: #5e5873;
+      padding: 12px;
       text-align: left;
       font-size: 13px;
       font-weight: 700;
-      border: none;
+      border-bottom: 1px solid #ebe9f1;
+      text-transform: uppercase;
 
       &.num {
         text-align: right;
@@ -251,7 +263,7 @@ $danger: #ea5455;
 
   tfoot {
     tr {
-      background: rgba($purple, 0.16);
+      background: rgba(var(--color-bg-page), 0.16);
     }
 
     td {
@@ -283,7 +295,7 @@ $danger: #ea5455;
     height: 20px;
     padding: 0 7px;
     border-radius: 20px;
-    background: rgba($purple, 0.25);
+    background: rgba(var(--color-bg-page), 0.25);
     border: 1px solid rgba($purple, 0.45);
     font-size: 11px;
     color: #fff;
@@ -310,7 +322,7 @@ $danger: #ea5455;
   padding: 0 10px;
   border: 1px solid rgba($purple, 0.6);
   border-radius: 20px;
-  background: rgba($purple, 0.14);
+  background: rgba(var(--color-bg-page), 0.14);
 
   span {
     font-size: 12px;
@@ -362,7 +374,7 @@ $danger: #ea5455;
   justify-content: center;
   gap: 6px;
   color: #fff;
-  background: linear-gradient(118deg, $purple, rgba($purple, 0.86));
+  background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.86));
   box-shadow: 0 4px 12px rgba($purple, 0.35);
 
   &:hover:not(:disabled) {

@@ -80,7 +80,7 @@ $purple: #7367F0;
         color: #fff;
       }
 
-      &.purple { background: linear-gradient(135deg, $purple 0%, rgba($purple, 0.7) 100%); }
+      &.purple { background: linear-gradient(135deg, var(--color-bg-page) 0%, rgba(var(--color-bg-page), 0.7) 100%); }
       &.success { background: linear-gradient(135deg, $success 0%, rgba($success, 0.7) 100%); }
       &.warning { background: linear-gradient(135deg, $warning 0%, rgba($warning, 0.7) 100%); }
       &.danger { background: linear-gradient(135deg, $danger 0%, rgba($danger, 0.7) 100%); }
@@ -123,7 +123,7 @@ $purple: #7367F0;
         .more-tag {
           display: inline-block;
           padding: 4px 10px;
-          background: rgba($purple, 0.1);
+          background: rgba(var(--color-bg-page), 0.1);
           border-radius: 20px;
           font-size: 11px;
           color: $purple;

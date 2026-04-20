@@ -28,7 +28,7 @@
     <div class="filter-row">
       <mat-form-field appearance="outline">
         <mat-label>Report Period</mat-label>
-        <mat-select [formControl]="periodFilter">
+        <mat-select [formControl]="periodFilter" aria-label="Select report period: Monthly, Quarterly, or Yearly">
           <mat-option value="monthly">Monthly</mat-option>
           <mat-option value="quarterly">Quarterly</mat-option>
           <mat-option value="yearly">Yearly</mat-option>
@@ -37,14 +37,14 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Start Date</mat-label>
-        <input matInput [matDatepicker]="startPicker" [formControl]="startDate">
+        <input matInput [matDatepicker]="startPicker" [formControl]="startDate" aria-label="Select start date for cash flow report">
         <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
         <mat-datepicker #startPicker></mat-datepicker>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>End Date</mat-label>
-        <input matInput [matDatepicker]="endPicker" [formControl]="endDate">
+        <input matInput [matDatepicker]="endPicker" [formControl]="endDate" aria-label="Select end date for cash flow report">
         <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
         <mat-datepicker #endPicker></mat-datepicker>
       </mat-form-field>
@@ -69,10 +69,10 @@
 
         <!-- Cash Flows from Operating Activities -->
         <div class="statement-section operating">
-          <h3 class="section-title">
+          <h2 class="section-title">
             <mat-icon>business</mat-icon>
             Cash Flows from Operating Activities
-          </h3>
+          </h2>
 
           <table class="statement-table">
             <tbody>
@@ -92,10 +92,10 @@
 
         <!-- Cash Flows from Investing Activities -->
         <div class="statement-section investing">
-          <h3 class="section-title">
+          <h2 class="section-title">
             <mat-icon>timeline</mat-icon>
             Cash Flows from Investing Activities
-          </h3>
+          </h2>
 
           <table class="statement-table">
             <tbody>
@@ -115,17 +115,17 @@
 
         <!-- Cash Flows from Financing Activities -->
         <div class="statement-section financing">
-          <h3 class="section-title">
+          <h2 class="section-title">
             <mat-icon>account_balance_wallet</mat-icon>
             Cash Flows from Financing Activities
-          </h3>
+          </h2>
 
           <table class="statement-table">
             <tbody>
               <tr *ngFor="let item of cashFlow.financingActivities" class="data-row">
                 <td class="item-name">{{ item.category }}</td>
                 <td class="item-amount" [class]="item.amount >= 0 ? 'positive' : 'negative'">
-                  {{ formatCurrency(item.amount) }}
+                   {{ formatCurrency(item.amount) }}
                 </td>
               </tr>
               <tr class="section-total">

@@ -1,0 +1,206 @@
+@import '../../../../../styles/vuexy-vars';
+@import '../../../../../styles/shared-list-styles';
+
+// ─── Standard Premium Theme (Light Mode) ──────────────────────
+$p-bg: #f8f7fa;
+$p-card: #ffffff;
+$p-border: #ebe9f1;
+$p-accent: #7367f0;
+$p-text-main: #5e5873;
+$p-text-secondary: #6e6b7b;
+$p-text-muted: #b9b9c3;
+$p-radius: 12px;
+$p-shadow: 0 4px 24px 0 rgba(0,0,0,0.06);
+
+// ─── Host ─────────────────────────────────────────────────────────────────────
+:host {
+  display: block;
+  background: $p-bg;
+  min-height: 100vh;
+}
+
+// ─── Page Container ───────────────────────────────────────────────────────────
+.si-page {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+// ─── Header Bar ───────────────────────────────────────────────────────────────
+.si-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: $p-radius;
+  padding: 1.5rem 2rem;
+  box-shadow: $p-shadow;
+  flex-wrap: wrap;
+
+  .si-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .si-header-accent {
+      width: 5px;
+      height: 40px;
+      border-radius: 4px;
+      background: $p-accent;
+    }
+
+    .si-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: $p-text-main;
+      margin: 0;
+    }
+    .si-subtitle { color: $p-text-muted; font-size: 0.85rem; margin-top: 2px; }
+  }
+}
+
+// ─── Main Body: Split Panels ──────────────────────────────────────────────────
+.si-body {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ─── Panel Base ───────────────────────────────────────────────────────────────
+.si-panel {
+  background: #fff;
+  border: 1px solid $p-border;
+  border-radius: $p-radius;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: $p-shadow;
+}
+
+.si-section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: $p-accent;
+  border-bottom: 1px solid #f0f0f5;
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+
+// ─── Form Fields (Standard Styled) ────────────────────────────
+.si-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $p-text-main;
+  margin-bottom: 6px;
+}
+
+.si-input, .si-select, .si-textarea {
+  width: 100%;
+  background: #fff;
+  border: 1px solid $p-border;
+  border-radius: 6px;
+  color: $p-text-main;
+  font-size: 0.9rem;
+  padding: 0.6rem 0.8rem;
+  transition: all 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: $p-accent;
+    box-shadow: 0 0 0 3px rgba($p-accent, 0.1);
+  }
+}
+
+// ─── Quantity Calculator ──────────────────────────────────────
+.si-calc-section {
+  background: #f8f7fa;
+  border: 1px solid $p-border;
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+
+.si-calc-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.calc-card {
+  flex: 1;
+  background: #fff;
+  border: 1px solid $p-border;
+  border-radius: 8px;
+  padding: 0.75rem;
+  text-align: center;
+
+  .calc-card-label { font-size: 0.65rem; font-weight: 700; color: $p-text-muted; text-transform: uppercase; margin-bottom: 4px; }
+  .calc-card-input { width: 100%; background: transparent; border: none; font-size: 1.25rem; font-weight: 700; color: $p-text-main; text-align: center; }
+  .calc-card-value { font-size: 1.25rem; font-weight: 700; color: $p-accent; }
+}
+
+// ─── Table Section ────────────────────────────────────────────
+.si-table-section {
+  background: #fff;
+  border: 1px solid $p-border;
+  border-radius: $p-radius;
+  overflow: hidden;
+  box-shadow: $p-shadow;
+}
+
+.si-table {
+  width: 100%;
+  border-collapse: collapse;
+  
+  th { background: #f3f2f7; color: $p-text-main; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; text-align: left; padding: 1rem; }
+  td { padding: 1rem; border-bottom: 1px solid $p-border; color: $p-text-main; font-size: 0.9rem; }
+  
+  .td-net { font-weight: 700; color: $p-accent; }
+}
+
+// ─── Summary Card ─────────────────────────────────────────────
+.si-summary-card {
+  background: #fff;
+  border: 2px solid $p-accent;
+  border-radius: $p-radius;
+  padding: 1.5rem;
+  box-shadow: 0 8px 25px rgba($p-accent, 0.12);
+
+  .sc-title { display: flex; align-items: center; gap: 8px; font-weight: 700; color: $p-accent; margin-bottom: 1.25rem; font-size: 0.8rem; text-transform: uppercase; }
+  .sc-row {
+    display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.95rem;
+    span { color: $p-text-secondary; }
+    strong { color: $p-text-main; }
+    &.sc-net-bill strong { font-size: 1.5rem; color: $p-accent; font-weight: 800; }
+  }
+}
+
+// ─── Buttons ──────────────────────────────────────────────────
+.si-btn-confirm {
+  background: $p-accent !important;
+  color: white !important;
+  height: 48px;
+  border-radius: 8px !important;
+  font-weight: 600;
+  box-shadow: 0 4px 14px 0 rgba($p-accent, 0.4);
+}
+
+.si-btn-confirm-lg {
+  @extend .si-btn-confirm;
+  width: 100%;
+  height: 54px !important;
+  font-size: 1rem;
+}

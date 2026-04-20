@@ -67,7 +67,7 @@ $accent: #ff9f43;
     }
 
     button[color="primary"] {
-      background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+      background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.8));
       color: #fff;
       box-shadow: 0 4px 12px rgba($purple, 0.35);
     }
@@ -91,7 +91,7 @@ $accent: #ff9f43;
   font-size: 13px;
   font-weight: 700;
   color: $purple;
-  background: $purple-light;
+  background: var(--color-bg-page);
   border-left: 3px solid $purple;
   padding: 6px 12px;
   border-radius: 0 6px 6px 0;
@@ -395,7 +395,7 @@ $accent: #ff9f43;
   font-size: 12px;
 
   thead tr {
-    background: linear-gradient(118deg, $purple, rgba($purple, 0.85));
+    background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.85));
 
     th {
       color: #fff;
@@ -412,7 +412,7 @@ $accent: #ff9f43;
     transition: background 0.15s;
 
     &:hover {
-      background: $purple-light;
+      background: var(--color-bg-page);
     }
 
     &.editing-row {
@@ -495,11 +495,11 @@ $accent: #ff9f43;
   }
 
   &.edit-btn {
-    background: rgba($purple, 0.1);
+    background: rgba(var(--color-bg-page), 0.1);
     color: $purple;
 
     &:hover {
-      background: $purple;
+      background: var(--color-bg-page);
       color: #fff;
     }
   }
@@ -654,7 +654,7 @@ $accent: #ff9f43;
     button {
       width: 100%;
       height: 40px;
-      background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+      background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.8));
       color: #fff;
       font-weight: 700;
       font-size: 14px;

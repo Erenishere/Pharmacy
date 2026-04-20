@@ -16,11 +16,15 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
 import { ItemService } from '../../services/item.service';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { ItemRegistrationFormComponent } from '../item-form-dialog/item-registration-form.component';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { DataTableColumn, TableActionClickEvent } from '../../../../shared/models/data-table.model';
+
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+
 
 interface ItemDisplay {
   _id: string;
@@ -61,27 +65,39 @@ interface ItemDisplay {
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatDividerModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    DataTableComponent
   ],
   templateUrl: './item-list-enhanced.component.html',
   styleUrl: './item-list-enhanced.component.scss'
 })
 export class ItemListEnhancedComponent implements OnInit {
-  @ViewChild(MatPaginator) paginator?: MatPaginator;
-  @ViewChild(MatSort) sort?: MatSort;
-
-  displayedColumns: string[] = [
-    'serial',
-    'company',
-    'name',
-    'availableQty',
-    'lastPPrice',
-    'avgPRate',
-    'totalCost',
-    'saleRate',
-    'category',
-    'actions'
+  tableColumns: DataTableColumn[] = [
+    { key: 'serial', label: 'S#', getValue: (row: any) => this.getItemSerial(row) },
+    { key: 'companyName', label: 'Company', sortable: true },
+    { key: 'name', label: 'Item Name', sortable: true, getValue: (row: any) => row.name + (row.code ? ` (${row.code})` : '') },
+    { 
+      key: 'currentStock', 
+      label: 'Qty', 
+      sortable: true, 
+      type: 'numeric',
+      getCellClass: (row: any) => this.isLowStock(row) ? 'low-stock-text fw-bold' : ''
+    },
+    { key: 'unitPurchaseTP', label: 'P.Price', type: 'currency', sortable: true },
+    { key: 'totalCost', label: 'Total Cost', type: 'currency', getValue: (row: any) => row.currentStock * row.unitPurchaseTP },
+    { key: 'unitRetailPrice', label: 'Sale Rate', type: 'currency', sortable: true },
+    { key: 'categoryName', label: 'Category', sortable: true },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [
+      { icon: 'visibility', label: 'View', actionKey: 'view' },
+      { icon: 'edit', label: 'Edit', actionKey: 'edit' },
+      { icon: 'qr_code', label: 'Barcode', actionKey: 'barcode' },
+      { icon: 'delete', label: 'Delete', actionKey: 'delete', color: 'warn' }
+    ]}
   ];
+
+  pageSize = 25;
+  pageIndex = 0;
+  pageSizeOptions = [10, 25, 50, 100];
 
   dataSource = new MatTableDataSource<ItemDisplay>([]);
   loading = false;
@@ -120,19 +136,19 @@ export class ItemListEnhancedComponent implements OnInit {
   loadFilterOptions(): void {
     // Load companies
     this.http.get<any>(`${environment.apiUrl}/companies?isActive=true`).subscribe({
-      next: (res) => this.companies = res.data || [],
+      next: (res: any) => this.companies = res.data || [],
       error: () => this.companies = []
     });
 
     // Load categories
     this.http.get<any>(`${environment.apiUrl}/categories?isActive=true`).subscribe({
-      next: (res) => this.categories = res.data || [],
+      next: (res: any) => this.categories = res.data || [],
       error: () => this.categories = []
     });
 
     // Load suppliers
     this.http.get<any>(`${environment.apiUrl}/account-heads?type=supplier&isActive=true`).subscribe({
-      next: (res) => this.suppliers = res.data || [],
+      next: (res: any) => this.suppliers = res.data || [],
       error: () => this.suppliers = []
     });
   }
@@ -142,8 +158,8 @@ export class ItemListEnhancedComponent implements OnInit {
 
     // Build query parameters
     const params: any = {
-      page: this.paginator?.pageIndex ? this.paginator.pageIndex + 1 : 1,
-      limit: this.paginator?.pageSize || 25
+      page: this.pageIndex + 1,
+      limit: this.pageSize
     };
 
     if (this.searchQuery) {
@@ -174,7 +190,7 @@ export class ItemListEnhancedComponent implements OnInit {
         }
         this.loading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Failed to load items:', error);
         this.toastService.error('Failed to load items');
         this.loading = false;
@@ -208,16 +224,12 @@ export class ItemListEnhancedComponent implements OnInit {
   }
 
   onSearch(): void {
-    if (this.paginator) {
-      this.paginator.pageIndex = 0;
-    }
+    this.pageIndex = 0;
     this.loadItems();
   }
 
   onFilterChange(): void {
-    if (this.paginator) {
-      this.paginator.pageIndex = 0;
-    }
+    this.pageIndex = 0;
     this.loadItems();
   }
 
@@ -231,8 +243,30 @@ export class ItemListEnhancedComponent implements OnInit {
     this.onFilterChange();
   }
 
-  onPageChange(): void {
+  onPageChange(event: any): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
     this.loadItems();
+  }
+
+  onSortChange(event: any): void {
+    // Implement sort if needed by API
+    this.loadItems();
+  }
+
+  getItemSerial(row: any): number {
+    const index = this.dataSource.data.indexOf(row);
+    return (this.pageIndex * this.pageSize) + index + 1;
+  }
+
+  onTableAction(event: TableActionClickEvent): void {
+    const item = event.row as ItemDisplay;
+    switch(event.action) {
+      case 'view': this.viewItem(item); break;
+      case 'edit': this.openEditDialog(item); break;
+      case 'barcode': this.printBarcode(item); break;
+      case 'delete': this.deleteItem(item); break;
+    }
   }
 
   openCreateDialog(): void {
@@ -281,7 +315,7 @@ export class ItemListEnhancedComponent implements OnInit {
           this.toastService.success('Item deleted successfully');
           this.loadItems();
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Failed to delete item:', error);
           this.toastService.error('Failed to delete item');
         }

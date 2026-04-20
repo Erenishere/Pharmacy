@@ -1,0 +1,186 @@
+<div class="list-page-container supporting-master-container">
+  <div class="list-page-header">
+    <div class="header-content">
+      <h1 class="page-title"><mat-icon style="vertical-align: middle; margin-right: 8px;">settings</mat-icon> Supporting Master Data</h1>
+      <p class="page-subtitle">Configure pharmaceutical reference data and system parameters</p>
+    </div>
+  </div>
+
+  <div [ngSwitch]="currentTab">
+    <!-- 1. Transporters -->
+    <div class="list-page-card" *ngSwitchCase="'transporters'">
+      <div class="table-actions">
+        <h3><mat-icon>local_shipping</mat-icon> Transporter List</h3>
+        <button mat-raised-button color="primary" class="add-btn" (click)="openForm('transporter')">
+          <mat-icon>add</mat-icon> New Transporter
+        </button>
+      </div>
+      <app-data-table [data]="transporters" [columns]="transporterCols" (actionClick)="onTableAction($event, 'transporter')"></app-data-table>
+    </div>
+
+    <!-- 2. Claim Accounts -->
+    <div class="list-page-card" *ngSwitchCase="'claim-accounts'">
+      <div class="table-actions">
+        <h3><mat-icon>account_balance</mat-icon> Claim Account List</h3>
+        <button mat-raised-button color="primary" class="add-btn" (click)="openForm('claim-account')">
+          <mat-icon>add</mat-icon> New Claim Account
+        </button>
+      </div>
+      <app-data-table [data]="claimAccounts" [columns]="claimAccountCols" (actionClick)="onTableAction($event, 'claim-account')"></app-data-table>
+    </div>
+
+    <!-- 3. Dimensions (Towns/Areas hierarchy) -->
+    <div class="list-page-card" *ngSwitchCase="'dimensions'">
+      <div class="table-actions">
+        <h3><mat-icon>layers</mat-icon> Dimensions Hierarchy</h3>
+        <button mat-raised-button color="primary" class="add-btn" (click)="openForm('dimension')">
+          <mat-icon>add</mat-icon> New Dimension
+        </button>
+      </div>
+      <app-data-table [data]="dimensions" [columns]="dimensionCols" (actionClick)="onTableAction($event, 'dimension')"></app-data-table>
+    </div>
+
+    <!-- 4. Salesmen -->
+    <div class="list-page-card" *ngSwitchCase="'salesmen'">
+      <div class="table-actions">
+        <h3><mat-icon>person</mat-icon> Sales Force List</h3>
+        <button mat-raised-button color="primary" class="add-btn" (click)="openForm('salesman')">
+          <mat-icon>add</mat-icon> New Salesman
+        </button>
+      </div>
+      <app-data-table [data]="salesmen" [columns]="salesmanCols" (actionClick)="onTableAction($event, 'salesman')"></app-data-table>
+    </div>
+
+    <!-- 5. Account Heads -->
+    <div class="list-page-card" *ngSwitchCase="'account-heads'">
+      <div class="table-actions">
+        <h3><mat-icon>summarize</mat-icon> Chart of Account Heads</h3>
+        <button mat-raised-button color="primary" class="add-btn" (click)="openForm('account-head')">
+          <mat-icon>add</mat-icon> New Head
+        </button>
+      </div>
+      <app-data-table [data]="accountHeads" [columns]="accountHeadCols" (actionClick)="onTableAction($event, 'account-head')"></app-data-table>
+    </div>
+
+    <!-- 6. Schemes -->
+    <div class="list-page-card" *ngSwitchCase="'schemes'">
+      <div class="table-actions">
+        <h3><mat-icon>percent</mat-icon> Discount Schemes</h3>
+        <button mat-raised-button color="primary" class="add-btn" (click)="openForm('scheme')">
+          <mat-icon>add</mat-icon> New Scheme
+        </button>
+      </div>
+      <app-data-table [data]="schemes" [columns]="schemeCols" (actionClick)="onTableAction($event, 'scheme')"></app-data-table>
+    </div>
+
+    <!-- 7. Towns -->
+    <div class="list-page-card" *ngSwitchCase="'towns'">
+      <div class="table-actions">
+        <h3><mat-icon>location_city</mat-icon> Towns List</h3>
+        <button mat-raised-button color="primary" class="add-btn" (click)="openForm('town')">
+          <mat-icon>add</mat-icon> New Town
+        </button>
+      </div>
+      <app-data-table [data]="towns" [columns]="townCols" (actionClick)="onTableAction($event, 'town')"></app-data-table>
+    </div>
+
+    <!-- 8. Areas -->
+    <div class="list-page-card" *ngSwitchCase="'areas'">
+      <div class="table-actions">
+        <h3><mat-icon>map</mat-icon> Areas/Sectors List</h3>
+        <button mat-raised-button color="primary" class="add-btn" (click)="openForm('area')">
+          <mat-icon>add</mat-icon> New Area
+        </button>
+      </div>
+      <app-data-table [data]="areas" [columns]="areaCols" (actionClick)="onTableAction($event, 'area')"></app-data-table>
+    </div>
+
+    <!-- 9. Customer Types -->
+    <div class="list-page-card" *ngSwitchCase="'customer-types'">
+      <div class="table-actions">
+        <h3><mat-icon>group</mat-icon> Customer Categorization</h3>
+        <button mat-raised-button color="primary" class="add-btn" (click)="openForm('customer-type')">
+          <mat-icon>add</mat-icon> New Type
+        </button>
+      </div>
+      <app-data-table [data]="customerTypes" [columns]="customerTypeCols" (actionClick)="onTableAction($event, 'customer-type')"></app-data-table>
+    </div>
+
+    <!-- 10. Companies -->
+    <div class="list-page-card" *ngSwitchCase="'companies'">
+      <div class="table-actions">
+        <h3><mat-icon>business</mat-icon> Manufacturers</h3>
+        <button mat-raised-button color="primary" class="add-btn" (click)="openForm('company')">
+          <mat-icon>add</mat-icon> New Company
+        </button>
+      </div>
+      <app-data-table [data]="companies" [columns]="companyCols" (actionClick)="onTableAction($event, 'company')"></app-data-table>
+    </div>
+
+    <!-- 11. Company Groups -->
+    <div class="list-page-card" *ngSwitchCase="'company-groups'">
+      <div class="table-actions">
+        <h3><mat-icon>corporate_fare</mat-icon> Corporate Groups</h3>
+        <button mat-raised-button color="primary" class="add-btn" (click)="openForm('company-group')">
+          <mat-icon>add</mat-icon> New Group
+        </button>
+      </div>
+      <app-data-table [data]="companyGroups" [columns]="companyGroupCols" (actionClick)="onTableAction($event, 'company-group')"></app-data-table>
+    </div>
+
+    <!-- 12. Formulas -->
+    <div class="list-page-card" *ngSwitchCase="'formulas'">
+      <div class="table-actions">
+        <h3><mat-icon>science</mat-icon> Drug Formulas</h3>
+        <button mat-raised-button color="primary" class="add-btn" (click)="openForm('formula')">
+          <mat-icon>add</mat-icon> New Formula
+        </button>
+      </div>
+      <app-data-table [data]="formulas" [columns]="formulaCols" (actionClick)="onTableAction($event, 'formula')"></app-data-table>
+    </div>
+
+    <!-- 13. Formula Sizes -->
+    <div class="list-page-card" *ngSwitchCase="'formula-sizes'">
+      <div class="table-actions">
+        <h3><mat-icon>straighten</mat-icon> Packaging Sizes</h3>
+        <button mat-raised-button color="primary" class="add-btn" (click)="openForm('formula-size')">
+          <mat-icon>add</mat-icon> New Size
+        </button>
+      </div>
+      <app-data-table [data]="formulaSizes" [columns]="formulaSizeCols" (actionClick)="onTableAction($event, 'formula-size')"></app-data-table>
+    </div>
+
+    <!-- 14. Categories -->
+    <div class="list-page-card" *ngSwitchCase="'categories'">
+      <div class="table-actions">
+        <h3><mat-icon>category</mat-icon> Product Categories</h3>
+        <button mat-raised-button color="primary" class="add-btn" (click)="openForm('category')">
+          <mat-icon>add</mat-icon> New Category
+        </button>
+      </div>
+      <app-data-table [data]="categories" [columns]="categoryCols" (actionClick)="onTableAction($event, 'category')"></app-data-table>
+    </div>
+
+    <!-- 15. Sub-Categories -->
+    <div class="list-page-card" *ngSwitchCase="'sub-categories'">
+      <div class="table-actions">
+        <h3><mat-icon>segment</mat-icon> Product Sub-Categories</h3>
+        <button mat-raised-button color="primary" class="add-btn" (click)="openForm('sub-category')">
+          <mat-icon>add</mat-icon> New Sub-Category
+        </button>
+      </div>
+      <app-data-table [data]="subCategories" [columns]="subCategoryCols" (actionClick)="onTableAction($event, 'sub-category')"></app-data-table>
+    </div>
+
+    <!-- 16. Business Types -->
+    <div class="list-page-card" *ngSwitchCase="'business-types'">
+      <div class="table-actions">
+        <h3><mat-icon>store</mat-icon> Business Entities</h3>
+        <button mat-raised-button color="primary" class="add-btn" (click)="openForm('business-type')">
+          <mat-icon>add</mat-icon> New Type
+        </button>
+      </div>
+      <app-data-table [data]="businessTypes" [columns]="businessTypeCols" (actionClick)="onTableAction($event, 'business-type')"></app-data-table>
+    </div>
+  </div>
+</div>

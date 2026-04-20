@@ -1,0 +1,511 @@
+<div class="si-page" *ngIf="!loading">
+  <form [formGroup]="salesForm" autocomplete="off">
+
+    <!-- ===== PREMIUM HEADER BAR ===== -->
+    <div class="si-header">
+      <div class="si-header-left">
+        <div class="si-header-accent"></div>
+        <div class="si-header-text">
+          <h1 class="si-title">
+            <mat-icon>receipt_long</mat-icon>
+            {{ mode === 'create' ? 'Create' : 'Edit' }} Sales Invoice
+          </h1>
+          <p class="si-subtitle">Pharmaceuticals Distribution — Billing Module</p>
+        </div>
+      </div>
+
+      <div class="si-header-actions">
+        <button mat-stroked-button class="si-btn-cancel" type="button" (click)="cancel()" [disabled]="saving">
+          <mat-icon>close</mat-icon> Cancel
+        </button>
+        <button mat-stroked-button class="si-btn-draft" type="button" (click)="saveDraft()" [disabled]="saving">
+          <mat-icon>save_as</mat-icon> Save Draft
+        </button>
+        <button mat-raised-button class="si-btn-confirm" type="button" (click)="saveAndConfirm()" [disabled]="saving">
+          <mat-icon>check_circle</mat-icon>
+          {{ saving ? 'Saving...' : 'Confirm Invoice' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== MAIN BODY ===== -->
+    <div class="si-body">
+
+      <!-- LEFT PANEL: Invoice Meta -->
+      <div class="si-panel si-panel-left">
+        <div class="si-section-label">
+          <mat-icon>assignment</mat-icon>
+          Invoice Details
+        </div>
+
+        <!-- Customer Search -->
+        <div class="si-field-group">
+          <label class="si-label required">Customer / Account</label>
+          <input
+            class="si-input"
+            [matAutocomplete]="customerAuto"
+            (input)="onCustomerSearch($event)"
+            placeholder="Search by name, town, phone..."
+            id="si-customer-search">
+          <mat-autocomplete #customerAuto="matAutocomplete" [displayWith]="displayCustomer" (optionSelected)="onCustomerSelected($event)">
+            <mat-option *ngFor="let c of filteredCustomers" [value]="c">
+              <div class="customer-option">
+                <span class="customer-name">{{ c.name }}</span>
+                <span class="customer-meta">{{ c.town || c.city }} · Bal: {{ fmt(c.currentBalance || 0) }}</span>
+              </div>
+            </mat-option>
+          </mat-autocomplete>
+        </div>
+
+        <!-- Customer Info Strip -->
+        <div class="si-customer-strip" *ngIf="selectedCustomer">
+          <div class="cs-badge">
+            <mat-icon>location_on</mat-icon>
+            <span>{{ salesForm.get('customerTown')?.value || '—' }}</span>
+          </div>
+          <div class="cs-badge cs-balance">
+            <mat-icon>account_balance_wallet</mat-icon>
+            <span>Prev. Bal: {{ fmt(salesForm.get('previousBalance')?.value || 0) }}</span>
+          </div>
+          <div class="cs-badge cs-tax">
+            <mat-icon>receipt</mat-icon>
+            <span>Tax: {{ fmt(salesForm.get('advanceTaxRate')?.value || 0) }}%</span>
+          </div>
+        </div>
+
+        <!-- Row: Invoice Type + Date -->
+        <div class="si-field-row-2">
+          <div class="si-field-group">
+            <label class="si-label">Invoice Type</label>
+            <select class="si-select" formControlName="salesType" id="si-sales-type">
+              <option *ngFor="let t of salesTypes" [value]="t.value">{{ t.label }}</option>
+            </select>
+          </div>
+          <div class="si-field-group">
+            <label class="si-label">Invoice Date</label>
+            <input class="si-input" [matDatepicker]="invDatePicker" formControlName="invoiceDate" id="si-invoice-date">
+            <mat-datepicker-toggle [for]="invDatePicker" class="si-date-toggle"></mat-datepicker-toggle>
+            <mat-datepicker #invDatePicker></mat-datepicker>
+          </div>
+        </div>
+
+        <!-- Row: Tax Invoice Type + Credit Days -->
+        <div class="si-field-row-2">
+          <div class="si-field-group">
+            <label class="si-label">Tax Invoice Type</label>
+            <select class="si-select" formControlName="taxInvoiceType" id="si-tax-type">
+              <option *ngFor="let t of invoiceTypes" [value]="t.value">{{ t.label }}</option>
+            </select>
+          </div>
+          <div class="si-field-group">
+            <label class="si-label">Credit Days</label>
+            <input class="si-input" formControlName="creditDays" type="number" min="0" id="si-credit-days">
+          </div>
+        </div>
+
+        <!-- Row: Memo No + PO Ref -->
+        <div class="si-field-row-2">
+          <div class="si-field-group">
+            <label class="si-label">Memo No.</label>
+            <input class="si-input" formControlName="memoNo" placeholder="Optional" id="si-memo-no">
+          </div>
+          <div class="si-field-group">
+            <label class="si-label">PO Reference</label>
+            <input class="si-input" formControlName="poReference" placeholder="Optional" id="si-po-ref">
+          </div>
+        </div>
+
+        <!-- Due Date -->
+        <div class="si-field-group">
+          <label class="si-label">Due Date</label>
+          <input class="si-input si-readonly" [matDatepicker]="duePicker" formControlName="dueDate" readonly id="si-due-date">
+          <mat-datepicker #duePicker></mat-datepicker>
+        </div>
+
+        <!-- Detail Note -->
+        <div class="si-field-group">
+          <label class="si-label">Detail Note</label>
+          <textarea class="si-textarea" formControlName="detailNote" rows="2" placeholder="Optional notes..." id="si-detail-note"></textarea>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL: Item Entry -->
+      <div class="si-panel si-panel-right" [formGroup]="currentItem">
+        <div class="si-section-label">
+          <mat-icon>add_shopping_cart</mat-icon>
+          Add Item to Invoice
+          <span class="editing-badge" *ngIf="editingIndex !== null">Editing #{{ editingIndex + 1 }}</span>
+        </div>
+
+        <!-- Item Search Row -->
+        <div class="si-item-search-row">
+          <div class="si-field-group si-item-search">
+            <label class="si-label accent-label">Search Item (Name / Code / Barcode)</label>
+            <input class="si-input" formControlName="itemName"
+              [matAutocomplete]="itemAuto"
+              (input)="onItemSearch($event)"
+              placeholder="Type to search products..."
+              id="si-item-search">
+            <mat-autocomplete #itemAuto="matAutocomplete" [displayWith]="displayItem" (optionSelected)="onItemSelected($event)">
+              <mat-option *ngFor="let itm of filteredItems" [value]="itm">
+                <div class="item-option">
+                  <span class="item-option-name">{{ itm.name }}</span>
+                  <span class="item-option-meta">
+                    {{ itm.code }}
+                    <span *ngIf="itm.formulaId"> · {{ itm.formulaId.name }}</span>
+                    <span class="item-stock" [class.low-stock]="(itm.inventory?.currentStock || 0) < 10">
+                      · Stock: {{ itm.inventory?.currentStock || 0 }}
+                    </span>
+                  </span>
+                </div>
+              </mat-option>
+            </mat-autocomplete>
+          </div>
+          <div class="si-item-info-card" *ngIf="currentItem.get('itemId')?.value">
+            <span class="iic-label">{{ currentItem.get('formulaName')?.value || currentItem.get('companyName')?.value || 'Item Selected' }}</span>
+            <span class="iic-avail">Avail: {{ currentItem.get('availableQty')?.value || 0 }} units</span>
+          </div>
+        </div>
+
+        <!-- Warehouse -->
+        <div class="si-field-group">
+          <label class="si-label required">Warehouse</label>
+          <select class="si-select" formControlName="warehouseId" id="si-warehouse">
+            <option value="">— Select Warehouse —</option>
+            <option *ngFor="let wh of warehouses" [value]="wh._id">{{ wh.name }}</option>
+          </select>
+        </div>
+
+        <!-- Quantity Calculator Row -->
+        <div class="si-calc-section">
+          <div class="si-calc-label">Quantity Calculator</div>
+          <div class="si-calc-row">
+            <!-- Box Qty -->
+            <div class="calc-card">
+              <div class="calc-card-label">Box Qty</div>
+              <input class="calc-card-input" formControlName="boxQuantity" type="number" min="0" id="si-box-qty">
+              <div class="calc-card-sub">× {{ currentItem.get('boxPacking')?.value || 1 }} units</div>
+            </div>
+            <div class="calc-op">+</div>
+            <!-- Unit Qty -->
+            <div class="calc-card">
+              <div class="calc-card-label">Unit Qty</div>
+              <input class="calc-card-input" formControlName="unitQuantity" type="number" min="0" id="si-unit-qty">
+              <div class="calc-card-sub">individual</div>
+            </div>
+            <div class="calc-op">=</div>
+            <!-- Total -->
+            <div class="calc-card calc-card-total">
+              <div class="calc-card-label">Total Units</div>
+              <div class="calc-card-value">{{ currentItem.getRawValue().totalUnitQty }}</div>
+              <div class="calc-card-sub">calculated</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sale Rates Row -->
+        <div class="si-field-row-2">
+          <div class="si-field-group">
+            <label class="si-label">Sale Rate (Box)</label>
+            <input class="si-input" formControlName="saleBoxRate" type="number" min="0" step="0.01" id="si-sale-box-rate">
+          </div>
+          <div class="si-field-group">
+            <label class="si-label">Sale Rate (Unit)</label>
+            <input class="si-input" formControlName="saleUnitRate" type="number" min="0" step="0.01" id="si-sale-unit-rate">
+          </div>
+        </div>
+
+        <!-- Scheme Row -->
+        <div class="si-field-row-2">
+          <div class="si-field-group">
+            <label class="si-label">Scheme Qty 1 (Free)</label>
+            <input class="si-input" formControlName="scheme1Qty" type="number" min="0" id="si-scheme1">
+          </div>
+          <div class="si-field-group">
+            <label class="si-label">Scheme Qty 2 (Claimable)</label>
+            <input class="si-input" formControlName="scheme2Qty" type="number" min="0" id="si-scheme2">
+          </div>
+        </div>
+
+        <!-- Batch & Expiry -->
+        <div class="si-field-row-2">
+          <div class="si-field-group">
+            <label class="si-label">Batch Number</label>
+            <input class="si-input" formControlName="batchNumber" placeholder="e.g. B202401" id="si-batch">
+          </div>
+          <div class="si-field-group">
+            <label class="si-label">Expiry Date</label>
+            <input class="si-input" [matDatepicker]="expPicker" formControlName="expiryDate" placeholder="MM/YYYY" id="si-expiry">
+            <mat-datepicker #expPicker></mat-datepicker>
+          </div>
+        </div>
+
+        <!-- Discount Section -->
+        <div class="si-sub-label">Discount & Tax</div>
+        <div class="si-field-row-3">
+          <div class="si-field-group">
+            <label class="si-label">Disc% 1</label>
+            <input class="si-input" formControlName="discount1Percent" type="number" min="0" max="100" id="si-disc1">
+          </div>
+          <div class="si-field-group">
+            <label class="si-label">Disc% 2</label>
+            <input class="si-input" formControlName="discount2Percent" type="number" min="0" max="100" id="si-disc2">
+          </div>
+          <div class="si-field-group">
+            <label class="si-label">GST %</label>
+            <input class="si-input" formControlName="gstRate" type="number" min="0" id="si-gst-rate">
+          </div>
+        </div>
+
+        <!-- Live Computed Results -->
+        <div class="si-results-strip">
+          <div class="si-result-cell">
+            <span class="src-label">Gross</span>
+            <span class="src-val">{{ fmt(currentItem.getRawValue().grossTotal) }}</span>
+          </div>
+          <div class="si-result-cell">
+            <span class="src-label">Discount</span>
+            <span class="src-val src-deduct">-{{ fmt((currentItem.getRawValue().discount1Amount || 0) + (currentItem.getRawValue().discount2Amount || 0)) }}</span>
+          </div>
+          <div class="si-result-cell">
+            <span class="src-label">GST</span>
+            <span class="src-val src-add">+{{ fmt(currentItem.getRawValue().gstAmount) }}</span>
+          </div>
+          <div class="si-result-cell">
+            <span class="src-label">Adv. Tax</span>
+            <span class="src-val src-add">+{{ fmt(currentItem.getRawValue().advanceTaxAmount) }}</span>
+          </div>
+          <div class="si-result-cell si-result-net">
+            <span class="src-label">Net Amount</span>
+            <span class="src-val-net">{{ fmt(currentItem.getRawValue().netAmount) }}</span>
+          </div>
+        </div>
+
+        <!-- Add Button -->
+        <div class="si-add-btn-row">
+          <button mat-raised-button class="si-btn-add" type="button" (click)="addItemToInvoice()" id="si-add-item-btn">
+            <mat-icon>{{ editingIndex !== null ? 'update' : 'add_shopping_cart' }}</mat-icon>
+            {{ editingIndex !== null ? 'Update Item' : 'Add to Invoice' }}
+          </button>
+          <button mat-stroked-button class="si-btn-cancel-edit" type="button" (click)="initCurrentItem()" *ngIf="editingIndex !== null">
+            Cancel Edit
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ITEMS TABLE ===== -->
+    <div class="si-table-section">
+      <div class="si-table-header">
+        <div class="si-table-title">
+          <mat-icon>list_alt</mat-icon>
+          Invoice Items
+          <span class="si-item-count">{{ itemsData.length }} item(s)</span>
+        </div>
+      </div>
+
+      <div class="si-table-wrap" *ngIf="itemsData.length > 0; else noItems">
+        <table mat-table [dataSource]="itemsData" class="si-table">
+
+          <ng-container matColumnDef="sno">
+            <th mat-header-cell *matHeaderCellDef>#</th>
+            <td mat-cell *matCellDef="let item; let i = index">{{ i + 1 }}</td>
+            <td mat-footer-cell *matFooterCellDef class="footer-totals-label" colspan="5">TOTALS</td>
+          </ng-container>
+
+          <ng-container matColumnDef="itemName">
+            <th mat-header-cell *matHeaderCellDef>Item / Formula</th>
+            <td mat-cell *matCellDef="let item">
+              <div class="tc-name">{{ item.itemName }}</div>
+              <div class="tc-sub" *ngIf="item.formulaName">{{ item.formulaName }} ({{ item.formulaSize }})</div>
+              <div class="tc-sub tc-code">{{ item.itemCode }}</div>
+            </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <ng-container matColumnDef="batchInfo">
+            <th mat-header-cell *matHeaderCellDef>Batch / Expiry</th>
+            <td mat-cell *matCellDef="let item">
+              <div class="tc-batch" *ngIf="item.batchNumber">{{ item.batchNumber }}</div>
+              <div class="tc-sub" *ngIf="item.expiryDate">{{ item.expiryDate | date:'MMM y' }}</div>
+              <span class="tc-na" *ngIf="!item.batchNumber">—</span>
+            </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <ng-container matColumnDef="boxQty">
+            <th mat-header-cell *matHeaderCellDef>Box / Unit</th>
+            <td mat-cell *matCellDef="let item">
+              <div>Bx: {{ item.boxQuantity }}</div>
+              <div class="tc-sub">Un: {{ item.unitQuantity }}</div>
+              <div class="tc-sub" *ngIf="item.scheme1Qty">Sc1: {{ item.scheme1Qty }}</div>
+              <div class="tc-bold">Total: {{ item.totalUnitQty }}</div>
+            </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <ng-container matColumnDef="unitQty">
+            <th mat-header-cell *matHeaderCellDef>Warehouse</th>
+            <td mat-cell *matCellDef="let item">{{ getWarehouseName(item.warehouseId) }}</td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <ng-container matColumnDef="warehouse">
+            <th mat-header-cell *matHeaderCellDef>Gross Total</th>
+            <td mat-cell *matCellDef="let item">{{ fmt(item.grossTotal) }}</td>
+            <td mat-footer-cell *matFooterCellDef class="footer-val">{{ fmt(calculateTotals().grossTotal) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="saleRate">
+            <th mat-header-cell *matHeaderCellDef>Sale Rate</th>
+            <td mat-cell *matCellDef="let item">
+              <div class="tc-sub">Bx: {{ fmt(item.saleBoxRate) }}</div>
+              <div class="tc-sub">Un: {{ fmt(item.saleUnitRate) }}</div>
+            </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <ng-container matColumnDef="discount">
+            <th mat-header-cell *matHeaderCellDef>Discount</th>
+            <td mat-cell *matCellDef="let item">
+              <div *ngIf="item.discount1Percent">D1: {{ item.discount1Percent }}% = {{ fmt(item.discount1Amount) }}</div>
+              <div *ngIf="item.discount2Percent" class="tc-sub">D2: {{ item.discount2Percent }}% = {{ fmt(item.discount2Amount) }}</div>
+              <span class="tc-na" *ngIf="!item.discount1Percent && !item.discount2Percent">—</span>
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="footer-val footer-deduct">-{{ fmt(calculateTotals().totalDiscount) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="gst">
+            <th mat-header-cell *matHeaderCellDef>GST</th>
+            <td mat-cell *matCellDef="let item">
+              <div *ngIf="item.gstAmount">{{ item.gstRate }}% = {{ fmt(item.gstAmount) }}</div>
+              <span class="tc-na" *ngIf="!item.gstAmount">—</span>
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="footer-val">{{ fmt(calculateTotals().gstTotal) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="advanceTax">
+            <th mat-header-cell *matHeaderCellDef>Adv. Tax</th>
+            <td mat-cell *matCellDef="let item">
+              <div *ngIf="item.advanceTaxAmount">{{ item.advanceTaxPercent }}% = {{ fmt(item.advanceTaxAmount) }}</div>
+              <span class="tc-na" *ngIf="!item.advanceTaxAmount">—</span>
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="footer-val">{{ fmt(calculateTotals().advanceTaxTotal) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="netAmount">
+            <th mat-header-cell *matHeaderCellDef>Net Amount</th>
+            <td mat-cell *matCellDef="let item" class="td-net">{{ fmt(item.netAmount) }}</td>
+            <td mat-footer-cell *matFooterCellDef class="footer-val footer-net">{{ fmt(calculateTotals().netBillTotal) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let item; let i = index">
+              <button class="tbl-action-btn edit" type="button" (click)="editItem(i)" matTooltip="Edit Item">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="tbl-action-btn del" type="button" (click)="removeItem(i)" matTooltip="Remove">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns; let i = index"
+            [class.si-editing-row]="editingIndex === i"></tr>
+          <tr mat-footer-row *matFooterRowDef="displayedColumns" class="si-footer-row"></tr>
+        </table>
+      </div>
+
+      <ng-template #noItems>
+        <div class="si-no-items">
+          <mat-icon>inventory_2</mat-icon>
+          <p>No items added yet. Use the panel above to add products.</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- ===== BOTTOM SECTION ===== -->
+    <div class="si-bottom">
+
+      <!-- Left: Additional Options -->
+      <div class="si-bottom-left">
+        <div class="si-section-label"><mat-icon>tune</mat-icon> Additional Discounts</div>
+        <div class="si-field-row-2">
+          <div class="si-field-group">
+            <label class="si-label">Overall Discount %</label>
+            <input class="si-input" formControlName="overallDiscountPercent" type="number" min="0" max="100" id="si-overall-disc-pct">
+          </div>
+          <div class="si-field-group">
+            <label class="si-label">Overall Discount Amount</label>
+            <input class="si-input" formControlName="overallDiscountAmount" type="number" min="0" id="si-overall-disc-amt">
+          </div>
+        </div>
+        <div class="si-field-group">
+          <label class="si-label">Warranty Info</label>
+          <textarea class="si-textarea" formControlName="warrantyInfo" rows="2" placeholder="Paste warranty info if applicable..." id="si-warranty"></textarea>
+        </div>
+      </div>
+
+      <!-- Right: Glassmorphic Summary Card -->
+      <div class="si-summary-card">
+        <div class="sc-title">
+          <mat-icon>summarize</mat-icon> Invoice Summary
+        </div>
+        <div class="sc-rows">
+          <div class="sc-row">
+            <span>Gross Total</span>
+            <strong>{{ fmt(calculateTotals().grossTotal) }}</strong>
+          </div>
+          <div class="sc-row sc-deduct">
+            <span>Total Discount</span>
+            <strong>-{{ fmt(calculateTotals().totalDiscount) }}</strong>
+          </div>
+          <div class="sc-row">
+            <span>Sub Total</span>
+            <strong>{{ fmt(calculateTotals().subtotal) }}</strong>
+          </div>
+          <div class="sc-row sc-add" *ngIf="calculateTotals().gstTotal > 0">
+            <span>GST Total</span>
+            <strong>+{{ fmt(calculateTotals().gstTotal) }}</strong>
+          </div>
+          <div class="sc-row sc-add" *ngIf="calculateTotals().advanceTaxTotal > 0">
+            <span>Advance Tax</span>
+            <strong>+{{ fmt(calculateTotals().advanceTaxTotal) }}</strong>
+          </div>
+          <div class="sc-divider"></div>
+          <div class="sc-row sc-net-bill">
+            <span>Net Bill Total</span>
+            <strong>{{ fmt(calculateTotals().netBillTotal) }}</strong>
+          </div>
+          <div class="sc-row sc-prev-bal" *ngIf="calculateTotals().previousBalance > 0">
+            <span>Previous Balance</span>
+            <strong>{{ fmt(calculateTotals().previousBalance) }}</strong>
+          </div>
+          <div class="sc-row sc-total-bal" *ngIf="calculateTotals().previousBalance > 0">
+            <span>Total Balance Due</span>
+            <strong>{{ fmt(calculateTotals().totalBalance) }}</strong>
+          </div>
+        </div>
+        <div class="sc-actions">
+          <button mat-raised-button class="si-btn-confirm-lg" type="button" (click)="saveAndConfirm()" [disabled]="saving" id="si-confirm-btn-bottom">
+            <mat-icon>check_circle</mat-icon>
+            {{ saving ? 'Saving...' : 'Confirm & Save Invoice' }}
+          </button>
+          <button mat-stroked-button class="si-btn-draft-sm" type="button" (click)="saveDraft()" [disabled]="saving">
+            <mat-icon>save_as</mat-icon> Draft
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<!-- Loading Overlay -->
+<div class="si-loading-overlay" *ngIf="loading">
+  <mat-spinner diameter="48"></mat-spinner>
+  <p>Loading invoice data...</p>
+</div>

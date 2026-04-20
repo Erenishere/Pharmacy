@@ -56,7 +56,7 @@
   .invoice-allocation-section {
     margin-top: 24px;
     padding: 20px;
-    background: rgba($purple, 0.02);
+    background: rgba(var(--color-bg-page), 0.02);
     border-radius: 8px;
     border: 1px dashed rgba($purple, 0.2);
 
@@ -156,7 +156,7 @@
       .save-btn {
         height: 44px;
         padding: 0 32px;
-        background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
+        background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.8));
         box-shadow: 0 4px 12px rgba($purple, 0.3);
       }
     }
@@ -182,4 +182,11 @@
   .row-receive { border-left: 4px solid $success !important; }
   .row-payment { border-left: 4px solid $danger !important; }
   .row-cancelled { opacity: 0.5; background: $grey-very-light !important; }
+  @include page-container;
+  @include page-header;
+
+  .dashboard-stats-grid { @include dashboard-stats-grid; }
+
+  .list-page-card { @include list-card; }
 }
+

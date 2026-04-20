@@ -108,7 +108,8 @@
                     <td class="text-right font-medium">{{ formatAmt(row.dueAmount) }}</td>
                     <td class="text-right">
                       <input class="allocation-input" type="number" [(ngModel)]="row.receivedAmount"
-                        [ngModelOptions]="{standalone: true}" (input)="updateDifference(row)" min="0">
+                        [ngModelOptions]="{standalone: true}" (input)="updateDifference(row)" min="0"
+                        [attr.aria-label]="'Enter received amount for invoice number ' + row.invoiceNumber">
                     </td>
                     <td class="text-right" [class.negative]="row.difference < 0">{{ formatAmt(row.difference) }}</td>
                   </tr>
@@ -315,14 +316,23 @@
           <tr mat-header-row *matHeaderRowDef="listColumns; sticky: true"></tr>
           <tr mat-row *matRowDef="let row; columns: listColumns;" [class.row-receive]="row.entryType === 'receive'"
             [class.row-payment]="row.entryType === 'payment'" [class.row-cancelled]="row.status === 'cancelled'"></tr>
+
+          <!-- Empty State -->
+          <tr class="mat-row empty-state-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="listColumns.length">
+              <div class="empty-state-premium">
+                <div class="icon-wrapper">
+                  <mat-icon>account_balance_wallet</mat-icon>
+                  <div class="icon-bg-glow"></div>
+                </div>
+                <h4>No Transactions Found</h4>
+                <p>There are no cash book entries for the selected period.</p>
+              </div>
+            </td>
+          </tr>
         </table>
 
-        @if (dataSource.data.length === 0) {
-          <div class="list-empty-state">
-            <mat-icon>receipt_long</mat-icon>
-            <p>No transactions found for selected criteria</p>
-          </div>
-        }
+        
       </div>
       
       <mat-paginator [length]="dataSource.data.length" [pageSize]="pageSize" [pageIndex]="pageIndex"

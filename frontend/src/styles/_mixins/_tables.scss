@@ -1,0 +1,345 @@
+// ============================================
+// TABLE & LIST MIXINS
+// ============================================
+// Standardized table and list styles with consistent
+// row styling and premium hover effects.
+// ============================================
+
+// ============================================
+// TABLE CONTAINER
+// ============================================
+@mixin table-container {
+  padding: 0 var(--space-6);
+  overflow-x: auto;
+  width: 100%;
+  
+  // Custom scrollbar
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #d1d1d1;
+    border-radius: 10px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: #b1b1b1;
+  }
+}
+
+// ============================================
+// DATA TABLE
+// ============================================
+@mixin data-table {
+  width: 100%;
+  background: transparent !important;
+  border-collapse: separate;
+  border-spacing: 0 var(--space-2);
+  
+  // ============================================
+  // HEADER ROW
+  // ============================================
+  .mat-mdc-header-row,
+  thead tr {
+    background: linear-gradient(135deg, var(--color-bg-page) 0%, rgba(var(--color-primary-rgb), 0.86) 100%) !important;
+    height: var(--table-header-height);
+    
+    th,
+    .mat-mdc-header-cell {
+      color: var(--color-text-inverse) !important;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: none;
+      padding: 0 var(--space-4);
+      
+      // Sort icons
+      .mat-sort-header-arrow {
+        color: rgba(255, 255, 255, 0.7) !important;
+      }
+    }
+  }
+  
+  // ============================================
+  // DATA ROWS
+  // ============================================
+  .mat-mdc-row,
+  tbody tr {
+    background: var(--color-bg-card);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+    position: relative;
+    
+    td,
+    .mat-mdc-cell {
+      border: none;
+      padding: var(--space-3) var(--space-4);
+      color: var(--color-text-body);
+      font-size: var(--font-size-base);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+    }
+    
+    // Premium hover effect
+    &:hover {
+      background-color: var(--color-bg-card) !important;
+      box-shadow: var(--shadow-row-hover);
+      transform: translateY(-2px);
+      z-index: 5;
+      border-left: 3px solid var(--color-primary);
+      
+      td,
+      .mat-mdc-cell {
+        color: var(--color-primary-dark) !important;
+      }
+      
+      // Action buttons
+      .mat-mdc-icon-button {
+        color: var(--color-primary) !important;
+      }
+      
+      // Chips
+      mat-chip {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        color: var(--color-primary-dark) !important;
+      }
+    }
+  }
+  
+  // ============================================
+  // FOOTER ROW
+  // ============================================
+  .mat-mdc-footer-row,
+  tfoot tr {
+    background-color: rgba(var(--color-primary-rgb), 0.05) !important;
+    height: var(--table-row-height);
+    
+    td,
+    .mat-mdc-footer-cell {
+      border: none;
+      color: var(--color-primary-dark) !important;
+      font-weight: var(--font-weight-bold);
+      font-size: var(--font-size-base);
+    }
+  }
+}
+
+// ============================================
+// LIST ITEM
+// ============================================
+@mixin list-item {
+  display: flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-2);
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+  
+  &:hover {
+    background: var(--color-bg-hover);
+    transform: translateX(4px);
+    border-color: rgba(var(--color-primary-rgb), 0.1);
+  }
+}
+
+// ============================================
+// PAGINATOR
+// ============================================
+@mixin paginator {
+  margin-top: var(--space-4);
+  background: linear-gradient(135deg, var(--color-bg-page) 0%, rgba(var(--color-primary-rgb), 0.86) 100%) !important;
+  color: var(--color-text-inverse) !important;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  
+  // Force all text and icons to white
+  .mat-mdc-paginator-range-label,
+  .mat-mdc-paginator-page-size-label,
+  .mat-mdc-select-value,
+  .mat-mdc-select-arrow,
+  .mat-mdc-button-base {
+    color: var(--color-text-inverse) !important;
+  }
+  
+  .mat-mdc-icon-button[disabled] {
+    color: rgba(255, 255, 255, 0.3) !important;
+  }
+  
+  .mat-mdc-form-field-focus-indicator {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+// ============================================
+// STATUS CHIP
+// ============================================
+@mixin status-chip {
+  height: auto !important;
+  padding: 4px 12px !important;
+  font-weight: var(--font-weight-bold) !important;
+  font-size: var(--font-size-sm) !important;
+  min-height: unset !important;
+  border-radius: var(--radius-sm) !important;
+  
+  // Success/Active
+  &.chip-active,
+  &.chip-success,
+  &.chip-distributed {
+    background-color: var(--color-success-light) !important;
+    color: var(--color-success) !important;
+    
+    ::ng-deep .mdc-evolution-chip__text-label {
+      color: var(--color-success) !important;
+    }
+  }
+  
+  // Warning/Pending
+  &.chip-inactive,
+  &.chip-draft,
+  &.chip-pending {
+    background-color: var(--color-warning-light) !important;
+    color: var(--color-warning) !important;
+    
+    ::ng-deep .mdc-evolution-chip__text-label {
+      color: var(--color-warning) !important;
+    }
+  }
+  
+  // Danger/Deleted
+  &.chip-danger,
+  &.chip-deleted {
+    background-color: var(--color-danger-light) !important;
+    color: var(--color-danger) !important;
+    
+    ::ng-deep .mdc-evolution-chip__text-label {
+      color: var(--color-danger) !important;
+    }
+  }
+  
+  // Info
+  &.chip-info {
+    background-color: var(--color-info-light) !important;
+    color: var(--color-info) !important;
+    
+    ::ng-deep .mdc-evolution-chip__text-label {
+      color: var(--color-info) !important;
+    }
+  }
+  
+  // Primary/Purple
+  &.chip-purple {
+    background-color: rgba(var(--color-primary-rgb), 0.12) !important;
+    color: var(--color-primary) !important;
+    
+    ::ng-deep .mdc-evolution-chip__text-label {
+      color: var(--color-primary) !important;
+    }
+  }
+}
+
+// ============================================
+// ACTION BUTTONS (Table Row)
+// ============================================
+@mixin action-buttons {
+  display: flex;
+  gap: var(--space-1);
+  
+  button.mat-icon-button {
+    @include button-icon;
+  }
+}
+
+// ============================================
+// EMPTY STATE
+// ============================================
+@mixin empty-state {
+  padding: var(--space-16) var(--space-12);
+  text-align: center;
+  color: var(--color-text-body);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: var(--space-4);
+    color: rgba(var(--color-primary-rgb), 0.15);
+  }
+  
+  p {
+    margin: 0 0 var(--space-4) 0;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+  }
+  
+  button {
+    font-weight: var(--font-weight-semibold);
+  }
+}
+
+// ============================================
+// PREMIUM EMPTY STATE
+// ============================================
+@mixin empty-state-premium {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12) var(--space-6);
+  background: var(--color-bg-card);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  
+  .icon-wrapper {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    background: rgba(var(--color-primary-rgb), 0.08);
+    margin-bottom: var(--space-5);
+    
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+      color: var(--color-primary);
+      z-index: 2;
+    }
+    
+    .icon-bg-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(var(--color-primary-rgb), 0.15) 0%, rgba(var(--color-primary-rgb), 0) 70%);
+      z-index: 1;
+    }
+  }
+  
+  h4 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+  }
+  
+  p {
+    margin: 0;
+    font-size: var(--font-size-base);
+    color: var(--color-text-muted);
+  }
+}

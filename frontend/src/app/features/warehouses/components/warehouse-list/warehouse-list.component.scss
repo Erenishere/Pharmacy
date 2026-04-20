@@ -1,35 +1,41 @@
-@import '../../../../../styles/vuexy-vars';
 @import '../../../../../styles/shared-list-styles';
 
-:host {
-  display: block;
+.list-page-container {
+  @include page-container;
 }
 
-.warehouse-page {
-  /* Inherits global .list-page-container styles */
+.list-page-header {
+  @include page-header;
+}
 
-  .list-page-header {
-    /* Inherits global header styles */
-    h1 {
-      mat-icon {
+.list-page-card {
+  @include list-card;
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(2px);
+  z-index: 100;
+}
+
+::ng-deep {
+  .warehouse-page {
+    .data-table {
+      @include data-table;
+      
+      .warehouse-code {
+        font-weight: 600;
         color: $purple;
-        font-size: 28px;
-        width: 28px;
-        height: 28px;
       }
     }
-  }
 
-  .data-table {
-    @include data-table;
-    
-    .warehouse-code {
-      font-weight: 600;
-      color: $purple;
+    .mat-mdc-paginator {
+      @include paginator;
     }
   }
-
-  /* Status chips are already standardized via @mixin status-chip-base in global styles */
 }
-
-@include paginator;

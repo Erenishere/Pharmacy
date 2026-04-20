@@ -1,288 +1,224 @@
-.stock-transfer-container {
-  padding: 24px;
-  max-width: 1400px;
+@import '../../../../../styles/vuexy-vars';
+@import '../../../../../styles/shared-list-styles';
+
+// ─── Standard Premium Theme (Light Mode) ──────────────────────
+$p-bg: #f8f7fa;
+$p-card: #ffffff;
+$p-border: #ebe9f1;
+$p-accent: #7367f0;
+$p-text-main: #5e5873;
+$p-text-muted: #b9b9c3;
+$p-radius: 12px;
+
+:host {
+  display: block;
+  background: $p-bg;
+  min-height: 100vh;
+}
+
+.stock-transfer-page {
+  padding: 2rem;
+  max-width: 1440px;
   margin: 0 auto;
 
-  .page-header {
-    margin-bottom: 24px;
-
+  /* Header Section */
+  .list-page-header {
+    margin-bottom: 2rem;
     h1 {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 28px;
-      font-weight: 500;
-      color: #333;
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: $p-text-main;
       margin: 0;
-
-      mat-icon {
-        font-size: 32px;
-        width: 32px;
-        height: 32px;
-        color: #1976d2;
-      }
-    }
-  }
-
-  .form-card {
-    margin-bottom: 24px;
-
-    mat-card-header {
+      border-left: 4px solid $p-accent;
+      padding-left: 1rem;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
-
-      mat-card-title {
-        font-size: 20px;
-        font-weight: 500;
-        color: #333;
-      }
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 16px;
-      margin-bottom: 16px;
-
-      .full-width {
-        grid-column: 1 / -1;
-      }
-    }
-
-    .quantity-section {
-      margin: 24px 0;
-      padding: 16px;
-      background-color: #f5f5f5;
-      border-radius: 8px;
-
-      h3 {
-        margin: 0 0 16px 0;
-        font-size: 16px;
-        font-weight: 500;
-        color: #555;
-      }
-
-      .quantity-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px;
-      }
-    }
-
-    .validation-error {
-      color: #f44336;
-      font-size: 12px;
-      padding: 8px;
-      background-color: #ffebee;
-      border-radius: 4px;
-      display: block;
-    }
-
-    .form-actions {
-      display: flex;
       gap: 12px;
-      margin-top: 24px;
+      mat-icon { color: $p-accent; font-size: 26px; width: 26px; height: 26px; }
+    }
+    p { color: $p-text-muted; margin: 0.5rem 0 0 1.25rem; font-size: 0.95rem; }
+  }
 
-      button {
-        min-width: 120px;
+  /* Form Section */
+  .form-card {
+    background: #fff !important;
+    border-radius: $p-radius !important;
+    box-shadow: 0 4px 24px 0 rgba(0,0,0,0.06) !important;
+    padding: 2rem !important;
+    margin-bottom: 2rem;
 
-        mat-icon {
-          margin-right: 8px;
-        }
+    .card-title-section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid $p-border;
+      h2 {
+        color: $p-text-main;
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin: 0;
+        border-left: 3px solid $p-accent;
+        padding-left: 10px;
+      }
+    }
 
-        mat-spinner {
-          display: inline-block;
-          margin-right: 8px;
+    .form-grid-premium {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+
+      .context-row, .warehouse-row {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr 1fr;
+        gap: 1.5rem;
+        align-items: flex-start;
+      }
+
+      .warehouse-row {
+        grid-template-columns: 1fr auto 1fr 1fr;
+        align-items: center;
+        .transfer-arrow {
+          color: $p-accent;
+          opacity: 0.5;
+          margin-top: -12px;
         }
       }
     }
   }
 
-  .table-card {
-    mat-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
+  /* Quantity Calculator */
+  .quantity-entry-section {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: #fcfcfd;
+    border: 1px solid $p-border;
+    border-radius: $p-radius;
 
-      mat-card-title {
-        font-size: 20px;
-        font-weight: 500;
-        color: #333;
+    .section-header .title-with-icon {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      mat-icon { color: $p-accent; font-size: 24px; }
+      h3 { color: $p-text-main; margin: 0; font-size: 1.1rem; }
+      p { color: $p-text-muted; font-size: 0.85rem; }
+    }
+
+    .quantity-calculator-v2 .qty-inner {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      
+      .qty-input-card {
+        background: #fff;
+        border: 1px solid $p-border;
+        border-radius: 10px;
+        padding: 1rem;
+        flex: 1;
+        input { border: none; width: 100%; font-size: 1.5rem; font-weight: 700; color: $p-text-main; outline: none; }
+        .card-label { font-size: 0.7rem; text-transform: uppercase; color: $p-text-muted; margin-bottom: 4px; }
       }
 
-      .header-actions {
-        display: flex;
-        gap: 8px;
+      .total-result-card {
+        background: $p-accent;
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 14px 0 rgba($p-accent, 0.4);
+        .result-label { font-size: 0.7rem; opacity: 0.8; text-transform: uppercase; }
+        .result-value { font-size: 2rem; font-weight: 800; }
+      }
+    }
+  }
+
+  /* Form Actions */
+  .form-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid $p-border;
+
+    .reset-btn-premium {
+      color: $p-text-muted;
+      height: 48px;
+      font-weight: 600;
+    }
+  }
+
+  /* Table Section */
+  .table-card {
+    background: #fff !important;
+    border-radius: $p-radius !important;
+    box-shadow: 0 4px 24px 0 rgba(0,0,0,0.06) !important;
+    padding: 0 !important;
+    overflow: hidden;
+
+    .card-title-section {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid $p-border;
+      h2 { color: $p-text-main; font-size: 1.1rem; margin: 0; }
+    }
+  }
+
+  /* ── Table: True Application Standard ── */
+  ::ng-deep {
+    /* Purple header - the system standard */
+    .mat-mdc-header-row {
+      background-color: $p-accent !important;
+      height: 48px;
+      .mat-mdc-header-cell {
+        color: #ffffff !important;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        padding: 0 16px;
       }
     }
 
-    .table-container {
-      position: relative;
-      overflow-x: auto;
-      min-height: 400px;
-
-      .transfer-table {
-        width: 100%;
-        background: white;
-
-        th {
-          background-color: #f5f5f5;
-          font-weight: 600;
-          color: #555;
-          padding: 16px 12px;
-
-          &.text-right {
-            text-align: right;
-          }
-
-          &.text-center {
-            text-align: center;
-          }
-        }
-
-        td {
-          padding: 12px;
-          border-bottom: 1px solid #e0e0e0;
-
-          &.text-right {
-            text-align: right;
-          }
-
-          &.text-center {
-            text-align: center;
-          }
-        }
-
-        .transfer-number {
-          font-weight: 500;
-          color: #1976d2;
-        }
-
-        .warehouse-chip {
-          font-size: 12px;
-          min-height: 28px;
-          padding: 4px 12px;
-
-          &.from {
-            background-color: #e3f2fd;
-            color: #1976d2;
-          }
-
-          &.to {
-            background-color: #e8f5e9;
-            color: #388e3c;
-          }
-        }
-
-        .quantity-breakdown {
-          font-weight: 500;
-          cursor: help;
-        }
-
-        mat-chip {
-          font-size: 12px;
-          min-height: 28px;
-          padding: 4px 12px;
-
-          &.status-pending {
-            background-color: #fff3e0;
-            color: #f57c00;
-          }
-
-          &.status-in-transit {
-            background-color: #e1f5fe;
-            color: #0288d1;
-          }
-
-          &.status-completed {
-            background-color: #e8f5e9;
-            color: #388e3c;
-          }
-
-          &.status-cancelled {
-            background-color: #ffebee;
-            color: #d32f2f;
-          }
-        }
-
-        .no-data {
-          text-align: center;
-          padding: 48px 24px;
-
-          .no-data-message {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            color: #999;
-
-            mat-icon {
-              font-size: 48px;
-              width: 48px;
-              height: 48px;
-              opacity: 0.5;
-            }
-
-            p {
-              margin: 0;
-              font-size: 16px;
-            }
-          }
-        }
+    .mat-mdc-row {
+      background: #ffffff;
+      transition: all 0.25s ease;
+      &:hover {
+        background-color: $p-accent !important;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba($p-accent, 0.25);
+        .mat-mdc-cell, .mat-mdc-cell span, .mat-mdc-cell mat-icon,
+        .mat-mdc-cell strong, td, td span, td mat-icon { color: #ffffff !important; }
       }
+    }
 
-      .loading-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(255, 255, 255, 0.8);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-      }
+    .mat-mdc-cell { color: $p-text-main !important; border: none; padding: 12px 16px; }
+
+    /* Purple paginator footer */
+    .mat-mdc-paginator {
+      background-color: $p-accent !important;
+      color: #ffffff !important;
+      margin-top: 0;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+      box-shadow: 0 4px 12px rgba($p-accent, 0.2);
+
+      .mat-mdc-paginator-range-label,
+      .mat-mdc-paginator-page-size-label,
+      .mat-mdc-select-value,
+      .mat-mdc-select-arrow,
+      .mat-mdc-button-base { color: #ffffff !important; }
+
+      .mat-mdc-icon-button[disabled] { color: rgba(255,255,255,0.35) !important; }
     }
   }
 }
 
-// Responsive Design
-@media (max-width: 768px) {
-  .stock-transfer-container {
-    padding: 16px;
-
-    .page-header h1 {
-      font-size: 24px;
-
-      mat-icon {
-        font-size: 28px;
-        width: 28px;
-        height: 28px;
-      }
-    }
-
-    .form-card {
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .quantity-section .quantity-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .table-card .table-container {
-      .transfer-table {
-        font-size: 14px;
-
-        th, td {
-          padding: 8px;
-        }
-      }
-    }
-  }
+.submit-btn-premium {
+  background: $p-accent !important;
+  color: white !important;
+  height: 48px;
+  padding: 0 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 4px 14px 0 rgba($p-accent, 0.4);
 }

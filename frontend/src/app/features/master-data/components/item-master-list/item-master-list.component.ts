@@ -11,6 +11,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ItemMasterService, Item, ItemFilters } from '../../services/item-master.service';
 import { CompanyMasterService, Company } from '../../services/company-master.service';
@@ -18,6 +20,9 @@ import { SupportingMasterService, Category, BusinessType } from '../../services/
 import { ToastService } from '../../../../shared/services/toast.service';
 import { ItemMasterFormComponent } from '../item-master-form/item-master-form.component';
 import { ItemMasterDetailComponent } from '../item-master-detail/item-master-detail.component';
+import { DataTableColumn, TableActionClickEvent } from '../../../../shared/models/data-table.model';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+
 
 @Component({
   selector: 'app-item-master-list',
@@ -35,7 +40,10 @@ import { ItemMasterDetailComponent } from '../item-master-detail/item-master-det
     MatSelectModule,
     MatChipsModule,
     MatTooltipModule,
-    MatDialogModule
+    MatDialogModule,
+    MatProgressSpinnerModule,
+    MatMenuModule,
+    DataTableComponent
   ],
   templateUrl: './item-master-list.component.html',
   styleUrl: './item-master-list.component.scss'
@@ -62,15 +70,20 @@ export class ItemMasterListComponent implements OnInit {
     limit: 25
   };
 
-  displayedColumns: string[] = [
-    'code',
-    'name',
-    'company',
-    'category',
-    'pricing',
-    'stock',
-    'status',
-    'actions'
+  tableColumns: DataTableColumn[] = [
+    { key: 'code', label: 'Code', sortable: true, getCellClass: (row: any) => 'code-cell' },
+    { key: 'name', label: 'Item Name', sortable: true, getCellClass: (row: any) => 'name-cell' },
+    { key: 'company', label: 'Company', getValue: (row: any) => row.companyId?.name || 'N/A' },
+    { key: 'category', label: 'Category', getValue: (row: any) => row.categoryId?.name || 'N/A' },
+    { key: 'retailPrice', label: 'Retail', getValue: (row: any) => row.pricing?.retailPrice?.toFixed(2) || '0.00', getCellClass: (row: any) => 'amount-cell' },
+    { key: 'tradePrice', label: 'Trade', getValue: (row: any) => row.pricing?.tradePrice?.toFixed(2) || '0.00', getCellClass: (row: any) => 'amount-cell' },
+    { key: 'stock', label: 'Stock', getValue: (row: any) => row.inventory?.currentStock || 0, getCellClass: (row: any) => `stock-cell ${this.getStockStatusClass(row)}` },
+    { key: 'status', label: 'Status', getValue: (row: any) => row.isActive ? 'Active' : 'Inactive' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [
+      { icon: 'visibility', label: 'View', actionKey: 'view' },
+      { icon: 'edit', label: 'Edit', actionKey: 'edit' },
+      { icon: 'sync_alt', label: 'Toggle', actionKey: 'toggle' }
+    ]}
   ];
 
   constructor(
@@ -188,11 +201,20 @@ export class ItemMasterListComponent implements OnInit {
     });
   }
 
+  onTableAction(event: TableActionClickEvent): void {
+    const row = event.row as Item;
+    switch(event.action) {
+      case 'view': this.viewItem(row); break;
+      case 'edit': this.editItem(row); break;
+      case 'toggle': this.toggleStatus(row); break;
+    }
+  }
+
   toggleStatus(item: Item) {
     this.itemService.toggleItemStatus(item._id).subscribe({
       next: (response) => {
         if (response.success) {
-          this.toastService.success(`Item ${response.data.isActive ? 'activated' : 'deactivated'} successfully`);
+          this.toastService.success(`Item status updated successfully`);
           this.loadItems();
         }
       },

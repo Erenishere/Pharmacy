@@ -1,0 +1,271 @@
+// ============================================
+// UTILITY MIXINS
+// ============================================
+// Common utility mixins for accessibility,
+// layout, and visual consistency.
+// ============================================
+
+// ============================================
+// TOUCH TARGET (Fitts's Law Compliance)
+// ============================================
+@mixin touch-target($size: var(--touch-target-min)) {
+  min-width: $size;
+  min-height: $size;
+}
+
+// ============================================
+// VISUALLY HIDDEN (Screen Reader Only)
+// ============================================
+@mixin visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+// ============================================
+// TRUNCATE TEXT
+// ============================================
+@mixin truncate($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+// ============================================
+// SCROLL CONTAINER
+// ============================================
+@mixin scroll-container($direction: vertical) {
+  overflow-#{$direction}: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--color-primary-rgb), 0.2) transparent;
+  
+  &::-webkit-scrollbar {
+    @if $direction == vertical {
+      width: 6px;
+    } @else {
+      height: 6px;
+    }
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(var(--color-primary-rgb), 0.2);
+    border-radius: 10px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--color-primary-rgb), 0.5);
+  }
+}
+
+// ============================================
+// FLEX CENTER
+// ============================================
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// ============================================
+// FLEX BETWEEN
+// ============================================
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// ============================================
+// ABSOLUTE FILL
+// ============================================
+@mixin absolute-fill {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+// ============================================
+// CARD ELEVATION
+// ============================================
+@mixin elevation($level: 1) {
+  @if $level == 0 {
+    box-shadow: var(--shadow-none);
+  } @else if $level == 1 {
+    box-shadow: var(--shadow-sm);
+  } @else if $level == 2 {
+    box-shadow: var(--shadow-md);
+  } @else if $level == 3 {
+    box-shadow: var(--shadow-lg);
+  } @else if $level == 4 {
+    box-shadow: var(--shadow-xl);
+  } @else if $level == 5 {
+    box-shadow: var(--shadow-2xl);
+  }
+}
+
+// ============================================
+// BORDER RADIUS
+// ============================================
+@mixin rounded($radius: var(--radius-lg)) {
+  border-radius: $radius;
+}
+
+// ============================================
+// PAGE CONTAINER
+// ============================================
+@mixin page-container {
+  padding: var(--space-6);
+  max-width: 1400px;
+  margin: 0 auto;
+  background-color: var(--color-bg-page);
+  min-height: 100vh;
+}
+
+// ============================================
+// PAGE HEADER
+// ============================================
+@mixin page-header {
+  margin-bottom: var(--space-6);
+  
+  h1, h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    border-left: 4px solid var(--color-primary);
+    padding-left: var(--space-3);
+    
+    mat-icon {
+      color: var(--color-primary);
+    }
+  }
+  
+  .page-description {
+    margin: var(--space-1) 0 0 var(--space-4);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-base);
+  }
+}
+
+// ============================================
+// AMOUNT CELL (Numeric Values)
+// ============================================
+@mixin amount-cell {
+  text-align: right;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  font-family: var(--font-family-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+// ============================================
+// LAYERED GLASS EFFECT
+// ============================================
+@mixin layered-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(var(--color-primary-rgb), 0.1);
+}
+
+// ============================================
+// EXPANSION PANEL
+// ============================================
+@mixin expansion-panel {
+  ::ng-deep .mat-expansion-panel {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-card) !important;
+    border: none;
+    margin-bottom: var(--space-4);
+    
+    .mat-expansion-panel-header {
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+    }
+    
+    .mat-expansion-panel-header-title {
+      color: var(--color-text-primary);
+      align-items: center;
+      gap: var(--space-2);
+      
+      mat-icon {
+        color: var(--color-primary);
+      }
+    }
+  }
+}
+
+// ============================================
+// TABS
+// ============================================
+@mixin tabs-override {
+  ::ng-deep .mat-mdc-tab-group,
+  ::ng-deep .mat-mdc-tab-nav-bar {
+    --mdc-tab-indicator-active-indicator-color: var(--color-primary);
+    --mat-tab-header-active-label-text-color: var(--color-primary);
+    --mat-tab-header-inactive-label-text-color: var(--color-text-muted);
+  }
+  
+  ::ng-deep .mat-mdc-tab .mdc-tab__text-label {
+    color: var(--color-text-muted) !important;
+    font-weight: var(--font-weight-medium) !important;
+  }
+  
+  ::ng-deep .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+    color: var(--color-primary) !important;
+  }
+  
+  ::ng-deep .mat-mdc-tab-header {
+    background-color: var(--color-bg-card) !important;
+    border-bottom: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  }
+}
+
+// ============================================
+// TOAST NOTIFICATION
+// ============================================
+@mixin toast-notification {
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-lg) !important;
+  animation: slideInRight var(--transition-base) ease-out;
+  
+  .swal2-title {
+    font-size: var(--font-size-md) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    color: var(--color-text-primary) !important;
+  }
+  
+  .swal2-html-container {
+    font-size: var(--font-size-base) !important;
+    color: var(--color-text-body) !important;
+  }
+  
+  .swal2-icon {
+    margin: 0 var(--space-2) 0 0 !important;
+  }
+}

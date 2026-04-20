@@ -101,13 +101,6 @@
       </div>
     } @else {
       <div class="table-wrapper">
-        @if (dataSource.data.length === 0) {
-          <div class="list-empty-state">
-            <mat-icon>shopping_cart</mat-icon>
-            <p>No e-orders found</p>
-            <button mat-raised-button color="primary" class="create-btn" (click)="openCreate()">Create First Order</button>
-          </div>
-        } @else {
           <table mat-table [dataSource]="dataSource" class="data-table">
 
             <ng-container matColumnDef="orderNumber">
@@ -187,6 +180,24 @@
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"
               [class.row-cancelled]="row.status === 'cancelled'"></tr>
+
+            <!-- Premium No Data Row -->
+            <tr class="mat-mdc-no-data-row empty-state-row" *matNoDataRow>
+              <td [attr.colspan]="displayedColumns.length">
+                <div class="empty-state-premium">
+                  <div class="icon-wrapper">
+                    <mat-icon>shopping_bag</mat-icon>
+                    <div class="icon-bg-glow"></div>
+                  </div>
+                  <h4>No E-Orders Found</h4>
+                  <p *ngIf="statusFilter.value || dateFrom.value || dateTo.value">We couldn't find any orders matching your filters.</p>
+                  <p *ngIf="!statusFilter.value && !dateFrom.value && !dateTo.value">Start by creating your first online booking order.</p>
+                  <button mat-flat-button color="primary" class="mt-4" (click)="openCreate()" *ngIf="!statusFilter.value && !dateFrom.value && !dateTo.value">
+                    <mat-icon>add</mat-icon> Create E-Order
+                  </button>
+                </div>
+              </td>
+            </tr>
           </table>
 
           <mat-paginator
@@ -196,7 +207,6 @@
             [pageSizeOptions]="[10, 20, 50, 100]"
             (page)="onPageChange($event)">
           </mat-paginator>
-        }
       </div>
     }
   </div>

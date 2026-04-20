@@ -6,11 +6,17 @@
 }
 
 .data-table-container {
+  overflow-x: auto !important;
+  width: 100% !important;
   position: relative;
   min-height: 200px;
   background-color: transparent !important;
   border-radius: 8px;
   border: none !important; // Cards handle borders globally
+  &::-webkit-scrollbar { height: 8px; }
+  &::-webkit-scrollbar-track { background: #f1f1f1; }
+  &::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
+  &::-webkit-scrollbar-thumb:hover { background: #b1b1b1; }
 }
 
 .table-overlay {
@@ -64,4 +70,6 @@
 }
 
 /* Paginator Standardization */
-@include paginator;
+::ng-deep .mat-mdc-paginator {
+  @include paginator;
+}

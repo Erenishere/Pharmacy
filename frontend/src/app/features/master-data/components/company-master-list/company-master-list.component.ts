@@ -10,10 +10,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { CompanyMasterService, Company } from '../../services/company-master.service';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { CompanyMasterFormComponent } from '../company-master-form/company-master-form.component';
+import { DataTableColumn, TableActionClickEvent } from '../../../../shared/models/data-table.model';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+
 
 @Component({
   selector: 'app-company-master-list',
@@ -29,134 +33,73 @@ import { CompanyMasterFormComponent } from '../company-master-form/company-maste
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatChipsModule
+    MatChipsModule,
+    MatProgressSpinnerModule,
+    DataTableComponent
   ],
   template: `
-    <div class="company-master-container">
-      <div class="page-header">
-        <h1><mat-icon>business</mat-icon> Company Master Management</h1>
-        <p class="page-description">Manage pharmaceutical manufacturing companies</p>
+    <div class="list-page-container items-enhanced-page">
+      <div class="list-page-header">
+        <div class="header-content">
+          <h1 class="page-title"><mat-icon>business</mat-icon> Company Master Management</h1>
+          <p class="page-subtitle">Manage pharmaceutical manufacturing companies (Total: {{ totalCompanies }})</p>
+        </div>
+        <div class="header-actions">
+          <button mat-raised-button color="primary" (click)="addCompany()" class="create-btn">
+            <mat-icon>add</mat-icon> New Company
+          </button>
+        </div>
       </div>
 
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Companies List</mat-card-title>
-          <mat-card-subtitle>{{ totalCompanies }} companies found</mat-card-subtitle>
-        </mat-card-header>
-
-        <mat-card-content>
-          <div class="filters-section">
-            <div class="search-filters">
-              <mat-form-field appearance="outline">
-                <mat-label>Search</mat-label>
-                <input matInput [(ngModel)]="searchText" (input)="onSearch()">
-                <mat-icon matSuffix>search</mat-icon>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>Group Type</mat-label>
-                <mat-select [(ngModel)]="selectedGroup" (selectionChange)="onFilterChange()">
-                  <mat-option value="">All Groups</mat-option>
-                  <mat-option value="A">Group A</mat-option>
-                  <mat-option value="B">Group B</mat-option>
-                  <mat-option value="C">Group C</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-
-            <div class="action-buttons">
-              <button mat-raised-button color="primary" (click)="addCompany()">
-                <mat-icon>add</mat-icon> Add Company
-              </button>
-              <button mat-icon-button (click)="loadCompanies()">
-                <mat-icon>refresh</mat-icon>
-              </button>
-            </div>
+      <div class="list-page-card">
+        <div class="list-filters-section">
+          <div class="filter-group-primary">
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Search Companies</mat-label>
+              <input matInput [(ngModel)]="searchText" (input)="onSearch()" placeholder="Name or Code">
+              <mat-icon matPrefix>search</mat-icon>
+            </mat-form-field>
           </div>
 
-          <div class="table-container" *ngIf="!loading; else loadingTemplate">
-            <table mat-table [dataSource]="companies">
-              <ng-container matColumnDef="code">
-                <th mat-header-cell *matHeaderCellDef>Code</th>
-                <td mat-cell *matCellDef="let company">{{ company.code }}</td>
-              </ng-container>
+          <div class="filter-group-secondary">
+            <mat-form-field appearance="outline" class="filter-field" style="min-width: 200px;">
+              <mat-label>Group Type</mat-label>
+              <mat-select [(ngModel)]="selectedGroup" (selectionChange)="onFilterChange()">
+                <mat-option value="">All Groups</mat-option>
+                <mat-option value="A">Group A</mat-option>
+                <mat-option value="B">Group B</mat-option>
+                <mat-option value="C">Group C</mat-option>
+              </mat-select>
+            </mat-form-field>
 
-              <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef>Company Name</th>
-                <td mat-cell *matCellDef="let company"><strong>{{ company.name }}</strong></td>
-              </ng-container>
+            <button mat-icon-button (click)="loadCompanies()" matTooltip="Refresh Data">
+              <mat-icon>refresh</mat-icon>
+            </button>
+          </div>
+        </div>
 
-              <ng-container matColumnDef="groupType">
-                <th mat-header-cell *matHeaderCellDef>Group</th>
-                <td mat-cell *matCellDef="let company">
-                  <mat-chip>{{ company.groupType }}</mat-chip>
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="contact">
-                <th mat-header-cell *matHeaderCellDef>Contact</th>
-                <td mat-cell *matCellDef="let company">
-                  <div>{{ company.contactPerson || 'N/A' }}</div>
-                  <small>{{ company.phone || '' }}</small>
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let company">
-                  <mat-chip [class.active]="company.isActive" [class.inactive]="!company.isActive">
-                    {{ company.isActive ? 'Active' : 'Inactive' }}
-                  </mat-chip>
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>Actions</th>
-                <td mat-cell *matCellDef="let company">
-                  <button mat-icon-button (click)="editCompany(company)">
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                  <button mat-icon-button (click)="toggleStatus(company)">
-                    <mat-icon>{{ company.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
-                  </button>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            </table>
-
-            <div *ngIf="companies.length === 0" class="no-data">
-              <mat-icon>business</mat-icon>
-              <h3>No companies found</h3>
-              <button mat-raised-button color="primary" (click)="addCompany()">
-                <mat-icon>add</mat-icon> Add First Company
-              </button>
-            </div>
+        <div class="table-wrapper">
+          <div class="loading-overlay" *ngIf="loading">
+            <mat-spinner diameter="40"></mat-spinner>
           </div>
 
-          <ng-template #loadingTemplate>
-            <div class="loading-container">
-              <mat-icon class="loading-icon">hourglass_empty</mat-icon>
-              <p>Loading companies...</p>
-            </div>
-          </ng-template>
-        </mat-card-content>
-      </mat-card>
+          <app-data-table 
+            [data]="companies"
+            [columns]="tableColumns"
+            [pageSize]="10"
+            [pageSizeOptions]="[10, 25, 50]"
+            (actionClick)="onTableAction($event)">
+          </app-data-table>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
-    .company-master-container { padding: 20px; }
-    .page-header h1 { display: flex; align-items: center; gap: 12px; margin: 0 0 8px 0; }
-    .page-description { color: #666; margin: 0 0 24px 0; }
-    .filters-section { display: flex; justify-content: space-between; margin-bottom: 20px; gap: 16px; }
-    .search-filters { display: flex; gap: 12px; flex: 1; }
-    .action-buttons { display: flex; gap: 8px; }
-    .table-container { overflow-x: auto; }
-    mat-chip.active { background-color: #4caf50; color: white; }
-    mat-chip.inactive { background-color: #9e9e9e; color: white; }
-    .no-data, .loading-container { text-align: center; padding: 60px 20px; }
-    .no-data mat-icon, .loading-icon { font-size: 48px; width: 48px; height: 48px; color: #ccc; }
+    @import 'styles/shared-list-styles';
+    .list-page-card { @include list-card; border: 1px solid $p-border; }
+    .list-filters-section { padding: 24px !important; border-bottom: 1px solid $p-border; display: flex; justify-content: space-between; align-items: center; }
+    .filter-group-primary { flex: 1; }
+    .filter-group-secondary { display: flex; align-items: center; gap: 16px; }
   `]
 })
 export class CompanyMasterListComponent implements OnInit {
@@ -165,7 +108,18 @@ export class CompanyMasterListComponent implements OnInit {
   loading = false;
   searchText = '';
   selectedGroup = '';
-  displayedColumns = ['code', 'name', 'groupType', 'contact', 'status', 'actions'];
+
+  tableColumns: DataTableColumn[] = [
+    { key: 'code', label: 'Code', sortable: true },
+    { key: 'name', label: 'Company Name', sortable: true },
+    { key: 'groupType', label: 'Group', getValue: (row: any) => row.groupType || '-' },
+    { key: 'contact', label: 'Contact', getValue: (row: any) => row.contactPerson || 'N/A' },
+    { key: 'phone', label: 'Phone', getValue: (row: any) => row.phone || '-' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [
+      { icon: 'edit', label: 'Edit', actionKey: 'edit' },
+      { icon: 'sync_alt', label: 'Toggle Status', actionKey: 'toggle' }
+    ]}
+  ];
 
   constructor(
     private companyService: CompanyMasterService,
@@ -223,6 +177,14 @@ export class CompanyMasterListComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) this.loadCompanies();
     });
+  }
+
+  onTableAction(event: TableActionClickEvent): void {
+    const row = event.row as Company;
+    switch(event.action) {
+      case 'edit': this.editCompany(row); break;
+      case 'toggle': this.toggleStatus(row); break;
+    }
   }
 
   toggleStatus(company: Company) {

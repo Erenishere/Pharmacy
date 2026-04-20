@@ -170,99 +170,12 @@ import { AuthService } from '../../core/services/auth.service';
           </div>
         </div>
 
-        <!-- Master Data Section -->
-        <div class="menu-section">
-          <div class="section-header" (click)="toggleSection('masterData')"
-               [class.active]="isRouteActive(['/master-data'])">
-            <mat-icon class="section-icon">dataset</mat-icon>
-            <span class="section-title">Master Data</span>
-            <mat-icon class="expand-icon" [class.expanded]="expandedSections['masterData']">
-              chevron_right
-            </mat-icon>
-          </div>
-          <div class="submenu" [class.open]="expandedSections['masterData']">
-            <a mat-list-item routerLink="/master-data" [queryParams]="{tab: 'company-groups'}" class="submenu-item"
-               [class.active]="isTabActive('company-groups')">
-              <mat-icon matListItemIcon>corporate_fare</mat-icon>
-              <span matListItemTitle>Company Groups</span>
-            </a>
-            <a mat-list-item routerLink="/master-data" [queryParams]="{tab: 'companies'}" class="submenu-item"
-               [class.active]="isTabActive('companies')">
-              <mat-icon matListItemIcon>business</mat-icon>
-              <span matListItemTitle>Companies</span>
-            </a>
-            <a mat-list-item routerLink="/master-data" [queryParams]="{tab: 'dimensions'}" class="submenu-item"
-               [class.active]="isTabActive('dimensions')">
-              <mat-icon matListItemIcon>view_module</mat-icon>
-              <span matListItemTitle>Dimensions/Branches</span>
-            </a>
-            <a mat-list-item routerLink="/master-data" [queryParams]="{tab: 'business-types'}" class="submenu-item"
-               [class.active]="isTabActive('business-types')">
-              <mat-icon matListItemIcon>storefront</mat-icon>
-              <span matListItemTitle>Business Types</span>
-            </a>
-            <a mat-list-item routerLink="/master-data" [queryParams]="{tab: 'account-heads'}" class="submenu-item"
-               [class.active]="isTabActive('account-heads')">
-              <mat-icon matListItemIcon>account_tree</mat-icon>
-              <span matListItemTitle>Account Heads</span>
-            </a>
-            <a mat-list-item routerLink="/master-data" [queryParams]="{tab: 'claim-accounts'}" class="submenu-item"
-               [class.active]="isTabActive('claim-accounts')">
-              <mat-icon matListItemIcon>account_balance</mat-icon>
-              <span matListItemTitle>Claim Accounts</span>
-            </a>
-            <a mat-list-item routerLink="/master-data" [queryParams]="{tab: 'towns'}" class="submenu-item"
-               [class.active]="isTabActive('towns')">
-              <mat-icon matListItemIcon>location_city</mat-icon>
-              <span matListItemTitle>Towns</span>
-            </a>
-            <a mat-list-item routerLink="/master-data" [queryParams]="{tab: 'areas'}" class="submenu-item"
-               [class.active]="isTabActive('areas')">
-              <mat-icon matListItemIcon>map</mat-icon>
-              <span matListItemTitle>Areas</span>
-            </a>
-            <a mat-list-item routerLink="/master-data" [queryParams]="{tab: 'categories'}" class="submenu-item"
-               [class.active]="isTabActive('categories')">
-              <mat-icon matListItemIcon>category</mat-icon>
-              <span matListItemTitle>Categories</span>
-            </a>
-            <a mat-list-item routerLink="/master-data" [queryParams]="{tab: 'sub-categories'}" class="submenu-item"
-               [class.active]="isTabActive('sub-categories')">
-              <mat-icon matListItemIcon>subdirectory_arrow_right</mat-icon>
-              <span matListItemTitle>Sub Categories</span>
-            </a>
-            <a mat-list-item routerLink="/master-data" [queryParams]="{tab: 'formulas'}" class="submenu-item"
-               [class.active]="isTabActive('formulas')">
-              <mat-icon matListItemIcon>science</mat-icon>
-              <span matListItemTitle>Formulas</span>
-            </a>
-            <a mat-list-item routerLink="/master-data" [queryParams]="{tab: 'formula-sizes'}" class="submenu-item"
-               [class.active]="isTabActive('formula-sizes')">
-              <mat-icon matListItemIcon>straighten</mat-icon>
-              <span matListItemTitle>Formula Sizes</span>
-            </a>
-            <a mat-list-item routerLink="/master-data" [queryParams]="{tab: 'customer-types'}" class="submenu-item"
-               [class.active]="isTabActive('customer-types')">
-              <mat-icon matListItemIcon>groups</mat-icon>
-              <span matListItemTitle>Customer Types</span>
-            </a>
-            <a mat-list-item routerLink="/master-data" [queryParams]="{tab: 'salesmen'}" class="submenu-item"
-               [class.active]="isTabActive('salesmen')">
-              <mat-icon matListItemIcon>badge</mat-icon>
-              <span matListItemTitle>Salesmen</span>
-            </a>
-            <a mat-list-item routerLink="/master-data" [queryParams]="{tab: 'transporters'}" class="submenu-item"
-               [class.active]="isTabActive('transporters')">
-              <mat-icon matListItemIcon>local_shipping</mat-icon>
-              <span matListItemTitle>Transporters</span>
-            </a>
-            <a mat-list-item routerLink="/master-data" [queryParams]="{tab: 'schemes'}" class="submenu-item"
-               [class.active]="isTabActive('schemes')">
-              <mat-icon matListItemIcon>local_offer</mat-icon>
-              <span matListItemTitle>Schemes</span>
-            </a>
-          </div>
-        </div>
+        <!-- Master Data - Simplified -->
+        <a mat-list-item routerLink="/master-data" routerLinkActive="active">
+          <mat-icon matListItemIcon>dataset</mat-icon>
+          <span matListItemTitle>Master Data</span>
+        </a>
+
 
         <!-- Accounts Section -->
         <div class="menu-section">

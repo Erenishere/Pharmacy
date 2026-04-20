@@ -1,0 +1,251 @@
+// ============================================
+// BUTTON MIXINS
+// ============================================
+// Standardized button styles with consistent dimensions
+// and premium hover effects. Fitts's Law compliant.
+// ============================================
+
+// ============================================
+// BASE BUTTON MIXIN
+// ============================================
+@mixin button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--button-height);
+  min-width: 80px;
+  padding: 0 var(--space-5);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  outline: none;
+  
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  
+  // Focus indicator for accessibility
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.3);
+  }
+}
+
+// ============================================
+// PRIMARY BUTTON
+// ============================================
+@mixin button-primary {
+  @include button-base;
+  background: linear-gradient(135deg, var(--color-bg-page) 0%, var(--color-bg-page) 100%);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-button);
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-primary-glow), var(--shadow-lg);
+  }
+  
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: var(--shadow-button);
+  }
+}
+
+// ============================================
+// SECONDARY BUTTON
+// ============================================
+@mixin button-secondary {
+  @include button-base;
+  background-color: var(--color-secondary);
+  color: var(--color-text-inverse);
+  
+  &:hover:not(:disabled) {
+    background-color: var(--color-secondary-dark);
+    transform: translateY(-1px);
+  }
+  
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+// ============================================
+// OUTLINE BUTTON
+// ============================================
+@mixin button-outline {
+  @include button-base;
+  background-color: transparent;
+  border: 2px solid var(--color-border-input);
+  color: var(--color-text-body);
+  
+  &:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background-color: var(--color-bg-hover);
+  }
+}
+
+// ============================================
+// GHOST BUTTON
+// ============================================
+@mixin button-ghost {
+  @include button-base;
+  background-color: transparent;
+  color: var(--color-text-body);
+  
+  &:hover:not(:disabled) {
+    background-color: var(--color-bg-hover);
+    color: var(--color-primary);
+  }
+}
+
+// ============================================
+// ICON BUTTON (Fitts's Law Compliant)
+// ============================================
+@mixin button-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  padding: 0;
+  border-radius: var(--radius-lg);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  outline: none;
+  
+  mat-icon,
+  .material-icons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+  
+  &:hover {
+    background-color: var(--color-bg-hover);
+  }
+  
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.3);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  // Primary variant
+  &.primary,
+  &.edit-btn {
+    &:hover:not(:disabled) {
+      background-color: rgba(var(--color-primary-rgb), 0.12);
+      color: var(--color-primary);
+    }
+  }
+  
+  // Danger variant
+  &.danger,
+  &.delete-btn {
+    &:hover:not(:disabled) {
+      background-color: var(--color-danger-light);
+      color: var(--color-danger);
+    }
+  }
+  
+  // Success variant
+  &.success {
+    &:hover:not(:disabled) {
+      background-color: var(--color-success-light);
+      color: var(--color-success);
+    }
+  }
+  
+  // Warning variant
+  &.warning {
+    &:hover:not(:disabled) {
+      background-color: var(--color-warning-light);
+      color: var(--color-warning);
+    }
+  }
+}
+
+// ============================================
+// BUTTON SIZE VARIANTS
+// ============================================
+@mixin button-sm {
+  height: var(--button-height-sm);
+  min-width: 64px;
+  padding: 0 var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+@mixin button-lg {
+  height: var(--button-height-lg);
+  min-width: 100px;
+  padding: 0 var(--space-6);
+  font-size: var(--font-size-md);
+}
+
+// ============================================
+// MATERIAL BUTTON OVERRIDES
+// ============================================
+@mixin material-button-overrides {
+  // Standard button heights
+  .mat-mdc-raised-button,
+  .mat-mdc-unelevated-button,
+  .mat-mdc-button,
+  .mat-mdc-stroked-button {
+    min-height: var(--button-height) !important;
+    padding: 0 var(--space-5) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    letter-spacing: 0.3px;
+    border-radius: var(--radius-md) !important;
+  }
+  
+  // Primary raised button
+  .mat-mdc-raised-button.mat-primary {
+    background: linear-gradient(135deg, var(--color-bg-page) 0%, var(--color-bg-page) 100%) !important;
+    box-shadow: var(--shadow-button) !important;
+    
+    &:hover {
+      box-shadow: var(--shadow-primary-glow), var(--shadow-lg) !important;
+      transform: translateY(-1px);
+    }
+  }
+  
+  // Stroked button
+  .mat-mdc-stroked-button:not(.mat-primary):not(.mat-warn) {
+    border-color: var(--color-border) !important;
+    color: var(--color-text-body) !important;
+    
+    &:hover {
+      border-color: var(--color-primary) !important;
+      color: var(--color-primary) !important;
+      background-color: var(--color-bg-hover) !important;
+    }
+  }
+  
+  // Icon button
+  .mat-mdc-icon-button {
+    width: var(--touch-target-min) !important;
+    height: var(--touch-target-min) !important;
+    padding: 0 !important;
+    
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}

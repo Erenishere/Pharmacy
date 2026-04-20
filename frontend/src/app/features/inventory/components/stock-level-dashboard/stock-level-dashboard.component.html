@@ -209,10 +209,10 @@
       <div class="list-loading-overlay" *ngIf="loading">
         <mat-spinner diameter="40"></mat-spinner>
       </div>
-
-      <mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions"
-        [pageIndex]="pageIndex" (page)="onPageChange($event)" showFirstLastButtons>
-      </mat-paginator>
     </div>
+
+    <mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndex" (page)="onPageChange($event)" showFirstLastButtons>
+    </mat-paginator>
   </div>
 </div>

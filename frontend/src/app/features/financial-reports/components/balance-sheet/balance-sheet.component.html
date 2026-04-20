@@ -28,7 +28,7 @@
     <div class="filter-row">
       <mat-form-field appearance="outline">
         <mat-label>Report Period</mat-label>
-        <mat-select [formControl]="periodFilter">
+        <mat-select [formControl]="periodFilter" aria-label="Select report period: Monthly, Quarterly, or Yearly">
           <mat-option value="monthly">Monthly</mat-option>
           <mat-option value="quarterly">Quarterly</mat-option>
           <mat-option value="yearly">Yearly</mat-option>
@@ -37,14 +37,14 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Start Date</mat-label>
-        <input matInput [matDatepicker]="startPicker" [formControl]="startDate">
+        <input matInput [matDatepicker]="startPicker" [formControl]="startDate" aria-label="Select start date for the report">
         <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
         <mat-datepicker #startPicker></mat-datepicker>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>End Date</mat-label>
-        <input matInput [matDatepicker]="endPicker" [formControl]="endDate">
+        <input matInput [matDatepicker]="endPicker" [formControl]="endDate" aria-label="Select end date for the report">
         <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
         <mat-datepicker #endPicker></mat-datepicker>
       </mat-form-field>
@@ -70,11 +70,11 @@
 
           <!-- Assets Section -->
           <div class="statement-section assets">
-            <h3 class="section-title">Assets</h3>
+            <h2 class="section-title">Assets</h2>
 
             <!-- Current Assets -->
             <div class="subsection">
-              <h4 class="subsection-title">Current Assets</h4>
+              <h3 class="subsection-title">Current Assets</h3>
               <table class="statement-table">
                 <tbody>
                   <tr *ngFor="let item of balanceSheet.assets.currentAssets" class="data-row">
@@ -91,7 +91,7 @@
 
             <!-- Fixed Assets -->
             <div class="subsection">
-              <h4 class="subsection-title">Fixed Assets</h4>
+              <h3 class="subsection-title">Fixed Assets</h3>
               <table class="statement-table">
                 <tbody>
                   <tr *ngFor="let item of balanceSheet.assets.fixedAssets" class="data-row">
@@ -115,11 +115,11 @@
 
           <!-- Liabilities & Equity Section -->
           <div class="statement-section liabilities-equity">
-            <h3 class="section-title">Liabilities & Equity</h3>
+            <h2 class="section-title">Liabilities & Equity</h2>
 
             <!-- Current Liabilities -->
             <div class="subsection">
-              <h4 class="subsection-title">Current Liabilities</h4>
+              <h3 class="subsection-title">Current Liabilities</h3>
               <table class="statement-table">
                 <tbody>
                   <tr *ngFor="let item of balanceSheet.liabilities.currentLiabilities" class="data-row">
@@ -136,7 +136,7 @@
 
             <!-- Long-term Liabilities -->
             <div class="subsection">
-              <h4 class="subsection-title">Long-term Liabilities</h4>
+              <h3 class="subsection-title">Long-term Liabilities</h3>
               <table class="statement-table">
                 <tbody>
                   <tr *ngFor="let item of balanceSheet.liabilities.longTermLiabilities" class="data-row">
@@ -159,7 +159,7 @@
 
             <!-- Equity -->
             <div class="subsection equity-section">
-              <h4 class="subsection-title">Equity</h4>
+              <h3 class="subsection-title">Equity</h3>
               <table class="statement-table">
                 <tbody>
                   <tr *ngFor="let item of balanceSheet.equity.capital" class="data-row">

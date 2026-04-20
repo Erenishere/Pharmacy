@@ -1,48 +1,60 @@
-@import "../../../../../styles/shared-list-styles";
+@import 'styles/shared-list-styles';
 
-.letter-list-page {
-  @include data-table;
-  @include paginator;
+.list-page-card {
+  @include list-card;
+}
 
-  .add-btn {
-    height: 40px;
-    padding: 0 20px;
-    background: linear-gradient(118deg, $purple, rgba($purple, 0.8));
-    box-shadow: 0 4px 12px rgba($purple, 0.3);
+.filter-group-primary {
+  .filter-field {
+    width: 200px;
+  }
+}
+
+::ng-deep {
+  .subject-cell {
+    font-weight: 600;
+    color: #333;
   }
 
-  .type-badge {
-    padding: 2px 8px;
-    background: rgba($purple, 0.08);
-    color: $purple-dark;
+  .status-badge {
+    padding: 4px 10px;
     border-radius: 4px;
     font-size: 11px;
     font-weight: 600;
-  }
+    text-transform: uppercase;
+    display: inline-block;
 
-  .subject-info {
-    display: flex;
-    flex-direction: column;
-    .subject-text { font-weight: 600; color: $grey-dark; }
-    .account-hint { font-size: 11px; color: $grey-medium; }
-  }
+    &.draft {
+      background: rgba(115, 103, 240, 0.1);
+      color: $purple;
+      border: 1px solid $purple;
+    }
 
-  .status-chip {
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 700;
-    
-    &.draft { background: rgba($warning, 0.1); color: $warning; }
-    &.final { background: rgba($success, 0.1); color: $success; }
-  }
+    &.sent {
+      background: rgba(40, 199, 111, 0.1);
+      color: #28c76f;
+      border: 1px solid #28c76f;
+    }
 
-  .action-buttons-inline {
-    display: flex;
-    justify-content: center;
-    gap: 4px;
-    .edit-btn { color: $purple; }
-    .print-btn { color: $info; }
-    .del-btn { color: $danger; }
+    &.received {
+      background: rgba(0, 207, 232, 0.1);
+      color: #00cfe8;
+      border: 1px solid #00cfe8;
+    }
   }
 }
+
+.letter-list-page {
+  @include page-container;
+  @include page-header;
+  @include data-table;
+  @include paginator;
+
+  .dashboard-stats-grid { @include dashboard-stats-grid; }
+
+  .list-page-card {
+    @include list-card;
+    border: 1px solid $p-border;
+  }
+}
+

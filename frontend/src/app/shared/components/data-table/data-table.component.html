@@ -20,27 +20,33 @@
       </ng-template>
 
       <!-- Cell -->
-      <td mat-cell *matCellDef="let row" [ngStyle]="{'text-align': col.align || 'left'}">
+      <td mat-cell *matCellDef="let row" 
+          [ngStyle]="{'text-align': col.align || 'left'}"
+          [ngClass]="col.getCellClass ? col.getCellClass(row) : ''">
         
-        <!-- Text Type -->
-        <span *ngIf="!col.type || col.type === 'text'">
-          {{ row[col.key] || '—' }}
-        </span>
+        <!-- Standard Value Handling (Dynamic or Property) -->
+        <ng-container *ngIf="col.type !== 'status' && col.type !== 'action' && col.type !== 'custom'">
+          
+          <!-- Text Type -->
+          <span *ngIf="!col.type || col.type === 'text'">
+            {{ col.getValue ? col.getValue(row) : (row[col.key] || '—') }}
+          </span>
 
-        <!-- Numeric Type -->
-        <span *ngIf="col.type === 'numeric'" class="numeric-val">
-          {{ row[col.key] | number: col.pipeFormat || '1.0-2' }}
-        </span>
+          <!-- Numeric Type -->
+          <span *ngIf="col.type === 'numeric'" class="numeric-val">
+            {{ (col.getValue ? col.getValue(row) : row[col.key]) | number: col.pipeFormat || '1.0-2' }}
+          </span>
 
-        <!-- Currency Type -->
-        <span *ngIf="col.type === 'currency'" class="numeric-val fw-bold">
-          {{ row[col.key] | currency: 'PKR' : 'symbol' : col.pipeFormat || '1.0-0' }}
-        </span>
+          <!-- Currency Type -->
+          <span *ngIf="col.type === 'currency'" class="numeric-val fw-bold">
+            {{ (col.getValue ? col.getValue(row) : row[col.key]) | currency: 'PKR' : 'symbol' : col.pipeFormat || '1.0-0' }}
+          </span>
 
-        <!-- Date Type -->
-        <span *ngIf="col.type === 'date'">
-          {{ row[col.key] | date: col.pipeFormat || 'dd/MM/yyyy' }}
-        </span>
+          <!-- Date Type -->
+          <span *ngIf="col.type === 'date'">
+            {{ (col.getValue ? col.getValue(row) : row[col.key]) | date: col.pipeFormat || 'dd/MM/yyyy' }}
+          </span>
+        </ng-container>
 
         <!-- Status Type -->
         <span *ngIf="col.type === 'status'">
@@ -48,19 +54,17 @@
             [color]="col.colorMap ? col.colorMap[row[col.key]] : 'primary'"
             [ngClass]="col.classMap ? col.classMap[row[col.key]] : ''"
             class="status-chip-sm">
-            {{ row[col.key] | titlecase }}
+            {{ (col.getValue ? col.getValue(row) : row[col.key]) | titlecase }}
           </mat-chip>
         </span>
 
-        <!-- Custom HTML projection (coming later) -->
+        <!-- Custom HTML projection -->
         <span *ngIf="col.type === 'custom'">
-          <!-- For now we fallback to standard text mapping -->
-          {{ row[col.key] !== undefined ? row[col.key] : '—' }}
+          {{ col.getValue ? col.getValue(row) : (row[col.key] !== undefined ? row[col.key] : '—') }}
         </span>
 
         <!-- Action Type -->
         <div *ngIf="col.type === 'action' && col.actions">
-          <!-- Dropdown menu if more than 3 actions, else inline buttons -->
           <ng-container *ngIf="col.actions.length > 2; else inlineActions">
             <button mat-icon-button [matMenuTriggerFor]="actionMenu" (click)="$event.stopPropagation()">
               <mat-icon>more_vert</mat-icon>
@@ -91,13 +95,22 @@
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumnKeys; sticky: true"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumnKeys;" class="data-table-row"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumnKeys;" 
+        class="data-table-row"
+        [class]="getRowClass(row)"></tr>
+
     
     <!-- Empty State -->
-    <tr class="mat-row" *matNoDataRow>
-      <td class="mat-cell empty-state" [attr.colspan]="displayedColumnKeys.length">
-        <mat-icon class="empty-icon">inbox</mat-icon>
-        <p>No records found</p>
+    <tr class="mat-row empty-state-row" *matNoDataRow>
+      <td class="mat-cell" [attr.colspan]="displayedColumnKeys.length">
+        <div class="empty-state-premium">
+          <div class="icon-wrapper">
+            <mat-icon>inbox</mat-icon>
+            <div class="icon-bg-glow"></div>
+          </div>
+          <h4>No Records Found</h4>
+          <p>There is no data to display matching the current criteria.</p>
+        </div>
       </td>
     </tr>
   </table>

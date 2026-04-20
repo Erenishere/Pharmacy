@@ -1,415 +1,146 @@
-@import 'styles/vuexy-vars';
+@import 'styles/shared-list-styles';
 
-$page-bg: #f8f7fa;
-$card-bg: #ffffff;
-$border: #e9ecef;
-$purple: #7367f0;
+// ─── Design Tokens ────────────────────────────────────────────
+$p-bg: #f8f7fa;
+$p-border: #ebe9f1;
 
-.purchase-invoice-list-container {
-  padding: 24px;
-  max-width: 1480px;
-  margin: 0 auto;
-  background-color: $page-bg;
+:host {
+  display: block;
+  background: $p-bg;
   min-height: 100vh;
 }
 
-.header-section {
+.list-page-container {
+  @include page-container;
+}
+
+// ─── Page Header ──────────────────────────────────────────────
+.list-page-header {
+  @include page-header;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 28px;
 
-  h2 {
-    margin: 0;
-    font-size: 36px;
-    font-weight: 600;
-    color: $text-card-title;
-    border-left: 4px solid $purple;
-    padding-left: 12px;
-    line-height: 1.1;
-  }
-}
-
-.statistics-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-
-  .stat-card {
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid $border;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    transition: transform 0.2s ease;
-
-    &:hover {
-      transform: translateY(-2px);
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: $text-muted;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-
-    .stat-value {
-      font-size: 24px;
+  .header-actions {
+    .btn-create {
+      background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.82)) !important;
+      color: #fff !important;
       font-weight: 600;
-      color: $text-card-title;
-
-      &.warn {
-        color: $danger;
-      }
-
-      &.success {
-        color: $success;
+      height: 42px;
+      padding: 0 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba($purple, 0.35);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s ease;
+      &:hover {
+        box-shadow: 0 6px 18px rgba($purple, 0.5);
+        transform: translateY(-1px);
       }
     }
   }
 }
 
-.filters-section {
-  display: grid;
-  gap: 14px;
-  margin-bottom: 24px;
-  padding: 18px;
-  background: $card-bg;
-  border-radius: 12px;
-  border: 1px solid $border;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
+// ─── Premium Stats Grid (Unified) ───────────────────────────
+.dashboard-stats-grid { @include dashboard-stats-grid; }
 
-.filters-grid {
-  display: grid;
-  grid-template-columns: 2fr repeat(4, minmax(160px, 1fr));
-  gap: 12px;
-  align-items: start;
-
-  .search-field {
-    grid-column: 1 / span 2;
-    min-width: 240px;
-  }
-
-  .filter-field {
-    min-width: 0;
-  }
-}
-
-.filters-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-
-  button {
-    min-width: 148px;
-  }
-}
-
-:host ::ng-deep .filters-section .mat-mdc-form-field-subscript-wrapper {
-  display: none;
-}
-
-:host ::ng-deep .filters-section .mat-mdc-form-field-infix {
-  min-height: 48px;
-}
-
-:host ::ng-deep .filters-section .mat-mdc-text-field-wrapper {
-  border-radius: 10px;
-  background: #ffffff;
-}
-
-/* Hardening against cross-component/global Material overrides */
-:host ::ng-deep .purchase-invoice-list-container .filters-section .mdc-floating-label,
-:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-mdc-floating-label {
-  opacity: 1 !important;
-  color: #6e6b7b !important;
-}
-
-:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-mdc-form-field.mat-focused .mdc-floating-label,
-:host ::ng-deep .purchase-invoice-list-container .filters-section .mdc-floating-label--float-above {
-  opacity: 1 !important;
-  color: $purple !important;
-  background: #ffffff !important;
-  padding: 0 4px !important;
-}
-
-:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-mdc-input-element,
-:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-mdc-select-value-text,
-:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-mdc-select-min-line {
-  color: #5e5873 !important;
-}
-
-:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-mdc-form-field-icon-prefix,
-:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-mdc-form-field-icon-suffix,
-:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-datepicker-toggle-default-icon,
-:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-mdc-select-arrow,
-:host ::ng-deep .purchase-invoice-list-container .filters-section .mat-icon {
-  color: $purple !important;
-  opacity: 1 !important;
-}
-
-.table-container {
-  background: #ffffff;
-  border: 1px solid $border;
-  border-radius: 12px;
+// ─── Main Content Card ─────────────────────────────────────────
+.list-page-card {
+  @include list-card;
+  border: 1px solid $p-border;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
-.table-scroll {
-  overflow-x: auto;
-}
-
-.invoices-table {
-  width: 100%;
-  min-width: 1250px;
-  background-color: #ffffff;
-  border-collapse: collapse;
-
-  th {
-    background-color: #f6f6fb;
-    color: #5e5873;
-    font-weight: 600;
-    font-size: 12px;
-    padding: 14px 16px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid $border;
-  }
-
-  td {
-    padding: 12px 16px;
-    font-size: 14px;
-    border-bottom: 1px solid #f2f2f5;
-    vertical-align: middle;
-  }
-
-  tr.mat-mdc-row {
-    transition: background-color 0.2s ease;
-    &:hover {
-      background: #f8f9ff;
-    }
-  }
-}
-
-tr.return-row td {
-  background-color: #fffaf8;
-}
-
-.invoice-link {
-  color: $purple;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
-.supplier-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-
-  strong {
-    font-size: 14px;
-    color: $text-card-title;
-  }
-
-  small {
-    font-size: 12px;
-    color: $text-muted;
-  }
-}
-
-.negative-balance,
-.return-amount {
-  color: $danger;
-  font-weight: 600;
-}
-
-.type-tag {
-  font-weight: 700;
-  font-size: 1.01rem;
-  letter-spacing: 0.2px;
-  white-space: nowrap;
-}
-
-.invoice-type-badge {
-  padding: 4px 9px;
-  background-color: #f3f2f7;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  color: $purple;
-  white-space: nowrap;
-}
-
-.gst-breakdown {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-
-  .gst-total {
-    font-weight: 600;
-    color: $text-card-title;
-  }
-
-  .gst-detail {
-    font-size: 11px;
-    color: $text-muted;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-}
-
-.status-chips {
+.list-filters-section {
+  padding: 20px 24px !important;
+  border-bottom: 1px solid $p-border;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-}
-
-:host ::ng-deep .status-chips .mat-mdc-standard-chip {
-  height: 27px;
-  font-size: 12px;
-}
-
-.purchase-chip {
-  background-color: rgba($success, 0.12);
-  color: #0d7f47;
-}
-
-.return-chip {
-  background-color: rgba($danger, 0.1);
-  color: #b42318;
-}
-
-.loading-container,
-.no-data,
-.error-message {
-  padding: 40px 24px;
-  text-align: center;
-  color: $text-muted;
-  display: flex;
-  flex-direction: column;
+  gap: 14px;
   align-items: center;
-  gap: 10px;
+
+  mat-form-field {
+    flex: 1;
+    min-width: 160px;
+    &:first-child { flex: 2; min-width: 260px; }
+  }
 }
 
-.no-data mat-icon,
-.error-message mat-icon {
-  font-size: 40px;
-  width: 40px;
-  height: 40px;
-}
-
-:host ::ng-deep mat-paginator {
-  border-top: 1px solid $border;
-  background: #ffffff;
-}
-
+// ─── Summary Footer ────────────────────────────────────────────
 .summary-footer {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 20px;
-  padding: 16px 20px;
+  gap: 28px;
+  padding: 20px 28px;
   background: #ffffff;
-  border: 1px solid $border;
+  border: 1px solid $p-border;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  margin-top: 16px;
+  margin-top: 20px;
 
   .summary-item {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    min-width: 190px;
 
     .label {
-      font-size: 12px;
-      color: $text-muted;
+      font-size: 10.5px;
+      color: #b9b9c3;
       margin-bottom: 4px;
       text-transform: uppercase;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.8px;
+      font-weight: 600;
     }
 
     .value {
-      font-size: 18px;
-      font-weight: 700;
+      font-size: 20px;
+      font-weight: 800;
       color: $purple;
+      line-height: 1.2;
+      font-family: 'Outfit', 'Inter', sans-serif;
     }
   }
 }
 
-@media (max-width: 1280px) {
-  .filters-grid {
-    grid-template-columns: repeat(2, minmax(180px, 1fr));
 
-    .search-field {
-      grid-column: 1 / -1;
-    }
-  }
+
+.list-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  
+  mat-icon { font-size: 48px; width: 48px; height: 48px; color: $purple; opacity: 0.5; margin-bottom: 16px; }
+  p { font-size: 16px; color: #5e5873 !important; font-weight: 500; margin-bottom: 24px; }
 }
 
-@media (max-width: 992px) {
-  .header-section {
-    flex-direction: column;
-    align-items: flex-start;
-    h2 {
-      font-size: 30px;
+// ─── Specialized Row Colouring ─────────────────────────────────
+::ng-deep {
+  .list-page-container {
+    app-data-table {
+      @include data-table;
+      
+      .data-table {
+        min-width: 1400px;
+      }
+
+      .return-row {
+        background-color: rgba(234, 84, 85, 0.03) !important;
+        border-left: 3px solid rgba(234, 84, 85, 0.3) !important;
+
+        &:hover {
+          background-color: var(--color-bg-page) !important;
+          * { color: #fff !important; }
+        }
+      }
     }
-  }
 
-  .filters-actions {
-    width: 100%;
-    justify-content: stretch;
-
-    button {
-      flex: 1;
-    }
-  }
-
-  .summary-footer {
-    justify-content: flex-start;
-
-    .summary-item {
-      align-items: flex-start;
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  .purchase-invoice-list-container {
-    padding: 16px;
-  }
-
-  .statistics-cards {
-    grid-template-columns: 1fr;
-  }
-
-  .filters-grid {
-    grid-template-columns: 1fr;
-
-    .search-field {
-      grid-column: auto;
-    }
-  }
-
-  .filters-actions {
-    flex-direction: column;
-
-    button {
-      width: 100%;
+    .mat-mdc-paginator {
+      @include paginator;
     }
   }
 }

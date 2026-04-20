@@ -160,75 +160,16 @@
       </div>
     } @else {
       <div class="table-wrapper">
-        <table mat-table [dataSource]="schemeDataSource" class="data-table">
-          <ng-container matColumnDef="sno">
-            <th mat-header-cell *matHeaderCellDef>S#</th>
-            <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="claimDate">
-            <th mat-header-cell *matHeaderCellDef>Creation Date</th>
-            <td mat-cell *matCellDef="let row">{{ fmtDate(row.createdAt) }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="company">
-            <th mat-header-cell *matHeaderCellDef>Company</th>
-            <td mat-cell *matCellDef="let row">
-              <strong>{{ row.company?.name || companyName(row.company) }}</strong>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="group">
-            <th mat-header-cell *matHeaderCellDef>Group</th>
-            <td mat-cell *matCellDef="let row">{{ row.group || '—' }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="discount2">
-            <th mat-header-cell *matHeaderCellDef class="text-right">Discount 2 (%)</th>
-            <td mat-cell *matCellDef="let row" class="text-right amount-cell">{{ row.discount2Percent || 0 }}%</td>
-          </ng-container>
-
-          <ng-container matColumnDef="scheme2">
-            <th mat-header-cell *matHeaderCellDef>Scheme Format</th>
-            <td mat-cell *matCellDef="let row"><span class="chip-scheme">{{ row.schemeFormat || '—' }}</span></td>
-          </ng-container>
-
-          <ng-container matColumnDef="to2">
-            <th mat-header-cell *matHeaderCellDef class="text-right">TO.2</th>
-            <td mat-cell *matCellDef="let row" class="text-right amount-cell">{{ row.to2Percent || 0 }}%</td>
-          </ng-container>
-
-          <ng-container matColumnDef="claimAccount">
-            <th mat-header-cell *matHeaderCellDef>Linked Account</th>
-            <td mat-cell *matCellDef="let row">{{ row.claimAccountId?.name || caName(row.claimAccountId) }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
-            <td mat-cell *matCellDef="let row" class="text-center">
-              <button mat-icon-button class="edit-btn" (click)="editScheme(row)" matTooltip="Edit">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button class="del-btn" (click)="deleteScheme(row)" matTooltip="Delete" color="warn">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="schemeColumns; sticky: true"></tr>
-          <tr mat-row *matRowDef="let row; columns: schemeColumns;"></tr>
-        </table>
-
-        @if (schemeDataSource.data.length === 0) {
-          <div class="list-empty-state">
-            <mat-icon>percent</mat-icon>
-            <p>No claims definitions found</p>
-          </div>
-        }
-
-        <mat-paginator [length]="schemeDataSource.data.length" [pageSize]="pageSize"
-          [pageSizeOptions]="[10, 20, 50]" (page)="onPageChange($event)">
-        </mat-paginator>
+        <app-data-table
+          [data]="schemeDataSource.data"
+          [columns]="schemeTableColumns"
+          [totalItems]="totalSchemes"
+          [pageSize]="pageSize"
+          [pageIndex]="pageIndex"
+          [pageSizeOptions]="[10, 20, 50]"
+          (pageChange)="onPageChange($event)"
+          (actionClick)="onSchemeTableAction($event)">
+        </app-data-table>
       </div>
     }
   </div>

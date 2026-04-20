@@ -2,53 +2,65 @@
   <!-- Header Section -->
   <div class="list-page-header">
     <div class="header-content">
-      <h1>Chart of Accounts</h1>
-      <p>Manage all business accounts and financial entities</p>
+      <h1><mat-icon>account_balance</mat-icon> Chart of Accounts</h1>
+      <p class="page-description">Manage all business accounts and financial entities</p>
     </div>
-    <button mat-raised-button color="primary" (click)="onCreateAccount()">
-      <mat-icon>add</mat-icon> New Account
-    </button>
+    <div class="header-actions">
+      <button mat-raised-button class="btn-create" (click)="onCreateAccount()">
+        <mat-icon>add</mat-icon> New Account
+      </button>
+    </div>
   </div>
 
   <!-- Statistics Cards -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <mat-icon>account_balance</mat-icon>
-      <div class="stat-content">
-        <span class="stat-value">{{ statistics.totalAccounts }}</span>
-        <span class="stat-label">Total Accounts</span>
+  <div class="dashboard-stats-grid">
+    <div class="stat-card primary">
+      <div class="stat-icon-wrapper">
+        <mat-icon>account_balance</mat-icon>
+      </div>
+      <div class="stat-data">
+        <span class="value">{{ statistics.totalAccounts }}</span>
+        <span class="label">Total Accounts</span>
       </div>
     </div>
 
-    <div class="stat-card">
-      <mat-icon>check_circle</mat-icon>
-      <div class="stat-content">
-        <span class="stat-value">{{ statistics.activeAccounts }}</span>
-        <span class="stat-label">Active Accounts</span>
+    <div class="stat-card success">
+      <div class="stat-icon-wrapper">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <div class="stat-data">
+        <span class="value">{{ statistics.activeAccounts }}</span>
+        <span class="label">Active Accounts</span>
       </div>
     </div>
 
-    <div class="stat-card">
-      <mat-icon>payments</mat-icon>
-      <div class="stat-content">
-        <span class="stat-value">{{ formatCurrency(statistics.totalBalance) }}</span>
-        <span class="stat-label">Total Balance</span>
+    <div class="stat-card primary">
+      <div class="stat-icon-wrapper">
+        <mat-icon>payments</mat-icon>
+      </div>
+      <div class="stat-data">
+        <span class="value">{{ formatCurrency(statistics.totalBalance) }}</span>
+        <span class="label">Total Balance</span>
       </div>
     </div>
 
-    <div class="stat-card">
-      <mat-icon>shopping_cart</mat-icon>
-      <div class="stat-content">
-        <span class="stat-value">{{ statistics.customersCount }}</span>
-        <span class="stat-label">Customers</span>
+    <div class="stat-card info">
+      <div class="stat-icon-wrapper">
+        <mat-icon>shopping_cart</mat-icon>
+      </div>
+      <div class="stat-data">
+        <span class="value">{{ statistics.customersCount }}</span>
+        <span class="label">Customers</span>
       </div>
     </div>
 
-    <div class="stat-card">
-      <mat-icon>local_shipping</mat-icon>
-      <div class="stat-content">
-        <span class="stat-value">{{ statistics.suppliersCount }}</span>
-        <span class="stat-label">Suppliers</span>
+    <div class="stat-card warning">
+      <div class="stat-icon-wrapper">
+        <mat-icon>local_shipping</mat-icon>
+      </div>
+      <div class="stat-data">
+        <span class="value">{{ statistics.suppliersCount }}</span>
+        <span class="label">Suppliers</span>
       </div>
     </div>
   </div>
@@ -86,9 +98,8 @@
     </div>
 
   <!-- Accounts Table -->
-    <div class="table-wrapper px-3 pb-3" style="position: relative; min-height: 200px;">
-      <div class="loading-overlay" *ngIf="loading"
-           style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); display: flex; justify-content: center; align-items: center; z-index: 10;">
+    <div class="table-wrapper" style="position: relative; min-height: 200px;">
+      <div class="loading-overlay" *ngIf="loading">
         <mat-spinner diameter="40"></mat-spinner>
       </div>
 

@@ -26,7 +26,8 @@ import { ExportButtonsComponent } from '@shared/components/export-buttons/export
 import { PrintPreviewService } from '@core/services/print-preview.service';
 import { AuthService } from '@core/services/auth.service';
 import { SalesmanService } from '../../../../core/services/salesman.service';
-import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table/data-table.component';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+import { DataTableColumn } from '../../../../shared/models/data-table.model';
 
 @Component({
   selector: 'app-sales-invoice-list',
@@ -59,7 +60,7 @@ export class SalesInvoiceListComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  tableColumns: TableColumn[] = [
+  tableColumns: DataTableColumn[] = [
     { key: 'invoiceNumber', label: 'Invoice No', sortable: true },
     { key: 'invoiceDate', label: 'Date', type: 'date', sortable: true },
     { key: 'salesType', label: 'Sales Type Tag' },
@@ -78,12 +79,12 @@ export class SalesInvoiceListComponent implements OnInit, OnDestroy {
       { icon: 'visibility', label: 'Preview Invoice', actionKey: 'preview' },
       { icon: 'print', label: 'Print A4', actionKey: 'printA4' },
       { icon: 'receipt', label: 'Print Thermal', actionKey: 'printThermal' },
-      { icon: 'check_circle', label: 'Confirm', actionKey: 'confirm', showIf: (row) => row.status === 'draft' },
-      { icon: 'payment', label: 'Mark Paid', actionKey: 'markPaid', showIf: (row) => row.status === 'confirmed' && row.paymentStatus !== 'paid' },
-      { icon: 'cancel', label: 'Cancel Invoice', actionKey: 'cancel', showIf: (row) => row.status !== 'cancelled' },
-      { icon: 'assignment_return', label: 'Return Items', actionKey: 'return', showIf: (row) => row.status === 'confirmed' },
-      { icon: 'edit', label: 'Edit Invoice', actionKey: 'edit', showIf: (row) => row.status === 'draft' },
-      { icon: 'delete', label: 'Delete', actionKey: 'delete', color: 'warn', showIf: (row) => row.status === 'draft' }
+      { icon: 'check_circle', label: 'Confirm', actionKey: 'confirm', showIf: (row: any) => row.status === 'draft' },
+      { icon: 'payment', label: 'Mark Paid', actionKey: 'markPaid', showIf: (row: any) => row.status === 'confirmed' && row.paymentStatus !== 'paid' },
+      { icon: 'cancel', label: 'Cancel Invoice', actionKey: 'cancel', showIf: (row: any) => row.status !== 'cancelled' },
+      { icon: 'assignment_return', label: 'Return Items', actionKey: 'return', showIf: (row: any) => row.status === 'confirmed' },
+      { icon: 'edit', label: 'Edit Invoice', actionKey: 'edit', showIf: (row: any) => row.status === 'draft' },
+      { icon: 'delete', label: 'Delete', actionKey: 'delete', color: 'warn', showIf: (row: any) => row.status === 'draft' }
     ]}
   ];
 
@@ -482,13 +483,11 @@ export class SalesInvoiceListComponent implements OnInit, OnDestroy {
 
   formatCurrency(amount: number): string {
     if (amount === undefined || amount === null || isNaN(amount)) {
-      return 'PKR 0';
+      return 'Rs. 0';
     }
-    return new Intl.NumberFormat('en-PK', {
-      style: 'currency',
-      currency: 'PKR',
+    return `Rs. ${new Intl.NumberFormat('en-PK', {
       maximumFractionDigits: 0
-    }).format(amount);
+    }).format(amount)}`;
   }
 
   formatDate(date: string): string {
@@ -525,37 +524,11 @@ export class SalesInvoiceListComponent implements OnInit, OnDestroy {
   }
 
   createInvoice(): void {
-    const dialogRef = this.dialog.open(InvoiceFormComponent, {
-      width: '95vw',
-      maxWidth: '1600px',
-      height: '95vh',
-      panelClass: 'invoice-form-dialog-panel',
-      data: { mode: 'create', type: 'sales' } as InvoiceFormData
-    });
-
-    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
-      if (result) {
-        this.loadInvoices();
-        this.loadStatistics();
-      }
-    });
+    this.router.navigate(['/sales-invoices/create']);
   }
 
   editInvoice(invoice: Invoice): void {
-    const dialogRef = this.dialog.open(InvoiceFormComponent, {
-      width: '95vw',
-      maxWidth: '1600px',
-      height: '95vh',
-      panelClass: 'invoice-form-dialog-panel',
-      data: { mode: 'edit', type: 'sales', invoice } as InvoiceFormData
-    });
-
-    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
-      if (result) {
-        this.loadInvoices();
-        this.loadStatistics();
-      }
-    });
+    this.router.navigate(['/sales-invoices/edit', invoice._id]);
   }
 
   viewInvoice(invoice: Invoice): void {

@@ -1,8 +1,12 @@
 @import "../../../../../styles/shared-list-styles";
 
 .e-order-list-page {
+  @include page-container;
+  @include page-header;
   @include data-table;
   @include paginator;
+
+  .dashboard-stats-grid { @include dashboard-stats-grid; }
 
   .stat-card {
     &.primary { --stat-color: #{$purple}; }
@@ -24,3 +28,4 @@
     background-color: rgba($grey-very-light, 0.5);
   }
 }
+

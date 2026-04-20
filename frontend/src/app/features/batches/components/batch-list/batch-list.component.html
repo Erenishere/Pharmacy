@@ -1,13 +1,12 @@
 <div class="list-page-container batches-page">
   <div class="list-page-header">
     <div class="header-content">
-      <h1 class="page-title"><mat-icon>inventory</mat-icon> Batch Management</h1>
-      <p class="page-subtitle">Detailed batch tracking and management</p>
+      <h1><mat-icon>inventory</mat-icon> Batch Management</h1>
+      <p class="page-description">Detailed batch tracking and management</p>
     </div>
     <div class="header-actions">
-      <button mat-raised-button color="primary" routerLink="/batches/create" class="create-btn">
-        <mat-icon>add</mat-icon>
-        Add New Batch
+      <button mat-raised-button color="primary" routerLink="/batches/create">
+        <mat-icon>add</mat-icon> Add New Batch
       </button>
     </div>
   </div>
@@ -46,96 +45,20 @@
         @if (loading) {
           <div class="list-loading-overlay">
             <mat-spinner diameter="40"></mat-spinner>
-            <p>Loading batches...</p>
           </div>
         }
 
-        <table mat-table [dataSource]="dataSource" matSort class="data-table" (matSortChange)="onSortChange($event)">
-          <!-- Batch Number Column -->
-          <ng-container matColumnDef="batchNumber">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Batch #</th>
-            <td mat-cell *matCellDef="let batch">
-              <span class="batch-link">{{ batch.batchNumber }}</span>
-            </td>
-          </ng-container>
-
-          <!-- Item Column -->
-          <ng-container matColumnDef="item">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Item</th>
-            <td mat-cell *matCellDef="let batch">
-              <div class="item-info">
-                <span class="item-name">{{ batch.item?.name || 'N/A' }}</span>
-                <small class="item-code">{{ batch.item?.code || 'N/A' }}</small>
-              </div>
-            </td>
-          </ng-container>
-
-          <!-- Quantity Column -->
-          <ng-container matColumnDef="quantity">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Quantity</th>
-            <td mat-cell *matCellDef="let batch">
-              <div class="quantity-info">
-                <span class="remaining">{{ batch.remainingQuantity }}</span>
-                <small class="total">/ {{ batch.quantity }}</small>
-              </div>
-            </td>
-          </ng-container>
-
-          <!-- Expiry Date Column -->
-          <ng-container matColumnDef="expiryDate">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Expiry Date</th>
-            <td mat-cell *matCellDef="let batch">
-              <span [class]="getExpiryClass(batch.expiryDate)" class="expiry-date">
-                {{ batch.expiryDate | date:'mediumDate' }}
-              </span>
-            </td>
-          </ng-container>
-
-          <!-- Status Column -->
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let batch">
-              <mat-chip [class]="'status-' + batch.status">
-                {{ batch.status }}
-              </mat-chip>
-            </td>
-          </ng-container>
-
-          <!-- Actions Column -->
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
-            <td mat-cell *matCellDef="let batch" class="text-center">
-              <button mat-icon-button [matMenuTriggerFor]="menu" class="action-btn">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-              <mat-menu #menu="matMenu">
-                <button mat-menu-item [routerLink]="['/batches', batch._id]">
-                  <mat-icon>visibility</mat-icon>
-                  <span>View Details</span>
-                </button>
-                <button mat-menu-item [routerLink]="['/batches', batch._id, 'edit']">
-                  <mat-icon>edit</mat-icon>
-                  <span>Edit Batch</span>
-                </button>
-                <button mat-menu-item (click)="onDeleteBatch(batch)">
-                  <mat-icon color="warn">delete</mat-icon>
-                  <span>Delete</span>
-                </button>
-              </mat-menu>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
-
-        <!-- Paginator -->
-        <mat-paginator 
-          [length]="totalBatches"
+        <app-data-table
+          [data]="dataSource.data"
+          [columns]="tableColumns"
+          [totalItems]="totalBatches"
           [pageSize]="pageSize"
+          [pageIndex]="currentPage"
           [pageSizeOptions]="pageSizeOptions"
-          (page)="onPageChange($event)">
-        </mat-paginator>
+          (pageChange)="onPageChange($event)"
+          (sortChange)="onSortChange($event)"
+          (actionClick)="onTableAction($event)">
+        </app-data-table>
       </div>
     } @else {
       <!-- Grouped View -->

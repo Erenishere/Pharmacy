@@ -22,7 +22,8 @@ import { Router } from '@angular/router';
 import { PurchaseOrderService, PurchaseOrder } from '../../services/purchase-order.service';
 import { FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
-import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table/data-table.component';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+import { DataTableColumn } from '../../../../shared/models/data-table.model';
 
 @Component({
   selector: 'app-purchase-order-list',
@@ -54,7 +55,7 @@ import { DataTableComponent, TableColumn } from '../../../../shared/components/d
   styleUrls: ['./purchase-order-list.component.scss']
 })
 export class PurchaseOrderListComponent implements OnInit, OnDestroy {
-  tableColumns: TableColumn[] = [
+  tableColumns: DataTableColumn[] = [
     { key: 'sno', label: 'S#' },
     { key: 'supplierName', label: 'Party Name', sortable: true },
     { key: 'supplierTown', label: 'Town' },
@@ -66,12 +67,12 @@ export class PurchaseOrderListComponent implements OnInit, OnDestroy {
     { key: 'fulfillmentStatus', label: 'Fulfillment', type: 'status', colorMap: { 'pending': 'warn', 'partial': 'accent', 'fulfilled': 'primary' } },
     { key: 'actions', label: 'Actions', type: 'action', actions: [
       { icon: 'visibility', label: 'View', actionKey: 'view' },
-      { icon: 'edit', label: 'Edit', actionKey: 'edit', showIf: (row) => row.status === 'draft' },
-      { icon: 'send', label: 'Send to Supplier', actionKey: 'send', showIf: (row) => row.status === 'draft' },
-      { icon: 'check_circle', label: 'Confirm', actionKey: 'confirm', color: 'primary', showIf: (row) => row.status === 'sent' },
-      { icon: 'receipt', label: 'Convert to Invoice', actionKey: 'convert', color: 'accent', showIf: (row) => row.status === 'confirmed' },
+      { icon: 'edit', label: 'Edit', actionKey: 'edit', showIf: (row: any) => row.status === 'draft' },
+      { icon: 'send', label: 'Send to Supplier', actionKey: 'send', showIf: (row: any) => row.status === 'draft' },
+      { icon: 'check_circle', label: 'Confirm', actionKey: 'confirm', color: 'primary', showIf: (row: any) => row.status === 'sent' },
+      { icon: 'receipt', label: 'Convert to Invoice', actionKey: 'convert', color: 'accent', showIf: (row: any) => row.status === 'confirmed' },
       { icon: 'print', label: 'Print', actionKey: 'print' },
-      { icon: 'delete', label: 'Delete', actionKey: 'delete', color: 'warn', showIf: (row) => row.status === 'draft' }
+      { icon: 'delete', label: 'Delete', actionKey: 'delete', color: 'warn', showIf: (row: any) => row.status === 'draft' }
     ]}
   ];
 

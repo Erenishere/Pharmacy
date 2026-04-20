@@ -1,0 +1,322 @@
+// ============================================
+// FORM & FILTER MIXINS
+// ============================================
+// Standardized form field and filter section styles
+// with consistent heights and premium appearance.
+// ============================================
+
+// ============================================
+// FORM FIELD BASE
+// ============================================
+@mixin form-field-base {
+  width: 100%;
+  
+  ::ng-deep .mat-mdc-form-field {
+    width: 100%;
+    margin-bottom: 0 !important;
+    
+    .mat-mdc-text-field-wrapper {
+      height: var(--input-height);
+      background-color: var(--color-bg-card) !important;
+    }
+    
+    .mat-mdc-form-field-flex {
+      height: var(--input-height);
+      align-items: center;
+    }
+    
+    .mat-mdc-form-field-infix {
+      min-height: var(--input-height);
+      padding-top: 13px;
+      padding-bottom: 13px;
+    }
+    
+    .mdc-text-field--outlined {
+      border-radius: var(--radius-xl) !important;
+    }
+    
+    // Outline borders
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: var(--color-border-input) !important;
+      border-width: 1px !important;
+    }
+    
+    &:hover,
+    &.mat-focused {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--color-primary) !important;
+        border-width: 2px !important;
+      }
+    }
+    
+    // Labels
+    .mat-mdc-floating-label,
+    .mdc-floating-label {
+      color: var(--color-text-primary) !important;
+      font-weight: var(--font-weight-medium) !important;
+    }
+    
+    &.mat-focused .mat-mdc-floating-label,
+    &.mat-focused .mdc-floating-label {
+      color: var(--color-primary) !important;
+    }
+    
+    // Input text
+    .mat-mdc-input-element {
+      color: var(--color-text-body) !important;
+      caret-color: var(--color-primary) !important;
+    }
+    
+    .mat-mdc-input-element::placeholder {
+      color: rgba(0, 0, 0, 0.6) !important;
+    }
+    
+    // Select
+    .mat-mdc-select-value {
+      color: var(--color-text-body) !important;
+    }
+    
+    .mat-mdc-select-arrow {
+      color: var(--color-primary) !important;
+    }
+    
+    // Icons
+    .mat-mdc-form-field-icon-prefix,
+    .mat-mdc-form-field-icon-suffix {
+      color: var(--color-primary) !important;
+    }
+  }
+}
+
+// ============================================
+// FILTER SECTION
+// ============================================
+@mixin filter-section {
+  padding: var(--space-4) var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  background: var(--color-bg-card);
+  border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.08);
+  
+  // Primary filter group (search, main filters)
+  .filter-group-primary,
+  .search-filters {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  // Secondary filter group (actions, toggles)
+  .filter-group-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    flex: 1.5;
+  }
+  
+  // Search field
+  .search-field,
+  .filter-search {
+    flex: 1;
+    min-width: 280px;
+    
+    @include form-field-base;
+    
+    ::ng-deep .mdc-text-field--outline {
+      background-color: var(--color-bg-input) !important;
+      transition: all var(--transition-fast);
+      border-radius: var(--radius-xl) !important;
+    }
+    
+    &:hover ::ng-deep .mdc-text-field--outline {
+      background-color: rgba(var(--color-primary-rgb), 0.05) !important;
+    }
+    
+    mat-icon {
+      color: var(--color-primary);
+      opacity: 0.7;
+    }
+  }
+  
+  // Filter field
+  .filter-field {
+    min-width: 160px;
+    flex: 0 1 auto;
+    
+    @include form-field-base;
+  }
+  
+  // Filter checkbox
+  .filter-checkbox {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-body);
+    display: flex;
+    align-items: center;
+    height: var(--input-height);
+    
+    ::ng-deep .mdc-checkbox {
+      padding: var(--space-2);
+    }
+  }
+  
+  // Clear button
+  .clear-btn,
+  .filter-clear-btn {
+    height: 40px;
+    color: var(--color-text-muted);
+    
+    &:hover {
+      color: var(--color-danger);
+      background: var(--color-danger-light);
+    }
+  }
+}
+
+// ============================================
+// FORM CARD (Inline Add Forms)
+// ============================================
+@mixin form-card {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: none;
+  padding: var(--space-6);
+  margin-bottom: var(--space-4);
+  
+  h3 {
+    margin: 0 0 var(--space-4) 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    border-left: 4px solid var(--color-primary);
+    padding-left: var(--space-3);
+  }
+  
+  .form-row {
+    display: flex;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    align-items: flex-start;
+    
+    mat-form-field {
+      flex: 1;
+      min-width: 180px;
+    }
+    
+    &.two-col mat-form-field {
+      min-width: 200px;
+    }
+    
+    &.three-col mat-form-field {
+      min-width: 180px;
+    }
+  }
+}
+
+// ============================================
+// FORM FIELD OVERRIDES (Global)
+// ============================================
+@mixin form-field-overrides {
+  ::ng-deep {
+    .mat-mdc-form-field {
+      .mdc-text-field--outline {
+        background-color: var(--color-bg-card) !important;
+      }
+      
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: rgba(var(--color-primary-rgb), 0.5) !important;
+        border-width: 1px !important;
+      }
+      
+      &:hover,
+      &.mat-focused {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: var(--color-primary) !important;
+          border-width: 2px !important;
+        }
+      }
+      
+      .mdc-floating-label {
+        color: var(--color-text-primary) !important;
+        font-weight: var(--font-weight-medium) !important;
+      }
+      
+      &.mat-focused .mdc-floating-label {
+        color: var(--color-primary) !important;
+      }
+      
+      .mat-mdc-input-element {
+        color: var(--color-text-body) !important;
+        caret-color: var(--color-primary) !important;
+      }
+      
+      .mat-mdc-input-element::placeholder {
+        color: rgba(0, 0, 0, 0.6) !important;
+      }
+      
+      .mat-mdc-select-value {
+        color: var(--color-text-body) !important;
+      }
+      
+      .mat-mdc-select-arrow {
+        color: var(--color-primary) !important;
+      }
+      
+      .mat-mdc-form-field-icon-suffix {
+        color: var(--color-text-body) !important;
+      }
+    }
+  }
+}
+
+// ============================================
+// AUTOCOMPLETE PANEL
+// ============================================
+@mixin autocomplete-panel($panel-class) {
+  .#{$panel-class}.mat-mdc-autocomplete-panel {
+    background: var(--color-bg-card) !important;
+    border-radius: var(--radius-2xl) !important;
+    box-shadow: var(--shadow-dropdown) !important;
+    border: 1px solid var(--color-border) !important;
+    max-height: 350px !important;
+    overflow-y: auto !important;
+    
+    .mat-mdc-option {
+      padding: var(--space-3) var(--space-4) !important;
+      min-height: 60px !important;
+      background: var(--color-bg-card) !important;
+      color: var(--color-text-body) !important;
+      border-bottom: 1px solid var(--color-border) !important;
+      
+      &:last-child {
+        border-bottom: none !important;
+      }
+      
+      &:hover,
+      &.mat-mdc-option-active {
+        background: var(--color-bg-hover) !important;
+      }
+      
+      .mdc-list-item__primary-text {
+        color: var(--color-text-body) !important;
+        display: block !important;
+        width: 100% !important;
+      }
+    }
+  }
+}

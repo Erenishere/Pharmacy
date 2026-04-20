@@ -15,10 +15,12 @@ import { MatMenuModule } from '@angular/material/menu';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil, catchError, of } from 'rxjs';
 
-import { Batch, BatchStatus, PaginationParams, BatchResponse } from '../../models/batch.model';
-import { BatchFilter } from '../../models/batch-filter.model';
 import { BatchService } from '../../services/batch.service';
+import { Batch, BatchResponse, PaginationParams, BatchStatus } from '../../models/batch.model';
+import { BatchFilter } from '../../models/batch-filter.model';
 import { BatchFiltersComponent } from '../batch-filters/batch-filters.component';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+import { DataTableColumn, TableActionClickEvent } from '../../../../shared/models/data-table.model';
 
 export enum ViewMode {
   TABLE = 'table',
@@ -51,10 +53,11 @@ export interface BatchGroup {
     MatCardModule,
     MatTooltipModule,
     MatButtonToggleModule,
-    MatExpansionModule,
     MatMenuModule,
+    MatExpansionModule,
     RouterModule,
-    BatchFiltersComponent
+    BatchFiltersComponent,
+    DataTableComponent
   ],
   templateUrl: './batch-list.component.html',
   styleUrls: ['./batch-list.component.scss']
@@ -68,6 +71,7 @@ export class BatchListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   displayedColumns: string[] = ['batchNumber', 'item', 'quantity', 'expiryDate', 'location', 'status', 'actions'];
   dataSource = new MatTableDataSource<Batch>([]);
+  tableColumns: DataTableColumn[] = [];
 
   loading = false;
   totalBatches = 0;
@@ -91,6 +95,7 @@ export class BatchListComponent implements OnInit, OnDestroy, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
+    this.initTableColumns();
     this.loadFiltersFromUrl();
     this.loadViewModeFromUrl();
     this.loadBatches();
@@ -131,6 +136,75 @@ export class BatchListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.currentPage = 0;
     this.updateUrlParams();
     this.loadBatches();
+  }
+
+  onTableAction(event: TableActionClickEvent): void {
+    const batch = event.row as Batch;
+    switch (event.action) {
+      case 'view':
+        this.router.navigate(['/batches', batch._id]);
+        break;
+      case 'edit':
+        this.router.navigate(['/batches', batch._id, 'edit']);
+        break;
+      case 'delete':
+        this.onDeleteBatch(batch);
+        break;
+    }
+  }
+
+  private initTableColumns(): void {
+    this.tableColumns = [
+      { key: 'batchNumber', label: 'Batch #', sortable: true },
+      { 
+        key: 'itemName', 
+        label: 'Item', 
+        sortable: true,
+        getValue: (row: Batch) => row.item?.name || 'N/A'
+      },
+      { 
+        key: 'quantity', 
+        label: 'Quantity', 
+        sortable: true,
+        getValue: (row: Batch) => `${row.remainingQuantity} / ${row.quantity}`
+      },
+      { 
+        key: 'expiryDate', 
+        label: 'Expiry Date', 
+        type: 'date', 
+        sortable: true,
+        pipeFormat: 'mediumDate',
+        getCellClass: (row: Batch) => this.getExpiryClass(row.expiryDate)
+      },
+      { 
+        key: 'locationName', 
+        label: 'Location', 
+        sortable: true,
+        getValue: (row: Batch) => row.location?.name || 'Main'
+      },
+      { 
+        key: 'status', 
+        label: 'Status', 
+        type: 'status',
+        classMap: {
+          'active': 'chip-success',
+          'expired': 'chip-danger',
+          'depleted': 'chip-warning',
+          'quarantined': 'chip-info'
+        }
+      },
+      {
+        key: 'actions',
+        label: 'Actions',
+        type: 'action',
+        align: 'center',
+        actions: [
+          { icon: 'visibility', label: 'View', actionKey: 'view' },
+          { icon: 'edit', label: 'Edit', actionKey: 'edit' },
+          { icon: 'delete', label: 'Delete', actionKey: 'delete', color: 'warn' }
+        ]
+      }
+    ];
   }
 
   /**

@@ -13,7 +13,7 @@
 
   <!-- Recovery Analytics Stats -->
   <div class="dashboard-stats-grid recovery-analytics" *ngIf="!loading && dataSource.data.length > 0">
-    <div class="stat-card" style="--stat-color: #7367f0">
+    <div class="stat-card primary">
       <div class="stat-icon-wrapper">
         <mat-icon>account_balance_wallet</mat-icon>
       </div>
@@ -24,7 +24,7 @@
       </div>
     </div>
 
-    <div class="stat-card" style="--stat-color: #ea5455">
+    <div class="stat-card danger">
       <div class="stat-icon-wrapper">
         <mat-icon>schedule</mat-icon>
       </div>
@@ -35,7 +35,7 @@
       </div>
     </div>
 
-    <div class="stat-card" style="--stat-color: #28c76f">
+    <div class="stat-card success">
       <div class="stat-icon-wrapper">
         <mat-icon>trending_up</mat-icon>
       </div>
@@ -46,7 +46,7 @@
       </div>
     </div>
 
-    <div class="stat-card" style="--stat-color: #ff9f43">
+    <div class="stat-card warning">
       <div class="stat-icon-wrapper">
         <mat-icon>timer</mat-icon>
       </div>
@@ -183,14 +183,22 @@
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+          <tr class="mat-row empty-state-row" *matNoDataRow>
+            <td class="mat-cell" colspan="12">
+              <div class="empty-state-premium">
+                <div class="icon-wrapper">
+                  <mat-icon>inbox</mat-icon>
+                  <div class="icon-bg-glow"></div>
+                </div>
+                <h4>No recovery data found. Adjust filters and click Generate Report.</h4>
+                <p>There is no data to display matching the current criteria.</p>
+              </div>
+            </td>
+          </tr>
         </table>
 
-        @if (dataSource.data.length === 0) {
-          <div class="list-empty-state">
-            <mat-icon>assessment</mat-icon>
-            <p>No recovery data found. Adjust filters and click Generate Report.</p>
-          </div>
-        }
+        
       </div>
     }
   </div>

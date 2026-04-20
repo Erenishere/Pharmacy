@@ -1,29 +1,32 @@
-<div class="user-list-container">
+<div class="list-page-container user-list-page">
     <!-- Header -->
-    <div class="header">
-        <h1>User Management</h1>
-        <button mat-raised-button color="primary" (click)="openCreateUserDialog()">
-            <mat-icon>add</mat-icon>
-            New User
-        </button>
+    <div class="list-page-header">
+        <div class="header-content">
+            <h1><mat-icon>people</mat-icon> User Management</h1>
+            <p class="page-description">Manage system users, roles, and access permissions</p>
+        </div>
+        <div class="header-actions">
+            <button mat-raised-button color="primary" class="create-btn" (click)="openCreateUserDialog()">
+                <mat-icon>add</mat-icon> New User
+            </button>
+        </div>
     </div>
 
     <!-- Card Container -->
-    <div class="card">
+    <div class="list-page-card">
         <!-- Filters -->
-        <div class="card-header">
-            <!-- Search -->
-            <div class="d-flex align-items-center">
-                <mat-form-field class="search-field mb-0" appearance="outline" subscriptSizing="dynamic">
+        <div class="list-filters-section">
+            <div class="filter-group-primary">
+                <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
                     <mat-label>Search users</mat-label>
                     <input matInput [formControl]="searchControl" placeholder="Search by name or email">
                     <mat-icon matPrefix>search</mat-icon>
                 </mat-form-field>
             </div>
 
-            <div class="filter-actions d-flex align-items-center gap-2">
+            <div class="filter-group-secondary">
                 <!-- Role Filter -->
-                <mat-form-field appearance="outline" class="role-filter mb-0" subscriptSizing="dynamic">
+                <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
                     <mat-label>Filter by Role</mat-label>
                     <mat-select [(value)]="selectedRole" (selectionChange)="onRoleFilterChange($event.value)">
                         <mat-option value="">All Roles</mat-option>
@@ -34,28 +37,32 @@
                 </mat-form-field>
 
                 <!-- Show Deleted Toggle -->
-                <div class="deleted-toggle">
+                <div class="filter-checkbox deleted-toggle">
                     <mat-slide-toggle [(ngModel)]="showDeleted" (change)="toggleShowDeleted()" color="primary">
-                        Show Deleted Users
+                        Show Deleted
                     </mat-slide-toggle>
                 </div>
+                
+                <button mat-button class="clear-btn" (click)="clearFilters()" *ngIf="searchControl.value || selectedRole">
+                    <mat-icon>restart_alt</mat-icon> Clear
+                </button>
             </div>
         </div>
 
-        <!-- User Count Display -->
-        <div class="user-count" *ngIf="!loading">
+        <div class="user-count-bar" *ngIf="!loading">
             <mat-icon>people</mat-icon>
-            <span>Showing {{ dataSource.data.length }} of {{ totalUsers }} users</span>
+            <span>Showing <strong>{{ dataSource.data.length }}</strong> of {{ totalUsers }} users</span>
         </div>
 
         <!-- Loading Spinner -->
-        <div *ngIf="loading" class="loading-container">
-            <mat-spinner diameter="50"></mat-spinner>
+        <div *ngIf="loading" class="list-loading-overlay">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Loading users...</p>
         </div>
 
         <!-- Table -->
-        <div class="table-responsive" *ngIf="!loading">
-            <table mat-table [dataSource]="dataSource" matSort class="table users-table">
+        <div class="table-wrapper" *ngIf="!loading">
+            <table mat-table [dataSource]="dataSource" matSort class="data-table">
 
                 <!-- Username Column -->
                 <ng-container matColumnDef="username">
@@ -63,7 +70,7 @@
                     <td mat-cell *matCellDef="let user">
                         <div class="user-info">
                             <span class="username">{{ user.username }}</span>
-                            <span *ngIf="!user.isActive" class="deleted-badge">Deleted</span>
+                            <span *ngIf="!user.isActive" class="deleted-badge badge-danger">Deleted</span>
                         </div>
                     </td>
                 </ng-container>
@@ -78,14 +85,9 @@
                 <ng-container matColumnDef="role">
                     <th mat-header-cell *matHeaderCellDef>Role</th>
                     <td mat-cell *matCellDef="let user">
-                        <mat-form-field class="role-select" appearance="outline" subscriptSizing="dynamic">
-                            <mat-select [value]="user.role" (selectionChange)="updateUserRole(user, $event.value)"
-                                [disabled]="isActionPending(user._id, 'update-role') || !user.isActive">
-                                <mat-option *ngFor="let role of roles" [value]="role">
-                                    {{ role | titlecase }}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>
+                        <span class="role-badge" [class]="user.role">
+                            {{ user.role | titlecase }}
+                        </span>
                     </td>
                 </ng-container>
 
@@ -108,30 +110,30 @@
 
                 <!-- Actions Column -->
                 <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef>Actions</th>
-                    <td mat-cell *matCellDef="let user">
+                    <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+                    <td mat-cell *matCellDef="let user" class="text-center">
                         <div class="actions">
-                            <button mat-icon-button matTooltip="View Details" (click)="viewUserDetail(user)">
+                            <button mat-icon-button matTooltip="View Details" (click)="viewUserDetail(user)" class="action-btn">
                                 <mat-icon>visibility</mat-icon>
                             </button>
 
-                            <button mat-icon-button matTooltip="Edit User" (click)="editUser(user)"
+                            <button mat-icon-button matTooltip="Edit User" (click)="editUser(user)" class="action-btn"
                                 [disabled]="!user.isActive">
                                 <mat-icon>edit</mat-icon>
                             </button>
 
                             <button *ngIf="user.isActive" mat-icon-button matTooltip="Reset Password"
-                                (click)="resetPassword(user)" [disabled]="isActionPending(user._id, 'reset-password')">
+                                (click)="resetPassword(user)" [disabled]="isActionPending(user._id, 'reset-password')" class="action-btn">
                                 <mat-icon>lock_reset</mat-icon>
                             </button>
 
                             <button *ngIf="user.isActive" mat-icon-button matTooltip="Delete User" color="warn"
-                                (click)="deleteUser(user)" [disabled]="isActionPending(user._id, 'delete')">
+                                (click)="deleteUser(user)" [disabled]="isActionPending(user._id, 'delete')" class="action-btn">
                                 <mat-icon>delete</mat-icon>
                             </button>
 
                             <button *ngIf="!user.isActive" mat-icon-button matTooltip="Restore User" color="primary"
-                                (click)="restoreUser(user)" [disabled]="isActionPending(user._id, 'restore')">
+                                (click)="restoreUser(user)" [disabled]="isActionPending(user._id, 'restore')" class="action-btn">
                                 <mat-icon>restore</mat-icon>
                             </button>
                         </div>
@@ -142,9 +144,9 @@
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="user-row"></tr>
 
                 <!-- No Data Row -->
-                <tr class="mat-row" *matNoDataRow>
+                <tr class="mat-mdc-no-data-row" *matNoDataRow>
                     <td class="mat-cell" [attr.colspan]="displayedColumns.length">
-                        <div class="no-data">
+                        <div class="empty-state-premium">
                             <mat-icon>people_outline</mat-icon>
                             <p>No users found</p>
                         </div>
@@ -152,17 +154,14 @@
                 </tr>
             </table>
 
-            <!-- Paginator -->
             <mat-paginator 
                 [length]="totalUsers" 
                 [pageSize]="pageSize" 
                 [pageIndex]="pageIndex"
                 [pageSizeOptions]="[5, 10, 25, 50, 100]" 
                 (page)="onPageChange($event)" 
-                showFirstLastButtons
-                [hidePageSize]="false"
-                [showFirstLastButtons]="true">
+                showFirstLastButtons>
             </mat-paginator>
         </div>
     </div>
-</div>
+</div>

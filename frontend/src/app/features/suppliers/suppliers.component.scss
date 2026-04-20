@@ -1,50 +1,53 @@
-@import '../../../styles/vuexy-vars';
+@import 'styles/shared-list-styles';
 
-:host {
+.list-page-container {
+  @include page-container;
+}
+
+.list-page-header {
+  @include page-header;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.list-page-card {
+  @include list-card;
+  border: 1px solid $p-border;
+  overflow: hidden; 
+}
+
+.list-filters-section {
+  padding: 24px !important;
+  border-bottom: 1px solid $p-border;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+
+  .search-field {
+    flex: 2;
+    min-width: 300px;
+  }
+
+  .filter-field {
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .inactive-toggle-wrapper {
+    margin-left: 10px;
+  }
+}
+
+.statistics-section {
+  margin-bottom: 2rem;
+}
+
+::ng-deep {
+  .suppliers-page app-data-table {
+    min-width: 1400px;
     display: block;
+  }
 }
-
-/* 
-   The Supplier List is now standardized using global utility classes:
-   .list-page-container, .list-page-header, .list-page-card, .list-filters-section
-   The "Perfect Hover" is inherited from the global .mat-mdc-row:hover rules.
-*/
-
-.suppliers-page {
-    /* Specialized statistics section for suppliers */
-    .statistics-section {
-        margin-bottom: 2rem;
-        // The app-supplier-stats component handles internal card styling,
-        // but we ensure it aligns with our 1400px container.
-    }
-
-    /* Target specific filter widths for this page */
-    .list-filters-section {
-        .search-field {
-            flex: 1.5;
-            min-width: 350px;
-        }
-
-        .filter-field {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .inactive-toggle-wrapper {
-            display: flex;
-            align-items: center;
-            padding-left: 1rem;
-            
-            ::ng-deep .mdc-label {
-                font-size: 0.9rem;
-                color: $text-body;
-                font-weight: 500;
-            }
-        }
-    }
-}
-
-/* 
-   Cleanup: We remove over 800 lines of redundant Material overrides 
-   and local table styling that were blocking the global "Perfect Hover".
-*/

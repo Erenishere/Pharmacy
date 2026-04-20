@@ -10,7 +10,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table/data-table.component';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+import { DataTableColumn } from '../../../../shared/models/data-table.model';
 
 interface LookupOption {
   _id: string;
@@ -59,7 +60,7 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
   areas: LookupOption[] = [];
 
   // List Configuration
-  tableColumns: TableColumn[] = [
+  tableColumns: DataTableColumn[] = [
     { key: 'sno', label: '#' },
     { key: 'code', label: 'Code' },
     { key: 'name', label: 'Name' },

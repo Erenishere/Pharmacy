@@ -93,7 +93,20 @@ export const routes: Routes = [
             },
             {
                 path: 'sales-invoices',
-                loadComponent: () => import('./features/invoices/components/sales-invoice-list/sales-invoice-list.component').then(m => m.SalesInvoiceListComponent)
+                children: [
+                    {
+                        path: '',
+                        loadComponent: () => import('./features/invoices/components/sales-invoice-list/sales-invoice-list.component').then(m => m.SalesInvoiceListComponent)
+                    },
+                    {
+                        path: 'create',
+                        loadComponent: () => import('./features/invoices/components/create-sales-invoice/create-sales-invoice.component').then(m => m.CreateSalesInvoiceComponent)
+                    },
+                    {
+                        path: 'edit/:id',
+                        loadComponent: () => import('./features/invoices/components/create-sales-invoice/create-sales-invoice.component').then(m => m.CreateSalesInvoiceComponent)
+                    }
+                ]
             },
             {
                 path: 'sales-returns',

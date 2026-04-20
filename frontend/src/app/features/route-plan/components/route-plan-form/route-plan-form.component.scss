@@ -80,7 +80,7 @@
   margin-top: 24px;
 
   button[mat-raised-button] {
-    background: linear-gradient(118deg, $purple, rgba($purple, .8));
+    background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), .8));
     box-shadow: 0 0 10px 1px rgba($purple, .4);
     color: #fff;
     font-weight: 500;

@@ -1,7 +1,7 @@
 @import "../../../../../styles/shared-list-styles";
 
 .recovery-summary-page {
-  @include dashboard-stats-grid;
+  .dashboard-stats-grid { @include dashboard-stats-grid; }
   @include data-table;
 
   .recovery-analytics {
@@ -22,7 +22,7 @@
     .generate-btn {
       height: 44px;
       padding: 0 24px;
-      background: $purple;
+      background: var(--color-bg-page);
       color: #fff;
     }
   }
@@ -81,4 +81,13 @@
     gap: 4px;
     .reminder-btn { color: $warning; }
   }
+  @include page-container;
+  @include page-header;
+  @include data-table;
+  @include paginator;
+
+  .dashboard-stats-grid { @include dashboard-stats-grid; }
+
+  .list-page-card { @include list-card; }
 }
+

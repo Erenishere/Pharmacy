@@ -55,7 +55,9 @@ mat-chip {
   @include status-chip-base;
 }
 
-@include paginator;
+.mat-mdc-paginator {
+  @include paginator;
+}
 
 .no-data,
 .empty-state {
@@ -71,7 +73,7 @@ mat-chip {
   text-align: right;
 
   button[mat-raised-button] {
-    background: linear-gradient(118deg, $purple, rgba($purple, .8));
+    background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), .8));
     box-shadow: 0 0 10px 1px rgba($purple, .4);
     color: #fff;
     font-weight: 500;
@@ -91,7 +93,7 @@ button[mat-stroked-button] {
   transition: all .25s ease;
 
   &:hover {
-    background: $purple;
+    background: var(--color-bg-page);
     color: white;
     transform: translateY(-1px);
   }

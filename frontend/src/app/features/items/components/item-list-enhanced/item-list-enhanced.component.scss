@@ -1,65 +1,80 @@
-@import '../../../../../styles/vuexy-vars';
-@import '../../../../../styles/shared-list-styles';
+@import 'styles/shared-list-styles';
 
-:host {
-  display: block;
+.list-page-container {
+  @include page-container;
 }
 
-.items-enhanced-page {
-  /* Inherits global .list-page-container styles */
+.list-page-header {
+  @include page-header;
+}
 
-  .list-page-header {
-    h1 {
-      mat-icon {
-        color: $purple;
-      }
-    }
-  }
+// ─── Main List Card ────────────────────────────────────────────
+.list-page-card {
+  @include list-card;
+  overflow: hidden;
+}
 
-  .data-table {
-    @include data-table;
-    
-    .item-name-block {
-      display: flex;
-      flex-direction: column;
+.filter-field {
+  min-width: 180px;
+}
+
+.filter-checkbox {
+  font-weight: 500;
+}
+
+// ─── Loading Overlay ──────────────────────────────────────────
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(2px);
+  z-index: 100;
+}
+
+// ─── Table Wrapper Scroll Fix ─────────────────────────────────
+.table-wrapper {
+  overflow-x: auto !important;
+  width: 100% !important;
+  position: relative;
+  &::-webkit-scrollbar { height: 8px; }
+  &::-webkit-scrollbar-track { background: #f1f1f1; }
+  &::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
+  &::-webkit-scrollbar-thumb:hover { background: #b1b1b1; }
+}
+
+// ─── Table Styling ────────────────────────────────────────────
+::ng-deep {
+  .items-enhanced-page {
+    app-data-table {
+      @include data-table;
       
-      .item-name-text {
+      .data-table {
+        min-width: 1400px;
+      }
+      
+      .mat-mdc-header-row {
+        background-color: $primary !important;
+        .mat-mdc-header-cell {
+          color: #ffffff !important;
+          font-weight: 600;
+        }
+      }
+
+      .mat-mdc-row:hover {
+        background-color: rgba($primary, 0.05) !important;
+      }
+      
+      .low-stock-text {
+        color: #ea5455 !important;
         font-weight: 600;
-        color: $text-card-title;
-        line-height: 1.2;
-      }
-
-      .item-code-text {
-        font-size: 11px;
-        color: $grey-dark;
-        font-family: 'Inter', monospace;
       }
     }
 
-    .stock-value {
-      font-weight: 600;
-      padding: 4px 8px;
-      border-radius: 4px;
-      background: rgba($success, 0.1);
-      color: $success;
-
-      &.low-stock {
-        background: rgba($danger, 0.1);
-        color: $danger;
-      }
+    .mat-mdc-paginator {
+      @include paginator;
     }
-
-    .price-cell {
-      font-family: 'Inter', monospace;
-      font-weight: 500;
-      color: $text-body;
-    }
-  }
-
-  /* Standardize high-contrast chips */
-  ::ng-deep .mat-mdc-chip {
-    @include status-chip-base;
   }
 }
-
-@include paginator;

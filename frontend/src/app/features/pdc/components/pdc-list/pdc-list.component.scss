@@ -1,76 +1,88 @@
 @import "../../../../../styles/shared-list-styles";
 
+// ─── Component Variables ──────────────────────────────────────
+$p-bg: #f8f7fa;
+$p-border: #ebe9f1;
+$p-accent: #7367f0;
+
+:host {
+  display: block;
+  background: $p-bg;
+  min-height: 100vh;
+}
+
 .pdc-list-page {
-  @include dashboard-stats-grid;
+  @include page-container;
+  @include page-header;
   @include data-table;
+  @include paginator;
 
-  .customer-info {
-    display: flex;
-    flex-direction: column;
-    .name { font-weight: 600; color: $purple-dark; }
-    .code { font-size: 11px; color: $grey-medium; }
+  .dashboard-stats-grid { @include dashboard-stats-grid; }
+}
+
+
+// ─── Specific Cell Components ─────────────────────────────────
+.receipt-badge {
+  background: rgba($p-accent, 0.1);
+  color: $p-accent;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+}
+
+.customer-cell, .bank-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.4;
+  .name, .bank-name { font-weight: 600; color: #5e5873; }
+  .id, .branch { font-size: 12px; color: #b9b9c3; }
+}
+
+.date-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  &.overdue {
+    color: #ea5455;
+    font-weight: 700;
+    .overdue-icon { font-size: 18px; width: 18px; height: 18px; color: #ea5455; }
   }
+}
 
-  .bank-details {
-    display: flex;
-    flex-direction: column;
-    .bank { font-weight: 500; font-size: 13px; }
-    .cheque-no { font-size: 11px; color: $grey-medium; font-family: monospace; }
-  }
+.status-badge {
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 
-  .date-chip {
-    padding: 2px 8px;
-    background: rgba($grey-medium, 0.1);
-    border-radius: 4px;
-    font-size: 12px;
-    &.overdue {
-      background: rgba($danger, 0.1);
-      color: $danger;
-      font-weight: 600;
+  &.status-pending { background: rgba(255, 159, 67, 0.12); color: #ff9f43; }
+  &.status-cleared { background: rgba(40, 199, 111, 0.12); color: #28c76f; }
+  &.status-bounced { background: rgba(234, 84, 85, 0.12); color: #ea5455; }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.pdc-row {
+  &:hover {
+    .receipt-badge {
+      background: #fff;
+      color: $p-accent;
     }
   }
+}
 
-  .status-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    .status-chip {
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 600;
-      width: fit-content;
-
-      &.pending { background: rgba($warning, 0.1); color: $warning; }
-      &.cleared { background: rgba($success, 0.1); color: $success; }
-      &.bounced { background: rgba($danger, 0.1); color: $danger; }
-    }
-    .bounce-hint {
-      font-size: 10px;
-      color: $danger;
-      max-width: 120px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-
-  .action-buttons-inline {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-
-    .clear-btn { color: $success; &:hover { background: rgba($success, 0.1); } }
-    .bounce-btn { color: $danger; &:hover { background: rgba($danger, 0.1); } }
-  }
-
-  .done-icon {
-    &.cleared { color: $success; }
-    &.bounced { color: $danger; }
-    opacity: 0.7;
-  }
-
-  .row-bounced {
-    background-color: rgba($danger, 0.02) !important;
-  }
+.empty-state {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #b9b9c3;
+  mat-icon { font-size: 48px; width: 48px; height: 48px; margin-bottom: 12px; }
 }

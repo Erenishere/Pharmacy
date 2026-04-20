@@ -1,0 +1,210 @@
+// ============================================
+// CARD MIXINS
+// ============================================
+// Standardized card styles with consistent padding,
+// radius, and shadows for premium appearance.
+// ============================================
+
+// ============================================
+// BASE CARD MIXIN
+// ============================================
+@mixin card-base {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+// ============================================
+// CARD PADDING
+// ============================================
+@mixin card-padding {
+  padding: var(--space-6);
+}
+
+// ============================================
+// CARD HEADER
+// ============================================
+@mixin card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-6) var(--space-6) var(--space-4);
+  border-bottom: none;
+  
+  .card-title,
+  mat-card-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    
+    mat-icon {
+      color: var(--color-primary);
+    }
+  }
+  
+  .card-subtitle,
+  mat-card-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin-top: var(--space-1);
+  }
+}
+
+// ============================================
+// CARD BODY
+// ============================================
+@mixin card-body {
+  padding: 0 var(--space-6) var(--space-6);
+}
+
+// ============================================
+// CARD FOOTER
+// ============================================
+@mixin card-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-bg-page);
+}
+
+// ============================================
+// LIST CARD (for data tables)
+// ============================================
+@mixin list-card {
+  @include card-base;
+  margin-bottom: var(--space-4);
+  
+  mat-card-header {
+    @include card-header;
+    padding: var(--space-6) var(--space-6) 0;
+    margin-bottom: var(--space-4);
+  }
+  
+  mat-card-content {
+    @include card-body;
+    padding: 0 0 var(--space-6);
+  }
+}
+
+// ============================================
+// STAT CARD (for dashboards)
+// ============================================
+@mixin stat-card {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.05);
+  transition: all var(--transition-slow);
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  
+  // Left accent bar
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--stat-color, var(--color-bg-page));
+    opacity: 0.8;
+  }
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: rgba(var(--color-primary-rgb), 0.2);
+  }
+  
+  // Icon wrapper
+  .stat-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-xl);
+    background: rgba(var(--color-primary-rgb), 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-base);
+    
+    mat-icon {
+      color: var(--stat-color, var(--color-primary));
+      font-size: var(--font-size-2xl);
+      width: 24px;
+      height: 24px;
+    }
+  }
+  
+  // Data section
+  .stat-data {
+    display: flex;
+    flex-direction: column;
+    
+    .label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-muted);
+      margin-bottom: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .value {
+      font-size: 22px;
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+      line-height: 1;
+    }
+  }
+  
+  // Color variants
+  &.primary .stat-icon-wrapper { background: rgba(var(--color-primary-rgb), 0.1); }
+  &.info .stat-icon-wrapper { background: var(--color-info-light); }
+  &.warning .stat-icon-wrapper { background: var(--color-warning-light); }
+  &.success .stat-icon-wrapper { background: var(--color-success-light); }
+  &.danger .stat-icon-wrapper { background: var(--color-danger-light); }
+}
+
+// ============================================
+// INTERACTIVE CARD
+// ============================================
+@mixin card-interactive {
+  @include card-base;
+  cursor: pointer;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: rgba(var(--color-primary-rgb), 0.3);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// ============================================
+// MATERIAL CARD OVERRIDES
+// ============================================
+@mixin material-card-overrides {
+  .mat-mdc-card {
+    background-color: var(--color-bg-card) !important;
+    --mdc-elevated-card-container-color: var(--color-bg-card) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-card) !important;
+  }
+}

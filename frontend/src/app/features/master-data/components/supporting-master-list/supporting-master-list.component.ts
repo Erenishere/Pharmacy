@@ -11,6 +11,9 @@ import { MatChipsModule } from '@angular/material/chips';
 import { SupportingMasterService } from '../../services/supporting-master.service';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { MasterDataFormDialogComponent } from '../master-data-form-dialog/master-data-form-dialog.component';
+import { DataTableColumn, TableActionClickEvent } from '../../../../shared/models/data-table.model';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+
 
 @Component({
   selector: 'app-supporting-master-list',
@@ -23,537 +26,50 @@ import { MasterDataFormDialogComponent } from '../master-data-form-dialog/master
     MatTabsModule,
     MatTableModule,
     MatDialogModule,
-    MatChipsModule
+    MatChipsModule,
+    DataTableComponent
   ],
-  template: `
-    <div class="supporting-master-container">
-      <div class="page-header">
-        <div class="header-text">
-          <h1>Supporting Master Data</h1>
-          <p>Manage towns, areas, categories, transporters, and more</p>
-        </div>
-      </div>
-
-      <div class="main-card">
-        <mat-tab-group #tabGroup [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="onTabChange($event)">
-          <!-- Transporters -->
-          <mat-tab label="Transporters">
-            <div class="tab-content">
-              <div class="table-actions">
-                <h3>Transporters List</h3>
-                <button mat-raised-button class="add-btn" (click)="openForm('transporter')">
-                  <mat-icon>add</mat-icon> Add Transporter
-                </button>
-              </div>
-              
-              <div class="table-container">
-                <table mat-table [dataSource]="transporters" class="full-width">
-                  <ng-container matColumnDef="code">
-                    <th mat-header-cell *matHeaderCellDef>Code</th>
-                    <td mat-cell *matCellDef="let item" class="code-cell">{{item.code}}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="name">
-                    <th mat-header-cell *matHeaderCellDef>Name</th>
-                    <td mat-cell *matCellDef="let item" class="name-cell">{{item.name}}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="contact">
-                    <th mat-header-cell *matHeaderCellDef>Contact Info</th>
-                    <td mat-cell *matCellDef="let item">
-                      <div class="contact-cell">
-                        <span><mat-icon>person</mat-icon> {{item.contactPerson || 'N/A'}}</span>
-                        <span><mat-icon>phone</mat-icon> {{item.phone || 'N/A'}}</span>
-                      </div>
-                    </td>
-                  </ng-container>
-                  <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef>Status</th>
-                    <td mat-cell *matCellDef="let item">
-                      <span class="status-badge" [class.active]="item.isActive">
-                        {{item.isActive ? 'Active' : 'Inactive'}}
-                      </span>
-                    </td>
-                  </ng-container>
-                  <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef>Actions</th>
-                    <td mat-cell *matCellDef="let item">
-                      <button mat-icon-button class="edit-btn" (click)="openForm('transporter', item)">
-                        <mat-icon>edit</mat-icon>
-                      </button>
-                    </td>
-                  </ng-container>
-
-                  <tr mat-header-row *matHeaderRowDef="['code', 'name', 'contact', 'status', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['code', 'name', 'contact', 'status', 'actions'];"></tr>
-                </table>
-              </div>
-            </div>
-          </mat-tab>
-
-          <!-- Claim Accounts -->
-          <mat-tab label="Claim Accounts">
-            <div class="tab-content">
-              <div class="table-actions">
-                <h3>Claim Accounts</h3>
-                <button mat-raised-button class="add-btn" (click)="openForm('claim-account')">
-                  <mat-icon>add</mat-icon> Add Claim Account
-                </button>
-              </div>
-              
-              <div class="table-container">
-                <table mat-table [dataSource]="claimAccounts" class="full-width">
-                  <ng-container matColumnDef="name">
-                    <th mat-header-cell *matHeaderCellDef>Account Name</th>
-                    <td mat-cell *matCellDef="let item" class="name-cell">{{item.name}}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef>Status</th>
-                    <td mat-cell *matCellDef="let item">
-                      <span class="status-badge" [class.active]="item.isActive">
-                        {{item.isActive ? 'Active' : 'Inactive'}}
-                      </span>
-                    </td>
-                  </ng-container>
-                  <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef>Actions</th>
-                    <td mat-cell *matCellDef="let item">
-                      <button mat-icon-button class="edit-btn" (click)="openForm('claim-account', item)">
-                        <mat-icon>edit</mat-icon>
-                      </button>
-                    </td>
-                  </ng-container>
-
-                  <tr mat-header-row *matHeaderRowDef="['name', 'status', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['name', 'status', 'actions'];"></tr>
-                </table>
-              </div>
-            </div>
-          </mat-tab>
-
-          <!-- Dimensions -->
-          <mat-tab label="Dimensions/Branches">
-            <div class="tab-content">
-              <div class="table-actions">
-                <h3>Dimension Branch ID Locations</h3>
-                <button mat-raised-button class="add-btn" (click)="openForm('dimension')">
-                  <mat-icon>add</mat-icon> Add Dimension Location
-                </button>
-              </div>
-              
-              <div class="table-container">
-                <table mat-table [dataSource]="dimensions" class="full-width">
-                  <ng-container matColumnDef="code">
-                    <th mat-header-cell *matHeaderCellDef>Code</th>
-                    <td mat-cell *matCellDef="let item" class="code-cell">{{item.code}}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="name">
-                    <th mat-header-cell *matHeaderCellDef>Dimension Name</th>
-                    <td mat-cell *matCellDef="let item" class="name-cell">{{item.name}}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="type">
-                    <th mat-header-cell *matHeaderCellDef>Type</th>
-                    <td mat-cell *matCellDef="let item">{{ formatDimensionType(item.type) }}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="parent">
-                    <th mat-header-cell *matHeaderCellDef>Parent Location</th>
-                    <td mat-cell *matCellDef="let item">
-                      {{ item.parentDimensionId?.code ? (item.parentDimensionId.code + ' - ' + item.parentDimensionId.name) : 'Root' }}
-                    </td>
-                  </ng-container>
-                  <ng-container matColumnDef="description">
-                    <th mat-header-cell *matHeaderCellDef>Description</th>
-                    <td mat-cell *matCellDef="let item">{{item.description || 'N/A'}}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef>Status</th>
-                    <td mat-cell *matCellDef="let item">
-                      <span class="status-badge" [class.active]="item.isActive">
-                        {{item.isActive ? 'Active' : 'Inactive'}}
-                      </span>
-                    </td>
-                  </ng-container>
-                  <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef>Actions</th>
-                    <td mat-cell *matCellDef="let item">
-                      <button mat-icon-button class="edit-btn" (click)="openForm('dimension', item)">
-                        <mat-icon>edit</mat-icon>
-                      </button>
-                    </td>
-                  </ng-container>
-
-                  <tr mat-header-row *matHeaderRowDef="['code', 'name', 'type', 'parent', 'description', 'status', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['code', 'name', 'type', 'parent', 'description', 'status', 'actions'];"></tr>
-                </table>
-              </div>
-            </div>
-          </mat-tab>
-
-          <!-- Salesmen -->
-          <mat-tab label="Salesmen">
-            <div class="tab-content">
-              <div class="table-actions">
-                <h3>Salesmen Management</h3>
-                <button mat-raised-button class="add-btn" (click)="openForm('salesman')">
-                  <mat-icon>add</mat-icon> Add Salesman
-                </button>
-              </div>
-              
-              <div class="table-container">
-                <table mat-table [dataSource]="salesmen" class="full-width">
-                  <ng-container matColumnDef="code">
-                    <th mat-header-cell *matHeaderCellDef>Code</th>
-                    <td mat-cell *matCellDef="let item" class="code-cell">{{item.code}}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="name">
-                    <th mat-header-cell *matHeaderCellDef>Name</th>
-                    <td mat-cell *matCellDef="let item" class="name-cell">{{item.name}}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="phone">
-                    <th mat-header-cell *matHeaderCellDef>Phone</th>
-                    <td mat-cell *matCellDef="let item">{{item.phone || '-'}}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="cnic">
-                    <th mat-header-cell *matHeaderCellDef>CNIC</th>
-                    <td mat-cell *matCellDef="let item">{{item.cnic || '-'}}</td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef>Status</th>
-                    <td mat-cell *matCellDef="let item">
-                      <span class="status-badge" [class.active]="item.isActive">
-                        {{item.isActive ? 'Active' : 'Inactive'}}
-                      </span>
-                    </td>
-                  </ng-container>
-                  <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef>Actions</th>
-                    <td mat-cell *matCellDef="let item">
-                      <button mat-icon-button class="edit-btn" (click)="openForm('salesman', item)">
-                        <mat-icon>edit</mat-icon>
-                      </button>
-                    </td>
-                  </ng-container>
-
-                  <tr mat-header-row *matHeaderRowDef="['code', 'name', 'phone', 'cnic', 'status', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['code', 'name', 'phone', 'cnic', 'status', 'actions'];"></tr>
-                </table>
-              </div>
-            </div>
-          </mat-tab>
-
-
-          <!-- Account Heads -->
-          <mat-tab label="Account Heads">
-            <div class="tab-content">
-              <div class="table-actions">
-                <h3>Head Types & Account Heads</h3>
-                <button mat-raised-button class="add-btn" (click)="openForm('account-head')">
-                  <mat-icon>add</mat-icon> Add Account Head
-                </button>
-              </div>
-              <div class="table-container">
-                <table mat-table [dataSource]="accountHeads" class="full-width">
-                  <ng-container matColumnDef="code"><th mat-header-cell *matHeaderCellDef>Code</th><td mat-cell *matCellDef="let i" class="code-cell">{{i.code}}</td></ng-container>
-                  <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>Head Name</th><td mat-cell *matCellDef="let i" class="name-cell">{{i.name}}</td></ng-container>
-                  <ng-container matColumnDef="type"><th mat-header-cell *matHeaderCellDef>Head Type</th><td mat-cell *matCellDef="let i">{{i.type}}</td></ng-container>
-                  <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef>Actions</th><td mat-cell *matCellDef="let i">
-                    <button mat-icon-button class="edit-btn" (click)="openForm('account-head', i)"><mat-icon>edit</mat-icon></button>
-                  </td></ng-container>
-                  <tr mat-header-row *matHeaderRowDef="['code', 'name', 'type', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['code', 'name', 'type', 'actions'];"></tr>
-                </table>
-              </div>
-            </div>
-          </mat-tab>
-
-          <!-- Schemes -->
-          <mat-tab label="Schemes">
-            <div class="tab-content">
-              <div class="table-actions">
-                <h3>Pharmaceutical Schemes</h3>
-                <button mat-raised-button class="add-btn" (click)="openForm('scheme')">
-                  <mat-icon>add</mat-icon> Add Scheme
-                </button>
-              </div>
-              <div class="table-container">
-                <table mat-table [dataSource]="schemes" class="full-width">
-                  <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>Scheme Name</th><td mat-cell *matCellDef="let i" class="name-cell">{{i.name}}</td></ng-container>
-                  <ng-container matColumnDef="description"><th mat-header-cell *matHeaderCellDef>Description</th><td mat-cell *matCellDef="let i">{{i.description}}</td></ng-container>
-                  <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef>Actions</th><td mat-cell *matCellDef="let i">
-                    <button mat-icon-button class="edit-btn" (click)="openForm('scheme', i)"><mat-icon>edit</mat-icon></button>
-                  </td></ng-container>
-                  <tr mat-header-row *matHeaderRowDef="['name', 'description', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['name', 'description', 'actions'];"></tr>
-                </table>
-              </div>
-            </div>
-          </mat-tab>
-
-          <!-- Towns -->
-          <mat-tab label="Towns">
-            <div class="tab-content">
-              <div class="table-actions">
-                <h3>Towns Management</h3>
-                <button mat-raised-button class="add-btn" (click)="openForm('town')">
-                  <mat-icon>add</mat-icon> Add Town
-                </button>
-              </div>
-              <div class="table-container">
-                <table mat-table [dataSource]="towns" class="full-width">
-                  <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>Town Name</th><td mat-cell *matCellDef="let i" class="name-cell">{{i.name}}</td></ng-container>
-                  <ng-container matColumnDef="region"><th mat-header-cell *matHeaderCellDef>Region</th><td mat-cell *matCellDef="let i">{{i.region || '-'}}</td></ng-container>
-                  <ng-container matColumnDef="status"><th mat-header-cell *matHeaderCellDef>Status</th><td mat-cell *matCellDef="let i">
-                    <span class="status-badge" [class.active]="i.isActive">{{i.isActive ? 'Active' : 'Inactive'}}</span>
-                  </td></ng-container>
-                  <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef>Actions</th><td mat-cell *matCellDef="let i">
-                    <button mat-icon-button class="edit-btn" (click)="openForm('town', i)"><mat-icon>edit</mat-icon></button>
-                  </td></ng-container>
-                  <tr mat-header-row *matHeaderRowDef="['name', 'region', 'status', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['name', 'region', 'status', 'actions'];"></tr>
-                </table>
-              </div>
-            </div>
-          </mat-tab>
-
-          <!-- Areas -->
-          <mat-tab label="Areas">
-            <div class="tab-content">
-              <div class="table-actions">
-                <h3>Areas & Routes</h3>
-                <button mat-raised-button class="add-btn" (click)="openForm('area')">
-                  <mat-icon>add</mat-icon> Add Area
-                </button>
-              </div>
-              <div class="table-container">
-                <table mat-table [dataSource]="areas" class="full-width">
-                  <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>Area Name</th><td mat-cell *matCellDef="let i" class="name-cell">{{i.name}}</td></ng-container>
-                  <ng-container matColumnDef="town"><th mat-header-cell *matHeaderCellDef>Town</th><td mat-cell *matCellDef="let i">{{i.townId?.name || '-'}}</td></ng-container>
-                  <ng-container matColumnDef="status"><th mat-header-cell *matHeaderCellDef>Status</th><td mat-cell *matCellDef="let i">
-                    <span class="status-badge" [class.active]="i.isActive">{{i.isActive ? 'Active' : 'Inactive'}}</span>
-                  </td></ng-container>
-                  <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef>Actions</th><td mat-cell *matCellDef="let i">
-                    <button mat-icon-button class="edit-btn" (click)="openForm('area', i)"><mat-icon>edit</mat-icon></button>
-                  </td></ng-container>
-                  <tr mat-header-row *matHeaderRowDef="['name', 'town', 'status', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['name', 'town', 'status', 'actions'];"></tr>
-                </table>
-              </div>
-            </div>
-          </mat-tab>
-
-          <!-- Customer Types -->
-          <mat-tab label="Customer Types">
-            <div class="tab-content">
-              <div class="table-actions">
-                <h3>Customer Types</h3>
-                <button mat-raised-button class="add-btn" (click)="openForm('customer-type')">
-                  <mat-icon>add</mat-icon> Add Customer Type
-                </button>
-              </div>
-              <div class="table-container">
-                <table mat-table [dataSource]="customerTypes" class="full-width">
-                  <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>Type Name</th><td mat-cell *matCellDef="let i" class="name-cell">{{i.name}}</td></ng-container>
-                  <ng-container matColumnDef="description"><th mat-header-cell *matHeaderCellDef>Description</th><td mat-cell *matCellDef="let i">{{i.description || '-'}}</td></ng-container>
-                  <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef>Actions</th><td mat-cell *matCellDef="let i">
-                    <button mat-icon-button class="edit-btn" (click)="openForm('customer-type', i)"><mat-icon>edit</mat-icon></button>
-                  </td></ng-container>
-                  <tr mat-header-row *matHeaderRowDef="['name', 'description', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['name', 'description', 'actions'];"></tr>
-                </table>
-              </div>
-            </div>
-          </mat-tab>
-
-          <!-- Companies -->
-          <mat-tab label="Companies">
-            <div class="tab-content">
-              <div class="table-actions">
-                <h3>Companies</h3>
-                <button mat-raised-button class="add-btn" (click)="openForm('company')">
-                  <mat-icon>add</mat-icon> Add Company
-                </button>
-              </div>
-              <div class="table-container">
-                <table mat-table [dataSource]="companies" class="full-width">
-                  <ng-container matColumnDef="code"><th mat-header-cell *matHeaderCellDef>Code</th><td mat-cell *matCellDef="let i" class="code-cell">{{i.code}}</td></ng-container>
-                  <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>Name</th><td mat-cell *matCellDef="let i" class="name-cell">{{i.name}}</td></ng-container>
-                  <ng-container matColumnDef="groupType"><th mat-header-cell *matHeaderCellDef>Group Type</th><td mat-cell *matCellDef="let i">{{i.groupType || '-'}}</td></ng-container>
-                  <ng-container matColumnDef="status"><th mat-header-cell *matHeaderCellDef>Status</th><td mat-cell *matCellDef="let i"><span class="status-badge" [class.active]="i.isActive">{{i.isActive ? 'Active' : 'Inactive'}}</span></td></ng-container>
-                  <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef>Actions</th><td mat-cell *matCellDef="let i"><button mat-icon-button class="edit-btn" (click)="openForm('company', i)"><mat-icon>edit</mat-icon></button></td></ng-container>
-                  <tr mat-header-row *matHeaderRowDef="['code', 'name', 'groupType', 'status', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['code', 'name', 'groupType', 'status', 'actions'];"></tr>
-                </table>
-              </div>
-            </div>
-          </mat-tab>
-
-          <!-- Company Groups -->
-          <mat-tab label="Company Groups">
-            <div class="tab-content">
-              <div class="table-actions">
-                <h3>Company Groups</h3>
-                <button mat-raised-button class="add-btn" (click)="openForm('company-group')">
-                  <mat-icon>add</mat-icon> Add Company Group
-                </button>
-              </div>
-              <div class="table-container">
-                <table mat-table [dataSource]="companyGroups" class="full-width">
-                  <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>Group Name</th><td mat-cell *matCellDef="let i" class="name-cell">{{i.name}}</td></ng-container>
-                  <ng-container matColumnDef="company"><th mat-header-cell *matHeaderCellDef>Company</th><td mat-cell *matCellDef="let i">{{i.companyId?.name || '-'}}</td></ng-container>
-                  <ng-container matColumnDef="description"><th mat-header-cell *matHeaderCellDef>Description</th><td mat-cell *matCellDef="let i">{{i.description || '-'}}</td></ng-container>
-                  <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef>Actions</th><td mat-cell *matCellDef="let i"><button mat-icon-button class="edit-btn" (click)="openForm('company-group', i)"><mat-icon>edit</mat-icon></button></td></ng-container>
-                  <tr mat-header-row *matHeaderRowDef="['name', 'company', 'description', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['name', 'company', 'description', 'actions'];"></tr>
-                </table>
-              </div>
-            </div>
-          </mat-tab>
-
-          <!-- Formulas -->
-          <mat-tab label="Formulas">
-            <div class="tab-content">
-              <div class="table-actions">
-                <h3>Formulas</h3>
-                <button mat-raised-button class="add-btn" (click)="openForm('formula')">
-                  <mat-icon>add</mat-icon> Add Formula
-                </button>
-              </div>
-              <div class="table-container">
-                <table mat-table [dataSource]="formulas" class="full-width">
-                  <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>Formula Name</th><td mat-cell *matCellDef="let i" class="name-cell">{{i.name}}</td></ng-container>
-                  <ng-container matColumnDef="composition"><th mat-header-cell *matHeaderCellDef>Composition</th><td mat-cell *matCellDef="let i">{{i.composition || '-'}}</td></ng-container>
-                  <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef>Actions</th><td mat-cell *matCellDef="let i"><button mat-icon-button class="edit-btn" (click)="openForm('formula', i)"><mat-icon>edit</mat-icon></button></td></ng-container>
-                  <tr mat-header-row *matHeaderRowDef="['name', 'composition', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['name', 'composition', 'actions'];"></tr>
-                </table>
-              </div>
-            </div>
-          </mat-tab>
-
-          <!-- Formula Sizes -->
-          <mat-tab label="Formula Sizes">
-            <div class="tab-content">
-              <div class="table-actions">
-                <h3>Formula Sizes</h3>
-                <button mat-raised-button class="add-btn" (click)="openForm('formula-size')">
-                  <mat-icon>add</mat-icon> Add Size
-                </button>
-              </div>
-              <div class="table-container">
-                <table mat-table [dataSource]="formulaSizes" class="full-width">
-                  <ng-container matColumnDef="formula"><th mat-header-cell *matHeaderCellDef>Formula</th><td mat-cell *matCellDef="let i">{{i.formulaId?.name || '-'}}</td></ng-container>
-                  <ng-container matColumnDef="size"><th mat-header-cell *matHeaderCellDef>Size</th><td mat-cell *matCellDef="let i" class="name-cell">{{i.size}}</td></ng-container>
-                  <ng-container matColumnDef="strength"><th mat-header-cell *matHeaderCellDef>Strength</th><td mat-cell *matCellDef="let i">{{i.strength || '-'}}</td></ng-container>
-                  <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef>Actions</th><td mat-cell *matCellDef="let i"><button mat-icon-button class="edit-btn" (click)="openForm('formula-size', i)"><mat-icon>edit</mat-icon></button></td></ng-container>
-                  <tr mat-header-row *matHeaderRowDef="['formula', 'size', 'strength', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['formula', 'size', 'strength', 'actions'];"></tr>
-                </table>
-              </div>
-            </div>
-          </mat-tab>
-
-          <!-- Categories -->
-          <mat-tab label="Categories">
-            <div class="tab-content">
-              <div class="table-actions">
-                <h3>Categories</h3>
-                <button mat-raised-button class="add-btn" (click)="openForm('category')">
-                  <mat-icon>add</mat-icon> Add Category
-                </button>
-              </div>
-              <div class="table-container">
-                <table mat-table [dataSource]="categories" class="full-width">
-                  <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>Category Name</th><td mat-cell *matCellDef="let i" class="name-cell">{{i.name}}</td></ng-container>
-                  <ng-container matColumnDef="description"><th mat-header-cell *matHeaderCellDef>Description</th><td mat-cell *matCellDef="let i">{{i.description || '-'}}</td></ng-container>
-                  <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef>Actions</th><td mat-cell *matCellDef="let i"><button mat-icon-button class="edit-btn" (click)="openForm('category', i)"><mat-icon>edit</mat-icon></button></td></ng-container>
-                  <tr mat-header-row *matHeaderRowDef="['name', 'description', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['name', 'description', 'actions'];"></tr>
-                </table>
-              </div>
-            </div>
-          </mat-tab>
-
-          <!-- Sub Categories -->
-          <mat-tab label="Sub Categories">
-            <div class="tab-content">
-              <div class="table-actions">
-                <h3>Sub Categories</h3>
-                <button mat-raised-button class="add-btn" (click)="openForm('sub-category')">
-                  <mat-icon>add</mat-icon> Add Sub Category
-                </button>
-              </div>
-              <div class="table-container">
-                <table mat-table [dataSource]="subCategories" class="full-width">
-                  <ng-container matColumnDef="category"><th mat-header-cell *matHeaderCellDef>Category</th><td mat-cell *matCellDef="let i">{{i.categoryId?.name || '-'}}</td></ng-container>
-                  <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>Sub Category</th><td mat-cell *matCellDef="let i" class="name-cell">{{i.name}}</td></ng-container>
-                  <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef>Actions</th><td mat-cell *matCellDef="let i"><button mat-icon-button class="edit-btn" (click)="openForm('sub-category', i)"><mat-icon>edit</mat-icon></button></td></ng-container>
-                  <tr mat-header-row *matHeaderRowDef="['category', 'name', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['category', 'name', 'actions'];"></tr>
-                </table>
-              </div>
-            </div>
-          </mat-tab>
-
-          <!-- Business Types -->
-          <mat-tab label="Business Types">
-            <div class="tab-content">
-              <div class="table-actions">
-                <h3>Business Types</h3>
-                <button mat-raised-button class="add-btn" (click)="openForm('business-type')">
-                  <mat-icon>add</mat-icon> Add Business Type
-                </button>
-              </div>
-              <div class="table-container">
-                <table mat-table [dataSource]="businessTypes" class="full-width">
-                  <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>Type Name</th><td mat-cell *matCellDef="let i" class="name-cell">{{i.name}}</td></ng-container>
-                  <ng-container matColumnDef="description"><th mat-header-cell *matHeaderCellDef>Description</th><td mat-cell *matCellDef="let i">{{i.description || '-'}}</td></ng-container>
-                  <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef>Actions</th><td mat-cell *matCellDef="let i"><button mat-icon-button class="edit-btn" (click)="openForm('business-type', i)"><mat-icon>edit</mat-icon></button></td></ng-container>
-                  <tr mat-header-row *matHeaderRowDef="['name', 'description', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['name', 'description', 'actions'];"></tr>
-                </table>
-              </div>
-            </div>
-          </mat-tab>
-        </mat-tab-group>
-      </div>
-    </div>
-  `,
+  templateUrl: './supporting-master-list.component.html',
   styles: [`
-    .supporting-master-container { padding: 24px; max-width: 1400px; margin: 0 auto; background-color: #f8f7fa; min-height: 100vh; }
-    .page-header { margin-bottom: 24px; }
-    .header-text h1 { margin: 0; font-size: 24px; font-weight: 600; color: #5e5873; border-left: 4px solid #867cf0; padding-left: 12px; }
-    .header-text p { margin: 4px 0 0 16px; color: #b8b8b8; font-size: 14px; }
-    .main-card { background: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); overflow: hidden; }
-    .tab-content { padding: 24px; }
-    .table-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .table-actions h3 { margin: 0; font-size: 18px; font-weight: 600; color: #5e5873; }
-    .add-btn { background: linear-gradient(118deg, #867cf0, rgba(134, 124, 240, 0.8)) !important; color: #fff !important; box-shadow: 0 0 10px 1px rgba(134, 124, 240, 0.4) !important; font-weight: 500; transition: all 0.25s ease; }
-    .add-btn:hover { box-shadow: 0 0 14px 2px rgba(134, 124, 240, 0.6) !important; transform: translateY(-1px); }
-    .table-container { background: transparent; }
-    .full-width { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
-    ::ng-deep .mat-mdc-header-row { background-color: #ffffff !important; height: 48px; }
-    ::ng-deep .mat-mdc-header-cell { color: #5e5873 !important; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e9ecef !important; background-color: #ffffff !important; }
-    ::ng-deep .mat-mdc-row { background-color: #ffffff !important; border: 1px solid #e9ecef !important; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important; transition: all 0.25s ease; margin-bottom: 8px; }
-    ::ng-deep .mat-mdc-row:hover { background-color: #867cf0 !important; border-color: #867cf0 !important; box-shadow: 0 8px 24px rgba(134, 124, 240, 0.35) !important; transform: translateY(-2px); }
-    ::ng-deep .mat-mdc-row:hover .mat-mdc-cell, ::ng-deep .mat-mdc-row:hover .code-cell, ::ng-deep .mat-mdc-row:hover .name-cell, ::ng-deep .mat-mdc-row:hover mat-icon, ::ng-deep .mat-mdc-row:hover .contact-cell span { color: #ffffff !important; }
-    ::ng-deep .mat-mdc-row:hover .status-badge { border-color: #ffffff !important; color: #ffffff !important; }
-    ::ng-deep .mat-mdc-cell { color: #6e6b7b !important; font-size: 14px; padding: 12px 16px; border: none !important; background-color: transparent !important; }
-    .code-cell { font-family: monospace; font-weight: 600; color: #867cf0 !important; }
-    .name-cell { font-weight: 600; color: #5e5873 !important; }
-    .contact-cell { display: flex; flex-direction: column; gap: 4px; }
-    .contact-cell span { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #6e6b7b !important; }
-    .contact-cell mat-icon { font-size: 16px; width: 16px; height: 16px; color: #867cf0 !important; }
-    .status-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; border: 1px solid #ea5455; color: #ea5455; }
-    .status-badge.active { border-color: #28c76f; color: #28c76f; }
-    .edit-btn { color: #7367f0 !important; }
-    ::ng-deep .mat-mdc-tab-header { background-color: #ffffff !important; border-bottom: 1px solid #ebe9f1 !important; }
-    ::ng-deep .mat-mdc-tab .mdc-tab__text-label { color: #6e6b7b !important; font-weight: 500; }
-    ::ng-deep .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label { color: #867cf0 !important; }
-    ::ng-deep .mat-mdc-tab-indicator-active-indicator-color { background-color: #867cf0 !important; }
-    ::ng-deep .mat-mdc-table { background-color: transparent !important; }
+    @import 'styles/shared-list-styles';
+    
+    .list-page-container {
+      @include page-container;
+    }
+
+    .list-page-header {
+      @include page-header;
+    }
+
+    .list-page-card {
+      @include list-card;
+      overflow: hidden;
+    }
+
+    .table-actions {
+      padding: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ebe9f1;
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #5e5873;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        mat-icon {
+          color: #7367f0;
+        }
+      }
+    }
   `]
 })
-export class SupportingMasterListComponent implements OnInit, AfterViewInit {
-  @ViewChild('tabGroup') tabGroup!: MatTabGroup;
+export class SupportingMasterListComponent implements OnInit {
 
   public transporters: any[] = [];
   public claimAccounts: any[] = [];
@@ -573,26 +89,137 @@ export class SupportingMasterListComponent implements OnInit, AfterViewInit {
   public subCategories: any[] = [];
   public businessTypes: any[] = [];
 
-  selectedTabIndex = 0;
+  currentTab: string = 'transporters';
 
-  private tabMapping: { [key: string]: number } = {
-    'transporters': 0,
-    'claim-accounts': 1,
-    'dimensions': 2,
-    'salesmen': 3,
-    'account-heads': 4,
-    'schemes': 5,
-    'towns': 6,
-    'areas': 7,
-    'customer-types': 8,
-    'companies': 9,
-    'company-groups': 10,
-    'formulas': 11,
-    'formula-sizes': 12,
-    'categories': 13,
-    'sub-categories': 14,
-    'business-types': 15
+  private tabMapping: { [key: string]: boolean } = {
+    'transporters': true,
+    'claim-accounts': true,
+    'dimensions': true,
+    'salesmen': true,
+    'account-heads': true,
+    'schemes': true,
+    'towns': true,
+    'areas': true,
+    'customer-types': true,
+    'companies': true,
+    'company-groups': true,
+    'formulas': true,
+    'formula-sizes': true,
+    'categories': true,
+    'sub-categories': true,
+    'business-types': true
   };
+
+  // ── Column Definitions ───────────────────────────────────
+  transporterCols: DataTableColumn[] = [
+    { key: 'code', label: 'Code', getCellClass: (row: any) => 'code-cell' },
+    { key: 'name', label: 'Name', getCellClass: (row: any) => 'name-cell' },
+    { key: 'contact', label: 'Contact', getValue: (row: any) => row.contactPerson || 'N/A' },
+    { key: 'phone', label: 'Phone', getValue: (row: any) => row.phone || 'N/A' },
+    { key: 'status', label: 'Status', getValue: (row: any) => row.isActive ? 'Active' : 'Inactive' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [{ icon: 'edit', label: 'Edit', actionKey: 'edit' }] }
+  ];
+
+  claimAccountCols: DataTableColumn[] = [
+    { key: 'name', label: 'Account Name', getCellClass: (row: any) => 'name-cell' },
+    { key: 'status', label: 'Status', getValue: (row: any) => row.isActive ? 'Active' : 'Inactive' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [{ icon: 'edit', label: 'Edit', actionKey: 'edit' }] }
+  ];
+
+  dimensionCols: DataTableColumn[] = [
+    { key: 'code', label: 'Code', getCellClass: (row: any) => 'code-cell' },
+    { key: 'name', label: 'Dimension Name', getCellClass: (row: any) => 'name-cell' },
+    { key: 'type', label: 'Type', getValue: (row: any) => this.formatDimensionType(row.type) },
+    { key: 'parent', label: 'Parent Location', getValue: (row: any) => row.parentDimensionId?.code ? (row.parentDimensionId.code + ' - ' + row.parentDimensionId.name) : 'Root' },
+    { key: 'status', label: 'Status', getValue: (row: any) => row.isActive ? 'Active' : 'Inactive' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [{ icon: 'edit', label: 'Edit', actionKey: 'edit' }] }
+  ];
+
+  salesmanCols: DataTableColumn[] = [
+    { key: 'code', label: 'Code', getCellClass: (row: any) => 'code-cell' },
+    { key: 'name', label: 'Name', getCellClass: (row: any) => 'name-cell' },
+    { key: 'phone', label: 'Phone', getValue: (row: any) => row.phone || '-' },
+    { key: 'cnic', label: 'CNIC', getValue: (row: any) => row.cnic || '-' },
+    { key: 'status', label: 'Status', getValue: (row: any) => row.isActive ? 'Active' : 'Inactive' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [{ icon: 'edit', label: 'Edit', actionKey: 'edit' }] }
+  ];
+
+  accountHeadCols: DataTableColumn[] = [
+    { key: 'code', label: 'Code', getCellClass: (row: any) => 'code-cell' },
+    { key: 'name', label: 'Head Name', getCellClass: (row: any) => 'name-cell' },
+    { key: 'type', label: 'Head Type' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [{ icon: 'edit', label: 'Edit', actionKey: 'edit' }] }
+  ];
+
+  schemeCols: DataTableColumn[] = [
+    { key: 'name', label: 'Scheme Name', getCellClass: (row: any) => 'name-cell' },
+    { key: 'description', label: 'Description' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [{ icon: 'edit', label: 'Edit', actionKey: 'edit' }] }
+  ];
+
+  townCols: DataTableColumn[] = [
+    { key: 'name', label: 'Town Name', getCellClass: (row: any) => 'name-cell' },
+    { key: 'region', label: 'Region', getValue: (row: any) => row.region || '-' },
+    { key: 'status', label: 'Status', getValue: (row: any) => row.isActive ? 'Active' : 'Inactive' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [{ icon: 'edit', label: 'Edit', actionKey: 'edit' }] }
+  ];
+
+  areaCols: DataTableColumn[] = [
+    { key: 'name', label: 'Area Name', getCellClass: (row: any) => 'name-cell' },
+    { key: 'town', label: 'Town', getValue: (row: any) => row.townId?.name || '-' },
+    { key: 'status', label: 'Status', getValue: (row: any) => row.isActive ? 'Active' : 'Inactive' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [{ icon: 'edit', label: 'Edit', actionKey: 'edit' }] }
+  ];
+
+  customerTypeCols: DataTableColumn[] = [
+    { key: 'name', label: 'Type Name', getCellClass: (row: any) => 'name-cell' },
+    { key: 'description', label: 'Description' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [{ icon: 'edit', label: 'Edit', actionKey: 'edit' }] }
+  ];
+
+  companyCols: DataTableColumn[] = [
+    { key: 'code', label: 'Code', getCellClass: (row: any) => 'code-cell' },
+    { key: 'name', label: 'Name', getCellClass: (row: any) => 'name-cell' },
+    { key: 'groupType', label: 'Group Type', getValue: (row: any) => row.groupType || '-' },
+    { key: 'status', label: 'Status', getValue: (row: any) => row.isActive ? 'Active' : 'Inactive' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [{ icon: 'edit', label: 'Edit', actionKey: 'edit' }] }
+  ];
+
+  companyGroupCols: DataTableColumn[] = [
+    { key: 'name', label: 'Group Name', getCellClass: (row: any) => 'name-cell' },
+    { key: 'company', label: 'Company', getValue: (row: any) => row.companyId?.name || '-' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [{ icon: 'edit', label: 'Edit', actionKey: 'edit' }] }
+  ];
+
+  formulaCols: DataTableColumn[] = [
+    { key: 'name', label: 'Formula Name', getCellClass: (row: any) => 'name-cell' },
+    { key: 'composition', label: 'Composition' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [{ icon: 'edit', label: 'Edit', actionKey: 'edit' }] }
+  ];
+
+  formulaSizeCols: DataTableColumn[] = [
+    { key: 'formula', label: 'Formula', getValue: (row: any) => row.formulaId?.name || '-' },
+    { key: 'size', label: 'Size', getCellClass: (row: any) => 'name-cell' },
+    { key: 'strength', label: 'Strength', getValue: (row: any) => row.strength || '-' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [{ icon: 'edit', label: 'Edit', actionKey: 'edit' }] }
+  ];
+
+  categoryCols: DataTableColumn[] = [
+    { key: 'name', label: 'Category Name', getCellClass: (row: any) => 'name-cell' },
+    { key: 'description', label: 'Description' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [{ icon: 'edit', label: 'Edit', actionKey: 'edit' }] }
+  ];
+
+  subCategoryCols: DataTableColumn[] = [
+    { key: 'category', label: 'Category', getValue: (row: any) => row.categoryId?.name || '-' },
+    { key: 'name', label: 'Sub Category', getCellClass: (row: any) => 'name-cell' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [{ icon: 'edit', label: 'Edit', actionKey: 'edit' }] }
+  ];
+
+  businessTypeCols: DataTableColumn[] = [
+    { key: 'name', label: 'Type Name', getCellClass: (row: any) => 'name-cell' },
+    { key: 'actions', label: 'Actions', type: 'action', actions: [{ icon: 'edit', label: 'Edit', actionKey: 'edit' }] }
+  ];
 
   constructor(
     private supportingService: SupportingMasterService,
@@ -601,20 +228,22 @@ export class SupportingMasterListComponent implements OnInit, AfterViewInit {
     private route: ActivatedRoute
   ) { }
 
+  onTableAction(event: TableActionClickEvent, type: string): void {
+    if (event.action === 'edit') this.openForm(type, event.row);
+  }
+
+
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       const tab = params['tab'];
       if (tab && this.tabMapping.hasOwnProperty(tab)) {
-        this.selectedTabIndex = this.tabMapping[tab];
+        this.currentTab = tab;
         this.loadTabData(tab);
       } else {
-        this.loadTransporters();
+        this.currentTab = 'company-groups';
+        this.loadCompanyGroups();
       }
     });
-  }
-
-  ngAfterViewInit() {
-    // Tab will be selected via selectedTabIndex binding
   }
 
   private loadTabData(tab: string): void {
