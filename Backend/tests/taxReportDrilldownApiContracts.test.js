@@ -25,6 +25,11 @@ describe('tax report drilldown API contracts', () => {
 
   const authHeaders = () => ({ Authorization: `Bearer ${token}` });
   const periodQuery = 'startDate=2024-05-01&endDate=2024-05-31';
+  const binaryParser = (res, callback) => {
+    const chunks = [];
+    res.on('data', (chunk) => chunks.push(chunk));
+    res.on('end', () => callback(null, Buffer.concat(chunks)));
+  };
 
   const expectNoPlaceholderText = (payload) => {
     expect(JSON.stringify(payload)).not.toMatch(/placeholder|mock|todo|coming soon|fake data/i);
@@ -385,5 +390,50 @@ describe('tax report drilldown API contracts', () => {
       grandTotal: 548,
     }));
     expectNoPlaceholderText(supplierWiseResponse.body);
+  });
+
+  it('exports the mounted tax report in csv, excel, and pdf formats', async () => {
+    const payload = {
+      startDate: '2024-05-01',
+      endDate: '2024-05-31',
+      taxType: 'ALL',
+    };
+
+    const csvResponse = await request(app)
+      .post('/api/v1/tax/report')
+      .set(authHeaders())
+      .send({ ...payload, format: 'csv' });
+
+    expect(csvResponse.status).toBe(200);
+    expect(csvResponse.headers['content-type']).toContain('text/csv');
+    expect(csvResponse.headers['content-disposition']).toContain('.csv');
+    expect(csvResponse.text).toContain('Invoice Number');
+    expect(csvResponse.text).toContain('SI-TAX-001');
+
+    const excelResponse = await request(app)
+      .post('/api/v1/tax/report')
+      .set(authHeaders())
+      .buffer(true)
+      .parse(binaryParser)
+      .send({ ...payload, format: 'excel' });
+
+    expect(excelResponse.status).toBe(200);
+    expect(excelResponse.headers['content-type']).toContain('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    expect(excelResponse.headers['content-disposition']).toContain('.xlsx');
+    expect(excelResponse.body).toBeInstanceOf(Buffer);
+    expect(excelResponse.body.length).toBeGreaterThan(0);
+
+    const pdfResponse = await request(app)
+      .post('/api/v1/tax/report')
+      .set(authHeaders())
+      .buffer(true)
+      .parse(binaryParser)
+      .send({ ...payload, format: 'pdf' });
+
+    expect(pdfResponse.status).toBe(200);
+    expect(pdfResponse.headers['content-type']).toContain('application/pdf');
+    expect(pdfResponse.headers['content-disposition']).toContain('.pdf');
+    expect(pdfResponse.body).toBeInstanceOf(Buffer);
+    expect(pdfResponse.body.length).toBeGreaterThan(0);
   });
 });

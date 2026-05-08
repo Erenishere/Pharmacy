@@ -426,14 +426,10 @@ exports.getStockSummary = async (req, res) => {
   try {
     const { warehouseId, categoryId } = req.query;
 
-    console.log('getStockSummary called with:', { warehouseId, categoryId });
-
     const summary = await inventoryReportService.getStockSummary(
       warehouseId,
       categoryId,
     );
-
-    console.log('Stock summary result:', summary);
 
     res.json({ success: true, data: summary });
   } catch (error) {

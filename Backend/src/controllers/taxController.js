@@ -1,5 +1,6 @@
 const taxService = require('../services/taxService');
 const Invoice = require('../models/Invoice');
+const exportService = require('../services/exportService');
 
 // Helper function to send success response
 const successResponse = (res, data, message = 'Success', statusCode = 200) => res.status(statusCode).json({
@@ -403,13 +404,14 @@ const generateTaxReport = async (req, res) => {
     const {
       startDate, endDate, taxType, format = 'json',
     } = req.body;
+    const normalizedFormat = String(format || 'json').toLowerCase();
 
     if (!startDate || !endDate) {
       return errorResponse(res, 'Start date and end date are required', 400, 'VALIDATION_ERROR');
     }
 
-    if (format !== 'json') {
-      return errorResponse(res, 'Tax report currently supports json format only', 501, 'TAX_REPORT_FORMAT_UNSUPPORTED');
+    if (!['json', 'csv', 'excel', 'pdf'].includes(normalizedFormat)) {
+      return errorResponse(res, 'Unsupported tax report format', 400, 'TAX_REPORT_FORMAT_UNSUPPORTED');
     }
 
     const start = new Date(startDate);
@@ -505,11 +507,90 @@ const generateTaxReport = async (req, res) => {
         incomeTaxTotal: invoice.totals?.incomeTaxTotal || 0,
         grandTotal: invoice.totals?.grandTotal || 0,
       })),
-      format,
+      format: normalizedFormat,
       generatedAt: new Date().toISOString(),
     };
 
-    return successResponse(res, report, 'Tax report generated successfully');
+    if (normalizedFormat === 'json') {
+      return successResponse(res, report, 'Tax report generated successfully');
+    }
+
+    const exportRows = report.invoices.length > 0
+      ? report.invoices.map((invoice) => ({
+        invoiceNumber: invoice.invoiceNumber,
+        invoiceType: invoice.type,
+        invoiceDate: invoice.invoiceDate,
+        partyCode: invoice.party?.code || '',
+        partyName: invoice.party?.name || '',
+        subtotal: invoice.subtotal,
+        totalTax: invoice.totalTax,
+        gst18Total: invoice.gst18Total,
+        gst4Total: invoice.gst4Total,
+        advanceTaxTotal: invoice.advanceTaxTotal,
+        nonFilerGSTTotal: invoice.nonFilerGSTTotal,
+        incomeTaxTotal: invoice.incomeTaxTotal,
+        grandTotal: invoice.grandTotal,
+      }))
+      : report.taxBreakdown.map((taxRow) => ({
+        invoiceNumber: '',
+        invoiceType: 'summary',
+        invoiceDate: '',
+        partyCode: '',
+        partyName: taxRow.label,
+        subtotal: 0,
+        totalTax: taxRow.amount,
+        gst18Total: taxRow.type === 'GST18' ? taxRow.amount : 0,
+        gst4Total: taxRow.type === 'GST4' ? taxRow.amount : 0,
+        advanceTaxTotal: taxRow.type === 'ADVANCE_TAX' ? taxRow.amount : 0,
+        nonFilerGSTTotal: taxRow.type === 'NON_FILER_GST' ? taxRow.amount : 0,
+        incomeTaxTotal: taxRow.type === 'INCOME_TAX' ? taxRow.amount : 0,
+        grandTotal: taxRow.amount,
+      }));
+
+    const exportColumns = [
+      { key: 'invoiceNumber', label: 'Invoice Number' },
+      { key: 'invoiceType', label: 'Invoice Type' },
+      { key: 'invoiceDate', label: 'Invoice Date' },
+      { key: 'partyCode', label: 'Party Code' },
+      { key: 'partyName', label: 'Party Name' },
+      { key: 'subtotal', label: 'Subtotal' },
+      { key: 'totalTax', label: 'Total Tax' },
+      { key: 'gst18Total', label: 'GST 18%' },
+      { key: 'gst4Total', label: 'GST 4%' },
+      { key: 'advanceTaxTotal', label: 'Advance Tax' },
+      { key: 'nonFilerGSTTotal', label: 'Non-Filer GST' },
+      { key: 'incomeTaxTotal', label: 'Income Tax' },
+      { key: 'grandTotal', label: 'Grand Total' },
+    ];
+
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filenameBase = `tax_report_${timestamp}`;
+
+    if (normalizedFormat === 'csv') {
+      const csv = exportService.exportToCSV(exportRows, exportColumns);
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${filenameBase}.csv"`);
+      return res.send(csv);
+    }
+
+    if (normalizedFormat === 'excel') {
+      const buffer = await exportService.exportToExcel(exportRows, exportColumns, 'Tax Report');
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filenameBase}.xlsx"`);
+      return res.send(buffer);
+    }
+
+    const pdfBuffer = await exportService.exportToPDF({
+      summary: report.summary,
+      data: exportRows,
+      columns: exportColumns,
+    }, {
+      title: `Tax Report (${report.taxType})`,
+      orientation: 'landscape',
+    });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filenameBase}.pdf"`);
+    return res.send(pdfBuffer);
   } catch (error) {
     console.error('Generate tax report error:', error);
     return errorResponse(res, error.message, 500, 'TAX_REPORT_ERROR');

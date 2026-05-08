@@ -21,7 +21,9 @@ const createCapitalEntry = async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Create capital entry error:', error);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error('Create capital entry error:', error);
+    }
     return res.status(400).json({
       success: false,
       error: {

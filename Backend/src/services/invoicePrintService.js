@@ -1,6 +1,7 @@
 const PDFDocument = require('pdfkit');
 const Invoice = require('../models/Invoice');
 const AppError = require('../utils/appError');
+const { isEmailConfigured, sendEmail } = require('./emailService');
 
 /**
  * Invoice Print Service
@@ -430,12 +431,47 @@ class InvoicePrintService {
       throw new Error('Customer email not found');
     }
 
-    await this.generateInvoicePDF(invoiceId);
+    if (!isEmailConfigured()) {
+      throw new AppError(
+        'Invoice email delivery is not configured. Set EMAIL_USER and EMAIL_PASS or use the print/download endpoint.',
+        501,
+      );
+    }
 
-    throw new AppError(
-      'Invoice email delivery is not configured. Use the print/download endpoint until SMTP settings are available.',
-      501,
-    );
+    const pdfBuffer = await this.generateInvoicePDF(invoiceId, emailOptions);
+    const invoiceNumber = invoice.invoiceNumber || invoiceId;
+    const customerName = invoice.customerId?.name || 'Customer';
+
+    const subject = emailOptions.subject || `Invoice ${invoiceNumber}`;
+    const text = emailOptions.message
+      || `Dear ${customerName},\n\nPlease find attached invoice ${invoiceNumber}.\n\nRegards,\nIndustraders`;
+    const html = emailOptions.html
+      || `
+        <p>Dear ${customerName},</p>
+        <p>Please find attached invoice <strong>${invoiceNumber}</strong>.</p>
+        <p>Regards,<br>Industraders</p>
+      `;
+
+    await sendEmail({
+      to: emailOptions.to || invoice.customerId.email,
+      subject,
+      text,
+      html,
+      attachments: [
+        {
+          filename: `invoice-${invoiceNumber}.pdf`,
+          content: pdfBuffer,
+          contentType: 'application/pdf',
+        },
+      ],
+    });
+
+    return {
+      delivered: true,
+      to: emailOptions.to || invoice.customerId.email,
+      invoiceId: invoice._id,
+      invoiceNumber,
+    };
   }
 
   /**
