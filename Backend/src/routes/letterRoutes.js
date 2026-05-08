@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const letterController = require('../controllers/letterController');
-const { authenticate } = require('../middleware/auth');
-const { authorize } = require('../middleware/rbac');
+const { authenticate, authorize } = require('../middleware/auth');
 
 router.post('/', authenticate, authorize(['admin', 'manager', 'accountant']), letterController.createLetter);
 router.get('/', authenticate, authorize(['admin', 'manager', 'accountant']), letterController.getLetters);

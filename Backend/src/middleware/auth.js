@@ -1,5 +1,6 @@
 const authService = require('../services/authService');
 const Response = require('../utils/response');
+const { normalizeRole, normalizeRoles } = require('../utils/roleUtils');
 
 /**
  * Middleware to authenticate JWT tokens
@@ -60,18 +61,24 @@ const authenticate = async (req, res, next) => {
  * Middleware to authorize based on user roles
  * @param {string|string[]} allowedRoles - Single role or array of allowed roles
  */
-const authorize = (allowedRoles) => (req, res, next) => {
+const authorize = (...allowedRolesInput) => (req, res, next) => {
   try {
     // Check if user is attached to request (should be done by authenticate middleware)
     if (!req.user) {
       return Response.error(res, 'User not authenticated', 401, 'UNAUTHORIZED');
     }
 
-    // Convert single role to array for consistent handling
-    const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+    const rawRoles = allowedRolesInput.length === 1 && Array.isArray(allowedRolesInput[0])
+      ? allowedRolesInput[0]
+      : allowedRolesInput;
+    const roles = normalizeRoles(rawRoles);
+
+    if (roles.length === 0) {
+      return Response.error(res, 'Route authorization is misconfigured', 500, 'INTERNAL_SERVER_ERROR');
+    }
 
     // Check if user's role is in allowed roles
-    if (!roles.includes(req.user.role)) {
+    if (!roles.includes(normalizeRole(req.user.role))) {
       return Response.error(res, 'You do not have permission to perform this action', 403, 'FORBIDDEN');
     }
 
@@ -90,7 +97,7 @@ const requireAdmin = authorize('admin');
 /**
  * Middleware for sales-related access (admin, sales)
  */
-const requireSales = authorize(['admin', 'sales']);
+const requireSales = authorize(['admin', 'sales', 'salesman']);
 
 /**
  * Middleware for purchase-related access (admin, purchase)
@@ -295,6 +302,8 @@ const validateDimensionId = async (req, res, next) => {
 module.exports = {
   authenticate,
   authorize,
+  normalizeRole,
+  normalizeRoles,
   requireAdmin,
   requireSales,
   requirePurchase,

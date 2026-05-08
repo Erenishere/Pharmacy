@@ -17,22 +17,17 @@ class AuthController {
     try {
       const { identifier, password } = req.body;
 
-      console.log('[AuthController] Login attempt for:', identifier);
-
       // Validate required fields
       if (!identifier || !password) {
-        console.log('[AuthController] Missing credentials');
         return Response.error(res, 'Username/email and password are required', 400, 'VALIDATION_ERROR');
       }
 
       // Authenticate user
-      console.log('[AuthController] Authenticating user...');
       const result = await authService.authenticate(identifier, password, {
         ipAddress: req.ip,
         userAgent: req.get('user-agent') || null,
       });
 
-      console.log('[AuthController] Login successful for:', identifier);
       return Response.success(res, {
         user: result.user,
         accessToken: result.accessToken,
@@ -42,12 +37,10 @@ class AuthController {
       console.error('[AuthController] Login error:', error.message);
 
       if (error.message === 'Invalid credentials') {
-        console.log('[AuthController] Invalid credentials for:', req.body.identifier);
         return Response.error(res, 'Invalid username/email or password', 401, 'INVALID_CREDENTIALS');
       }
 
       if (error.message === 'User account is inactive') {
-        console.log('[AuthController] User account inactive:', req.body.identifier);
         return Response.error(res, 'Your account has been deactivated. Please contact administrator.', 401, 'ACCOUNT_INACTIVE');
       }
 

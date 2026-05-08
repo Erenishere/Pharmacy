@@ -2,8 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 const financialReportController = require('../controllers/financialReportController');
-const { authenticate } = require('../middleware/auth');
-const { authorize } = require('../middleware/rbac');
+const { authenticate, authorize } = require('../middleware/auth');
 
 /**
  * Financial Report Routes

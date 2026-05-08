@@ -17,7 +17,6 @@ const expenseCategorySchema = new mongoose.Schema({
   timestamps: true,
 });
 
-expenseCategorySchema.index({ categoryName: 1 });
 expenseCategorySchema.index({ status: 1 });
 
 module.exports = mongoose.model('ExpenseCategory', expenseCategorySchema);

@@ -18,11 +18,11 @@ router.get('/expiring-soon', authenticate, batchController.getExpiringBatches);
 router.get('/expired', authenticate, batchController.getExpiredBatches);
 
 // Base routes (assuming mounted at /api/v1/batches)
-router.post('/', authenticate, authorize(['admin', 'inventory_manager']), batchController.createBatch);
+router.post('/', authenticate, authorize(['admin', 'inventory']), batchController.createBatch);
 router.get('/', authenticate, batchController.getAllBatches);
 router.get('/:id', authenticate, batchController.getBatch);
-router.put('/:id', authenticate, authorize(['admin', 'inventory_manager']), batchController.updateBatch);
-router.delete('/:id', authenticate, authorize(['admin', 'inventory_manager']), batchController.deleteBatch);
-router.patch('/:id/quantity', authenticate, authorize(['admin', 'inventory_manager']), batchController.updateBatchQuantity);
+router.put('/:id', authenticate, authorize(['admin', 'inventory']), batchController.updateBatch);
+router.delete('/:id', authenticate, authorize(['admin', 'inventory']), batchController.deleteBatch);
+router.patch('/:id/quantity', authenticate, authorize(['admin', 'inventory']), batchController.updateBatchQuantity);
 
 module.exports = router;

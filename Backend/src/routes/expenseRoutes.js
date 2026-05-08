@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const expenseController = require('../controllers/expenseController');
-const { authenticate } = require('../middleware/auth');
-const { authorize } = require('../middleware/rbac');
+const { authenticate, authorize } = require('../middleware/auth');
 
 router.post('/', authenticate, authorize(['admin', 'accountant', 'manager']), expenseController.createExpense);
 router.get('/', authenticate, authorize(['admin', 'accountant', 'manager']), expenseController.getExpenses);

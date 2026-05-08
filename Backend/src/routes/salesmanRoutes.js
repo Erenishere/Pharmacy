@@ -58,6 +58,7 @@ router.post(
 router.get(
   '/',
   authenticate,
+  authorize(['admin', 'sales']),
   salesmanController.getAllSalesmen,
 );
 
@@ -65,6 +66,7 @@ router.get(
 router.get(
   '/code/:code',
   authenticate,
+  authorize(['admin', 'sales']),
   salesmanController.getSalesmanByCode,
 );
 
@@ -72,6 +74,7 @@ router.get(
 router.get(
   '/:id',
   authenticate,
+  authorize(['admin', 'sales']),
   salesmanController.getSalesmanById,
 );
 

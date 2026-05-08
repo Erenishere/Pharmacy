@@ -2,8 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 const capitalController = require('../controllers/capitalController');
-const { authenticate } = require('../middleware/auth');
-const { authorize } = require('../middleware/rbac');
+const { authenticate, authorize } = require('../middleware/auth');
 
 /**
  * Capital Routes

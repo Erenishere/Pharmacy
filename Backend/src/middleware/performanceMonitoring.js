@@ -75,7 +75,7 @@ const responseTimeMiddleware = responseTime((req, res, time) => {
   }
 
   // Log slow requests (> 1 second)
-  if (time > 1000) {
+  if (process.env.NODE_ENV !== 'test' && time > 1000) {
     console.warn(`Slow request detected: ${req.method} ${route} - ${time.toFixed(2)}ms`);
   }
 });

@@ -95,7 +95,7 @@ router.get('/template', authenticate, itemController.downloadItemsTemplate);
  *       500:
  *         description: Internal server error
  */
-router.post('/bulk-import', authenticate, authorize(['admin', 'inventory_manager', 'data_entry']), upload.single('file'), itemController.bulkImportItems);
+router.post('/bulk-import', authenticate, authorize(['admin', 'inventory', 'data_entry']), upload.single('file'), itemController.bulkImportItems);
 
 /**
  * @swagger
@@ -466,7 +466,7 @@ router.post('/reconcile-all', authenticate, authorize(['admin']), itemController
  *       500:
  *         description: Internal server error
  */
-router.get('/inventory-status', authenticate, authorize(['admin', 'inventory_manager']), itemController.getInventoryStatus);
+router.get('/inventory-status', authenticate, authorize(['admin', 'inventory']), itemController.getInventoryStatus);
 
 /**
  * @swagger
@@ -536,7 +536,7 @@ router.get('/:itemId/stock/:warehouseId', authenticate, itemController.getItemWa
  *       500:
  *         description: Internal server error
  */
-router.post('/:itemId/sync-stock', authenticate, authorize(['admin', 'inventory_manager']), itemController.syncItemStock);
+router.post('/:itemId/sync-stock', authenticate, authorize(['admin', 'inventory']), itemController.syncItemStock);
 
 /**
  * @swagger
@@ -772,7 +772,7 @@ router.get('/:id', authenticate, getItemByIdValidation, itemController.getItemBy
  *       500:
  *         description: Internal server error
  */
-router.post('/', authenticate, authorize(['admin', 'inventory_manager', 'data_entry']), createItemValidation, itemController.createItem);
+router.post('/', authenticate, authorize(['admin', 'inventory', 'data_entry']), createItemValidation, itemController.createItem);
 
 /**
  * @swagger
@@ -839,7 +839,7 @@ router.post('/', authenticate, authorize(['admin', 'inventory_manager', 'data_en
  *       500:
  *         description: Internal server error
  */
-router.put('/:id', authenticate, authorize(['admin', 'inventory_manager', 'data_entry']), updateItemValidation, itemController.updateItem);
+router.put('/:id', authenticate, authorize(['admin', 'inventory', 'data_entry']), updateItemValidation, itemController.updateItem);
 
 /**
  * @swagger
@@ -868,7 +868,7 @@ router.put('/:id', authenticate, authorize(['admin', 'inventory_manager', 'data_
  *       500:
  *         description: Internal server error
  */
-router.delete('/:id', authenticate, authorize(['admin', 'inventory_manager']), getItemByIdValidation, itemController.deleteItem);
+router.delete('/:id', authenticate, authorize(['admin', 'inventory']), getItemByIdValidation, itemController.deleteItem);
 
 /**
  * @swagger
@@ -897,7 +897,7 @@ router.delete('/:id', authenticate, authorize(['admin', 'inventory_manager']), g
  *       500:
  *         description: Internal server error
  */
-router.patch('/:id/toggle-status', authenticate, authorize(['admin', 'inventory_manager']), getItemByIdValidation, itemController.toggleItemStatus);
+router.patch('/:id/toggle-status', authenticate, authorize(['admin', 'inventory']), getItemByIdValidation, itemController.toggleItemStatus);
 
 /**
  * @swagger
@@ -946,7 +946,7 @@ router.patch('/:id/toggle-status', authenticate, authorize(['admin', 'inventory_
  *       500:
  *         description: Internal server error
  */
-router.patch('/:id/stock', authenticate, authorize(['admin', 'inventory_manager', 'inventory']), updateItemStockValidation, itemController.updateItemStock);
+router.patch('/:id/stock', authenticate, authorize(['admin', 'inventory']), updateItemStockValidation, itemController.updateItemStock);
 
 /**
  * @swagger
@@ -998,7 +998,7 @@ router.patch('/:id/stock', authenticate, authorize(['admin', 'inventory_manager'
  *       500:
  *         description: Internal server error
  */
-router.post('/transfer', authenticate, authorize(['admin', 'inventory_manager', 'inventory']), transferStockValidation, itemController.transferStock);
+router.post('/transfer', authenticate, authorize(['admin', 'inventory']), transferStockValidation, itemController.transferStock);
 
 // Batch related item routes
 router.get('/:itemId/next-batch-number', authenticate, batchController.getNextBatchNumber);

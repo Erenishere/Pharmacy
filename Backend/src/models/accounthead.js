@@ -33,8 +33,6 @@ const accountHeadSchema = new mongoose.Schema({
     timestamps: true,
 });
 
-accountHeadSchema.index({ code: 1 });
-accountHeadSchema.index({ name: 1 });
 accountHeadSchema.index({ type: 1 });
 
 const AccountHead = mongoose.models.AccountHead || mongoose.model('AccountHead', accountHeadSchema);

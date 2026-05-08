@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ctrl = require('../controllers/biltyReceiptController');
-const { authenticate } = require('../middleware/auth');
-const { authorize } = require('../middleware/rbac');
+const { authenticate, authorize } = require('../middleware/auth');
 
 const roles = ['admin', 'accountant', 'purchase', 'sales'];
 

@@ -1,6 +1,7 @@
 const userRepository = require('../repositories/userRepository');
 const authService = require('./authService');
 const Salesman = require('../models/Salesman');
+const { VALID_USER_ROLES, normalizeRole } = require('../utils/roleUtils');
 
 /**
  * User Service
@@ -73,8 +74,9 @@ class UserService {
    * @returns {Promise<Array>} Array of users with specified role
    */
   async getUsersByRole(role) {
-    this.validateRole(role);
-    return userRepository.findActiveByRole(role);
+    const normalizedRole = normalizeRole(role);
+    this.validateRole(normalizedRole);
+    return userRepository.findActiveByRole(normalizedRole);
   }
 
   /**
@@ -88,6 +90,7 @@ class UserService {
     const {
       username, email, password, role, accountId, dimensionId, permissions,
     } = userData;
+    const normalizedRole = normalizeRole(role);
 
     // Validate required fields (Requirement 10.3, 10.4, 10.5, 10.6)
     if (!username || !email || !password || !role) {
@@ -95,7 +98,7 @@ class UserService {
     }
 
     // Validate role
-    this.validateRole(role);
+    this.validateRole(normalizedRole);
 
     // Check if username already exists
     const usernameExists = await userRepository.usernameExists(username);
@@ -152,7 +155,7 @@ class UserService {
       username,
       email,
       password,
-      role,
+      role: normalizedRole,
       accountId: accountId || null,
       dimensionId: dimensionId || null,
       permissions: permissions || {
@@ -189,6 +192,7 @@ class UserService {
 
     // Validate role if provided
     if (updateData.role) {
+      updateData.role = normalizeRole(updateData.role);
       this.validateRole(updateData.role);
     }
 
@@ -379,23 +383,24 @@ class UserService {
    * @throws {Error} If validation fails
    */
   async updateUserRole(id, newRole) {
+    const normalizedRole = normalizeRole(newRole);
     const user = await userRepository.findById(id);
     if (!user) {
       throw new Error('User not found');
     }
 
     // Validate role
-    this.validateRole(newRole);
+    this.validateRole(normalizedRole);
 
     // Prevent changing role of last admin
-    if (user.role === 'admin' && newRole !== 'admin') {
+    if (user.role === 'admin' && normalizedRole !== 'admin') {
       const adminCount = await userRepository.countByRole('admin');
       if (adminCount <= 1) {
         throw new Error('Cannot change role of the last admin user');
       }
     }
 
-    const updatedUser = await userRepository.updateRole(id, newRole);
+    const updatedUser = await userRepository.updateRole(id, normalizedRole);
 
     // Ensure salesman profile if new role is 'sales'
     await this.ensureSalesmanProfile(updatedUser);
@@ -726,24 +731,10 @@ class UserService {
    * @throws {Error} If role is invalid
    */
   validateRole(role) {
-    const validRoles = [
-      'admin',
-      'manager',
-      'salesman',
-      'accountant',
-      'store_keeper',
-      'store_incharge',
-      'deliveryman',
-      'driver',
-      'it_support',
-      'data_entry',
-      'custom',
-      'sales',
-      'inventory',
-      'purchase',
-    ];
-    if (!validRoles.includes(role)) {
-      throw new Error(`Invalid role. Must be one of: ${validRoles.join(', ')}`);
+    const normalizedRole = normalizeRole(role);
+
+    if (!VALID_USER_ROLES.includes(normalizedRole)) {
+      throw new Error(`Invalid role. Must be one of: ${VALID_USER_ROLES.join(', ')}`);
     }
   }
 
@@ -771,7 +762,8 @@ class UserService {
         }
 
         // Validate role
-        this.validateRole(userData.role);
+        const normalizedRole = normalizeRole(userData.role);
+        this.validateRole(normalizedRole);
 
         // Validate username length
         if (userData.username.length < 3) {
@@ -817,7 +809,7 @@ class UserService {
           username: userData.username,
           email: userData.email,
           password: userData.password,
-          role: userData.role,
+          role: normalizedRole,
           isActive: userData.isActive !== undefined ? userData.isActive : true,
         });
       } catch (error) {

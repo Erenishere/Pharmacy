@@ -22,7 +22,7 @@ class BatchSelectorService {
       allowManualOverride: true,
       
       // Override roles (requires special permission)
-      overrideRoles: ['admin', 'inventory_manager'],
+      overrideRoles: ['admin', 'inventory'],
       
       // Maximum batches to allocate per request
       maxBatchesPerAllocation: 10,

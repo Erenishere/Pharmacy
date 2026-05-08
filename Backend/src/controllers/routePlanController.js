@@ -1,4 +1,25 @@
 const routePlanService = require('../services/routePlanService');
+const { normalizeRole } = require('../utils/roleUtils');
+
+const isSalesRouteUser = (user) => ['sales', 'salesman'].includes(normalizeRole(user?.role));
+
+const getRoutePlanSalesmanUserId = (plan) => {
+  const salesmanRef = plan?.salesmanId;
+
+  if (!salesmanRef) {
+    return null;
+  }
+
+  if (typeof salesmanRef === 'string') {
+    return salesmanRef;
+  }
+
+  if (salesmanRef._id) {
+    return salesmanRef._id.toString();
+  }
+
+  return salesmanRef.toString();
+};
 
 const createRoutePlan = async (req, res) => {
   try {
@@ -21,6 +42,11 @@ const getRoutePlans = async (req, res) => {
       salesmanId: req.query.salesmanId,
       dimensionId: req.query.dimensionId,
     };
+
+    if (isSalesRouteUser(req.user)) {
+      filters.salesmanId = req.user?._id?.toString();
+    }
+
     const options = { page: req.query.page, limit: req.query.limit };
     const result = await routePlanService.getRoutePlans(filters, options);
     return res.status(200).json({
@@ -36,6 +62,15 @@ const getRoutePlans = async (req, res) => {
 const getRoutePlanById = async (req, res) => {
   try {
     const plan = await routePlanService.getRoutePlanById(req.params.id);
+
+    if (isSalesRouteUser(req.user) && getRoutePlanSalesmanUserId(plan) !== req.user?._id?.toString()) {
+      return res.status(403).json({
+        success: false,
+        error: { code: 'FORBIDDEN', message: 'You do not have access to this route plan' },
+        timestamp: new Date().toISOString(),
+      });
+    }
+
     return res.status(200).json({
       success: true, data: plan, message: 'Route plan retrieved successfully', timestamp: new Date().toISOString(),
     });

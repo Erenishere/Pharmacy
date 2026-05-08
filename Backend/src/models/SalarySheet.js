@@ -4,15 +4,12 @@ const salarySheetSchema = new mongoose.Schema({
   // Reference Number - Auto generated
   referenceNumber: {
     type: String,
-    unique: true,
-    index: true,
   },
 
   // Dimension/Position
   dimensionId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'DimensionBranch',
-    index: true,
   },
 
   // Employee Information
@@ -180,7 +177,6 @@ const salarySheetSchema = new mongoose.Schema({
       message: 'Status must be one of: draft, active, paid, cancelled',
     },
     default: 'draft',
-    index: true,
   },
 
   // Notes

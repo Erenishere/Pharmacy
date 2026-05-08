@@ -11,6 +11,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const { body, validationResult } = require('express-validator');
+const { normalizeRole } = require('../utils/roleUtils');
 
 /**
  * MongoDB injection sanitization
@@ -205,15 +206,9 @@ const roleBasedRateLimit = (options = {}) => {
     // Determine limit based on role
     let limit = defaultLimit;
     if (user) {
-      switch (user.role) {
+      switch (normalizeRole(user.role)) {
         case 'admin':
           limit = 1000;
-          break;
-        case 'api':
-          limit = 500;
-          break;
-        case 'viewer':
-          limit = 50;
           break;
         default:
           limit = defaultLimit;

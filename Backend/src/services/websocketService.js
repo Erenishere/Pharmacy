@@ -6,6 +6,7 @@
 const socketIo = require('socket.io');
 const jwt = require('jsonwebtoken');
 const cacheService = require('./cacheService');
+const { normalizeRole } = require('../utils/roleUtils');
 
 class WebSocketService {
   constructor() {
@@ -69,7 +70,7 @@ class WebSocketService {
 
         // Attach user data to socket
         socket.userId = user._id.toString();
-        socket.userRole = user.role;
+        socket.userRole = normalizeRole(user.role);
         socket.userName = user.username;
         
         next();
@@ -395,7 +396,7 @@ class WebSocketService {
    * @param {any} data - Message data
    */
   sendToRole(role, data) {
-    this.io.to(`role:${role}`).emit(data.type || 'notification', data);
+    this.io.to(`role:${normalizeRole(role)}`).emit(data.type || 'notification', data);
   }
 
   /**

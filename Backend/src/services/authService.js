@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const { randomUUID } = require('crypto');
 const User = require('../models/User');
 const authSessionStore = require('./authSessionStore');
+const { normalizeRole } = require('../utils/roleUtils');
 
 class AuthService {
   /**
@@ -93,33 +94,24 @@ class AuthService {
    * @throws {Error} If authentication fails
    */
   async authenticate(identifier, password, metadata = {}) {
-    console.log('[AuthService] authenticate() called with identifier:', identifier);
-
     // Find user by username or email
     const user = await User.findOne({
       $or: [{ username: identifier }, { email: identifier }],
     });
 
-    console.log('[AuthService] User found:', user ? 'YES' : 'NO');
-
     if (!user) {
-      console.log('[AuthService] No user found with identifier:', identifier);
       throw new Error('Invalid credentials');
     }
 
     // Check if user is active
     if (!user.isActive) {
-      console.log('[AuthService] User is inactive:', user.username);
       throw new Error('User account is inactive');
     }
 
     // Verify password
-    console.log('[AuthService] Verifying password...');
     const isPasswordValid = await user.comparePassword(password);
-    console.log('[AuthService] Password valid:', isPasswordValid);
 
     if (!isPasswordValid) {
-      console.log('[AuthService] Invalid password for:', identifier);
       throw new Error('Invalid credentials');
     }
 
@@ -128,7 +120,10 @@ class AuthService {
 
     // If user is a sales user, populate salesman data including warehouseId
     const userJSON = user.toJSON();
-    if (['sales', 'salesman'].includes(user.role)) {
+    const normalizedRole = normalizeRole(user.role);
+    userJSON.role = normalizedRole;
+
+    if (['sales', 'salesman'].includes(normalizedRole)) {
       const Salesman = require('../models/Salesman');
       const salesman = await Salesman.findOne({ userId: user._id });
 
@@ -144,7 +139,7 @@ class AuthService {
 
     const accessToken = this.generateAccessToken({
       userId: user._id,
-      role: user.role,
+      role: normalizedRole,
       sid: sessionId,
     });
 
@@ -161,8 +156,6 @@ class AuthService {
       userAgent: metadata.userAgent,
       ipAddress: metadata.ipAddress,
     });
-
-    console.log('[AuthService] Authentication successful for:', identifier);
 
     return {
       user: userJSON,
@@ -199,7 +192,7 @@ class AuthService {
     // Generate new access token
     const accessToken = this.generateAccessToken({
       userId: user._id,
-      role: user.role,
+      role: normalizeRole(user.role),
       sid: decoded.sid,
     });
 
@@ -218,7 +211,10 @@ class AuthService {
     });
 
     return {
-      user: user.toJSON(),
+      user: {
+        ...user.toJSON(),
+        role: normalizeRole(user.role),
+      },
       accessToken,
       refreshToken: rotatedRefreshToken,
     };
@@ -246,29 +242,18 @@ class AuthService {
       throw new Error('User account is inactive');
     }
 
+    user.role = normalizeRole(user.role);
+
     // If user is a sales user, populate salesman data including warehouseId
     if (['sales', 'salesman'].includes(user.role)) {
       const Salesman = require('../models/Salesman');
       const salesman = await Salesman.findOne({ userId: user._id });
 
-      console.log('[AuthService] Sales user detected:', user.username);
-      console.log('[AuthService] Salesman found:', salesman ? 'YES' : 'NO');
-
       if (salesman) {
-        console.log('[AuthService] Salesman ID:', salesman._id);
-        console.log('[AuthService] Salesman Code:', salesman.code);
-        console.log('[AuthService] Warehouse ID:', salesman.warehouseId);
-
         // Attach salesman data to user object
         user.salesmanId = salesman._id;
         user.salesmanCode = salesman.code;
         user.warehouseId = salesman.warehouseId;
-
-        console.log('[AuthService] User object after assignment:', {
-          salesmanId: user.salesmanId,
-          salesmanCode: user.salesmanCode,
-          warehouseId: user.warehouseId,
-        });
       }
     }
 

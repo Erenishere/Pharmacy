@@ -9,7 +9,7 @@ const router = express.Router();
 router.use(auth.authenticate);
 
 // Restrict the following routes to admin users only
-router.use(auth.authorize(['admin', 'inventory-manager']));
+router.use(auth.authorize(['admin', 'inventory']));
 
 router
   .route('/')

@@ -1,7 +1,5 @@
 const smsService = require('../services/smsService');
 const Invoice = require('../models/Invoice');
-const Customer = require('../models/Customer');
-const Supplier = require('../models/Supplier');
 
 /**
  * Send SMS

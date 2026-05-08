@@ -524,7 +524,7 @@ module.exports = router;
 router.post(
   '/return',
   authenticate,
-  requireRoles(['admin', 'purchase', 'purchase_manager']),
+  requireRoles(['admin', 'purchase']),
   [
     body('originalInvoiceId')
       .notEmpty()

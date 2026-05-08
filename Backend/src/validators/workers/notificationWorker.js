@@ -82,7 +82,7 @@ notificationQueue.process('check-reorder-point', async (job) => {
     
     if (item && item.reorderPoint && quantity <= item.reorderPoint) {
       // Notify inventory managers
-      websocketService.sendToRole('inventory_manager', {
+      websocketService.sendToRole('inventory', {
         type: 'reorder_alert',
         itemId,
         itemName: item.name,
@@ -118,7 +118,7 @@ notificationQueue.process('batch-expiry-warning', async (job) => {
   
   try {
     // Notify inventory managers
-    websocketService.sendToRole('inventory_manager', {
+    websocketService.sendToRole('inventory', {
       type: 'batch_expiry_warning',
       batchId,
       batchNumber,
@@ -141,7 +141,7 @@ notificationQueue.process('notify-credit-limit', async (job) => {
   
   try {
     // Notify sales managers
-    websocketService.sendToRole('sales_manager', {
+    websocketService.sendToRole('sales', {
       type: 'credit_limit_reached',
       customerId,
       currentBalance,

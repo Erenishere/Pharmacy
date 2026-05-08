@@ -4,7 +4,6 @@ const SMSLog = require('../models/SMSLog');
 class SMSService {
   constructor() {
     this.twilioClient = null;
-    this.initializeTwilioClient();
   }
 
   /**
@@ -15,14 +14,18 @@ class SMSService {
     const authToken = process.env.TWILIO_AUTH_TOKEN;
 
     if (!accountSid || !authToken) {
-      console.warn('Twilio credentials not configured. SMS functionality will be limited.');
+      if (process.env.NODE_ENV !== 'test') {
+        console.warn('Twilio credentials not configured. SMS functionality will be limited.');
+      }
       return;
     }
 
     try {
       this.twilioClient = twilio(accountSid, authToken);
+      return this.twilioClient;
     } catch (error) {
       console.error('Failed to initialize Twilio client:', error.message);
+      return null;
     }
   }
 
@@ -98,6 +101,10 @@ class SMSService {
 
     try {
       // Check if Twilio is configured
+      if (!this.twilioClient) {
+        this.initializeTwilioClient();
+      }
+
       if (!this.twilioClient) {
         throw new Error('Twilio client not initialized. Check TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN environment variables.');
       }

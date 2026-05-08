@@ -6,6 +6,7 @@
 const Salesman = require('../models/Salesman');
 const Invoice = require('../models/Invoice');
 const reportService = require('../services/reportService');
+const { normalizeRole } = require('../utils/roleUtils');
 
 /**
  * Get logged-in salesman's profile
@@ -20,7 +21,7 @@ const getMyProfile = async (req, res, next) => {
 
     if (!salesman) {
       // Auto-create if user has sales role but profile is missing
-      if (req.user.role === 'sales') {
+      if (['sales', 'salesman'].includes(normalizeRole(req.user.role))) {
         const newSalesman = await Salesman.create({
           name: req.user.username,
           email: req.user.email,
@@ -28,7 +29,6 @@ const getMyProfile = async (req, res, next) => {
           commissionRate: 0,
           isActive: true,
         });
-        console.log(`Auto-initialized missing salesman profile for user: ${req.user.username}`);
         return res.json({
           success: true,
           data: newSalesman,
