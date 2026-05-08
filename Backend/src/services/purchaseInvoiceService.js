@@ -8,9 +8,13 @@ const accountService = require('./accountService');
 const discountCalculationService = require('./discountCalculationService');
 const batchCreationService = require('./batchCreationService');
 const eventPublisherService = require('./eventPublisherService');
+const inventoryService = require('./inventoryService');
 const { executeTransactionalOperation } = require('../utils/transactionUtils');
 const Item = require('../models/Item');
 const PurchaseOrder = require('../models/PurchaseOrder');
+const LedgerEntry = require('../models/LedgerEntry');
+
+const getObjectId = (value) => value?._id || value;
 
 /**
  * Purchase Invoice Service
@@ -30,7 +34,7 @@ class PurchaseInvoiceService {
    */
   async createPurchaseInvoice(invoiceData) {
     const {
-      supplierId, items, createdBy, invoiceDate, dueDate, notes, poId, poNumber,
+      supplierId, items, createdBy, invoiceDate, dueDate, notes, poId, poNumber, supplierBillNo,
     } = invoiceData;
 
     // Validate required fields
@@ -72,6 +76,7 @@ class PurchaseInvoiceService {
 
       invoiceDate: invoiceDate || new Date(),
       dueDate: dueDate || this.calculateDueDate(supplier.financialInfo.paymentTerms),
+      supplierBillNo,
       items: processedItems,
       totals,
       status: 'draft',
@@ -729,7 +734,7 @@ class PurchaseInvoiceService {
     }
 
     // Execute confirmation within transaction
-    return executeTransactionalOperation(async (session) => {
+    const result = await executeTransactionalOperation(async (session) => {
       // Create stock movements
       const stockMovements = await this.createStockMovementsForInvoice(invoice, userId, session);
 
@@ -767,6 +772,11 @@ class PurchaseInvoiceService {
       maxRetries: 3,
       timeout: 30000,
     });
+
+    const itemIds = [...new Set(invoice.items.map((item) => getObjectId(item.itemId).toString()))];
+    await Promise.all(itemIds.map((itemId) => inventoryService.syncItemCurrentStock(itemId)));
+
+    return result;
   }
 
   /**
@@ -780,9 +790,11 @@ class PurchaseInvoiceService {
     const movements = [];
 
     for (const item of invoice.items) {
+      const itemId = getObjectId(item.itemId);
+      const warehouseId = getObjectId(item.warehouseId);
       const movementData = {
-        itemId: item.itemId,
-        warehouse: item.warehouseId,
+        itemId,
+        warehouse: warehouseId,
         movementType: 'in', // Purchase invoice adds stock
         quantity: item.quantity,
         referenceType: 'purchase_invoice',
@@ -821,8 +833,7 @@ class PurchaseInvoiceService {
       // Map invoice items to get received quantities
       const invoiceItemsMap = new Map();
       invoice.items.forEach((item) => {
-        // Use itemId to match
-        const itemIdStr = item.itemId.toString();
+        const itemIdStr = getObjectId(item.itemId).toString();
         const currentQty = invoiceItemsMap.get(itemIdStr) || 0;
         invoiceItemsMap.set(itemIdStr, currentQty + item.quantity);
       });
@@ -830,7 +841,7 @@ class PurchaseInvoiceService {
       let hasUpdates = false;
 
       purchaseOrder.items.forEach((poItem) => {
-        const itemIdStr = poItem.itemId.toString();
+        const itemIdStr = getObjectId(poItem.itemId).toString();
         if (invoiceItemsMap.has(itemIdStr)) {
           const receivedQty = invoiceItemsMap.get(itemIdStr);
           // Add to existing received quantity
@@ -871,8 +882,7 @@ class PurchaseInvoiceService {
       // Map invoice items to get received quantities
       const invoiceItemsMap = new Map();
       invoice.items.forEach((item) => {
-        // Use itemId to match
-        const itemIdStr = item.itemId.toString();
+        const itemIdStr = getObjectId(item.itemId).toString();
         const currentQty = invoiceItemsMap.get(itemIdStr) || 0;
         invoiceItemsMap.set(itemIdStr, currentQty + item.quantity);
       });
@@ -880,7 +890,7 @@ class PurchaseInvoiceService {
       let hasUpdates = false;
 
       purchaseOrder.items.forEach((poItem) => {
-        const itemIdStr = poItem.itemId.toString();
+        const itemIdStr = getObjectId(poItem.itemId).toString();
         if (invoiceItemsMap.has(itemIdStr)) {
           const receivedQty = invoiceItemsMap.get(itemIdStr);
           // Subtract from existing received quantity (prevent negative)
@@ -918,7 +928,9 @@ class PurchaseInvoiceService {
     const affectedItemIds = new Set();
 
     for (const item of items) {
-      const itemDoc = await Item.findById(item.itemId).session(session);
+      const itemId = getObjectId(item.itemId);
+      const warehouseId = getObjectId(item.warehouseId);
+      const itemDoc = await Item.findById(itemId).session(session);
 
       if (!itemDoc) {
         throw new Error(`Item not found: ${item.itemId}`);
@@ -929,8 +941,8 @@ class PurchaseInvoiceService {
       // Update Inventory collection (warehouse-level stock) - this is the source of truth
       if (item.warehouseId) {
         const inventoryQuery = {
-          item: new mongoose.Types.ObjectId(item.itemId),
-          warehouse: new mongoose.Types.ObjectId(item.warehouseId),
+          item: new mongoose.Types.ObjectId(itemId),
+          warehouse: new mongoose.Types.ObjectId(warehouseId),
         };
 
         // Add batch number to query if provided
@@ -967,15 +979,15 @@ class PurchaseInvoiceService {
         await itemDoc.save({ session });
       }
 
-      affectedItemIds.add(item.itemId.toString());
+      affectedItemIds.add(itemId.toString());
       updatedItems.push(itemDoc);
     }
 
-    // Sync Item.inventory.currentStock from Inventory collection for all affected items
-    // Note: syncItemCurrentStock runs outside transaction as it's a background sync
-    await Promise.all(
-      Array.from(affectedItemIds).map((itemId) => inventoryService.syncItemCurrentStock(itemId)),
-    );
+    if (!session) {
+      await Promise.all(
+        Array.from(affectedItemIds).map((itemId) => inventoryService.syncItemCurrentStock(itemId)),
+      );
+    }
 
     return updatedItems;
   }
@@ -1098,12 +1110,16 @@ class PurchaseInvoiceService {
 
     // If invoice was confirmed, reverse operations within transaction
     if (invoice.status === 'confirmed') {
-      return executeTransactionalOperation(async (session) => {
+      const cancelledInvoice = await executeTransactionalOperation(async (session) => {
         // Reverse stock movements
         await this.reverseStockMovements(invoice, userId, reason, session);
         
         // Update inventory levels
         await this.updateInventoryLevels(invoice.items, 'subtract', session);
+
+        await batchCreationService.reverseBatchesFromInvoice(invoice, userId);
+
+        await this.createLedgerEntriesForPurchaseInvoiceCancellation(invoice, userId, reason, session);
 
         // Revert Purchase Order fulfillment if linked
         if (invoice.poId) {
@@ -1118,20 +1134,20 @@ class PurchaseInvoiceService {
           cancellationReason: reason,
         }, { session });
 
-        // Publish cancellation event
-        await eventPublisherService.publishEvent('invoice.cancelled', {
-          invoiceId: invoice._id,
-          invoiceNumber: invoice.invoiceNumber,
-          type: 'purchase',
-          cancelledBy: userId,
-          reason,
-        });
+        if (typeof eventPublisherService.publishInvoiceCancelled === 'function') {
+          await eventPublisherService.publishInvoiceCancelled(invoice);
+        }
 
         return cancelledInvoice;
       }, {
         maxRetries: 3,
         timeout: 30000,
       });
+
+      const itemIds = [...new Set(invoice.items.map((item) => getObjectId(item.itemId).toString()))];
+      await Promise.all(itemIds.map((itemId) => inventoryService.syncItemCurrentStock(itemId)));
+
+      return cancelledInvoice;
     }
 
     // For non-confirmed invoices, just update status
@@ -1157,11 +1173,14 @@ class PurchaseInvoiceService {
     const movements = [];
 
     for (const item of invoice.items) {
+      const itemId = getObjectId(item.itemId);
+      const warehouseId = getObjectId(item.warehouseId);
       const movementData = {
-        itemId: item.itemId,
+        itemId,
+        warehouse: warehouseId,
         movementType: 'out',
         quantity: item.quantity, // Positive for outward movement (reversal)
-        referenceType: 'purchase_invoice',
+        referenceType: 'purchase_invoice_cancellation',
         referenceId: invoice._id,
         batchInfo: item.batchInfo || {},
         movementDate: new Date(),
@@ -1184,7 +1203,51 @@ class PurchaseInvoiceService {
    * @returns {Promise<Array>} Stock movements
    */
   async getInvoiceStockMovements(invoiceId) {
-    return stockMovementRepository.findByReference('purchase_invoice', invoiceId);
+    const StockMovement = require('../models/StockMovement');
+    return StockMovement.find({
+      referenceId: invoiceId,
+      referenceType: { $in: ['purchase_invoice', 'purchase_invoice_cancellation'] },
+    }).sort({ movementDate: 1 });
+  }
+
+  async createLedgerEntriesForPurchaseInvoice(invoice, userId, session = null) {
+    const supplierId = getObjectId(invoice.supplierId);
+    const invoiceTotal = invoice.totals?.netBillTotal || invoice.totals?.grandTotal || invoice.totals?.dueAmount || 0;
+    if (!supplierId || !invoiceTotal) {
+      return [];
+    }
+
+    return LedgerEntry.create([{
+      accountId: supplierId,
+      accountType: 'Supplier',
+      transactionType: 'credit',
+      amount: invoiceTotal,
+      description: `Purchase Invoice ${invoice.invoiceNumber}`,
+      referenceType: 'invoice',
+      referenceId: invoice._id,
+      transactionDate: invoice.invoiceDate || new Date(),
+      createdBy: userId,
+    }], { session });
+  }
+
+  async createLedgerEntriesForPurchaseInvoiceCancellation(invoice, userId, reason = '', session = null) {
+    const supplierId = getObjectId(invoice.supplierId);
+    const invoiceTotal = invoice.totals?.netBillTotal || invoice.totals?.grandTotal || invoice.totals?.dueAmount || 0;
+    if (!supplierId || !invoiceTotal) {
+      return [];
+    }
+
+    return LedgerEntry.create([{
+      accountId: supplierId,
+      accountType: 'Supplier',
+      transactionType: 'debit',
+      amount: invoiceTotal,
+      description: `Cancellation of Purchase Invoice ${invoice.invoiceNumber}${reason ? ` - ${reason}` : ''}`,
+      referenceType: 'adjustment',
+      referenceId: invoice._id,
+      transactionDate: new Date(),
+      createdBy: userId,
+    }], { session });
   }
 
   /**

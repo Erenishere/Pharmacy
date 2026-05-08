@@ -1,3 +1,4 @@
+@import 'styles/vuexy-vars';
 @import 'styles/shared-list-styles';
 
 // ─── Design Tokens ────────────────────────────────────────────
@@ -22,9 +23,40 @@ $p-border: #ebe9f1;
   align-items: flex-start;
   margin-bottom: 28px;
 
+  .header-content {
+    .title-with-accent {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .header-accent-bar {
+        width: 5px;
+        height: 40px;
+        border-radius: 4px;
+        background: $purple;
+      }
+    }
+
+    h1 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0;
+
+      mat-icon {
+        color: $purple;
+      }
+    }
+
+    .page-description {
+      margin: 8px 0 0 17px;
+      color: $grey-dark;
+    }
+  }
+
   .header-actions {
     .btn-create {
-      background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.82)) !important;
+      background: linear-gradient(118deg, $purple, rgba($purple, 0.85)) !important;
       color: #fff !important;
       font-weight: 600;
       height: 42px;

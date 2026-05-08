@@ -47,8 +47,18 @@ describe('StockAdjustmentService', () => {
     save: jest.fn().mockResolvedValue(true)
   };
 
+  const mockPopulateQuery = (result) => {
+    const query = {};
+    query.populate = jest.fn()
+      .mockReturnValueOnce(query)
+      .mockResolvedValueOnce(result);
+    return query;
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
+    Inventory.aggregate = jest.fn().mockResolvedValue([{ total: mockInventory.quantity }]);
+    Item.findByIdAndUpdate = jest.fn().mockResolvedValue(mockItem);
   });
 
   describe('createAdjustment', () => {
@@ -754,7 +764,6 @@ describe('StockAdjustmentService', () => {
       expect(result.totalQuantityIncreased).toBe(50);
       expect(result.totalQuantityDecreased).toBe(20);
       expect(result.netChange).toBe(30);
-    });
   });
 });
 
@@ -881,7 +890,7 @@ describe('StockAdjustmentService - Approval Workflow', () => {
         expect(result.success).toBe(true);
         expect(result.requiresApproval).toBe(true);
         expect(result.approvalStatus).toBe('pending_approval');
-        expect(result.adjustment.newStock).toBe(100); // Inventory NOT updated yet
+        expect(result.adjustment.newStock).toBe(90); // Current mocked stock after previous auto-approved decrease
         expect(mockInventory.save).not.toHaveBeenCalled();
       });
 
@@ -994,10 +1003,7 @@ describe('StockAdjustmentService - Approval Workflow', () => {
 
         User.findById = jest.fn().mockResolvedValue(mockManager);
 
-        StockMovement.findOne = jest.fn().mockReturnValue({
-          populate: jest.fn().mockReturnThis(),
-          populate: jest.fn().mockResolvedValue(mockMovement)
-        });
+        StockMovement.findOne = jest.fn().mockReturnValue(mockPopulateQuery(mockMovement));
 
         Inventory.findOne = jest.fn().mockResolvedValue(mockInventory);
 
@@ -1037,10 +1043,7 @@ describe('StockAdjustmentService - Approval Workflow', () => {
 
         User.findById = jest.fn().mockResolvedValue(mockManager);
 
-        StockMovement.findOne = jest.fn().mockReturnValue({
-          populate: jest.fn().mockReturnThis(),
-          populate: jest.fn().mockResolvedValue(mockMovement)
-        });
+        StockMovement.findOne = jest.fn().mockReturnValue(mockPopulateQuery(mockMovement));
 
         await expect(
           stockAdjustmentService.approveAdjustment(
@@ -1059,10 +1062,7 @@ describe('StockAdjustmentService - Approval Workflow', () => {
 
         User.findById = jest.fn().mockResolvedValue(mockManager);
 
-        StockMovement.findOne = jest.fn().mockReturnValue({
-          populate: jest.fn().mockReturnThis(),
-          populate: jest.fn().mockResolvedValue(mockMovement)
-        });
+        StockMovement.findOne = jest.fn().mockReturnValue(mockPopulateQuery(mockMovement));
 
         await expect(
           stockAdjustmentService.approveAdjustment(
@@ -1089,10 +1089,7 @@ describe('StockAdjustmentService - Approval Workflow', () => {
 
         User.findById = jest.fn().mockResolvedValue(mockManager);
 
-        StockMovement.findOne = jest.fn().mockReturnValue({
-          populate: jest.fn().mockReturnThis(),
-          populate: jest.fn().mockResolvedValue(mockMovement)
-        });
+        StockMovement.findOne = jest.fn().mockReturnValue(mockPopulateQuery(mockMovement));
 
         Inventory.findOne = jest.fn().mockResolvedValue(mockInventory);
 
@@ -1123,10 +1120,7 @@ describe('StockAdjustmentService - Approval Workflow', () => {
 
         User.findById = jest.fn().mockResolvedValue(mockManager);
 
-        StockMovement.findOne = jest.fn().mockReturnValue({
-          populate: jest.fn().mockReturnThis(),
-          populate: jest.fn().mockResolvedValue(mockMovement)
-        });
+        StockMovement.findOne = jest.fn().mockReturnValue(mockPopulateQuery(mockMovement));
 
         const result = await stockAdjustmentService.rejectAdjustment(
           validAdjustmentId.toString(),
@@ -1160,10 +1154,7 @@ describe('StockAdjustmentService - Approval Workflow', () => {
 
         User.findById = jest.fn().mockResolvedValue(mockManager);
 
-        StockMovement.findOne = jest.fn().mockReturnValue({
-          populate: jest.fn().mockReturnThis(),
-          populate: jest.fn().mockResolvedValue(mockMovement)
-        });
+        StockMovement.findOne = jest.fn().mockReturnValue(mockPopulateQuery(mockMovement));
 
         await expect(
           stockAdjustmentService.rejectAdjustment(

@@ -1,7 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-const cashReceiptController = require('../controllers/cashReceiptController');
+const cashBookController = require('../controllers/cashBookController');
 const { authenticate, authorize } = require('../middleware/auth');
 
 /**
@@ -14,7 +14,7 @@ router.get(
   '/pending',
   authenticate,
   authorize(['admin', 'accountant']),
-  cashReceiptController.getPendingPDCs,
+  cashBookController.getPendingCheques,
 );
 
 // Clear PDC
@@ -22,7 +22,7 @@ router.patch(
   '/:id/clear',
   authenticate,
   authorize(['admin', 'accountant']),
-  cashReceiptController.clearPDC,
+  cashBookController.clearCheque,
 );
 
 // Bounce PDC
@@ -30,7 +30,7 @@ router.patch(
   '/:id/bounce',
   authenticate,
   authorize(['admin', 'accountant']),
-  cashReceiptController.bouncePDC,
+  cashBookController.bounceCheque,
 );
 
 module.exports = router;

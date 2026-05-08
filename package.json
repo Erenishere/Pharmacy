@@ -7,6 +7,11 @@
     "frontend:build": "npm run build --prefix frontend",
     "backend:install": "npm install --prefix Backend",
     "backend:dev": "npm run dev --prefix Backend",
+    "qa:install": "npm install --prefix qa",
+    "qa:seed": "npm run seed --prefix qa",
+    "qa:smoke": "npm run test --prefix qa",
+    "qa:smoke:headed": "npm run test:headed --prefix qa",
+    "qa:list": "npm run list --prefix qa",
     "install-all": "npm run frontend:install && npm run backend:install",
     "build": "npm run frontend:build"
   },

@@ -1,20 +1,21 @@
 @import 'styles/vuexy-vars';
+@import 'styles/shared-list-styles';
 
 :host {
   display: block;
 }
 
 .dashboard-shell {
-  padding: 32px;
-  background-color: #f8f8fb;
+  padding: 24px;
+  background-color: $bg-page;
   min-height: 100vh;
-  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: $font-family;
   color: $text-body;
-  max-width: 1600px;
+  max-width: 1440px;
   margin: 0 auto;
 
   * {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: color $transition-base, background-color $transition-base, border-color $transition-base, box-shadow $transition-base;
   }
 }
 
@@ -22,87 +23,91 @@
 // HEADER SECTION
 // ---------------------------------------------------------
 .dashboard-header {
-  margin-bottom: 40px;
+  margin-bottom: 18px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 18px;
 
   .header-copy {
+    border-left: 4px solid $primary;
+    padding-left: 16px;
+
     .eyebrow {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0;
       color: $primary;
-      margin-bottom: 12px;
-      background: rgba($primary, 0.08);
-      padding: 6px 12px;
-      border-radius: 4px;
+      margin-bottom: 8px;
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
 
       mat-icon {
-        font-size: 14px;
-        width: 14px;
-        height: 14px;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
       }
     }
 
     h1 {
-      font-size: 38px;
+      font-size: $h1-size;
       font-weight: 700;
-      letter-spacing: -0.02em;
+      letter-spacing: 0;
       color: $text-card-title;
-      margin: 0 0 8px 0;
+      margin: 0 0 6px;
+      line-height: 1.2;
     }
 
     p {
       color: $text-body;
-      font-size: 15px;
+      font-size: $font-size-base;
       margin: 0;
       max-width: 600px;
-      line-height: 1.6;
+      line-height: $line-height-base;
     }
   }
 
   .header-summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 20px;
+    @include dashboard-stats-grid;
   }
 
   .header-summary-card {
     background-color: #ffffff;
-    padding: 24px;
+    padding: 30px 28px;
+    min-height: 130px;
     display: flex;
     align-items: center;
-    gap: 20px;
-    border-radius: $radius-card;
+    gap: 22px;
+    border-radius: 12px;
     box-shadow: $shadow-card;
-    border: 1px solid transparent;
-    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
-      box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
-      border-color 0.3s ease;
+    border: 1px solid rgba($primary, 0.05);
+    transition: none;
 
     &:hover {
-      border-color: $primary !important;
-      box-shadow: 0 15px 35px rgba(115, 103, 240, 0.25);
-      transform: translateY(-6px) scale(1.01);
+      border-color: rgba($primary, 0.05) !important;
+      box-shadow: $shadow-card;
+      transform: none;
     }
 
     .header-summary-icon {
-      width: 48px;
-      height: 48px;
+      width: 66px;
+      height: 66px;
+      flex: 0 0 66px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background-color: #f8f8fb;
-      color: $grey-dark;
-      border-radius: 8px;
+      background-color: rgba($primary, 0.1);
+      color: $primary;
+      border-radius: 12px;
 
       mat-icon {
-        font-size: 24px;
+        font-size: 30px;
+        width: 30px;
+        height: 30px;
       }
     }
 
@@ -112,20 +117,22 @@
       justify-content: center;
 
       span {
-        font-size: 13px;
+        font-size: 16px;
         font-weight: 600;
         color: $text-muted;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 4px;
+        letter-spacing: 0.5px;
+        margin: 8px 0 0;
+        order: 2;
       }
 
       strong {
-        font-size: 26px;
+        font-size: 30px;
         font-weight: 700;
         color: $text-card-title;
         margin: 0;
         line-height: 1.2;
+        order: 1;
       }
 
       small {
@@ -133,12 +140,11 @@
         color: $text-muted;
         font-weight: 500;
         margin-top: 4px;
+        order: 3;
       }
     }
 
     &[data-tone="primary"] {
-      border-bottom: 3px solid $primary;
-
       .header-summary-icon {
         background: rgba($primary, 0.1);
         color: $primary;
@@ -146,8 +152,6 @@
     }
 
     &[data-tone="success"] {
-      border-bottom: 3px solid $success;
-
       .header-summary-icon {
         background: rgba($success, 0.1);
         color: $success;
@@ -155,8 +159,6 @@
     }
 
     &[data-tone="warning"] {
-      border-bottom: 3px solid $warning;
-
       .header-summary-icon {
         background: rgba($warning, 0.1);
         color: $warning;
@@ -164,8 +166,6 @@
     }
 
     &[data-tone="danger"] {
-      border-bottom: 3px solid $danger;
-
       .header-summary-icon {
         background: rgba($danger, 0.1);
         color: $danger;
@@ -173,12 +173,73 @@
     }
 
     &[data-tone="info"] {
-      border-bottom: 3px solid $info;
-
       .header-summary-icon {
         background: rgba($info, 0.1);
         color: $info;
       }
+    }
+  }
+}
+
+.chart-first-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.35fr) minmax(260px, 0.82fr) minmax(280px, 0.95fr);
+  gap: 16px;
+  align-items: stretch;
+  width: 100%;
+  margin-bottom: 20px;
+
+  .chart-card {
+    min-width: 0;
+
+    .mat-mdc-card-header {
+      padding: 16px 18px 10px !important;
+      min-height: 72px;
+    }
+
+    .mat-mdc-card-content {
+      padding: 8px 18px 18px !important;
+    }
+  }
+
+  .chart-shell {
+    height: 210px;
+    min-height: 210px;
+  }
+
+  .donut-wrap {
+    position: relative;
+    min-height: 210px;
+  }
+
+  .donut-chart {
+    height: 210px;
+  }
+
+  .donut-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    text-align: center;
+    padding-bottom: 34px;
+
+    strong {
+      color: $text-card-title;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    span {
+      color: $text-muted;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-top: 4px;
     }
   }
 }
@@ -189,14 +250,15 @@
 .toolbar-card {
   background-color: #ffffff;
   border-radius: $radius-card;
-  padding: 16px 24px;
-  margin-bottom: 40px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 24px;
+  gap: 16px;
   box-shadow: $shadow-card;
+  border: $border-card;
 
   .toolbar-block {
     display: flex;
@@ -330,45 +392,42 @@
 // ---------------------------------------------------------
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-  margin-bottom: 40px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
 
   .kpi-card {
     background-color: #ffffff;
     border-radius: $radius-card;
-    padding: 24px;
+    padding: 18px;
     text-decoration: none;
     position: relative;
     box-shadow: $shadow-card;
-    border: 1px solid #ebe9f1;
+    border: $border-card;
 
-    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
-      box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
-      border-color 0.3s ease;
+    transition: box-shadow $transition-base, border-color $transition-base, transform $transition-base;
 
     &:hover {
       border-color: $primary !important;
-      box-shadow: 0 15px 35px rgba(115, 103, 240, 0.3);
-      transform: translateY(-6px) scale(1.02);
-      z-index: 10;
+      box-shadow: $shadow-card-hover;
+      transform: translateY(-2px);
     }
 
     .kpi-top {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 20px;
+      margin-bottom: 14px;
 
       .kpi-icon {
-        width: 44px;
-        height: 44px;
+        width: 42px;
+        height: 42px;
         display: flex;
         align-items: center;
         justify-content: center;
         background-color: #f8f8fb;
         color: $grey-dark;
-        border-radius: 12px;
+        border-radius: $radius-lg;
 
         mat-icon {
           font-size: 22px;
@@ -399,17 +458,19 @@
     }
 
     .kpi-value {
-      font-size: 28px;
+      font-size: 22px;
       font-weight: 700;
       color: $text-card-title;
       margin-bottom: 6px;
     }
 
     .kpi-label {
-      font-size: 14px;
-      font-weight: 500;
+      font-size: 13px;
+      font-weight: 600;
       color: $text-body;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0;
     }
 
     .kpi-meta {
@@ -451,30 +512,31 @@
 // ---------------------------------------------------------
 .panel-card {
   border-radius: $radius-card !important;
-  border: 1px solid #ebe9f1 !important;
+  border: $border-card !important;
   box-shadow: $shadow-card !important;
   background: #ffffff !important;
 
   .mat-mdc-card-header {
     background-color: #ffffff;
-    border-bottom: 1px solid #ebe9f1;
-    padding: 20px 24px !important;
+    border-bottom: $border-card;
+    padding: 16px 18px !important;
 
     .mat-mdc-card-title {
-      font-size: 18px !important;
+      font-size: 16px !important;
       font-weight: 600 !important;
       color: $text-card-title;
+      letter-spacing: 0;
     }
 
     .mat-mdc-card-subtitle {
-      font-size: 13px !important;
+      font-size: 12px !important;
       color: $text-muted;
       margin-top: 4px !important;
     }
   }
 
   .mat-mdc-card-content {
-    padding: 24px !important;
+    padding: 18px !important;
   }
 }
 
@@ -850,6 +912,57 @@
 
   &.compact {
     height: 140px;
+  }
+}
+
+@media (max-width: 1280px) {
+  .chart-first-grid {
+    grid-template-columns: minmax(320px, 1fr) minmax(280px, 1fr);
+
+    .chart-card.wide {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard-shell {
+    padding: 16px;
+  }
+
+  .dashboard-header .header-copy h1 {
+    font-size: 28px;
+  }
+
+  .toolbar-card,
+  .toolbar-card .toolbar-block,
+  .toolbar-card .toolbar-actions,
+  .toolbar-card .toolbar-actions .toolbar-meta {
+    width: 100%;
+  }
+
+  .toolbar-card .toolbar-block,
+  .toolbar-card .toolbar-actions {
+    align-items: flex-start;
+  }
+
+  .toolbar-card .period-pills {
+    flex-wrap: wrap;
+  }
+
+  .chart-first-grid {
+    grid-template-columns: 1fr;
+
+    .chart-shell,
+    .donut-wrap,
+    .donut-chart {
+      height: 220px;
+      min-height: 220px;
+    }
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
 }
 

@@ -1,13 +1,48 @@
 <div class="list-page-container cashbook-page">
   <div class="list-page-header">
     <div class="header-content">
-      <h1 class="page-title"><mat-icon>account_balance_wallet</mat-icon> Cash Book</h1>
+      <div class="title-with-accent">
+        <div class="header-accent-bar"></div>
+        <h1 class="page-title"><mat-icon>account_balance_wallet</mat-icon> Cash Book</h1>
+      </div>
       <p class="page-subtitle">Manage cash receipts and payments with invoice allocation</p>
     </div>
     <div class="header-actions">
       <button mat-stroked-button (click)="resetForm()" class="reset-btn">
         <mat-icon>refresh</mat-icon> Reset Form
       </button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="dashboard-stats-grid">
+    <div class="stat-card success">
+      <div class="stat-icon-wrapper"><mat-icon>account_balance_wallet</mat-icon></div>
+      <div class="stat-data">
+        <span class="value">Rs. 0</span>
+        <span class="label">Today's Receipts</span>
+      </div>
+    </div>
+    <div class="stat-card danger">
+      <div class="stat-icon-wrapper"><mat-icon>payments</mat-icon></div>
+      <div class="stat-data">
+        <span class="value">Rs. 0</span>
+        <span class="label">Today's Payments</span>
+      </div>
+    </div>
+    <div class="stat-card primary">
+      <div class="stat-icon-wrapper"><mat-icon>history</mat-icon></div>
+      <div class="stat-data">
+        <span class="value">{{ totalCount }}</span>
+        <span class="label">Total Entries</span>
+      </div>
+    </div>
+    <div class="stat-card info">
+      <div class="stat-icon-wrapper"><mat-icon>event_repeat</mat-icon></div>
+      <div class="stat-data">
+        <span class="value">0</span>
+        <span class="label">Pending PDCs</span>
+      </div>
     </div>
   </div>
 
@@ -39,7 +74,7 @@
             <mat-option [value]="a._id">
               <div class="account-opt">
                 <span class="name">{{ a.name }}</span>
-                <span class="balance" [class.negative]="a.balance < 0">Bal: PKR {{ formatAmt(a.balance || 0) }}</span>
+                <span class="balance" [class.negative]="(a.balance || 0) < 0">Bal: PKR {{ formatAmt(a.balance || 0) }}</span>
               </div>
             </mat-option>
           }
@@ -48,9 +83,14 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Cash Account</mat-label>
-        <mat-select formControlName="cashAccount">
-          @for (opt of cashAccountOptions; track opt.value) {
-            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        <mat-select formControlName="cashAccountId">
+          @for (opt of cashAccountOptions; track opt._id) {
+            <mat-option [value]="opt._id">
+              <div class="account-opt">
+                <span class="name">{{ opt.name }}</span>
+                <span class="balance" [class.negative]="(opt.balance || 0) < 0">Bal: PKR {{ formatAmt(opt.balance || 0) }}</span>
+              </div>
+            </mat-option>
           }
         </mat-select>
       </mat-form-field>
@@ -145,6 +185,12 @@
           <mat-label>Cheque #</mat-label>
           <input matInput formControlName="chequeNumber">
         </mat-form-field>
+        <mat-form-field appearance="outline" class="sm-field">
+          <mat-label>Cheque Date</mat-label>
+          <input matInput [matDatepicker]="chequePicker" formControlName="chequeDate">
+          <mat-datepicker-toggle matIconSuffix [for]="chequePicker"></mat-datepicker-toggle>
+          <mat-datepicker #chequePicker></mat-datepicker>
+        </mat-form-field>
       </div>
 
       <div class="action-buttons">
@@ -153,7 +199,9 @@
           {{ editingId ? 'Update Entry' : 'Save Entry' }}
         </button>
         @if (editingId) {
-          <button mat-stroked-button (click)="resetForm()">Cancel</button>
+          <button mat-stroked-button class="cancel-btn" (click)="resetForm()">
+            <mat-icon>close</mat-icon> Cancel
+          </button>
         }
       </div>
     </div>
@@ -165,7 +213,7 @@
       <div class="filter-group-primary">
         <mat-form-field appearance="outline" class="filter-field sm">
           <mat-label>Type</mat-label>
-          <mat-select [(ngModel)]="listFilterType">
+          <mat-select [(ngModel)]="listFilterType" (selectionChange)="applyListFilters()">
             <mat-option value="">All Types</mat-option>
             <mat-option value="receive">Receive</mat-option>
             <mat-option value="payment">Payment</mat-option>
@@ -174,7 +222,7 @@
 
         <mat-form-field appearance="outline" class="filter-field sm">
           <mat-label>Status</mat-label>
-          <mat-select [(ngModel)]="listFilterStatus">
+          <mat-select [(ngModel)]="listFilterStatus" (selectionChange)="applyListFilters()">
             <mat-option value="">All Status</mat-option>
             <mat-option value="pending">Pending</mat-option>
             <mat-option value="cleared">Cleared</mat-option>
@@ -184,20 +232,20 @@
 
         <mat-form-field appearance="outline" class="filter-field date">
           <mat-label>From</mat-label>
-          <input matInput [matDatepicker]="fromPicker" [ngModel]="listFilterFrom" (ngModelChange)="onFilterFromChange($event)">
+          <input matInput [matDatepicker]="fromPicker" [ngModel]="listFilterFrom" (ngModelChange)="onFilterFromChange($event); applyListFilters()">
           <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
           <mat-datepicker #fromPicker></mat-datepicker>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="filter-field date">
           <mat-label>To</mat-label>
-          <input matInput [matDatepicker]="toPicker" [ngModel]="listFilterTo" (ngModelChange)="onFilterToChange($event)">
+          <input matInput [matDatepicker]="toPicker" [ngModel]="listFilterTo" (ngModelChange)="onFilterToChange($event); applyListFilters()">
           <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
           <mat-datepicker #toPicker></mat-datepicker>
         </mat-form-field>
 
-        <button mat-icon-button class="search-btn" (click)="applyListFilters()">
-          <mat-icon>search</mat-icon>
+        <button mat-icon-button class="search-btn" (click)="applyListFilters()" matTooltip="Refresh List">
+          <mat-icon>refresh</mat-icon>
         </button>
       </div>
     </div>
@@ -212,7 +260,7 @@
         <table mat-table [dataSource]="dataSource" class="data-table">
           <ng-container matColumnDef="sno">
             <th mat-header-cell *matHeaderCellDef>S#</th>
-            <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td>
+            <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 + (pageIndex * pageSize) }}</td>
           </ng-container>
 
           <ng-container matColumnDef="accountTitle">
@@ -317,14 +365,11 @@
           <tr mat-row *matRowDef="let row; columns: listColumns;" [class.row-receive]="row.entryType === 'receive'"
             [class.row-payment]="row.entryType === 'payment'" [class.row-cancelled]="row.status === 'cancelled'"></tr>
 
-          <!-- Empty State -->
-          <tr class="mat-row empty-state-row" *matNoDataRow>
+  <!-- Standardized No Data Row -->
+          <tr class="mat-row no-data-row" *matNoDataRow>
             <td class="mat-cell" [attr.colspan]="listColumns.length">
-              <div class="empty-state-premium">
-                <div class="icon-wrapper">
-                  <mat-icon>account_balance_wallet</mat-icon>
-                  <div class="icon-bg-glow"></div>
-                </div>
+              <div class="no-data-content">
+                <mat-icon>account_balance_wallet</mat-icon>
                 <h4>No Transactions Found</h4>
                 <p>There are no cash book entries for the selected period.</p>
               </div>
@@ -335,7 +380,7 @@
         
       </div>
       
-      <mat-paginator [length]="dataSource.data.length" [pageSize]="pageSize" [pageIndex]="pageIndex"
+      <mat-paginator [length]="totalCount" [pageSize]="pageSize" [pageIndex]="pageIndex"
         [pageSizeOptions]="[10, 20, 50, 100]" (page)="onPageChange($event)">
       </mat-paginator>
     }

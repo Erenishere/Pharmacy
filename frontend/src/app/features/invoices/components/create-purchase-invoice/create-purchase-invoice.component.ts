@@ -454,7 +454,7 @@ export class CreatePurchaseInvoiceComponent implements OnInit, OnDestroy {
     this.saving = true;
     const formValue = this.purchaseForm.value;
     const totals = this.calculateTotals();
-    const invoiceData = {
+    const invoiceData: any = {
       ...formValue,
       type: 'purchase',
       status,
@@ -492,13 +492,10 @@ export class CreatePurchaseInvoiceComponent implements OnInit, OnDestroy {
         gst4Amount: item.gst4Amount,
         advanceTaxAmount: item.advanceTaxAmount,
         lineTotal: item.netAmount,
-        batchInfo: item.batchNumber ? {
-          batchNumber: item.batchNumber,
-          manufacturingDate: item.manufacturingDate,
-          expiryDate: item.expiryDate
-        } : undefined
+        batchInfo: this.buildBatchInfo(item)
       }))
     };
+    this.omitEmptyObjectIds(invoiceData, ['claimAccountId']);
 
     const request$ = this.mode === 'create'
       ? this.invoiceService.createPurchaseInvoice(invoiceData)
@@ -522,6 +519,22 @@ export class CreatePurchaseInvoiceComponent implements OnInit, OnDestroy {
   public cancel(): void { this.router.navigate(['/purchase-invoices']); }
 
   private round(n: number): number { return Math.round(n * 100) / 100; }
+
+  private buildBatchInfo(item: any): any | undefined {
+    if (!item.batchNumber) return undefined;
+    const batchInfo: any = { batchNumber: item.batchNumber };
+    if (item.manufacturingDate) batchInfo.manufacturingDate = item.manufacturingDate;
+    if (item.expiryDate) batchInfo.expiryDate = item.expiryDate;
+    return batchInfo;
+  }
+
+  private omitEmptyObjectIds(payload: any, keys: string[]): void {
+    keys.forEach((key) => {
+      if (payload[key] === '' || payload[key] === null || payload[key] === undefined) {
+        delete payload[key];
+      }
+    });
+  }
 
   public fmt(amount: number): string {
     if (amount === undefined || amount === null || isNaN(amount)) return '0';

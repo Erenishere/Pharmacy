@@ -7,7 +7,7 @@ export interface Account {
   _id: string;
   name: string;
   accountNumber?: string;
-  accountType: 'customer' | 'supplier' | 'employee' | 'investor' | 'both';
+  accountType: 'customer' | 'supplier' | 'employee' | 'investor' | 'both' | 'account_manager' | 'sub_account';
   parentAccountId?: string;
   dimensionId?: string;
   townId?: string;

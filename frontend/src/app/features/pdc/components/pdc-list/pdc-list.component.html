@@ -2,8 +2,11 @@
   <!-- ── Standard Premium Header ─────────────────────────────── -->
   <div class="list-page-header">
     <div class="header-content">
-      <h1><mat-icon>account_balance</mat-icon> PDC Management</h1>
-      <p class="page-description">Monitor and process Post-Dated Cheques (PDCs) and bank receipts</p>
+      <div class="title-with-accent">
+        <div class="header-accent-bar"></div>
+        <h1><mat-icon>account_balance</mat-icon> PDC Management</h1>
+      </div>
+      <p class="page-description">Monitor and process pending Post-Dated Cheques (PDCs) with live clear and bounce actions (Visible: {{ dataSource.data.length }})</p>
     </div>
   </div>
 
@@ -31,21 +34,21 @@
 
     <div class="stat-card primary">
       <div class="stat-icon-wrapper">
-        <mat-icon>check_circle</mat-icon>
+        <mat-icon>today</mat-icon>
       </div>
       <div class="stat-data">
-        <span class="value">{{ totalCleared }}</span>
-        <span class="label">Cleared Today</span>
+        <span class="value">{{ totalDueToday }}</span>
+        <span class="label">Due Today</span>
       </div>
     </div>
 
     <div class="stat-card danger">
       <div class="stat-icon-wrapper">
-        <mat-icon>error</mat-icon>
+        <mat-icon>warning</mat-icon>
       </div>
       <div class="stat-data">
-        <span class="value">{{ totalBounced }}</span>
-        <span class="label">Bounced Total</span>
+        <span class="value">{{ totalOverdue }}</span>
+        <span class="label">Overdue Pending</span>
       </div>
     </div>
   </div>
@@ -75,7 +78,7 @@
       </div>
 
       <table mat-table [dataSource]="dataSource" class="mat-elevation-z0">
-        <!-- Receipt Number -->
+        <!-- ... existing columns ... -->
         <ng-container matColumnDef="receiptNumber">
           <th mat-header-cell *matHeaderCellDef> Receipt No </th>
           <td mat-cell *matCellDef="let row"> 
@@ -88,8 +91,8 @@
           <th mat-header-cell *matHeaderCellDef> Customer </th>
           <td mat-cell *matCellDef="let row"> 
             <div class="customer-cell">
-              <span class="name">{{ row.customerName }}</span>
-              <span class="id">ID: {{ row.customerId }}</span>
+              <span class="name">{{ row.customerId?.name || row.customerName || '—' }}</span>
+              <span class="id">Code: {{ row.customerId?.code || '—' }}</span>
             </div>
           </td>
         </ng-container>
@@ -115,9 +118,9 @@
         <ng-container matColumnDef="chequeDate">
           <th mat-header-cell *matHeaderCellDef> Due Date </th>
           <td mat-cell *matCellDef="let row">
-            <div class="date-cell" [class.overdue]="isOverdue(row.bankDetails?.chequeDate) && row.chequeStatus === 'pending'">
+            <div class="date-cell" [class.overdue]="isOverdue(row.bankDetails?.chequeDate) && (row.chequeStatus || row.status) === 'pending'">
               {{ row.bankDetails?.chequeDate | date:'mediumDate' }}
-              <mat-icon *ngIf="isOverdue(row.bankDetails?.chequeDate) && row.chequeStatus === 'pending'" 
+              <mat-icon *ngIf="isOverdue(row.bankDetails?.chequeDate) && (row.chequeStatus || row.status) === 'pending'" 
                         matTooltip="Cheque is overdue!" class="overdue-icon">priority_high</mat-icon>
             </div>
           </td>
@@ -133,8 +136,8 @@
         <ng-container matColumnDef="status">
           <th mat-header-cell *matHeaderCellDef> Status </th>
           <td mat-cell *matCellDef="let row">
-            <span class="status-badge" [ngClass]="getStatusClass(row.chequeStatus)">
-              {{ row.chequeStatus | titlecase }}
+            <span class="status-badge" [ngClass]="getStatusClass(row.chequeStatus || row.status)">
+              {{ (row.chequeStatus || row.status) | titlecase }}
             </span>
           </td>
         </ng-container>
@@ -143,7 +146,7 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef> Actions </th>
           <td mat-cell *matCellDef="let row">
-            <div class="action-buttons" *ngIf="row.chequeStatus === 'pending'">
+            <div class="action-buttons" *ngIf="(row.chequeStatus || row.status) === 'pending'">
               <button mat-icon-button color="primary" matTooltip="Clear Cheque" 
                       (click)="clearPDC(row)" [disabled]="processingId === row._id">
                 <mat-icon *ngIf="processingId !== row._id">check_circle</mat-icon>
@@ -160,20 +163,21 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="pdc-row"></tr>
 
-        <!-- No Data Row -->
-            <tr class="mat-row empty-state-row" *matNoDataRow>
-      <td class="mat-cell" [attr.colspan]="displayedColumns.length">
-        <div class="empty-state-premium">
-          <div class="icon-wrapper">
-            <mat-icon>inbox</mat-icon>
-            <div class="icon-bg-glow"></div>
-          </div>
-          <h4>No Records Found</h4>
-          <p>There is no data to display matching the current criteria.</p>
-        </div>
-      </td>
-    </tr>
+        <!-- Standardized No Data Row -->
+        <tr class="mat-row no-data-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            <div class="no-data-content">
+              <mat-icon>inbox</mat-icon>
+              <h4>No Records Found</h4>
+              <p>There is no data to display matching the current criteria.</p>
+            </div>
+          </td>
+        </tr>
       </table>
+
+      <!-- Standardized Paginator -->
+      <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons aria-label="Select page of PDCs">
+      </mat-paginator>
     </div>
   </div>
 </div>

@@ -1,7 +1,10 @@
 <div class="list-page-container cash-adjustment-page">
   <div class="list-page-header">
     <div class="header-content">
-      <h1 class="page-title"><mat-icon>swap_horiz</mat-icon> Cash Adjustment</h1>
+      <div class="title-with-accent">
+        <div class="header-accent-bar"></div>
+        <h1 class="page-title"><mat-icon>swap_horiz</mat-icon> Cash Adjustment</h1>
+      </div>
       <p class="page-subtitle">Internal cash transfers and adjustments between accounts</p>
     </div>
   </div>
@@ -187,13 +190,10 @@
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
-          <tr class="mat-row empty-state-row" *matNoDataRow>
+          <tr class="mat-row no-data-row" *matNoDataRow>
             <td class="mat-cell" colspan="12">
-              <div class="empty-state-premium">
-                <div class="icon-wrapper">
-                  <mat-icon>inbox</mat-icon>
-                  <div class="icon-bg-glow"></div>
-                </div>
+              <div class="no-data-content">
+                <mat-icon>inbox</mat-icon>
                 <h4>No adjustments found</h4>
                 <p>There is no data to display matching the current criteria.</p>
               </div>

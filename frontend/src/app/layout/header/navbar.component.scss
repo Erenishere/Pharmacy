@@ -255,6 +255,7 @@ $hover-bg: rgba($primary, 0.08);
 }
 
 ::ng-deep {
+  .navbar-menu-panel.mat-mdc-menu-panel,
   .quick-menu,
   .notifications-menu,
   .user-menu {
@@ -262,7 +263,36 @@ $hover-bg: rgba($primary, 0.08);
     border: 1px solid rgba($grey-dark, 0.08);
     border-radius: 16px;
     box-shadow: 0 16px 36px rgba(34, 41, 47, 0.08);
-    background: #ffffff;
+    background: #ffffff !important;
+    overflow: hidden;
+  }
+
+  .navbar-menu-panel.mat-mdc-menu-panel,
+  .navbar-menu-panel .mat-mdc-menu-content,
+  .navbar-menu-panel .mdc-list,
+  .navbar-menu-panel .mat-mdc-menu-item,
+  .navbar-menu-panel .mat-mdc-menu-item .mdc-list-item__primary-text {
+    background: #ffffff !important;
+    color: $text-body !important;
+  }
+
+  .navbar-menu-panel .mat-mdc-menu-content {
+    padding: 0 !important;
+  }
+
+  .navbar-menu-panel .mat-divider {
+    border-top-color: rgba($grey-dark, 0.08) !important;
+  }
+
+  .navbar-menu-panel .mat-mdc-menu-item:hover,
+  .navbar-menu-panel .mat-mdc-menu-item.cdk-program-focused,
+  .navbar-menu-panel .mat-mdc-menu-item.cdk-focused {
+    background: rgba($primary, 0.08) !important;
+  }
+
+  .navbar-menu-panel .mat-icon,
+  .navbar-menu-panel mat-icon {
+    color: $text-body !important;
   }
 
   .notifications-menu {
@@ -333,6 +363,7 @@ $hover-bg: rgba($primary, 0.08);
           display: flex;
           flex: 1;
           flex-direction: column;
+          min-width: 0;
 
           .notif-text {
             color: $text-body;
@@ -344,6 +375,15 @@ $hover-bg: rgba($primary, 0.08);
             color: $text-muted;
             font-size: 11px;
           }
+        }
+
+        .notif-dot {
+          width: 8px;
+          height: 8px;
+          margin-top: 6px;
+          border-radius: 999px;
+          background: $primary;
+          flex-shrink: 0;
         }
       }
     }

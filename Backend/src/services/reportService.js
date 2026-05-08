@@ -382,7 +382,7 @@ class ReportService {
       grouped[salesmanKey].totalTax += (invoice.totals?.totalTax || 0);
       grouped[salesmanKey].totalSubtotal += (invoice.totals?.subtotal || 0);
 
-      // Calculate commission if salesman has a rate (placeholder logic)
+      // Calculate commission from the salesman's configured rate.
       if (invoice.salesmanId && invoice.salesmanId.commissionRate) {
         grouped[salesmanKey].commission += (invoice.totals?.subtotal || 0) * (invoice.salesmanId.commissionRate / 100);
       }
@@ -942,7 +942,7 @@ class ReportService {
       invoiceCount: supplier.invoiceCount,
     }));
 
-    suppliers.sort((a, b) => b.total.totalAmount - a.total.totalAmount);
+    suppliers.sort((a, b) => b.total - a.total);
 
     return {
       reportType: 'supplier_wise_gst',
@@ -951,8 +951,8 @@ class ReportService {
       summary: {
         totalSuppliers: suppliers.length,
         totalInvoices: suppliers.reduce((sum, s) => sum + s.invoiceCount, 0),
-        totalGST: suppliers.reduce((sum, s) => sum + s.total.gstAmount, 0),
-        grandTotal: suppliers.reduce((sum, s) => sum + s.total.totalAmount, 0),
+        totalGST: Math.round(suppliers.reduce((sum, s) => sum + s.gst4 + s.gst18, 0) * 100) / 100,
+        grandTotal: Math.round(suppliers.reduce((sum, s) => sum + s.total, 0) * 100) / 100,
       },
       generatedAt: new Date(),
     };
@@ -3526,15 +3526,6 @@ class ReportService {
       breakdown,
       generatedAt: new Date(),
     };
-  }
-
-  /**
-   * Phase 2: Get tax report (wrapper for getTaxBreakdownReport)
-   * @param {Object} params - Report parameters
-   * @returns {Promise<Object>} Tax report
-   */
-  async getTaxReport(params) {
-    return await this.getTaxBreakdownReport(params);
   }
 
   /**

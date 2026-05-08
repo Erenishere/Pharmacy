@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 // E-Order Interfaces
@@ -106,6 +106,8 @@ export interface ApiResponse<T> {
 })
 export class EOrderService {
   private baseUrl = `${environment.apiUrl}/e-orders`;
+  private salesmenUrl = `${environment.apiUrl}/salesmen`;
+  private schemesUrl = `${environment.apiUrl}/schemes`;
 
   constructor(private http: HttpClient) {}
 
@@ -138,15 +140,19 @@ export class EOrderService {
 
   // E-Order Workflow Operations
   submitEOrder(id: string): Observable<ApiResponse<EOrder>> {
-    return this.http.post<ApiResponse<EOrder>>(`${this.baseUrl}/${id}/submit`, {});
+    return throwError(() => new Error('Submit is not a mounted e-order workflow. Create or update orders directly as pending.'));
   }
 
   approveEOrder(id: string, approvalData: { approvedBy: string; notes?: string }): Observable<ApiResponse<EOrder>> {
     return this.http.post<ApiResponse<EOrder>>(`${this.baseUrl}/${id}/approve`, approvalData);
   }
 
+  cancelEOrder(id: string, cancellationData: { reason: string }): Observable<ApiResponse<EOrder>> {
+    return this.http.post<ApiResponse<EOrder>>(`${this.baseUrl}/${id}/cancel`, cancellationData);
+  }
+
   rejectEOrder(id: string, rejectionData: { rejectedBy: string; reason: string }): Observable<ApiResponse<EOrder>> {
-    return this.http.post<ApiResponse<EOrder>>(`${this.baseUrl}/${id}/reject`, rejectionData);
+    return this.cancelEOrder(id, { reason: rejectionData.reason });
   }
 
   processEOrder(id: string, processData: {
@@ -159,11 +165,11 @@ export class EOrderService {
     }>;
     notes?: string;
   }): Observable<ApiResponse<EOrder>> {
-    return this.http.post<ApiResponse<EOrder>>(`${this.baseUrl}/${id}/process`, processData);
+    return throwError(() => new Error('Process is not a mounted e-order workflow. Use approve, cancel, or convert-to-invoice.'));
   }
 
   markReadyForDelivery(id: string, readyData: { notes?: string }): Observable<ApiResponse<EOrder>> {
-    return this.http.post<ApiResponse<EOrder>>(`${this.baseUrl}/${id}/ready`, readyData);
+    return throwError(() => new Error('Ready-for-delivery is not a mounted e-order workflow.'));
   }
 
   assignDelivery(id: string, deliveryData: {
@@ -171,7 +177,7 @@ export class EOrderService {
     deliveryDate: string;
     notes?: string;
   }): Observable<ApiResponse<EOrder>> {
-    return this.http.post<ApiResponse<EOrder>>(`${this.baseUrl}/${id}/assign-delivery`, deliveryData);
+    return throwError(() => new Error('Delivery assignment is not a mounted e-order workflow.'));
   }
 
   markDelivered(id: string, deliveryData: {
@@ -180,7 +186,7 @@ export class EOrderService {
     customerSignature?: string;
     notes?: string;
   }): Observable<ApiResponse<EOrder>> {
-    return this.http.post<ApiResponse<EOrder>>(`${this.baseUrl}/${id}/deliver`, deliveryData);
+    return throwError(() => new Error('Mark-delivered is not a mounted e-order workflow.'));
   }
 
   convertToInvoice(id: string, invoiceData: {
@@ -195,42 +201,41 @@ export class EOrderService {
 
   // Salesman Management
   getSalesmen(): Observable<ApiResponse<Salesman[]>> {
-    return this.http.get<ApiResponse<Salesman[]>>(`${this.baseUrl}/salesmen`);
+    return this.http.get<ApiResponse<Salesman[]>>(this.salesmenUrl);
   }
 
   getSalesmanById(id: string): Observable<ApiResponse<Salesman>> {
-    return this.http.get<ApiResponse<Salesman>>(`${this.baseUrl}/salesmen/${id}`);
+    return this.http.get<ApiResponse<Salesman>>(`${this.salesmenUrl}/${id}`);
   }
 
   // Scheme Management
   getSchemes(): Observable<ApiResponse<Scheme[]>> {
-    return this.http.get<ApiResponse<Scheme[]>>(`${this.baseUrl}/schemes`);
+    return this.http.get<ApiResponse<Scheme[]>>(this.schemesUrl);
   }
 
-  getApplicableSchemes(itemId: string, quantity: number): Observable<ApiResponse<Scheme[]>> {
-    const params = new HttpParams()
-      .set('itemId', itemId)
-      .set('quantity', quantity.toString());
-    return this.http.get<ApiResponse<Scheme[]>>(`${this.baseUrl}/schemes/applicable`, { params });
+  getApplicableSchemes(itemId: string, quantity: number, customerId?: string, companyId?: string): Observable<ApiResponse<Scheme[]>> {
+    if (!customerId) {
+      return throwError(() => new Error('customerId is required for the mounted /schemes/applicable endpoint.'));
+    }
+
+    return this.http.post<ApiResponse<Scheme[]>>(`${this.schemesUrl}/applicable`, {
+      itemId,
+      customerId,
+      companyId,
+      quantity
+    });
   }
 
   // E-Order Analytics
   getEOrderAnalytics(params: { startDate?: string; endDate?: string; salesmanId?: string } = {}): Observable<ApiResponse<any>> {
-    let httpParams = new HttpParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        httpParams = httpParams.set(key, value.toString());
-      }
+    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/summary`, {
+      params: this.toHttpParams(params)
     });
-    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/analytics`, { params: httpParams });
   }
 
   // Batch and Inventory Operations
   getAvailableBatches(itemId: string, requiredQuantity: number): Observable<ApiResponse<any[]>> {
-    const params = new HttpParams()
-      .set('itemId', itemId)
-      .set('quantity', requiredQuantity.toString());
-    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/batches/available`, { params });
+    return throwError(() => new Error('Available batch lookup is not exposed by the mounted e-order API.'));
   }
 
   reserveStock(orderId: string, items: Array<{
@@ -238,21 +243,22 @@ export class EOrderService {
     quantity: number;
     batchNumber?: string;
   }>): Observable<ApiResponse<null>> {
-    return this.http.post<ApiResponse<null>>(`${this.baseUrl}/${orderId}/reserve-stock`, { items });
+    return throwError(() => new Error('Stock reservation is not exposed by the mounted e-order API.'));
   }
 
   // Export Operations
   exportEOrders(params: EOrderQueryParams & { format: 'csv' | 'excel' | 'pdf' }): Observable<Blob> {
+    return throwError(() => new Error('E-order export is not exposed by the mounted e-order API.'));
+  }
+
+  private toHttpParams(params: Record<string, string | number | undefined>): HttpParams {
     let httpParams = new HttpParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         httpParams = httpParams.set(key, value.toString());
       }
     });
-    return this.http.get(`${this.baseUrl}/export`, {
-      params: httpParams,
-      responseType: 'blob'
-    });
+    return httpParams;
   }
 
   // Utility Methods

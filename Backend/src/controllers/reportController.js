@@ -9,6 +9,14 @@ const inventoryService = require('../services/inventoryService');
  * Handles HTTP requests for report generation and export
  */
 class ReportController {
+  constructor() {
+    Object.getOwnPropertyNames(ReportController.prototype)
+      .filter((method) => method !== 'constructor' && typeof this[method] === 'function')
+      .forEach((method) => {
+        this[method] = this[method].bind(this);
+      });
+  }
+
   /**
    * Generate sales report
    */

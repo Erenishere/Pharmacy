@@ -640,6 +640,7 @@ export class SuppliersComponent implements OnInit, OnDestroy, AfterViewInit {
         const dialogRef = this.dialog.open(SupplierFormComponent, {
             width: '500px',
             disableClose: false,
+            panelClass: 'standard-form-dialog-panel',
             data: {}
         });
 
@@ -662,6 +663,7 @@ export class SuppliersComponent implements OnInit, OnDestroy, AfterViewInit {
         const dialogRef = this.dialog.open(SupplierFormComponent, {
             width: '500px',
             disableClose: false,
+            panelClass: 'standard-form-dialog-panel',
             data: { supplier }
         });
 

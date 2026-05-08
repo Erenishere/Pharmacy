@@ -1,4 +1,9 @@
 const accountService = require('../services/accountService');
+const AccountHead = require('../models/accountHead');
+const CustomerType = require('../models/customertype');
+const Designation = require('../models/designation');
+const DimensionBranch = require('../models/dimensionbranch');
+const Town = require('../models/town');
 
 /**
  * Account Controller
@@ -49,6 +54,60 @@ const createAccount = async (req, res) => {
       error: {
         code: 'INTERNAL_ERROR',
         message: error.message || 'Failed to create account',
+      },
+      timestamp: new Date().toISOString(),
+    });
+  }
+};
+
+/**
+ * Get account registration lookup bundle
+ * @route GET /api/v1/accounts/registration-lookups
+ */
+const getAccountRegistrationLookups = async (req, res) => {
+  try {
+    const [dimensions, designations, customerTypes, accountHeads, towns] = await Promise.all([
+      DimensionBranch.find({ isActive: true })
+        .select('_id code name type isActive')
+        .sort({ name: 1 })
+        .lean(),
+      Designation.find({ isActive: true })
+        .select('_id name isActive')
+        .sort({ name: 1 })
+        .lean(),
+      CustomerType.find({ isActive: true })
+        .select('_id name isActive')
+        .sort({ name: 1 })
+        .lean(),
+      AccountHead.find({ isActive: true })
+        .select('_id name code type isActive')
+        .sort({ name: 1 })
+        .lean(),
+      Town.find({ isActive: true })
+        .select('_id name region isActive')
+        .sort({ name: 1 })
+        .lean(),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        dimensions,
+        designations,
+        customerTypes,
+        accountHeads,
+        towns,
+      },
+      message: 'Account registration lookups retrieved successfully',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Get account registration lookups error:', error);
+    return res.status(500).json({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: error.message || 'Failed to retrieve account registration lookups',
       },
       timestamp: new Date().toISOString(),
     });
@@ -777,6 +836,7 @@ const searchAccounts = async (req, res) => {
 
 module.exports = {
   createAccount,
+  getAccountRegistrationLookups,
   getAccounts,
   getAccountById,
   getAccountsByType,

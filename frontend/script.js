@@ -1,3 +1,6 @@
+// @ts-nocheck
+'use strict';
+
 const fs = require('fs');
 const path = require('path');
 const dirs = [
@@ -12,7 +15,7 @@ const dirs = [
   'recovery-summary/components/recovery-summary/recovery-summary.component.html',
   'route-plan/components/route-plan-list/route-plan-list.component.html'
 ];
-const basePath = 'c:\\\\Users\\\\DC\\\\Desktop\\\\pharmacy\\\\Frontend\\\\src\\\\app\\\\features\\\\';
+const basePath = path.join(__dirname, 'src', 'app', 'features');
 
 dirs.forEach(d => {
   const file = path.join(basePath, d);
@@ -25,21 +28,23 @@ dirs.forEach(d => {
       if (match.includes('empty-state-premium')) return match;
       
       // Determine columns span name, assuming displayedColumns or displayedColumnKeys
-      let colspanMatch = match.match(/colspan\]?\x3D\x22([^\x22']+)\x22/);
+      let colspanMatch = match.match(/colspan\]?="([^"']+)"/);
       let colspan = colspanMatch ? colspanMatch[1] : '10';
 
-      return \    <tr class=\x22mat-row empty-state-row\x22 *matNoDataRow>
-      <td class=\x22mat-cell\x22 [attr.colspan]=\x22\\x22>
-        <div class=\x22empty-state-premium\x22>
-          <div class=\x22icon-wrapper\x22>
-            <mat-icon>inbox</mat-icon>
-            <div class=\x22icon-bg-glow\x22></div>
-          </div>
-          <h4>No Records Found</h4>
-          <p>There is no data to display matching the current criteria.</p>
-        </div>
-      </td>
-    </tr>\;
+      return [
+        '    <tr class="mat-row empty-state-row" *matNoDataRow>',
+        `      <td class="mat-cell" [attr.colspan]="${colspan}">`,
+        '        <div class="empty-state-premium">',
+        '          <div class="icon-wrapper">',
+        '            <mat-icon>inbox</mat-icon>',
+        '            <div class="icon-bg-glow"></div>',
+        '          </div>',
+        '          <h4>No Records Found</h4>',
+        '          <p>There is no data to display matching the current criteria.</p>',
+        '        </div>',
+        '      </td>',
+        '    </tr>',
+      ].join('\n');
     });
 
     if (content !== newContent) {

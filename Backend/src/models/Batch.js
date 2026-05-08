@@ -133,7 +133,7 @@ batchSchema.statics.batchNumberExists = async function (batchNumber, itemId, war
 };
 
 // Method to update remaining quantity
-batchSchema.methods.updateRemainingQuantity = async function (quantityChange) {
+batchSchema.methods.updateRemainingQuantity = async function (quantityChange, options = {}) {
   const newQuantity = this.remainingQuantity + quantityChange;
 
   if (newQuantity < 0) {
@@ -147,6 +147,10 @@ batchSchema.methods.updateRemainingQuantity = async function (quantityChange) {
     this.status = 'depleted';
   } else if (this.status === 'depleted' && this.remainingQuantity > 0) {
     this.status = 'active';
+  }
+
+  if (options.session) {
+    return this.save({ session: options.session });
   }
 
   return this.save();

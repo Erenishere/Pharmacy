@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable, map } from 'rxjs';
 import { API_CONFIG } from '../../../core/constants/api.constants';
 import {
   SalaryPackage,
@@ -16,7 +15,6 @@ import {
 })
 export class SalaryPackageService {
   private readonly baseUrl = API_CONFIG.BASE_URL;
-  private static createdPackages: SalaryPackage[] = [];
 
   constructor(private http: HttpClient) { }
 
@@ -24,29 +22,17 @@ export class SalaryPackageService {
    * Create salary package
    */
   createPackage(packageData: SalaryPackageCreateRequest): Observable<ApiResponse<SalaryPackage>> {
-    return this.http.post<ApiResponse<SalaryPackage>>(
+    return this.http.post<ApiResponse<SalaryPackage | { packageId: string; package: SalaryPackage }>>(
       `${this.baseUrl}/salary-packages`,
       packageData
     ).pipe(
-      catchError((error) => {
-        console.error('[SalaryPackageService] Create package failed:', error);
-        // Mock response
-        const mockPackage: SalaryPackage = {
-          _id: Date.now().toString(),
-          packageId: `PKG${Date.now()}`,
-          employeeName: 'Mock Employee',
-          basicPay: { amount: 0, source: 'biodata' },
-          ...packageData,
-          status: 'Active',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+      map((response) => {
+        const rawData = response.data as SalaryPackage | { packageId: string; package: SalaryPackage };
+        const salaryPackage = 'package' in rawData ? rawData.package : rawData;
+        return {
+          ...response,
+          data: salaryPackage
         };
-        SalaryPackageService.createdPackages.push(mockPackage);
-        return of({
-          success: true,
-          data: mockPackage,
-          message: 'Package created (mock response)'
-        });
       })
     );
   }
@@ -67,15 +53,6 @@ export class SalaryPackageService {
     return this.http.get<ApiResponse<SalaryPackage[]>>(
       `${this.baseUrl}/salary-packages`,
       { params }
-    ).pipe(
-      catchError((error) => {
-        console.error('[SalaryPackageService] Get packages failed:', error);
-        return of({
-          success: true,
-          data: SalaryPackageService.createdPackages,
-          message: 'Mock data loaded'
-        });
-      })
     );
   }
 
@@ -111,53 +88,29 @@ export class SalaryPackageService {
    * Get employees (from Account API)
    */
   getEmployees(): Observable<ApiResponse<Employee[]>> {
-    return this.http.get<ApiResponse<Employee[]>>(
-      `${this.baseUrl}/accounts?accountType=employee`
+    const params = new HttpParams()
+      .set('accountType', 'employee')
+      .set('isActive', 'true')
+      .set('limit', '100');
+
+    return this.http.get<ApiResponse<any[]>>(
+      `${this.baseUrl}/accounts`,
+      { params }
     ).pipe(
-      catchError((error) => {
-        console.error('[SalaryPackageService] Get employees failed:', error);
-        // Mock employees
-        const mockEmployees: Employee[] = [
-          {
-            _id: '1',
-            code: 'EMP001',
-            name: 'Ahmed Khan',
-            email: 'ahmed@example.com',
-            phone: '+1234567890',
-            designation: 'Sales Manager',
-            basicPay: 50000,
-            accountType: 'employee',
-            isActive: true
-          },
-          {
-            _id: '2',
-            code: 'EMP002',
-            name: 'Ali Raza',
-            email: 'ali@example.com',
-            phone: '+1234567891',
-            designation: 'Salesman',
-            basicPay: 45000,
-            accountType: 'employee',
-            isActive: true
-          },
-          {
-            _id: '3',
-            code: 'EMP003',
-            name: 'Sara Ahmed',
-            email: 'sara@example.com',
-            phone: '+1234567892',
-            designation: 'Salesman',
-            basicPay: 42000,
-            accountType: 'employee',
-            isActive: true
-          }
-        ];
-        return of({
-          success: true,
-          data: mockEmployees,
-          message: 'Mock employees loaded'
-        });
-      })
+      map((response) => ({
+        ...response,
+        data: (response.data || []).map((account) => ({
+          _id: account._id,
+          code: account.code || '',
+          name: account.name || account.accountName || '',
+          email: account.email || account.contactInfo?.email || '',
+          phone: account.phone || account.contactInfo?.phone || account.contactInfo?.mobile || '',
+          designation: account.employeeBiodata?.designation || account.employeeBiodata?.designationId?.name || account.designation || '',
+          basicPay: Number(account.employeeBiodata?.basicPay || account.basicPay || 0),
+          accountType: 'employee',
+          isActive: account.isActive !== false
+        }))
+      }))
     );
   }
 
@@ -165,24 +118,23 @@ export class SalaryPackageService {
    * Get items for brand incentives
    */
   getItems(): Observable<ApiResponse<Item[]>> {
-    return this.http.get<ApiResponse<Item[]>>(
-      `${this.baseUrl}/items`
+    const params = new HttpParams()
+      .set('isActive', 'true')
+      .set('limit', '100');
+
+    return this.http.get<ApiResponse<any[]>>(
+      `${this.baseUrl}/items`,
+      { params }
     ).pipe(
-      catchError((error) => {
-        console.error('[SalaryPackageService] Get items failed:', error);
-        // Mock items
-        const mockItems: Item[] = [
-          { _id: '1', code: 'ITEM001', name: 'Panadol 500mg', category: 'Medicine' },
-          { _id: '2', code: 'ITEM002', name: 'Brufen 400mg', category: 'Medicine' },
-          { _id: '3', code: 'ITEM003', name: 'Augmentin 625mg', category: 'Antibiotic' },
-          { _id: '4', code: 'ITEM004', name: 'Vitamin C 1000mg', category: 'Supplement' }
-        ];
-        return of({
-          success: true,
-          data: mockItems,
-          message: 'Mock items loaded'
-        });
-      })
+      map((response) => ({
+        ...response,
+        data: (response.data || []).map((item) => ({
+          _id: item._id,
+          code: item.code || '',
+          name: item.name || item.itemName || '',
+          category: item.category?.name || item.categoryName || item.category || ''
+        }))
+      }))
     );
   }
 }

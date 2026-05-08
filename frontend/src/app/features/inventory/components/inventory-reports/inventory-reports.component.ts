@@ -141,7 +141,7 @@ export class InventoryReportsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (response.success) {
-            this.fastMovingItems = response.data || [];
+            this.fastMovingItems = response.data?.items || [];
           }
           this.loading.fastMoving = false;
         },
@@ -177,7 +177,7 @@ export class InventoryReportsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (response.success) {
-            this.deadStockItems = response.data || [];
+            this.deadStockItems = response.data?.items || [];
           }
           this.loading.deadStock = false;
         },

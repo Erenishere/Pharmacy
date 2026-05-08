@@ -301,7 +301,7 @@ export class PurchaseOrderListComponent implements OnInit, OnDestroy {
     this.poService.convertToInvoice(po._id).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
         this.snackBar.open('Purchase order converted to invoice successfully', 'Close', { duration: 3000 });
-        this.router.navigate(['/purchase-invoices', response.data._id]);
+        this.router.navigate(['/purchase-invoices/edit', response.data._id]);
       },
       error: () => {
         this.snackBar.open('Failed to convert to invoice', 'Close', { duration: 3000 });
@@ -329,13 +329,53 @@ export class PurchaseOrderListComponent implements OnInit, OnDestroy {
   }
 
   onPrint(po: PurchaseOrder): void {
-    // Implement print functionality
-    this.snackBar.open('Print functionality coming soon', 'Close', { duration: 2000 });
+    this.router.navigate(['/purchase-orders', po._id], { queryParams: { print: '1' } });
   }
 
   onExport(): void {
-    // Implement export functionality
-    this.snackBar.open('Export functionality coming soon', 'Close', { duration: 2000 });
+    const rows = this.dataSource.data;
+    if (!rows.length) {
+      this.snackBar.open('No purchase orders to export', 'Close', { duration: 2500 });
+      return;
+    }
+
+    const columns = [
+      { key: 'sno', label: 'S#' },
+      { key: 'poNumber', label: 'P/O No' },
+      { key: 'supplierName', label: 'Party Name' },
+      { key: 'supplierTown', label: 'Town' },
+      { key: 'billNo', label: 'Bill No' },
+      { key: 'poDate', label: 'Date' },
+      { key: 'totalAmount', label: 'Amount' },
+      { key: 'status', label: 'Status' },
+      { key: 'fulfillmentStatus', label: 'Fulfillment' }
+    ];
+    const csv = [
+      columns.map(column => this.escapeCsv(column.label)).join(','),
+      ...rows.map(row => columns
+        .map(column => this.escapeCsv(this.formatExportValue(row[column.key])))
+        .join(','))
+    ].join('\r\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `purchase-orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    this.snackBar.open('Purchase orders exported', 'Close', { duration: 2500 });
+  }
+
+  private formatExportValue(value: unknown): string {
+    if (value === null || value === undefined) return '';
+    if (value instanceof Date) return value.toISOString();
+    return String(value);
+  }
+
+  private escapeCsv(value: string): string {
+    const escaped = value.replace(/"/g, '""');
+    return /[",\r\n]/.test(escaped) ? `"${escaped}"` : escaped;
   }
 
   clearFilters(): void {

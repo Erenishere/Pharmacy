@@ -1,17 +1,162 @@
+@import "../../../../../styles/vuexy-vars";
 @import "../../../../../styles/shared-list-styles";
 
-.route-plan-list-page {
+$p-bg: #f8f7fa;
+
+:host {
+  display: block;
+  background: $p-bg;
+}
+
+.route-plan-list {
   @include page-container;
-  @include page-header;
-  @include data-table;
-  @include paginator;
 
-  .dashboard-stats-grid { @include dashboard-stats-grid; }
+  .list-page-header {
+    @include page-header;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
 
-  .list-page-card { @include list-card; }
+    .header-content {
+      .title-with-accent {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .header-accent-bar {
+          width: 5px;
+          height: 40px;
+          border-radius: 4px;
+          background: $purple;
+        }
+      }
+
+      h1 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+
+        mat-icon {
+          color: $purple;
+        }
+      }
+
+      .page-subtitle {
+        margin: 8px 0 0 17px;
+        color: $grey-dark;
+      }
+    }
+
+    .header-actions {
+      .create-btn {
+        background: linear-gradient(118deg, #7367f0, #867cf0) !important;
+        color: #fff !important;
+        font-weight: 600;
+        height: 42px;
+        padding: 0 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(115, 103, 240, 0.35);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.25s ease;
+
+        &:hover {
+          box-shadow: 0 6px 18px rgba(115, 103, 240, 0.5);
+          transform: translateY(-1px);
+        }
+
+        mat-icon {
+          color: #fff !important;
+        }
+      }
+    }
+  }
+
+  .dashboard-stats-grid { 
+    @include dashboard-stats-grid;
+    margin-bottom: 24px;
+  }
+
+  // ─── Table Styling ────────────────────────────────────────────
+  :host ::ng-deep {
+    .route-plan-list {
+      .table-wrapper {
+        @include data-table;
+      }
+
+      .mat-mdc-header-row {
+        background-color: $purple !important;
+        th {
+          color: #ffffff !important;
+        }
+      }
+
+      .mat-mdc-paginator {
+        @include paginator;
+        margin-top: 16px;
+        border-radius: 8px;
+      }
+    }
+  }
+
+  .list-page-card {
+    @include list-card;
+
+    // Standardized No Data Content
+    .no-data-content {
+      padding: 60px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: $grey-dark;
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        margin-bottom: 16px;
+        color: rgba($purple, 0.2);
+      }
+
+      h4 {
+        margin: 0 0 8px 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: $purple-dark;
+      }
+
+      p {
+        margin: 0;
+        color: $grey-dark;
+        font-size: 0.95rem;
+      }
+    }
+
+    mat-paginator {
+      background: $purple !important;
+      color: #ffffff !important;
+      border-radius: 8px;
+      margin-top: 16px;
+
+      ::ng-deep {
+        .mat-mdc-paginator-range-label,
+        .mat-mdc-paginator-page-size-label,
+        .mat-mdc-select-value,
+        .mat-mdc-select-arrow,
+        .mat-mdc-icon-button {
+          color: #ffffff !important;
+        }
+      }
+    }
+  }
 
   .dimension-chip {
-    background: rgba(var(--color-bg-page), 0.1);
+    background: rgba($purple, 0.1);
     color: $purple;
     font-weight: 500;
     font-size: 11px;

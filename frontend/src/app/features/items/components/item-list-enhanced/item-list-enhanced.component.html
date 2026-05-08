@@ -2,7 +2,10 @@
   <!-- Header -->
   <div class="list-page-header">
     <div class="header-content">
-      <h1><mat-icon>inventory_2</mat-icon> Item Management</h1>
+      <div class="title-with-accent">
+        <div class="header-accent-bar"></div>
+        <h1><mat-icon>inventory_2</mat-icon> Item Management</h1>
+      </div>
       <p class="page-description">Manage your inventory items, pricing, and stock levels</p>
     </div>
     <div class="header-actions">
@@ -26,6 +29,17 @@
                  placeholder="Search by name, code, barcode...">
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
+
+        <!-- Category Filter -->
+        <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+          <mat-label>Category</mat-label>
+          <mat-select [(ngModel)]="selectedCategory" (ngModelChange)="onFilterChange()">
+            <mat-option [value]="''">All Categories</mat-option>
+            @for (category of categories; track category._id) {
+              <mat-option [value]="category._id">{{ category.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
       </div>
 
       <div class="filter-group-secondary">
@@ -36,17 +50,6 @@
             <mat-option [value]="''">All Companies</mat-option>
             @for (company of companies; track company._id) {
               <mat-option [value]="company._id">{{ company.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <!-- Category Filter -->
-        <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
-          <mat-label>Category</mat-label>
-          <mat-select [(ngModel)]="selectedCategory" (ngModelChange)="onFilterChange()">
-            <mat-option [value]="''">All Categories</mat-option>
-            @for (category of categories; track category._id) {
-              <mat-option [value]="category._id">{{ category.name }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -72,6 +75,7 @@
         [pageIndex]="pageIndex"
         [pageSizeOptions]="pageSizeOptions"
         (pageChange)="onPageChange($event)"
+        (sortChange)="onSortChange($event)"
         (actionClick)="onTableAction($event)">
       </app-data-table>
     </div>

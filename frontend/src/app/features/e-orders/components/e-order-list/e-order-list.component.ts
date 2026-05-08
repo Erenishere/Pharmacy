@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
@@ -34,7 +35,7 @@ import {
   imports: [
     CommonModule, ReactiveFormsModule,
     MatTableModule, MatButtonModule, MatIconModule, MatFormFieldModule,
-    MatSelectModule, MatDatepickerModule, MatNativeDateModule,
+    MatSelectModule, MatDatepickerModule, MatNativeDateModule, MatInputModule,
     MatCardModule, MatProgressSpinnerModule, MatDialogModule,
     MatTooltipModule, MatSnackBarModule, MatMenuModule, MatPaginatorModule
   ],
@@ -42,7 +43,7 @@ import {
   styleUrl: './e-order-list.component.scss'
 })
 export class EOrderListComponent implements OnInit {
-  displayedColumns = ['orderNumber', 'customer', 'town', 'grandTotal', 'createdBy', 'orderDate', 'actions'];
+  displayedColumns = ['orderNumber', 'customer', 'town', 'grandTotal', 'createdBy', 'orderDate', 'status', 'actions'];
   dataSource = new MatTableDataSource<EOrder>([]);
   loading = false;
   processingId: string | null = null;
@@ -120,6 +121,17 @@ export class EOrderListComponent implements OnInit {
     this.loadOrders();
   }
 
+  clearFilters(): void {
+    this.statusFilter.setValue('', { emitEvent: false });
+    this.dateFrom.setValue(null, { emitEvent: false });
+    this.dateTo.setValue(null, { emitEvent: false });
+    this.applyFilters();
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(this.statusFilter.value || this.dateFrom.value || this.dateTo.value);
+  }
+
   viewDetails(eOrder: EOrder): void {
     this.router.navigate(['/e-orders', eOrder._id]);
   }
@@ -129,7 +141,7 @@ export class EOrderListComponent implements OnInit {
       width: '1280px',
       maxWidth: '96vw',
       height: '92vh',
-      panelClass: 'e-order-dialog-panel',
+      panelClass: ['standard-form-dialog-panel', 'e-order-dialog-panel'],
       autoFocus: false,
       data: {}
     });
@@ -143,7 +155,7 @@ export class EOrderListComponent implements OnInit {
       width: '1280px',
       maxWidth: '96vw',
       height: '92vh',
-      panelClass: 'e-order-dialog-panel',
+      panelClass: ['standard-form-dialog-panel', 'e-order-dialog-panel'],
       autoFocus: false,
       data: { order }
     });

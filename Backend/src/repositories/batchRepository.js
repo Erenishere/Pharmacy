@@ -17,12 +17,14 @@ class BatchRepository {
    * @param {string} id - Batch ID
    * @returns {Promise<Object|null>} Batch or null if not found
    */
-  async findById(id) {
-    return Batch.findById(id)
+  async findById(id, options = {}) {
+    const query = Batch.findById(id)
       .populate('item', 'name code')
       .populate('supplier', 'name code')
       .populate('location', 'name code')
       .lean();
+
+    return options.session ? query.session(options.session) : query;
   }
 
   /**
@@ -31,12 +33,14 @@ class BatchRepository {
    * @param {string} itemId - Item ID
    * @returns {Promise<Object|null>} Batch or null if not found
    */
-  async findByBatchNumber(batchNumber, itemId) {
-    return Batch.findOne({ batchNumber, item: itemId })
+  async findByBatchNumber(batchNumber, itemId, options = {}) {
+    const query = Batch.findOne({ batchNumber, item: itemId })
       .populate('item', 'name code')
       .populate('supplier', 'name code')
       .populate('location', 'name code')
       .lean();
+
+    return options.session ? query.session(options.session) : query;
   }
 
   /**
@@ -375,14 +379,15 @@ class BatchRepository {
    * @param {number} quantity - Quantity to add (positive) or remove (negative)
    * @returns {Promise<Object|null>} Updated batch or null if not found
    */
-  async updateQuantity(id, quantity) {
-    const batch = await Batch.findById(id);
+  async updateQuantity(id, quantity, options = {}) {
+    const query = Batch.findById(id);
+    const batch = options.session ? await query.session(options.session) : await query;
     if (!batch) {
       return null;
     }
 
-    await batch.updateRemainingQuantity(quantity);
-    return this.findById(id);
+    await batch.updateRemainingQuantity(quantity, options);
+    return this.findById(id, options);
   }
 
   /**

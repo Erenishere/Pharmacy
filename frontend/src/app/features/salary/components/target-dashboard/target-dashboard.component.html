@@ -1,8 +1,11 @@
-<div class="list-page-container target-dashboard-page">
+<div class="list-page-container target-dashboard">
   <div class="list-page-header">
     <div class="header-content">
-      <h1 class="page-title"><mat-icon>trending_up</mat-icon> Performance Dashboard</h1>
-      <p class="page-subtitle">Track sales targets, recoveries, and brand incentives</p>
+      <div class="title-with-accent">
+        <div class="header-accent-bar"></div>
+        <h1 class="page-title"><mat-icon>trending_up</mat-icon> Target Dashboard</h1>
+      </div>
+      <p class="page-subtitle">Monitor sales targets and performance metrics</p>
     </div>
     <div class="header-actions">
       <div class="date-filters">
@@ -30,34 +33,31 @@
   <!-- Summary Stats -->
   <div class="dashboard-stats-grid target-summary" *ngIf="dashboardData && !loading">
     <div class="stat-card primary">
-      <div class="stat-icon-wrapper"><mat-icon>people</mat-icon></div>
-      <div class="stat-details">
-        <h3 class="stat-value">{{ dashboardData.summary.totalEmployees }}</h3>
-        <p class="stat-label">Total Staff</p>
-      </div>
-    </div>
-
-    <div class="stat-card success">
       <div class="stat-icon-wrapper"><mat-icon>trending_up</mat-icon></div>
-      <div class="stat-details">
-        <h3 class="stat-value">{{ dashboardData.summary.salesTargetAchievers }}</h3>
-        <p class="stat-label">Sales Achievers</p>
+      <div class="stat-data">
+        <span class="value">Rs. {{ formatAmt(dashboardData.summary.totalTarget) }}</span>
+        <span class="label">Monthly Target</span>
       </div>
     </div>
-
-    <div class="stat-card info">
-      <div class="stat-icon-wrapper"><mat-icon>account_balance_wallet</mat-icon></div>
-      <div class="stat-details">
-        <h3 class="stat-value">{{ dashboardData.summary.recoveryTargetAchievers }}</h3>
-        <p class="stat-label">Recovery Achievers</p>
+    <div class="stat-card success">
+      <div class="stat-icon-wrapper"><mat-icon>check_circle</mat-icon></div>
+      <div class="stat-data">
+        <span class="value">Rs. {{ formatAmt(dashboardData.summary.totalAchieved) }}</span>
+        <span class="label">Total Achieved</span>
       </div>
     </div>
-
     <div class="stat-card warning">
-      <div class="stat-icon-wrapper"><mat-icon>groups</mat-icon></div>
-      <div class="stat-details">
-        <h3 class="stat-value">{{ dashboardData.summary.partyVisitTargetAchievers }}</h3>
-        <p class="stat-label">Visit Achievers</p>
+      <div class="stat-icon-wrapper"><mat-icon>show_chart</mat-icon></div>
+      <div class="stat-data">
+        <span class="value">{{ dashboardData.summary.avgAchievement | number:'1.1-1' }}%</span>
+        <span class="label">Avg Performance</span>
+      </div>
+    </div>
+    <div class="stat-card info">
+      <div class="stat-icon-wrapper"><mat-icon>group</mat-icon></div>
+      <div class="stat-data">
+        <span class="value">{{ dashboardData.summary.totalEmployees }}</span>
+        <span class="label">Sales Staff</span>
       </div>
     </div>
   </div>
@@ -190,20 +190,18 @@
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          
+
           <tr class="mat-row empty-state-row" *matNoDataRow>
             <td class="mat-cell" [attr.colspan]="displayedColumns.length">
-              <div class="empty-state-premium">
-                <div class="icon-wrapper">
-                  <mat-icon>insights</mat-icon>
-                  <div class="icon-bg-glow"></div>
-                </div>
+              <div class="no-data-content">
+                <mat-icon>insights</mat-icon>
                 <h4>No Performance Records Found</h4>
                 <p>There is no data to display matching the current criteria.</p>
               </div>
             </td>
           </tr>
         </table>
+        <mat-paginator class="standard-purple-footer" [length]="totalItems" [pageSize]="pageSize" [pageSizeOptions]="[10, 25, 50, 100]" (page)="onPageChange($event)"></mat-paginator>
       </div>
     }
   </div>

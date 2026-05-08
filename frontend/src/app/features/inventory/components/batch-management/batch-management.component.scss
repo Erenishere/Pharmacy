@@ -1,10 +1,12 @@
 .batch-management-container {
   padding: 24px;
-  background-color: #f5f5f5;
+  background-color: var(--indus-bg, #fbfbfd);
   min-height: 100vh;
 
   .dashboard-header {
     margin-bottom: 24px;
+    padding-left: 16px;
+    border-left: 6px solid var(--indus-primary, #7367f0);
 
     .header-content {
       display: flex;
@@ -18,26 +20,40 @@
         align-items: center;
         gap: 12px;
         margin: 0;
-        font-size: 28px;
-        font-weight: 500;
-        color: #333;
+        font-size: 38px;
+        font-weight: 800;
+        letter-spacing: 0;
+        color: var(--indus-text, #5e5873);
 
         mat-icon {
-          font-size: 32px;
-          width: 32px;
-          height: 32px;
-          color: #1976d2;
+          font-size: 36px;
+          width: 36px;
+          height: 36px;
+          color: var(--indus-primary, #7367f0);
         }
       }
 
       .header-actions {
         display: flex;
-        gap: 8px;
+        gap: 12px;
         align-items: center;
+        flex-wrap: wrap;
+
+        button {
+          min-height: 44px;
+          border-radius: 8px;
+          color: var(--indus-text, #5e5873);
+          font-weight: 800;
+          letter-spacing: 0;
+
+          mat-icon {
+            color: var(--indus-primary, #7367f0);
+          }
+        }
 
         button.active {
-          color: #1976d2;
-          background-color: rgba(25, 118, 210, 0.1);
+          color: var(--indus-primary, #7367f0);
+          background-color: var(--indus-primary-soft, rgba(115, 103, 240, 0.1));
         }
 
         .spinning {
@@ -55,62 +71,82 @@
   // Statistics Cards
   .statistics-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+    align-items: stretch;
 
     .stat-card {
+      min-height: 136px;
+      border: 1px solid var(--indus-border, #ebe9f1);
+      border-radius: 8px;
+      background: var(--indus-surface, #fff);
+      box-shadow: var(--indus-shadow-card, 0 8px 24px rgba(34, 41, 47, 0.07));
+      overflow: visible;
+
       mat-card-content {
         display: flex;
         align-items: center;
-        gap: 16px;
-        padding: 20px !important;
+        justify-content: flex-start;
+        gap: 18px;
+        min-height: 136px;
+        padding: 22px 24px !important;
+        overflow: visible;
 
         .stat-icon {
+          flex: 0 0 58px;
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 60px;
-          height: 60px;
-          border-radius: 12px;
+          width: 58px;
+          height: 58px;
+          border-radius: 14px;
 
           mat-icon {
-            font-size: 32px;
-            width: 32px;
-            height: 32px;
+            font-size: 28px;
+            width: 28px;
+            height: 28px;
           }
         }
 
         .stat-details {
           flex: 1;
+          min-width: 0;
 
           .stat-label {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 4px;
+            font-size: 13px;
+            line-height: 1.15;
+            color: var(--indus-text-muted, #a8a5b6);
+            margin-bottom: 8px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0;
           }
 
           .stat-value {
-            font-size: 28px;
-            font-weight: 600;
-            line-height: 1.2;
+            font-size: 30px;
+            font-weight: 800;
+            line-height: 1.05;
+            color: var(--indus-text, #5e5873);
           }
 
           .stat-sublabel {
-            font-size: 12px;
-            color: #999;
-            margin-top: 4px;
+            font-size: 13px;
+            line-height: 1.25;
+            color: var(--indus-text-muted, #a8a5b6);
+            margin-top: 8px;
+            font-weight: 600;
           }
         }
       }
 
       &.primary {
         .stat-icon {
-          background-color: rgba(25, 118, 210, 0.1);
-          color: #1976d2;
+          background-color: var(--indus-primary-soft, rgba(115, 103, 240, 0.1));
+          color: var(--indus-primary, #7367f0);
         }
         .stat-value {
-          color: #1976d2;
+          color: var(--indus-primary, #7367f0);
         }
       }
 
@@ -149,24 +185,32 @@
   // Filters Card
   .filters-card {
     margin-bottom: 24px;
+    border: 1px solid var(--indus-border, #ebe9f1);
+    border-radius: 8px;
+    background: var(--indus-surface, #fff);
+    box-shadow: var(--indus-shadow-card, 0 8px 24px rgba(34, 41, 47, 0.07));
 
     .filters-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px 22px;
       align-items: start;
 
       .search-field {
         grid-column: span 2;
-        min-width: 300px;
+        min-width: 0;
       }
 
       .clear-filters-btn {
-        margin-top: 8px;
+        min-height: 56px;
+        align-self: start;
+        border-radius: 8px;
+        white-space: nowrap;
       }
 
       mat-form-field {
         width: 100%;
+        min-width: 0;
       }
     }
   }
@@ -438,6 +482,33 @@
         align-items: center;
         justify-content: center;
         z-index: 10;
+      }
+    }
+  }
+
+  @media (max-width: 900px) {
+    .dashboard-header .header-content {
+      align-items: flex-start;
+      flex-direction: column;
+
+      h1 {
+        font-size: 30px;
+      }
+    }
+
+    .statistics-cards {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .filters-card .filters-container {
+      grid-template-columns: 1fr;
+
+      .search-field {
+        grid-column: auto;
+      }
+
+      .clear-filters-btn {
+        width: 100%;
       }
     }
   }

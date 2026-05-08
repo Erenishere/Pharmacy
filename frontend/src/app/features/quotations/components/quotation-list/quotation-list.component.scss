@@ -1,10 +1,79 @@
+@import "../../../../../styles/vuexy-vars";
 @import "../../../../../styles/shared-list-styles";
+
+$p-bg: #f8f7fa;
+
+:host {
+  display: block;
+  background: $p-bg;
+}
 
 .quotation-list-page {
   @include page-container;
-  @include page-header;
-  @include data-table;
-  @include paginator;
+
+  .list-page-header {
+    @include page-header;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+
+    .header-content {
+      .title-with-accent {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .header-accent-bar {
+          width: 5px;
+          height: 40px;
+          border-radius: 4px;
+          background: $purple;
+        }
+      }
+
+      h1 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+
+        mat-icon {
+          color: $purple;
+        }
+      }
+
+      .page-subtitle {
+        margin: 8px 0 0 17px;
+        color: $grey-dark;
+      }
+    }
+
+    .header-actions {
+      .create-btn {
+        background: linear-gradient(118deg, #7367f0, #867cf0) !important;
+        color: #fff !important;
+        font-weight: 600;
+        height: 42px;
+        padding: 0 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(115, 103, 240, 0.35);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.25s ease;
+
+        &:hover {
+          box-shadow: 0 6px 18px rgba(115, 103, 240, 0.5);
+          transform: translateY(-1px);
+        }
+
+        mat-icon {
+          color: #fff !important;
+        }
+      }
+    }
+  }
 
   .dashboard-stats-grid { @include dashboard-stats-grid; }
 
@@ -15,6 +84,115 @@
     &.success { --stat-color: #{$success}; }
     &.danger { --stat-color: #{$danger}; }
     &.primary-alt { --stat-color: #{$purple-dark}; }
+  }
+
+  // ─── Filter Section ───────────────────────────────────────────
+  .list-filters-section.quotation-filters {
+    padding: 20px 24px !important;
+    border-bottom: 1px solid rgba($purple, 0.08);
+
+    .filter-group-primary {
+      display: grid !important;
+      grid-template-columns: minmax(280px, 2.2fr) repeat(3, minmax(180px, 1fr)) auto !important;
+      gap: 16px !important;
+      align-items: start !important;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    mat-form-field.search-field,
+    mat-form-field.filter-field {
+      width: 100% !important;
+      min-width: 0 !important;
+      margin: 0 !important;
+    }
+
+    .clear-btn {
+      align-self: start;
+      min-width: 132px;
+      height: 56px;
+      color: $grey-dark !important;
+      white-space: nowrap;
+
+      &:hover {
+        background: rgba($purple, 0.05);
+      }
+    }
+  }
+
+  // ─── Table Styling ────────────────────────────────────────────
+  :host ::ng-deep {
+    .quotation-list-page {
+      .table-wrapper {
+        @include data-table;
+      }
+
+      .mat-mdc-header-row {
+        background-color: $purple !important;
+        th {
+          color: #ffffff !important;
+        }
+      }
+
+      .mat-mdc-paginator {
+        @include paginator;
+        margin-top: 16px;
+        border-radius: 8px;
+      }
+    }
+  }
+
+  .list-page-card {
+    @include list-card;
+
+    // Standardized No Data Content
+    .no-data-content {
+      padding: 60px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: $grey-dark;
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        margin-bottom: 16px;
+        color: rgba($purple, 0.2);
+      }
+
+      h4 {
+        margin: 0 0 8px 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: $purple-dark;
+      }
+
+      p {
+        margin: 0;
+        color: $grey-dark;
+        font-size: 0.95rem;
+      }
+    }
+
+    mat-paginator {
+      background: $purple !important;
+      color: #ffffff !important;
+      border-radius: 8px;
+      margin-top: 16px;
+
+      ::ng-deep {
+        .mat-mdc-paginator-range-label,
+        .mat-mdc-paginator-page-size-label,
+        .mat-mdc-select-value,
+        .mat-mdc-select-arrow,
+        .mat-mdc-icon-button {
+          color: #ffffff !important;
+        }
+      }
+    }
   }
 
   .party-info {
@@ -35,7 +213,7 @@
     &.draft { background: rgba($grey-medium, 0.1); color: $grey-dark; }
     &.sent { background: rgba($warning, 0.1); color: darken($warning, 15%); }
     &.approved { background: rgba($success, 0.1); color: darken($success, 10%); }
-    &.converted { background: rgba(var(--color-bg-page), 0.1); color: $purple; }
+    &.converted { background: rgba($purple, 0.1); color: $purple; }
     &.expired, &.cancelled { background: rgba($danger, 0.1); color: $danger; opacity: 0.7; }
   }
 
@@ -43,7 +221,32 @@
     opacity: 0.6;
     background-color: rgba($grey-very-light, 0.5);
   }
-}
 
-.list-page-card { @include list-card; }
+  @media (max-width: 1260px) {
+    .list-filters-section.quotation-filters {
+      .filter-group-primary {
+        grid-template-columns: repeat(2, minmax(220px, 1fr)) !important;
+      }
+
+      .clear-btn {
+        grid-column: 1 / -1;
+        justify-self: start;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .list-filters-section.quotation-filters {
+      padding: 18px !important;
+
+      .filter-group-primary {
+        grid-template-columns: 1fr !important;
+      }
+
+      .clear-btn {
+        width: 100%;
+      }
+    }
+  }
+}
 

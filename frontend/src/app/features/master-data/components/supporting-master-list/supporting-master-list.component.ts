@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -46,6 +46,91 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
       overflow: hidden;
     }
 
+    .metadata-nav-card {
+      @include list-card;
+      margin-bottom: 22px;
+      padding: 22px;
+    }
+
+    .metadata-nav-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+
+      h2 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        color: var(--indus-text, #5e5873);
+        font-size: 20px;
+        font-weight: 800;
+
+        mat-icon {
+          color: var(--indus-primary, #7367f0);
+        }
+      }
+
+      p {
+        margin: 4px 0 0;
+        color: var(--indus-text-soft, #6e6b7b);
+        font-size: 14px;
+        font-weight: 500;
+      }
+    }
+
+    .metadata-tab-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .metadata-tab {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 10px 14px;
+      border: 1px solid var(--indus-border, #ebe9f1);
+      border-radius: var(--indus-radius-sm, 8px);
+      background: var(--indus-surface, #fff);
+      color: var(--indus-text, #5e5873);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: left;
+      transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, transform 160ms ease;
+
+      mat-icon {
+        flex: 0 0 28px;
+        width: 28px;
+        height: 28px;
+        color: var(--indus-primary, #7367f0);
+        font-size: 22px;
+      }
+
+      &:hover {
+        border-color: var(--indus-hover-border, rgba(115, 103, 240, 0.18));
+        background: var(--indus-primary-softer, rgba(115, 103, 240, 0.05));
+        box-shadow: var(--indus-hover-shadow, 0 12px 28px rgba(115, 103, 240, 0.12));
+        transform: translateY(-1px);
+      }
+
+      &.active {
+        border-color: var(--indus-primary, #7367f0);
+        background: linear-gradient(135deg, var(--indus-primary, #7367f0) 0%, var(--indus-primary-dark, #5e50ee) 100%);
+        color: var(--indus-white, #fff);
+        box-shadow: var(--indus-shadow-button, 0 8px 18px rgba(115, 103, 240, 0.28));
+
+        mat-icon {
+          color: var(--indus-white, #fff);
+        }
+      }
+    }
+
     .table-actions {
       padding: 24px;
       display: flex;
@@ -65,6 +150,21 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
         mat-icon {
           color: #7367f0;
         }
+      }
+    }
+
+    @media (max-width: 768px) {
+      .metadata-nav-card {
+        padding: 16px;
+      }
+
+      .metadata-nav-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .metadata-tab-grid {
+        grid-template-columns: 1fr;
       }
     }
   `]
@@ -90,6 +190,25 @@ export class SupportingMasterListComponent implements OnInit {
   public businessTypes: any[] = [];
 
   currentTab: string = 'transporters';
+
+  readonly metadataTabs = [
+    { key: 'transporters', label: 'Transporters', icon: 'local_shipping' },
+    { key: 'claim-accounts', label: 'Claim Accounts', icon: 'account_balance' },
+    { key: 'dimensions', label: 'Dimensions', icon: 'layers' },
+    { key: 'salesmen', label: 'Sales Force', icon: 'person' },
+    { key: 'account-heads', label: 'Account Heads', icon: 'summarize' },
+    { key: 'schemes', label: 'Schemes', icon: 'percent' },
+    { key: 'towns', label: 'Towns', icon: 'location_city' },
+    { key: 'areas', label: 'Areas', icon: 'map' },
+    { key: 'customer-types', label: 'Customer Types', icon: 'groups' },
+    { key: 'companies', label: 'Companies', icon: 'business' },
+    { key: 'company-groups', label: 'Corporate Groups', icon: 'corporate_fare' },
+    { key: 'formulas', label: 'Formulas', icon: 'science' },
+    { key: 'formula-sizes', label: 'Formula Sizes', icon: 'straighten' },
+    { key: 'categories', label: 'Categories', icon: 'category' },
+    { key: 'sub-categories', label: 'Sub-Categories', icon: 'segment' },
+    { key: 'business-types', label: 'Business Types', icon: 'store' }
+  ];
 
   private tabMapping: { [key: string]: boolean } = {
     'transporters': true,
@@ -225,7 +344,8 @@ export class SupportingMasterListComponent implements OnInit {
     private supportingService: SupportingMasterService,
     private toastService: ToastService,
     private dialog: MatDialog,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) { }
 
   onTableAction(event: TableActionClickEvent, type: string): void {
@@ -240,9 +360,23 @@ export class SupportingMasterListComponent implements OnInit {
         this.currentTab = tab;
         this.loadTabData(tab);
       } else {
-        this.currentTab = 'company-groups';
-        this.loadCompanyGroups();
+        this.currentTab = 'transporters';
+        this.loadTransporters();
       }
+    });
+  }
+
+  selectTab(tab: string): void {
+    if (!this.tabMapping[tab] || this.currentTab === tab) {
+      return;
+    }
+
+    this.currentTab = tab;
+    this.loadTabData(tab);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab },
+      queryParamsHandling: 'merge'
     });
   }
 

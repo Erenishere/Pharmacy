@@ -155,11 +155,9 @@ export class FinancialDashboardComponent implements OnInit {
       this.summary.totalExpenses
     ];
 
-    // Mock profit trend data (in real implementation, this would come from API)
-    this.profitTrendChart.data.labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    this.profitTrendChart.data.datasets[0].data = [
-      45000, 52000, 48000, 61000, 55000, this.summary.netProfit
-    ];
+    const label = `${this.startDate.value?.toLocaleDateString() || 'Start'} - ${this.endDate.value?.toLocaleDateString() || 'End'}`;
+    this.profitTrendChart.data.labels = [label];
+    this.profitTrendChart.data.datasets[0].data = [this.summary.netProfit];
   }
 
   onGenerateReports(): void {
@@ -197,8 +195,38 @@ export class FinancialDashboardComponent implements OnInit {
   }
 
   onExportReports(): void {
-    // Implementation for exporting all reports
-    this.snackBar.open('Export functionality coming soon', 'Close', { duration: 3000 });
+    if (!this.summary) {
+      this.snackBar.open('Generate reports before exporting', 'Close', { duration: 3000 });
+      return;
+    }
+
+    const rows = [
+      ['Period', this.periodFilter.value || 'monthly'],
+      ['Start Date', this.startDate.value?.toISOString() || ''],
+      ['End Date', this.endDate.value?.toISOString() || ''],
+      ['Total Revenue', this.summary.totalRevenue],
+      ['Total Expenses', this.summary.totalExpenses],
+      ['Net Profit', this.summary.netProfit],
+      ['Total Assets', this.summary.totalAssets],
+      ['Total Liabilities', this.summary.totalLiabilities],
+      ['Total Equity', this.summary.totalEquity],
+      ['Cash Position', this.summary.cashPosition],
+      ['Accounts Receivable', this.summary.accountsReceivable],
+      ['Accounts Payable', this.summary.accountsPayable],
+      ['Profit Margin', this.normalizePercentage(this.summary.profitMargin)],
+      ['Return on Assets', this.normalizePercentage(this.summary.returnOnAssets)],
+      ['Current Ratio', this.getCurrentRatio()],
+      ['Debt-to-Equity', this.getDebtToEquity()]
+    ];
+    const csv = ['Metric,Value', ...rows.map(([metric, value]) => `${this.escapeCsv(String(metric))},${this.escapeCsv(String(value))}`)].join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `financial-summary-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+    this.snackBar.open('Financial summary exported', 'Close', { duration: 3000 });
   }
 
   formatCurrency(amount: number): string {
@@ -210,7 +238,7 @@ export class FinancialDashboardComponent implements OnInit {
   }
 
   formatPercentage(value: number): string {
-    return (value * 100).toFixed(1) + '%';
+    return this.normalizePercentage(value).toFixed(1) + '%';
   }
 
   getProfitMarginClass(): string {
@@ -223,5 +251,26 @@ export class FinancialDashboardComponent implements OnInit {
     if (!this.summary) return '';
     return this.summary.returnOnAssets >= 15 ? 'excellent' :
            this.summary.returnOnAssets >= 8 ? 'good' : 'poor';
+  }
+
+  getCurrentRatio(): string {
+    if (!this.summary || this.summary.accountsPayable === 0) return 'N/A';
+    return ((
+      this.summary.cashPosition + this.summary.accountsReceivable
+    ) / this.summary.accountsPayable).toFixed(2) + ':1';
+  }
+
+  getDebtToEquity(): string {
+    if (!this.summary || this.summary.totalEquity === 0) return 'N/A';
+    return (this.summary.totalLiabilities / this.summary.totalEquity).toFixed(2) + ':1';
+  }
+
+  private normalizePercentage(value: number): number {
+    return Math.abs(value) <= 1 ? value * 100 : value;
+  }
+
+  private escapeCsv(value: string): string {
+    const escaped = value.replace(/"/g, '""');
+    return /[",\r\n]/.test(escaped) ? `"${escaped}"` : escaped;
   }
 }

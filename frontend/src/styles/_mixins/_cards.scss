@@ -111,7 +111,7 @@
   position: relative;
   overflow: hidden;
   cursor: default;
-  
+
   // Left accent bar
   &::before {
     content: '';
@@ -123,14 +123,13 @@
     background: var(--stat-color, var(--color-bg-page));
     opacity: 0.8;
   }
-  
+
   &:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-card-hover);
     border-color: rgba(var(--color-primary-rgb), 0.2);
   }
-  
-  // Icon wrapper
+
   .stat-icon-wrapper {
     width: 48px;
     height: 48px;
@@ -148,12 +147,11 @@
       height: 24px;
     }
   }
-  
-  // Data section
+
   .stat-data {
     display: flex;
     flex-direction: column;
-    
+
     .label {
       font-size: var(--font-size-sm);
       font-weight: var(--font-weight-medium);
@@ -162,7 +160,7 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    
+
     .value {
       font-size: 22px;
       font-weight: var(--font-weight-bold);
@@ -170,8 +168,7 @@
       line-height: 1;
     }
   }
-  
-  // Color variants
+
   &.primary .stat-icon-wrapper { background: rgba(var(--color-primary-rgb), 0.1); }
   &.info .stat-icon-wrapper { background: var(--color-info-light); }
   &.warning .stat-icon-wrapper { background: var(--color-warning-light); }

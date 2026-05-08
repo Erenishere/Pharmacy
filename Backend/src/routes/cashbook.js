@@ -10,6 +10,20 @@ const { authenticate, authorize } = require('../middleware/auth');
  * Most routes require accountant, admin, or relevant role
  */
 
+router.get(
+  '/entries',
+  authenticate,
+  authorize(['accountant', 'admin', 'sales', 'purchase']),
+  cashBookController.getCashBookEntries,
+);
+
+router.get(
+  '/lookups',
+  authenticate,
+  authorize(['accountant', 'admin', 'sales', 'purchase']),
+  cashBookController.getCashBookLookups,
+);
+
 // Cash Receipt Routes
 router.post(
   '/receipts',
@@ -37,34 +51,6 @@ router.get(
   authenticate,
   authorize(['accountant', 'admin']),
   cashBookController.getReceiptStatistics,
-);
-
-router.get(
-  '/receipts/:id',
-  authenticate,
-  authorize(['accountant', 'admin', 'sales']),
-  cashBookController.getCashReceiptById,
-);
-
-router.put(
-  '/receipts/:id',
-  authenticate,
-  authorize(['accountant', 'admin']),
-  cashBookController.updateCashReceipt,
-);
-
-router.post(
-  '/receipts/:id/clear',
-  authenticate,
-  authorize(['accountant', 'admin']),
-  cashBookController.clearCashReceipt,
-);
-
-router.post(
-  '/receipts/:id/cancel',
-  authenticate,
-  authorize(['accountant', 'admin']),
-  cashBookController.cancelCashReceipt,
 );
 
 // Phase 2: Post-Dated Cheque Routes (Requirement 7.1, 7.2, 7.3, 7.4, 7.5)
@@ -109,6 +95,41 @@ router.get(
   authenticate,
   authorize(['accountant', 'admin', 'sales']),
   cashBookController.getPendingInvoices,
+);
+
+router.get(
+  '/suppliers/:supplierId/pending-invoices',
+  authenticate,
+  authorize(['accountant', 'admin', 'purchase']),
+  cashBookController.getSupplierPendingInvoices,
+);
+
+router.get(
+  '/receipts/:id',
+  authenticate,
+  authorize(['accountant', 'admin', 'sales']),
+  cashBookController.getCashReceiptById,
+);
+
+router.put(
+  '/receipts/:id',
+  authenticate,
+  authorize(['accountant', 'admin']),
+  cashBookController.updateCashReceipt,
+);
+
+router.post(
+  '/receipts/:id/clear',
+  authenticate,
+  authorize(['accountant', 'admin']),
+  cashBookController.clearCashReceipt,
+);
+
+router.post(
+  '/receipts/:id/cancel',
+  authenticate,
+  authorize(['accountant', 'admin']),
+  cashBookController.cancelCashReceipt,
 );
 
 // Cash Payment Routes

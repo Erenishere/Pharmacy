@@ -1,12 +1,101 @@
+@import 'styles/vuexy-vars';
 @import 'styles/shared-list-styles';
+
+$p-bg: #f8f7fa;
+
+:host {
+  display: block;
+  background: $p-bg;
+}
+
+.list-page-container {
+  @include page-container;
+
+  .list-page-header {
+    @include page-header;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+
+    .header-content {
+      .title-with-accent {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .header-accent-bar {
+          width: 5px;
+          height: 40px;
+          border-radius: 4px;
+          background: $purple;
+        }
+      }
+
+      h1 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+
+        mat-icon {
+          color: $purple;
+        }
+      }
+
+      .page-subtitle {
+        margin: 8px 0 0 17px;
+        color: $grey-dark;
+      }
+    }
+
+    .header-actions {
+      .create-btn {
+        background: linear-gradient(118deg, $purple, rgba($purple, 0.85)) !important;
+        color: #fff !important;
+        font-weight: 600;
+        height: 42px;
+        padding: 0 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba($purple, 0.35);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.25s ease;
+
+        &:hover {
+          box-shadow: 0 6px 18px rgba($purple, 0.5);
+          transform: translateY(-1px);
+        }
+
+        mat-icon {
+          color: #fff !important;
+        }
+      }
+    }
+  }
+}
 
 .list-page-card {
   @include list-card;
 }
 
-.filter-group-primary {
-  .filter-field {
-    width: 200px;
+::ng-deep {
+  .list-filters-section {
+    .filter-group-primary {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      gap: 14px;
+      align-items: center;
+
+      mat-form-field.filter-field {
+        display: inline-flex !important;
+        width: 200px !important;
+        margin-bottom: 0 !important;
+        flex-shrink: 0;
+      }
+    }
   }
 }
 
@@ -30,31 +119,26 @@
       border: 1px solid $purple;
     }
 
-    &.sent {
+    &.final {
       background: rgba(40, 199, 111, 0.1);
       color: #28c76f;
       border: 1px solid #28c76f;
     }
+  }
+}
 
-    &.received {
-      background: rgba(0, 207, 232, 0.1);
-      color: #00cfe8;
-      border: 1px solid #00cfe8;
+:host ::ng-deep {
+  .list-page-container {
+    app-data-table {
+      @include data-table;
+
+      .data-table {
+        min-width: 1400px;
+      }
+    }
+
+    .mat-mdc-paginator {
+      @include paginator;
     }
   }
 }
-
-.letter-list-page {
-  @include page-container;
-  @include page-header;
-  @include data-table;
-  @include paginator;
-
-  .dashboard-stats-grid { @include dashboard-stats-grid; }
-
-  .list-page-card {
-    @include list-card;
-    border: 1px solid $p-border;
-  }
-}
-

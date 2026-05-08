@@ -1,15 +1,130 @@
 <div class="list-page-container capital-assets-page">
   <div class="list-page-header">
     <div class="header-content">
-      <h1 class="page-title"><mat-icon>account_balance_wallet</mat-icon> Capital Assets</h1>
-      <p class="page-subtitle">Manage fixed capital entries and investments</p>
+      <div class="title-with-accent">
+        <div class="header-accent-bar"></div>
+        <h1 class="page-title"><mat-icon>account_balance_wallet</mat-icon> Capital Assets</h1>
+      </div>
+      <p class="page-description">Manage fixed capital entries and investments</p>
     </div>
   </div>
 
-  <!-- Entry Form Section -->
+  <div class="statement-card">
+    <div class="statement-header">
+      <div>
+        <h3 class="section-title">Capital Statement</h3>
+        <p class="statement-description">Net capital, cash mix, and running movement through the selected date.</p>
+      </div>
+
+      <div class="statement-controls">
+        <mat-form-field appearance="outline">
+          <mat-label>As of date</mat-label>
+          <input matInput type="date" [(ngModel)]="statementAsOfDate" [ngModelOptions]="{ standalone: true }">
+        </mat-form-field>
+        <button mat-stroked-button type="button" (click)="loadStatement()" [disabled]="statementLoading">
+          <mat-icon>sync</mat-icon>
+          Refresh Statement
+        </button>
+      </div>
+    </div>
+
+    @if (statementLoading) {
+      <div class="statement-loading">
+        <mat-spinner diameter="28"></mat-spinner>
+        <span>Loading capital statement...</span>
+      </div>
+    } @else if (statement) {
+      <div class="statement-grid">
+        <div class="metric-card">
+          <span class="metric-label">Net Capital</span>
+          <strong>{{ fmtNum(statement.netCapital || 0) }}</strong>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Capital In</span>
+          <strong>{{ fmtNum(statement.capitalSummary?.totalCapitalIn || 0) }}</strong>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Capital Out</span>
+          <strong>{{ fmtNum(statement.capitalSummary?.totalCapitalOut || 0) }}</strong>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Cash In Hand</span>
+          <strong>{{ fmtNum(statement.cashInHand || 0) }}</strong>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Bank Cash</span>
+          <strong>{{ fmtNum(statement.bankCash || 0) }}</strong>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Stock Value</span>
+          <strong>{{ fmtNum(statement.stockValue || 0) }}</strong>
+        </div>
+      </div>
+
+      <div class="statement-tables">
+        <div class="statement-table-card">
+          <div class="table-title-row">
+            <h4>Fixed Capital</h4>
+            <span>{{ statement.fixedCapitalList?.length || 0 }} entries</span>
+          </div>
+
+          @if (statement.fixedCapitalList?.length) {
+            <div class="mini-table">
+              @for (entry of statement.fixedCapitalList; track entry._id || entry.capitalDate || $index) {
+                <div class="mini-row">
+                  <div>
+                    <strong>{{ entry.capitalAssetName || 'Capital Entry' }}</strong>
+                    <span>{{ entry.status || 'Investor' }}</span>
+                  </div>
+                  <div class="mini-row-right">
+                    <strong>{{ fmtNum(entry.amount || 0) }}</strong>
+                    <span>{{ fmtDate(entry.capitalDate) }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="statement-empty">No fixed capital entries found for this date.</p>
+          }
+        </div>
+
+        <div class="statement-table-card">
+          <div class="table-title-row">
+            <h4>Running Capital</h4>
+            <span>{{ statement.runningCapitalList?.length || 0 }} movements</span>
+          </div>
+
+          @if (statement.runningCapitalList?.length) {
+            <div class="mini-table">
+              @for (entry of statement.runningCapitalList; track entry._id || entry.capitalDate || $index) {
+                <div class="mini-row">
+                  <div>
+                    <strong>{{ entry.capitalAssetName || 'Capital Movement' }}</strong>
+                    <span>{{ entry.transactionType | uppercase }} - {{ entry.status || 'Investor' }}</span>
+                  </div>
+                  <div class="mini-row-right">
+                    <strong>{{ fmtNum(entry.runningCapital || 0) }}</strong>
+                    <span>{{ fmtDate(entry.capitalDate) }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="statement-empty">No running-capital entries found for this date.</p>
+          }
+        </div>
+      </div>
+    } @else {
+      <p class="statement-empty">Capital statement could not be loaded for the selected date.</p>
+    }
+  </div>
+
   <div class="form-card" [formGroup]="form">
     <div class="card-header">
-      <h3 class="section-title">New Capital Entry</h3>
+      <h3 class="section-title">{{ editingId ? 'Edit Capital Entry' : 'New Capital Entry' }}</h3>
+      @if (editingId) {
+        <p class="edit-contract-note">Financial fields are locked during edit so saved ledger history stays aligned with the backend contract.</p>
+      }
     </div>
 
     <div class="form-grid">
@@ -35,7 +150,7 @@
         <mat-label>Cash Account</mat-label>
         <mat-select formControlName="cashAccountId">
           <mat-option value="">-- Select Cash Account --</mat-option>
-          @for (a of accounts; track a._id) {
+          @for (a of cashAccounts; track a._id) {
             <mat-option [value]="a._id">{{ a.accountName || a.name }}</mat-option>
           }
         </mat-select>
@@ -45,7 +160,7 @@
         <mat-label>Investor Account</mat-label>
         <mat-select formControlName="investorAccountId">
           <mat-option value="">-- Select Investor --</mat-option>
-          @for (a of accounts; track a._id) {
+          @for (a of investorAccounts; track a._id) {
             <mat-option [value]="a._id">{{ a.accountName || a.name }}</mat-option>
           }
         </mat-select>
@@ -85,12 +200,11 @@
     </div>
   </div>
 
-  <!-- Asset Table Section -->
   <div class="list-page-card">
     <div class="list-filters-section">
       <div class="filter-group-primary">
         <div class="section-title">
-          <mat-icon>list_alt</mat-icon> 
+          <mat-icon>list_alt</mat-icon>
           <span>Asset Transaction Registry</span>
         </div>
       </div>
@@ -126,26 +240,26 @@
 
           <ng-container matColumnDef="cashAccount">
             <th mat-header-cell *matHeaderCellDef>Cash Account</th>
-            <td mat-cell *matCellDef="let row">{{ row.cashAccountName || row.cashAccountId?.accountName || '—' }}</td>
+            <td mat-cell *matCellDef="let row">{{ row.cashAccountName || row.cashAccountId?.name || row.cashAccountId?.accountName || '-' }}</td>
           </ng-container>
 
           <ng-container matColumnDef="inAmount">
             <th mat-header-cell *matHeaderCellDef class="text-right">In Flow</th>
             <td mat-cell *matCellDef="let row" class="text-right amount-cell positive">
-              {{ getInAmount(row) ? fmtNum(getInAmount(row)) : '—' }}
+              {{ getInAmount(row) ? fmtNum(getInAmount(row)) : '-' }}
             </td>
           </ng-container>
 
           <ng-container matColumnDef="outAmount">
             <th mat-header-cell *matHeaderCellDef class="text-right">Out Flow</th>
             <td mat-cell *matCellDef="let row" class="text-right amount-cell negative">
-              {{ getOutAmount(row) ? fmtNum(getOutAmount(row)) : '—' }}
+              {{ getOutAmount(row) ? fmtNum(getOutAmount(row)) : '-' }}
             </td>
           </ng-container>
 
           <ng-container matColumnDef="investorAccount">
             <th mat-header-cell *matHeaderCellDef>Investor Account</th>
-            <td mat-cell *matCellDef="let row">{{ row.investorAccountName || row.investorAccountId?.accountName || '—' }}</td>
+            <td mat-cell *matCellDef="let row">{{ row.investorAccountName || row.investorAccountId?.name || row.investorAccountId?.accountName || '-' }}</td>
           </ng-container>
 
           <ng-container matColumnDef="capitalDate">
@@ -192,8 +306,6 @@
             </td>
           </tr>
         </table>
-
-        
       </div>
 
       <mat-paginator

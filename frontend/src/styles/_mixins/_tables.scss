@@ -154,26 +154,26 @@
 // ============================================
 @mixin paginator {
   margin-top: var(--space-4);
-  background: linear-gradient(135deg, var(--color-primary) 0%, rgba(var(--color-primary-rgb), 0.86) 100%) !important;
-  color: var(--color-text-inverse) !important;
+  background: var(--color-bg-card) !important;
+  color: var(--color-text-primary) !important;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  
-  // Force all text and icons to white
+
+  // Force all text and icons to primary color
   .mat-mdc-paginator-range-label,
   .mat-mdc-paginator-page-size-label,
   .mat-mdc-select-value,
   .mat-mdc-select-arrow,
   .mat-mdc-button-base {
-    color: var(--color-text-inverse) !important;
+    color: var(--color-primary) !important;
   }
-  
+
   .mat-mdc-icon-button[disabled] {
-    color: rgba(255, 255, 255, 0.3) !important;
+    color: rgba(115, 103, 240, 0.3) !important;
   }
-  
+
   .mat-mdc-form-field-focus-indicator {
-    background: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(115, 103, 240, 0.1) !important;
   }
 }
 

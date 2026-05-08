@@ -12,6 +12,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTableModule } from '@angular/material/table';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { QuotationFormDialogComponent } from '../quotation-form-dialog/quotation-form-dialog.component';
 
 @Component({
   selector: 'app-quotation-detail',
@@ -208,7 +209,19 @@ export class QuotationDetailComponent implements OnInit {
 
   onEdit(): void {
     if (!this.quotation) return;
-    this.router.navigate(['/quotations/edit', this.quotation._id]);
+    const ref = this.dialog.open(QuotationFormDialogComponent, {
+      width: '1000px',
+      maxWidth: '95vw',
+      panelClass: ['standard-form-dialog-panel', 'quotation-dialog-panel'],
+      autoFocus: false,
+      data: { quotation: this.quotation }
+    });
+
+    ref.afterClosed().subscribe(result => {
+      if (result && this.quotation) {
+        this.loadQuotation(this.quotation._id);
+      }
+    });
   }
 
   onPrint(): void {

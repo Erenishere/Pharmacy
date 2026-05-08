@@ -104,7 +104,7 @@ class CashBookController {
   async updateCashReceipt(req, res) {
     try {
       const { id } = req.params;
-      const receipt = await cashReceiptService.updateCashReceipt(id, req.body);
+      const receipt = await cashReceiptService.updateCashReceipt(id, req.body, req.user.id);
 
       res.status(200).json({
         success: true,
@@ -127,7 +127,7 @@ class CashBookController {
   async clearCashReceipt(req, res) {
     try {
       const { id } = req.params;
-      const receipt = await cashReceiptService.clearCashReceipt(id);
+      const receipt = await cashReceiptService.clearCashReceipt(id, req.user.id);
 
       res.status(200).json({
         success: true,
@@ -150,7 +150,7 @@ class CashBookController {
   async cancelCashReceipt(req, res) {
     try {
       const { id } = req.params;
-      const receipt = await cashReceiptService.cancelCashReceipt(id);
+      const receipt = await cashReceiptService.cancelCashReceipt(id, req.user.id, req.body?.reason);
 
       res.status(200).json({
         success: true,
@@ -263,7 +263,7 @@ class CashBookController {
   async updateCashPayment(req, res) {
     try {
       const { id } = req.params;
-      const payment = await cashPaymentService.updateCashPayment(id, req.body);
+      const payment = await cashPaymentService.updateCashPayment(id, req.body, req.user.id);
 
       res.status(200).json({
         success: true,
@@ -286,7 +286,7 @@ class CashBookController {
   async clearCashPayment(req, res) {
     try {
       const { id } = req.params;
-      const payment = await cashPaymentService.clearCashPayment(id);
+      const payment = await cashPaymentService.clearCashPayment(id, req.user.id);
 
       res.status(200).json({
         success: true,
@@ -309,7 +309,7 @@ class CashBookController {
   async cancelCashPayment(req, res) {
     try {
       const { id } = req.params;
-      const payment = await cashPaymentService.cancelCashPayment(id);
+      const payment = await cashPaymentService.cancelCashPayment(id, req.user.id, req.body?.reason);
 
       res.status(200).json({
         success: true,
@@ -320,6 +320,77 @@ class CashBookController {
       res.status(400).json({
         success: false,
         error: 'Failed to cancel cash payment',
+        message: error.message,
+      });
+    }
+  }
+
+  /**
+   * Get merged cash book entries
+   * GET /api/v1/cashbook/entries
+   */
+  async getCashBookEntries(req, res) {
+    try {
+      const {
+        type,
+        status,
+        paymentMethod,
+        startDate,
+        endDate,
+        page,
+        limit,
+        sortBy,
+        sortOrder,
+      } = req.query;
+
+      const result = await cashBookService.getCashBookEntries(
+        {
+          entryType: type,
+          status,
+          paymentMethod,
+          startDate,
+          endDate,
+        },
+        {
+          page,
+          limit,
+          sortBy,
+          sortOrder,
+        },
+      );
+
+      res.status(200).json({
+        success: true,
+        message: 'Cash book entries retrieved successfully',
+        data: result,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: 'Failed to retrieve cash book entries',
+        message: error.message,
+      });
+    }
+  }
+
+  /**
+   * Get projected lookups for the cashbook form.
+   * GET /api/v1/cashbook/lookups
+   */
+  async getCashBookLookups(req, res) {
+    try {
+      const { transactionType } = req.query;
+      const lookups = await cashBookService.getCashBookLookups(transactionType);
+
+      res.status(200).json({
+        success: true,
+        message: 'Cash book lookups retrieved successfully',
+        data: lookups,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: 'Failed to retrieve cash book lookups',
         message: error.message,
       });
     }
@@ -700,12 +771,35 @@ class CashBookController {
       res.status(200).json({
         success: true,
         message: 'Pending invoices retrieved successfully',
-        data: { pendingInvoices },
+        data: pendingInvoices,
       });
     } catch (error) {
       res.status(400).json({
         success: false,
         error: 'Failed to retrieve pending invoices',
+        message: error.message,
+      });
+    }
+  }
+
+  /**
+   * Get pending purchase invoices for supplier.
+   * GET /api/v1/cashbook/suppliers/:supplierId/pending-invoices
+   */
+  async getSupplierPendingInvoices(req, res) {
+    try {
+      const { supplierId } = req.params;
+      const pendingInvoices = await cashPaymentService.getOutstandingInvoices(supplierId);
+
+      res.status(200).json({
+        success: true,
+        message: 'Pending supplier invoices retrieved successfully',
+        data: pendingInvoices,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: 'Failed to retrieve pending supplier invoices',
         message: error.message,
       });
     }

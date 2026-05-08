@@ -24,7 +24,7 @@ $p-border: #ebe9f1;
 
   .header-actions {
     .add-btn {
-      background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.82)) !important;
+      background: linear-gradient(118deg, $purple, rgba($purple, 0.85)) !important;
       color: #fff !important;
       font-weight: 600;
       height: 42px;

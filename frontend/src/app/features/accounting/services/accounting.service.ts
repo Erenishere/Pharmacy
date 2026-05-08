@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 // Accounting Interfaces
@@ -105,7 +105,7 @@ export interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class AccountingService {
-  private baseUrl = `${environment.apiUrl}/accounting`;
+  private baseUrl = `${environment.apiUrl}/accounts`;
 
   constructor(private http: HttpClient) {}
 
@@ -117,36 +117,36 @@ export class AccountingService {
         httpParams = httpParams.set(key, value.toString());
       }
     });
-    return this.http.get<ApiResponse<Account[]>>(`${this.baseUrl}/accounts`, { params: httpParams });
+    return this.http.get<ApiResponse<Account[]>>(this.baseUrl, { params: httpParams });
   }
 
   getAccountById(id: string): Observable<ApiResponse<Account>> {
-    return this.http.get<ApiResponse<Account>>(`${this.baseUrl}/accounts/${id}`);
+    return this.http.get<ApiResponse<Account>>(`${this.baseUrl}/${id}`);
   }
 
   createAccount(account: Partial<Account>): Observable<ApiResponse<Account>> {
-    return this.http.post<ApiResponse<Account>>(`${this.baseUrl}/accounts`, account);
+    return this.http.post<ApiResponse<Account>>(this.baseUrl, account);
   }
 
   updateAccount(id: string, account: Partial<Account>): Observable<ApiResponse<Account>> {
-    return this.http.put<ApiResponse<Account>>(`${this.baseUrl}/accounts/${id}`, account);
+    return this.http.put<ApiResponse<Account>>(`${this.baseUrl}/${id}`, account);
   }
 
   deleteAccount(id: string): Observable<ApiResponse<null>> {
-    return this.http.delete<ApiResponse<null>>(`${this.baseUrl}/accounts/${id}`);
+    return this.http.delete<ApiResponse<null>>(`${this.baseUrl}/${id}`);
   }
 
   // Account Hierarchy Operations
   getAccountHierarchy(): Observable<ApiResponse<Account[]>> {
-    return this.http.get<ApiResponse<Account[]>>(`${this.baseUrl}/accounts/hierarchy`);
+    return throwError(() => new Error('Account hierarchy is not exposed by the mounted /accounts API.'));
   }
 
   getChildAccounts(parentId: string): Observable<ApiResponse<Account[]>> {
-    return this.http.get<ApiResponse<Account[]>>(`${this.baseUrl}/accounts/${parentId}/children`);
+    return this.http.get<ApiResponse<Account[]>>(`${this.baseUrl}/${parentId}/sub-accounts`);
   }
 
   moveAccount(accountId: string, newParentId?: string): Observable<ApiResponse<Account>> {
-    return this.http.put<ApiResponse<Account>>(`${this.baseUrl}/accounts/${accountId}/move`, { newParentId });
+    return throwError(() => new Error('Moving accounts is not exposed by the mounted /accounts API.'));
   }
 
   // Ledger Operations
@@ -157,7 +157,18 @@ export class AccountingService {
         httpParams = httpParams.set(key, value.toString());
       }
     });
-    return this.http.get<ApiResponse<LedgerEntry[]>>(`${this.baseUrl}/ledger`, { params: httpParams });
+    if (!params.accountId) {
+      return throwError(() => new Error('accountId is required for the mounted account ledger endpoint.'));
+    }
+
+    const { accountId } = params;
+    httpParams = httpParams.delete('accountId');
+    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/${accountId}/ledger`, { params: httpParams })
+      .pipe(map(response => ({
+        ...response,
+        data: response.data?.entries || response.data || [],
+        pagination: response.data?.pagination || response.pagination
+      })));
   }
 
   getAccountLedger(accountId: string, params: { startDate?: string; endDate?: string } = {}): Observable<ApiResponse<LedgerEntry[]>> {
@@ -167,38 +178,37 @@ export class AccountingService {
         httpParams = httpParams.set(key, value.toString());
       }
     });
-    return this.http.get<ApiResponse<LedgerEntry[]>>(`${this.baseUrl}/accounts/${accountId}/ledger`, { params: httpParams });
+    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/${accountId}/ledger`, { params: httpParams })
+      .pipe(map(response => ({
+        ...response,
+        data: response.data?.entries || response.data || [],
+        pagination: response.data?.pagination || response.pagination
+      })));
   }
 
   // Journal Entry Operations
   getJournalEntries(params: { startDate?: string; endDate?: string; status?: string; page?: number; limit?: number } = {}): Observable<ApiResponse<JournalEntry[]>> {
-    let httpParams = new HttpParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        httpParams = httpParams.set(key, value.toString());
-      }
-    });
-    return this.http.get<ApiResponse<JournalEntry[]>>(`${this.baseUrl}/journal-entries`, { params: httpParams });
+    return throwError(() => new Error('Journal entries are not exposed by the mounted accounting API.'));
   }
 
   getJournalEntryById(id: string): Observable<ApiResponse<JournalEntry>> {
-    return this.http.get<ApiResponse<JournalEntry>>(`${this.baseUrl}/journal-entries/${id}`);
+    return throwError(() => new Error('Journal entries are not exposed by the mounted accounting API.'));
   }
 
   createJournalEntry(entry: Partial<JournalEntry>): Observable<ApiResponse<JournalEntry>> {
-    return this.http.post<ApiResponse<JournalEntry>>(`${this.baseUrl}/journal-entries`, entry);
+    return throwError(() => new Error('Journal entries are not exposed by the mounted accounting API.'));
   }
 
   updateJournalEntry(id: string, entry: Partial<JournalEntry>): Observable<ApiResponse<JournalEntry>> {
-    return this.http.put<ApiResponse<JournalEntry>>(`${this.baseUrl}/journal-entries/${id}`, entry);
+    return throwError(() => new Error('Journal entries are not exposed by the mounted accounting API.'));
   }
 
   postJournalEntry(id: string): Observable<ApiResponse<JournalEntry>> {
-    return this.http.post<ApiResponse<JournalEntry>>(`${this.baseUrl}/journal-entries/${id}/post`, {});
+    return throwError(() => new Error('Journal posting is not exposed by the mounted accounting API.'));
   }
 
   approveJournalEntry(id: string, approvalData: { approvedBy: string; notes?: string }): Observable<ApiResponse<JournalEntry>> {
-    return this.http.post<ApiResponse<JournalEntry>>(`${this.baseUrl}/journal-entries/${id}/approve`, approvalData);
+    return throwError(() => new Error('Journal approval is not exposed by the mounted accounting API.'));
   }
 
   // Accounting Reports Integration
@@ -209,7 +219,7 @@ export class AccountingService {
         httpParams = httpParams.set(key, value.toString());
       }
     });
-    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/balances`, { params: httpParams });
+    return throwError(() => new Error('Account balance reports are not exposed by the mounted /accounts API.'));
   }
 
   getTrialBalance(params: { asOfDate?: string; includeZeroBalances?: boolean } = {}): Observable<ApiResponse<any>> {
@@ -219,16 +229,12 @@ export class AccountingService {
         httpParams = httpParams.set(key, value.toString());
       }
     });
-    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/trial-balance`, { params: httpParams });
+    return throwError(() => new Error('Trial balance is available through reports, not the mounted /accounts API.'));
   }
 
   // Export Operations
   exportChartOfAccounts(params: { format: 'csv' | 'excel' | 'pdf' }): Observable<Blob> {
-    const httpParams = new HttpParams().set('format', params.format);
-    return this.http.get(`${this.baseUrl}/export/chart-of-accounts`, {
-      params: httpParams,
-      responseType: 'blob'
-    });
+    return throwError(() => new Error('Chart of accounts export is not exposed by the mounted /accounts API.'));
   }
 
   exportLedger(params: LedgerQueryParams & { format: 'csv' | 'excel' | 'pdf' }): Observable<Blob> {
@@ -238,10 +244,7 @@ export class AccountingService {
         httpParams = httpParams.set(key, value.toString());
       }
     });
-    return this.http.get(`${this.baseUrl}/export/ledger`, {
-      params: httpParams,
-      responseType: 'blob'
-    });
+    return throwError(() => new Error('Ledger export is not exposed by the mounted /accounts API.'));
   }
 
   // Utility Methods

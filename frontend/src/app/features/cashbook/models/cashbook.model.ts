@@ -4,9 +4,10 @@ export interface CashReceipt {
   receiptDate: string;
   customerId: string;
   customerName?: string;
+  cashAccountId?: any;
   amount: number;
   paymentMethod: 'cash' | 'cheque' | 'bank_transfer' | 'online';
-  status: 'pending' | 'cleared' | 'cancelled';
+  status: 'pending' | 'cleared' | 'bounced' | 'cancelled';
   chequeStatus?: 'pending' | 'cleared' | 'bounced';
   postDatedCheque?: boolean;
   bankDetails?: {
@@ -33,6 +34,7 @@ export interface CashPayment {
   paymentDate: string;
   supplierId: string;
   supplierName?: string;
+  cashAccountId?: any;
   amount: number;
   paymentMethod: 'cash' | 'cheque' | 'bank_transfer' | 'online';
   status: 'pending' | 'cleared' | 'cancelled';
@@ -73,12 +75,59 @@ export interface CashBookStatistics {
 export interface CashBookQueryParams {
   page?: number;
   limit?: number;
+  type?: 'receive' | 'payment';
   startDate?: string;
   endDate?: string;
   status?: string;
   paymentMethod?: string;
   customerId?: string;
   supplierId?: string;
+}
+
+export interface CashBookEntry {
+  _id: string;
+  entryType: 'receive' | 'payment';
+  number: string;
+  accountTitle: string;
+  cashAccount: string;
+  salesman: string;
+  userId: string;
+  receive: number;
+  paid: number;
+  difference: number;
+  date: string;
+  postDatedCheque: boolean;
+  bankName: string;
+  chequeNumber: string;
+  status: string;
+  detail: string;
+  raw: any;
+}
+
+export interface CashBookEntriesResponse {
+  entries: CashBookEntry[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+  };
+}
+
+export interface CashBookLookupOption {
+  _id: string;
+  name: string;
+  code?: string;
+  balance?: number;
+  accountType?: string;
+  username?: string;
+}
+
+export interface CashBookLookups {
+  transactionType: 'receive' | 'payment';
+  accountOptions: CashBookLookupOption[];
+  cashAccountOptions: CashBookLookupOption[];
+  salesmen: CashBookLookupOption[];
 }
 
 export interface ApiResponse<T> {

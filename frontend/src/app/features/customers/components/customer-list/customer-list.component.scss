@@ -1,4 +1,77 @@
+@import 'styles/vuexy-vars';
 @import 'styles/shared-list-styles';
+
+$p-bg: #f8f7fa;
+
+:host {
+  display: block;
+  background: $p-bg;
+}
+
+.list-page-container {
+  @include page-container;
+
+  .list-page-header {
+    @include page-header;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+
+    .header-content {
+      .title-with-accent {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .header-accent-bar {
+          width: 5px;
+          height: 40px;
+          border-radius: 4px;
+          background: $purple;
+        }
+      }
+
+      h1 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+
+        mat-icon {
+          color: $purple;
+        }
+      }
+
+      .page-description,
+      .page-subtitle {
+        margin: 8px 0 0 17px;
+        color: $grey-dark;
+      }
+    }
+
+    .header-actions {
+      .create-btn {
+        background: linear-gradient(118deg, $purple, rgba($purple, 0.85)) !important;
+        color: #fff !important;
+        font-weight: 600;
+        height: 42px;
+        padding: 0 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba($purple, 0.35);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.25s ease;
+
+        &:hover {
+          box-shadow: 0 6px 18px rgba($purple, 0.5);
+          transform: translateY(-1px);
+        }
+      }
+    }
+  }
+}
 
 .list-page-card {
   @include list-card;

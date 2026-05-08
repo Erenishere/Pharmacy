@@ -8,6 +8,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
+import { BiltyService } from '../../services/bilty.service';
 
 const NUG_TYPES = ['Single', 'Double', 'Triple', 'Bundle of 4', 'Single Kata', 'Double Kata'];
 const NUG_MULTIPLIERS: Record<string, number> = {
@@ -206,6 +207,7 @@ export class BiltyFormDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
+    private biltyService: BiltyService,
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<BiltyFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
@@ -290,14 +292,9 @@ export class BiltyFormDialogComponent implements OnInit {
 
     this.loading = true;
     const payload = { ...this.form.getRawValue() };
-
-    const url = this.data?.mode === 'edit'
-      ? `${environment.apiUrl}/bilty-receipts/${this.data.record._id}`
-      : `${environment.apiUrl}/bilty-receipts`;
-
     const req$ = this.data?.mode === 'edit'
-      ? this.http.put<any>(url, payload)
-      : this.http.post<any>(url, payload);
+      ? this.biltyService.updateReceipt(this.data.record._id, payload)
+      : this.biltyService.createReceipt(payload);
 
     req$.subscribe({
       next: () => {

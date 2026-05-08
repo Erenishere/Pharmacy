@@ -64,8 +64,8 @@ class BatchService {
    * @param {string} id - Batch ID
    * @returns {Promise<Object>} Batch
    */
-  async getBatchById(id) {
-    const batch = await batchRepository.findById(id);
+  async getBatchById(id, options = {}) {
+    const batch = await batchRepository.findById(id, options);
     if (!batch) {
       throw new Error('Batch not found');
     }
@@ -277,7 +277,7 @@ class BatchService {
     }
 
     // Update batch quantity
-    await batchRepository.updateQuantity(id, quantity);
+    await batchRepository.updateQuantity(id, quantity, options);
 
     // Update inventory if location is set
     if (batch.location) {
@@ -308,7 +308,7 @@ class BatchService {
       }
     }
 
-    return this.getBatchById(id);
+    return this.getBatchById(id, options);
   }
 
   /**
@@ -406,13 +406,14 @@ class BatchService {
    * @param {number} quantity - Quantity to validate
    * @returns {Promise<Object>} Validation result
    */
-  async validateBatchQuantity(batchNumber, quantity) {
+  async validateBatchQuantity(batchNumber, quantity, options = {}) {
     if (!batchNumber || quantity === undefined) {
       throw new Error('Batch number and quantity are required');
     }
 
     const Batch = require('../models/Batch');
-    const batch = await Batch.findOne({ batchNumber });
+    const query = Batch.findOne({ batchNumber });
+    const batch = options.session ? await query.session(options.session) : await query;
 
     if (!batch) {
       return {
@@ -442,13 +443,14 @@ class BatchService {
    * @param {number} warningDays - Days before expiry to warn (default 30)
    * @returns {Promise<Object>} Expiry check result
    */
-  async checkBatchExpiry(batchNumber, warningDays = 30) {
+  async checkBatchExpiry(batchNumber, warningDays = 30, options = {}) {
     if (!batchNumber) {
       throw new Error('Batch number is required');
     }
 
     const Batch = require('../models/Batch');
-    const batch = await Batch.findOne({ batchNumber });
+    const query = Batch.findOne({ batchNumber });
+    const batch = options.session ? await query.session(options.session) : await query;
 
     if (!batch) {
       return {
@@ -507,20 +509,21 @@ class BatchService {
     }
 
     const Batch = require('../models/Batch');
-    const batch = await Batch.findOne({ batchNumber });
+    const query = Batch.findOne({ batchNumber });
+    const batch = options.session ? await query.session(options.session) : await query;
 
     if (!batch) {
       throw new Error('Batch not found');
     }
 
     // Validate quantity
-    const validation = await this.validateBatchQuantity(batchNumber, quantity);
+    const validation = await this.validateBatchQuantity(batchNumber, quantity, options);
     if (!validation.valid) {
       throw new Error(validation.error);
     }
 
     // Check expiry
-    const expiryCheck = await this.checkBatchExpiry(batchNumber);
+    const expiryCheck = await this.checkBatchExpiry(batchNumber, 30, options);
     if (expiryCheck.isExpired) {
       throw new Error('Cannot deduct from expired batch');
     }
@@ -542,7 +545,8 @@ class BatchService {
     }
 
     const Batch = require('../models/Batch');
-    const batch = await Batch.findOne({ batchNumber });
+    const query = Batch.findOne({ batchNumber });
+    const batch = options.session ? await query.session(options.session) : await query;
 
     if (!batch) {
       throw new Error('Batch not found');

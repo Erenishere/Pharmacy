@@ -1,8 +1,8 @@
+@import "../../../../../styles/vuexy-vars";
 @import "../../../../../styles/shared-list-styles";
 
 // ─── Component Variables ──────────────────────────────────────
 $p-bg: #f8f7fa;
-$p-border: #ebe9f1;
 $p-accent: #7367f0;
 
 :host {
@@ -11,13 +11,151 @@ $p-accent: #7367f0;
   min-height: 100vh;
 }
 
-.pdc-list-page {
+.list-page-container {
   @include page-container;
-  @include page-header;
-  @include data-table;
-  @include paginator;
 
-  .dashboard-stats-grid { @include dashboard-stats-grid; }
+  .list-page-header {
+    @include page-header;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+
+    .header-content {
+      .title-with-accent {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .header-accent-bar {
+          width: 5px;
+          height: 40px;
+          border-radius: 4px;
+          background: $purple;
+        }
+      }
+
+      h1 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+
+        mat-icon {
+          color: $purple;
+        }
+      }
+
+      .page-description {
+        margin: 8px 0 0 17px;
+        color: $grey-dark;
+      }
+    }
+  }
+}
+
+.dashboard-stats-grid { 
+  @include dashboard-stats-grid;
+  margin-bottom: 24px;
+}
+
+.list-page-card {
+  @include list-card;
+
+  // Standardized No Data Content
+  .no-data-content {
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: $grey-dark;
+
+    mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      color: rgba($purple, 0.2);
+    }
+
+    h4 {
+      margin: 0 0 8px 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: $purple-dark;
+    }
+
+    p {
+      margin: 0;
+      color: $grey-dark;
+      font-size: 0.95rem;
+    }
+  }
+
+  mat-paginator {
+    background: $purple !important;
+    color: #ffffff !important;
+    border-radius: 8px;
+    margin-top: 16px;
+
+    ::ng-deep {
+      .mat-mdc-paginator-range-label,
+      .mat-mdc-paginator-page-size-label,
+      .mat-mdc-select-value,
+      .mat-mdc-select-arrow,
+      .mat-mdc-icon-button {
+        color: #ffffff !important;
+      }
+    }
+  }
+}
+
+// ─── Filter Section ───────────────────────────────────────────
+.list-filters-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba($purple, 0.08);
+
+  ::ng-deep {
+    .mat-mdc-form-field {
+      width: 200px;
+      .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+      }
+    }
+  }
+
+  .refresh-btn {
+    border-color: rgba($purple, 0.3) !important;
+    color: $purple !important;
+    &:hover {
+      background-color: rgba($purple, 0.05) !important;
+    }
+  }
+}
+
+// ─── Table Styling ────────────────────────────────────────────
+:host ::ng-deep {
+  .list-page-container {
+    app-data-table {
+      @include data-table;
+    }
+
+    table {
+      @include data-table;
+    }
+
+    .mat-mdc-header-row {
+      background-color: $purple !important;
+      th {
+        color: #ffffff !important;
+      }
+    }
+  }
 }
 
 

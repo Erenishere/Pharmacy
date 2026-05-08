@@ -2,37 +2,43 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Bilty, ApiResponse } from '../models/bilty.model';
+import { ApiResponse, BiltyReceipt, BiltyReceiptFilters, BiltyReceiptStatus } from '../models/bilty.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BiltyService {
-  private baseUrl = `${environment.apiUrl}/bilty`;
+  private baseUrl = `${environment.apiUrl}/bilty-receipts`;
 
   constructor(private http: HttpClient) {}
 
-  getAllBilties(): Observable<ApiResponse<Bilty[]>> {
-    return this.http.get<ApiResponse<Bilty[]>>(this.baseUrl);
+  getReceipts(filters: BiltyReceiptFilters = {}): Observable<ApiResponse<BiltyReceipt[]>> {
+    let params = new HttpParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params = params.set(key, String(value));
+      }
+    });
+    return this.http.get<ApiResponse<BiltyReceipt[]>>(this.baseUrl, { params });
   }
 
-  getPendingBilties(): Observable<ApiResponse<Bilty[]>> {
-    return this.http.get<ApiResponse<Bilty[]>>(`${this.baseUrl}/pending`);
+  getReceiptById(id: string): Observable<ApiResponse<BiltyReceipt>> {
+    return this.http.get<ApiResponse<BiltyReceipt>>(`${this.baseUrl}/${id}`);
   }
 
-  getBiltyDetails(invoiceId: string): Observable<ApiResponse<Bilty>> {
-    return this.http.get<ApiResponse<Bilty>>(`${this.baseUrl}/${invoiceId}`);
+  createReceipt(data: Partial<BiltyReceipt>): Observable<ApiResponse<BiltyReceipt>> {
+    return this.http.post<ApiResponse<BiltyReceipt>>(this.baseUrl, data);
   }
 
-  recordBilty(data: Partial<Bilty>): Observable<ApiResponse<Bilty>> {
-    return this.http.post<ApiResponse<Bilty>>(this.baseUrl, data);
+  updateReceipt(id: string, data: Partial<BiltyReceipt>): Observable<ApiResponse<BiltyReceipt>> {
+    return this.http.put<ApiResponse<BiltyReceipt>>(`${this.baseUrl}/${id}`, data);
   }
 
-  updateBiltyStatus(invoiceId: string, status: string): Observable<ApiResponse<Bilty>> {
-    return this.http.patch<ApiResponse<Bilty>>(`${this.baseUrl}/${invoiceId}/status`, { status });
+  updateReceiptStatus(id: string, status: BiltyReceiptStatus): Observable<ApiResponse<BiltyReceipt>> {
+    return this.http.patch<ApiResponse<BiltyReceipt>>(`${this.baseUrl}/${id}/status`, { status });
   }
 
-  markAsReceived(invoiceId: string, data: any): Observable<ApiResponse<Bilty>> {
-    return this.http.patch<ApiResponse<Bilty>>(`${this.baseUrl}/${invoiceId}/received`, data);
+  deleteReceipt(id: string): Observable<ApiResponse<null>> {
+    return this.http.delete<ApiResponse<null>>(`${this.baseUrl}/${id}`);
   }
 }

@@ -76,7 +76,18 @@ router.post(
  * @desc    Logout user (client-side token removal)
  * @access  Private
  */
-router.post('/logout', authenticate, authController.logout);
+router.post(
+  '/logout',
+  authenticate,
+  [
+    body('refreshToken')
+      .optional()
+      .isString()
+      .withMessage('Refresh token must be a string'),
+    validate,
+  ],
+  authController.logout,
+);
 
 /**
  * @route   GET /api/auth/profile

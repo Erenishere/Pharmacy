@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { randomUUID } = require('crypto');
 const User = require('../models/User');
+const authSessionStore = require('./authSessionStore');
 
 class AuthService {
   /**
@@ -90,7 +92,7 @@ class AuthService {
    * @returns {Object} User object and tokens
    * @throws {Error} If authentication fails
    */
-  async authenticate(identifier, password) {
+  async authenticate(identifier, password, metadata = {}) {
     console.log('[AuthService] authenticate() called with identifier:', identifier);
 
     // Find user by username or email
@@ -138,13 +140,26 @@ class AuthService {
     }
 
     // Generate tokens
+    const sessionId = randomUUID();
+
     const accessToken = this.generateAccessToken({
       userId: user._id,
       role: user.role,
+      sid: sessionId,
     });
 
     const refreshToken = this.generateRefreshToken({
       userId: user._id,
+      sid: sessionId,
+      tid: randomUUID(),
+    });
+
+    await authSessionStore.createSession({
+      sessionId,
+      userId: user._id,
+      refreshToken,
+      userAgent: metadata.userAgent,
+      ipAddress: metadata.ipAddress,
     });
 
     console.log('[AuthService] Authentication successful for:', identifier);
@@ -162,9 +177,13 @@ class AuthService {
    * @returns {Object} New access token and user info
    * @throws {Error} If refresh token is invalid
    */
-  async refreshAccessToken(refreshToken) {
+  async refreshAccessToken(refreshToken, metadata = {}) {
     // Verify refresh token
     const decoded = this.verifyRefreshToken(refreshToken);
+    const session = await authSessionStore.validateRefreshToken(refreshToken);
+    if (!decoded.sid || !session) {
+      throw new Error('Invalid refresh token');
+    }
 
     // Find user
     const user = await User.findById(decoded.userId);
@@ -181,11 +200,27 @@ class AuthService {
     const accessToken = this.generateAccessToken({
       userId: user._id,
       role: user.role,
+      sid: decoded.sid,
+    });
+
+    const rotatedRefreshToken = this.generateRefreshToken({
+      userId: user._id,
+      sid: decoded.sid,
+      tid: randomUUID(),
+    });
+
+    await authSessionStore.rotateSession({
+      sessionId: decoded.sid,
+      userId: user._id,
+      refreshToken: rotatedRefreshToken,
+      userAgent: metadata.userAgent,
+      ipAddress: metadata.ipAddress,
     });
 
     return {
       user: user.toJSON(),
       accessToken,
+      refreshToken: rotatedRefreshToken,
     };
   }
 
@@ -197,6 +232,10 @@ class AuthService {
    */
   async validateTokenAndGetUser(token) {
     const decoded = this.verifyAccessToken(token);
+
+    if (decoded.sid && await authSessionStore.isSessionRevoked(decoded.sid)) {
+      throw new Error('Session has expired');
+    }
 
     const user = await User.findById(decoded.userId);
     if (!user) {
@@ -234,6 +273,26 @@ class AuthService {
     }
 
     return user;
+  }
+
+  async logoutSession(accessToken, refreshToken = null, metadata = {}) {
+    let sessionId = null;
+
+    if (accessToken) {
+      const decodedAccessToken = this.verifyAccessToken(accessToken);
+      sessionId = decodedAccessToken.sid || null;
+    }
+
+    if (!sessionId && refreshToken) {
+      const decodedRefreshToken = this.verifyRefreshToken(refreshToken);
+      sessionId = decodedRefreshToken.sid || null;
+    }
+
+    if (!sessionId) {
+      return false;
+    }
+
+    return authSessionStore.revokeSession(sessionId, metadata.reason || 'logout');
   }
 }
 

@@ -53,14 +53,30 @@ export class RealtimeDashboardService implements OnDestroy {
 
   private readonly API_ENDPOINTS = {
     ENHANCED_DASHBOARD: `${environment.apiUrl}/dashboard/enhanced`,
-    SALES_ANALYTICS: `${environment.apiUrl}/analytics/sales`,
-    INVENTORY_PERFORMANCE: `${environment.apiUrl}/analytics/inventory`,
-    CUSTOMER_BEHAVIOR: `${environment.apiUrl}/analytics/customers`,
-    OPERATIONAL_METRICS: `${environment.apiUrl}/analytics/operational`,
-    FINANCIAL_HEALTH: `${environment.apiUrl}/analytics/financial`
+    SALES_ANALYTICS: `${environment.apiUrl}/reports/analytics/sales-trends`,
+    INVENTORY_PERFORMANCE: `${environment.apiUrl}/reports/analytics/inventory-turnover`,
+    CUSTOMER_BEHAVIOR: `${environment.apiUrl}/reports/analytics/top-customers`,
+    OPERATIONAL_METRICS: `${environment.apiUrl}/reports/analytics/dashboard`,
+    FINANCIAL_HEALTH: `${environment.apiUrl}/reports/financial/summary`
   };
 
   constructor(private http: HttpClient) {}
+
+  private withDefaultDateRange(filters: any = {}): any {
+    if (filters?.startDate && filters?.endDate) {
+      return filters;
+    }
+
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 30);
+
+    return {
+      ...filters,
+      startDate: filters?.startDate || startDate.toISOString().slice(0, 10),
+      endDate: filters?.endDate || endDate.toISOString().slice(0, 10),
+    };
+  }
 
   connect(): void {
     if (this.isPolling) {
@@ -143,7 +159,7 @@ export class RealtimeDashboardService implements OnDestroy {
   }
 
   getSalesAnalytics(filters?: any): Observable<any> {
-    return this.http.get<any>(this.API_ENDPOINTS.SALES_ANALYTICS, { params: filters }).pipe(
+    return this.http.get<any>(this.API_ENDPOINTS.SALES_ANALYTICS, { params: this.withDefaultDateRange(filters) }).pipe(
       map(response => {
         if (response.success && response.data) {
           return response.data;
@@ -160,7 +176,7 @@ export class RealtimeDashboardService implements OnDestroy {
   }
 
   getInventoryPerformance(filters?: any): Observable<any> {
-    return this.http.get<any>(this.API_ENDPOINTS.INVENTORY_PERFORMANCE, { params: filters }).pipe(
+    return this.http.get<any>(this.API_ENDPOINTS.INVENTORY_PERFORMANCE, { params: this.withDefaultDateRange(filters) }).pipe(
       map(response => {
         if (response.success && response.data) {
           return response.data;
@@ -177,7 +193,7 @@ export class RealtimeDashboardService implements OnDestroy {
   }
 
   getCustomerBehavior(filters?: any): Observable<any> {
-    return this.http.get<any>(this.API_ENDPOINTS.CUSTOMER_BEHAVIOR, { params: filters }).pipe(
+    return this.http.get<any>(this.API_ENDPOINTS.CUSTOMER_BEHAVIOR, { params: this.withDefaultDateRange(filters) }).pipe(
       map(response => {
         if (response.success && response.data) {
           return response.data;

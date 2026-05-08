@@ -21,84 +21,115 @@ import { RoutePlanService } from '../../services/route-plan.service';
     MatSelectModule, MatButtonModule, MatIconModule, MatSnackBarModule, MatProgressSpinnerModule
   ],
   template: `
-    <div class="dialog-container">
-      <div class="dialog-header">
-        <h2 mat-dialog-title>{{ mode === 'create' ? 'New Route Plan' : 'Edit Route Plan' }}</h2>
-        <button mat-icon-button (click)="dialogRef.close()"><mat-icon>close</mat-icon></button>
-      </div>
+    <div class="route-plan-dialog">
+      <h2 mat-dialog-title class="dialog-title">
+        <span class="title-content">
+          <mat-icon>map</mat-icon>
+          <span>{{ mode === 'create' ? 'New Route Plan' : 'Edit Route Plan' }}</span>
+        </span>
+        <button mat-icon-button type="button" class="close-btn" aria-label="Close route plan dialog" (click)="dialogRef.close()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </h2>
 
-      <mat-dialog-content>
-        <form [formGroup]="form">
-          <div class="form-row two-col">
-            <mat-form-field appearance="outline">
-              <mat-label>Month (YYYY-MM)</mat-label>
-              <input matInput formControlName="monthYear" placeholder="2026-02" [readonly]="mode === 'edit'">
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Salesman</mat-label>
-              <mat-select formControlName="salesmanId" [disabled]="mode === 'edit'">
-                @for (s of salesmen; track s._id) {
-                  <mat-option [value]="s._id">{{ s.username || s.fullName }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <div class="form-row two-col">
-            <mat-form-field appearance="outline">
-              <mat-label>Dimension</mat-label>
-              <mat-select formControlName="dimensionId">
-                <mat-option value="">None</mat-option>
-                @for (d of dimensions; track d._id) {
-                  <mat-option [value]="d._id">{{ d.name }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <h4>Targets</h4>
-          <div class="form-row three-col">
-            <mat-form-field appearance="outline">
-              <mat-label>Sales Target</mat-label>
-              <input matInput type="number" formControlName="salesTarget">
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Recovery Target</mat-label>
-              <input matInput type="number" formControlName="recoveryTarget">
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Visit Target</mat-label>
-              <input matInput type="number" formControlName="visitTarget">
-            </mat-form-field>
-          </div>
-
-          <h4>Weekly Schedule</h4>
-          <div formArrayName="days">
-            @for (day of daysArray.controls; track $index; let i = $index) {
-              <div [formGroupName]="i" class="form-row two-col day-row">
-                <mat-form-field appearance="outline">
-                  <mat-label>Day</mat-label>
-                  <mat-select formControlName="dayOfWeek">
-                    @for (d of weekDays; track d) { <mat-option [value]="d">{{ d }}</mat-option> }
-                  </mat-select>
-                </mat-form-field>
-                <mat-form-field appearance="outline">
-                  <mat-label>Area</mat-label>
-                  <mat-select formControlName="areaId">
-                    @for (a of areas; track a._id) { <mat-option [value]="a._id">{{ a.name }}</mat-option> }
-                  </mat-select>
-                </mat-form-field>
-                <button mat-icon-button color="warn" (click)="removeDay(i)"><mat-icon>remove_circle</mat-icon></button>
+      <mat-dialog-content class="dialog-content">
+        <form [formGroup]="form" class="route-plan-form">
+          <section class="form-section">
+            <div class="section-heading">Plan Details</div>
+            <div class="form-grid two-column">
+              <mat-form-field appearance="outline">
+                <mat-label>Month (YYYY-MM)</mat-label>
+                <input matInput formControlName="monthYear" placeholder="2026-02" [readonly]="mode === 'edit'">
+                <mat-error *ngIf="form.get('monthYear')?.hasError('required')">Month is required.</mat-error>
+                <mat-error *ngIf="form.get('monthYear')?.hasError('pattern')">Use YYYY-MM format, for example 2026-05.</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Salesman</mat-label>
+                <mat-select formControlName="salesmanId" [disabled]="mode === 'edit'">
+                  @for (s of salesmen; track s._id) {
+                    <mat-option [value]="s.routePlanUserId || s._id">{{ s.displayName || s.name || s.fullName || s.username }}</mat-option>
+                  }
+                </mat-select>
+                <mat-error *ngIf="form.get('salesmanId')?.hasError('required')">Salesman is required.</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="field-span-full">
+                <mat-label>Dimension</mat-label>
+                <mat-select formControlName="dimensionId">
+                  <mat-option value="">None</mat-option>
+                  @for (d of dimensions; track d._id) {
+                    <mat-option [value]="d._id">{{ d.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+            @if (mode === 'create' && salesmen.length === 0) {
+              <div class="inline-warning">
+                No linked salesman user is available for route plans yet. Create or link a salesman user first.
               </div>
             }
-          </div>
-          <button mat-stroked-button type="button" (click)="addDay()"><mat-icon>add</mat-icon> Add Day</button>
+          </section>
+
+          <section class="form-section">
+            <div class="section-heading">Targets</div>
+            <div class="form-grid three-column">
+              <mat-form-field appearance="outline">
+                <mat-label>Sales Target</mat-label>
+                <input matInput type="number" formControlName="salesTarget">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Recovery Target</mat-label>
+                <input matInput type="number" formControlName="recoveryTarget">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Visit Target</mat-label>
+                <input matInput type="number" formControlName="visitTarget">
+              </mat-form-field>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="section-heading">Weekly Schedule</div>
+            <div class="days-list" formArrayName="days">
+              @if (daysArray.controls.length === 0) {
+                <div class="empty-days">No visit day added yet. Use Add Day to build the schedule.</div>
+              }
+              @for (day of daysArray.controls; track $index; let i = $index) {
+                <div [formGroupName]="i" class="day-row">
+                  <div class="form-grid day-grid">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Day</mat-label>
+                      <mat-select formControlName="dayOfWeek">
+                        @for (d of weekDays; track d) {
+                          <mat-option [value]="d">{{ d }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Area</mat-label>
+                      <mat-select formControlName="areaId">
+                        @for (a of areas; track a._id) {
+                          <mat-option [value]="a._id">{{ a.name }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                  <button mat-icon-button type="button" color="warn" class="remove-day-btn" aria-label="Remove day" (click)="removeDay(i)">
+                    <mat-icon>remove_circle</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+            <button mat-stroked-button type="button" class="add-day-btn" (click)="addDay()">
+              <mat-icon>add</mat-icon>
+              Add Day
+            </button>
+          </section>
         </form>
       </mat-dialog-content>
 
-      <mat-dialog-actions align="end">
-        <button mat-stroked-button (click)="dialogRef.close()" [disabled]="loading">Cancel</button>
-        <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="loading || form.invalid">
+      <mat-dialog-actions align="end" class="dialog-actions">
+        <button mat-stroked-button type="button" (click)="dialogRef.close()" [disabled]="loading">Cancel</button>
+        <button mat-raised-button color="primary" type="button" (click)="onSubmit()" [disabled]="loading">
           @if (loading) { <mat-spinner diameter="20"></mat-spinner> }
           @else { <ng-container><mat-icon>{{ mode === 'create' ? 'add' : 'save' }}</mat-icon> {{ mode === 'create' ? 'Create' : 'Update' }}</ng-container> }
         </button>
@@ -174,7 +205,15 @@ export class RoutePlanFormComponent implements OnInit {
   removeDay(i: number): void { this.daysArray.removeAt(i); }
 
   onSubmit(): void {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      if (this.mode === 'create' && this.salesmen.length === 0) {
+        this.snackBar.open('No linked salesman user is available for route plans.', 'Close', { duration: 3500 });
+      } else {
+        this.snackBar.open('Enter month in YYYY-MM format and select a salesman.', 'Close', { duration: 3500 });
+      }
+      return;
+    }
     this.loading = true;
     const request = this.mode === 'create'
       ? this.routePlanService.createRoutePlan(this.form.value)

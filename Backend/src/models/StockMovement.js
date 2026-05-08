@@ -80,14 +80,25 @@ const stockMovementSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Reference type is required'],
     enum: {
-      values: ['sales_invoice', 'purchase_invoice', 'adjustment', 'opening_balance', 'transfer', 'warehouse_transfer'],
-      message: 'Reference type must be one of: sales_invoice, purchase_invoice, adjustment, opening_balance, transfer, warehouse_transfer',
+      values: [
+        'sales_invoice',
+        'purchase_invoice',
+        'sales_invoice_cancellation',
+        'purchase_invoice_cancellation',
+        'sales_return',
+        'return_purchase',
+        'adjustment',
+        'opening_balance',
+        'transfer',
+        'warehouse_transfer',
+      ],
+      message: 'Reference type must be one of: sales_invoice, purchase_invoice, sales_invoice_cancellation, purchase_invoice_cancellation, sales_return, return_purchase, adjustment, opening_balance, transfer, warehouse_transfer',
     },
   },
   referenceId: {
     type: mongoose.Schema.Types.ObjectId,
     required() {
-      return ['sales_invoice', 'purchase_invoice'].includes(this.referenceType);
+      return ['sales_invoice', 'purchase_invoice', 'sales_invoice_cancellation', 'purchase_invoice_cancellation', 'sales_return', 'return_purchase'].includes(this.referenceType);
     },
   },
   batchInfo: {
@@ -197,6 +208,10 @@ stockMovementSchema.methods.getMovementDescription = function () {
   const descriptions = {
     sales_invoice: 'Sale to customer',
     purchase_invoice: 'Purchase from supplier',
+    sales_invoice_cancellation: 'Sales invoice cancellation',
+    purchase_invoice_cancellation: 'Purchase invoice cancellation',
+    sales_return: 'Sales return from customer',
+    return_purchase: 'Purchase return to supplier',
     adjustment: 'Stock adjustment',
     opening_balance: 'Opening balance',
     transfer: 'Stock transfer',
@@ -325,20 +340,16 @@ stockMovementSchema.statics.calculateStockBalance = async function (itemId, ware
   };
 
   if (warehouseId) {
-    match.$or = [
-      { warehouse: new mongoose.Types.ObjectId(warehouseId) },
-      { 'transferInfo.toWarehouse': new mongoose.Types.ObjectId(warehouseId) },
-    ];
+    match.warehouse = new mongoose.Types.ObjectId(warehouseId);
   }
 
   return this.aggregate([
     { $match: match },
     {
       $project: {
-        quantity: {
+        balanceWarehouse: {
           $switch: {
             branches: [
-              // For outbound transfers, we need to handle them specially
               {
                 case: {
                   $and: [
@@ -346,16 +357,31 @@ stockMovementSchema.statics.calculateStockBalance = async function (itemId, ware
                     { $eq: ['$movementType', 'out'] },
                   ],
                 },
-                then: { $multiply: ['$quantity', -1] },
+                then: '$warehouse',
               },
-              // Standard movement types
+              {
+                case: {
+                  $and: [
+                    { $eq: ['$referenceType', 'warehouse_transfer'] },
+                    { $eq: ['$movementType', 'in'] },
+                  ],
+                },
+                then: { $ifNull: ['$transferInfo.toWarehouse', '$warehouse'] },
+              },
+            ],
+            default: '$warehouse',
+          },
+        },
+        quantity: {
+          $switch: {
+            branches: [
               {
                 case: { $eq: ['$movementType', 'in'] },
-                then: '$quantity',
+                then: { $abs: '$quantity' },
               },
               {
                 case: { $eq: ['$movementType', 'out'] },
-                then: { $multiply: ['$quantity', -1] },
+                then: { $multiply: [{ $abs: '$quantity' }, -1] },
               },
             ],
             default: 0,
@@ -367,13 +393,7 @@ stockMovementSchema.statics.calculateStockBalance = async function (itemId, ware
       $group: {
         _id: {
           itemId: '$itemId',
-          warehouse: {
-            $cond: [
-              { $eq: ['$referenceType', 'warehouse_transfer'] },
-              '$transferInfo.toWarehouse',
-              '$warehouse',
-            ],
-          },
+          warehouse: '$balanceWarehouse',
         },
         balance: { $sum: '$quantity' },
         lastMovement: { $max: '$movementDate' },
@@ -414,46 +434,56 @@ stockMovementSchema.statics.getItemStockLevels = async function (itemId) {
       },
     },
     {
+      $project: {
+        balanceWarehouse: {
+          $switch: {
+            branches: [
+              {
+                case: {
+                  $and: [
+                    { $eq: ['$referenceType', 'warehouse_transfer'] },
+                    { $eq: ['$movementType', 'out'] },
+                  ],
+                },
+                then: '$warehouse',
+              },
+              {
+                case: {
+                  $and: [
+                    { $eq: ['$referenceType', 'warehouse_transfer'] },
+                    { $eq: ['$movementType', 'in'] },
+                  ],
+                },
+                then: { $ifNull: ['$transferInfo.toWarehouse', '$warehouse'] },
+              },
+            ],
+            default: '$warehouse',
+          },
+        },
+        movementType: 1,
+        quantity: 1,
+        movementDate: 1,
+      },
+    },
+    {
       $group: {
         _id: {
-          warehouse: {
-            $cond: [
-              { $eq: ['$referenceType', 'warehouse_transfer'] },
-              '$transferInfo.toWarehouse',
-              '$warehouse',
-            ],
-          },
+          warehouse: '$balanceWarehouse',
         },
         totalIn: {
           $sum: {
             $cond: [
               { $eq: ['$movementType', 'in'] },
-              '$quantity',
-              {
-                $cond: [
-                  {
-                    $and: [
-                      { $eq: ['$referenceType', 'warehouse_transfer'] },
-                      { $eq: ['$movementType', 'out'] },
-                    ],
-                  },
-                  { $multiply: ['$quantity', -1] },
-                  0,
-                ],
-              },
+              { $abs: '$quantity' },
+              0,
             ],
           },
         },
         totalOut: {
           $sum: {
             $cond: [
-              {
-                $and: [
-                  { $eq: ['$movementType', 'out'] },
-                  { $ne: ['$referenceType', 'warehouse_transfer'] },
-                ],
-              },
-              '$quantity',
+              { $eq: ['$movementType', 'out'] },
+              { $abs: '$quantity' },
               0,
             ],
           },
@@ -667,9 +697,15 @@ stockMovementSchema.pre('save', function (next) {
     this.movementDate = new Date();
   }
 
-  // Ensure quantity is positive
-  if (this.quantity <= 0) {
-    throw new Error('Quantity must be a positive number');
+  // Keep stock movement direction encoded consistently before validation.
+  if (this.movementType === 'in' && this.quantity < 0) {
+    this.quantity = Math.abs(this.quantity);
+  } else if (this.movementType === 'out' && this.quantity > 0) {
+    this.quantity = -Math.abs(this.quantity);
+  }
+
+  if (this.quantity === 0) {
+    throw new Error('Quantity cannot be zero');
   }
 
   // Set default status for non-transfer movements
@@ -703,13 +739,6 @@ stockMovementSchema.pre('save', function (next) {
     ) {
       throw new Error('Source and destination warehouses must be different');
     }
-  }
-
-  // Ensure quantity sign matches movement type for non-adjustment movements
-  if (this.movementType === 'in' && this.quantity < 0) {
-    this.quantity = Math.abs(this.quantity);
-  } else if (this.movementType === 'out' && this.quantity > 0) {
-    this.quantity = -Math.abs(this.quantity);
   }
 
   next();

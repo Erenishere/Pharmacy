@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { shareReplay } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import {
   CashReceipt,
   CashPayment,
+  CashBookEntriesResponse,
+  CashBookLookups,
   CashBookSummary,
   CashBookStatistics,
   CashBookQueryParams,
@@ -16,8 +19,46 @@ import {
 })
 export class CashBookService {
   private baseUrl = `${environment.apiUrl}/cashbook`;
+  private lookupsCache = new Map<'receive' | 'payment', Observable<ApiResponse<CashBookLookups>>>();
 
   constructor(private http: HttpClient) {}
+
+  getEntries(params: CashBookQueryParams = {}): Observable<ApiResponse<CashBookEntriesResponse>> {
+    let httpParams = new HttpParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        httpParams = httpParams.set(key, value.toString());
+      }
+    });
+    return this.http.get<ApiResponse<CashBookEntriesResponse>>(`${this.baseUrl}/entries`, { params: httpParams });
+  }
+
+  getLookups(
+    transactionType: 'receive' | 'payment' = 'receive',
+    forceRefresh = false
+  ): Observable<ApiResponse<CashBookLookups>> {
+    if (forceRefresh) {
+      this.lookupsCache.delete(transactionType);
+    }
+
+    const cached = this.lookupsCache.get(transactionType);
+    if (cached) {
+      return cached;
+    }
+
+    const request$ = this.http
+      .get<ApiResponse<CashBookLookups>>(`${this.baseUrl}/lookups`, {
+        params: new HttpParams().set('transactionType', transactionType),
+      })
+      .pipe(shareReplay(1));
+
+    this.lookupsCache.set(transactionType, request$);
+    return request$;
+  }
+
+  clearLookupCache(): void {
+    this.lookupsCache.clear();
+  }
 
   getReceipts(params: CashBookQueryParams = {}): Observable<ApiResponse<CashReceipt[]>> {
     let httpParams = new HttpParams();
@@ -125,6 +166,10 @@ export class CashBookService {
 
   getCustomerPendingInvoices(customerId: string): Observable<ApiResponse<any[]>> {
     return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/customers/${customerId}/pending-invoices`);
+  }
+
+  getSupplierPendingInvoices(supplierId: string): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/suppliers/${supplierId}/pending-invoices`);
   }
 
   applyPaymentToInvoices(data: any): Observable<ApiResponse<any>> {

@@ -1,0 +1,10 @@
+{
+  "purchase": {
+    "status": 400,
+    "body": "{\"success\":false,\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"Invalid input data\",\"details\":[{\"field\":\"items[0].batchInfo.manufacturingDate\",\"message\":\"Invalid manufacturing date format\"}]},\"metadata\":{\"requestId\":\"ec770e92-ad34-4117-b052-a1439d137dfe\",\"timestamp\":\"2026-04-27T17:21:17.330Z\",\"path\":\"/api/v1/invoices/purchase\",\"method\":\"POST\",\"duration\":\"232.69ms\"}}"
+  },
+  "sales": {
+    "status": 400,
+    "body": "{\"success\":false,\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"details\":{\"details\":[{\"field\":\"salesmanId\",\"message\":\"\\\"salesmanId\\\" is not allowed to be empty\",\"value\":\"\"},{\"field\":\"claimAccountId\",\"message\":\"\\\"claimAccountId\\\" is not allowed to be empty\",\"value\":\"\"},{\"field\":\"items.0.unitPrice\",\"message\":\"Unit price is required\"}],\"stack\":\"ValidationError: Validation failed\\n    at C:\\\\Users\\\\DC\\\\Desktop\\\\pharmacy\\\\Backend\\\\src\\\\middleware\\\\joiValidation.js:23:17\\n    at Layer.handle [as handle_request] (C:\\\\Users\\\\DC\\\\Desktop\\\\pharmacy\\\\Backend\\\\node_modules\\\\express\\\\lib\\\\router\\\\layer.js:95:5)\\n    at next (C:\\\\Users\\\\DC\\\\Desktop\\\\pharmacy\\\\Backend\\\\node_modules\\\\express\\\\lib\\\\router\\\\route.js:149:13)\\n    at C:\\\\Users\\\\DC\\\\Desktop\\\\pharmacy\\\\Backend\\\\src\\\\middleware\\\\auth.js:76:5\\n    at Layer.handle [as handle_request] (C:\\\\Users\\\\DC\\\\Desktop\\\\pharmacy\\\\Backend\\\\node_modules\\\\express\\\\lib\\\\router\\\\layer.js:95:5)\\n    at next (C:\\\\Users\\\\DC\\\\Desktop\\\\pharmacy\\\\Backend\\\\node_modules\\\\express\\\\lib\\\\router\\\\route.js:149:13)\\n    at authenticate (C:\\\\Users\\\\DC\\\\Desktop\\\\pharmacy\\\\Backend\\\\src\\\\middleware\\\\auth.js:34:5)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\"}},\"metadata\":{\"requestId\":\"72fc5489-ab3a-4968-8035-d22f5a10ea3c\",\"timestamp\":\"2026-04-27T17:21:24.918Z\",\"path\":\"/api/v1/invoices/sales\",\"method\":\"POST\",\"duration\":\"171.92ms\"}}"
+  }
+}

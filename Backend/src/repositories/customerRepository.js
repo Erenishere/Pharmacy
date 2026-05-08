@@ -145,6 +145,10 @@ class CustomerRepository {
       queryBuilder.sort({ name: 1 });
     }
 
+    if (options.populate) {
+      queryBuilder.populate(options.populate);
+    }
+
     // Apply pagination
     if (options.limit) {
       queryBuilder.limit(parseInt(options.limit, 10));

@@ -1,5 +1,99 @@
 const ExcelJS = require('exceljs');
+const PDFDocument = require('pdfkit');
 const salesReportService = require('../services/salesReportService');
+
+const formatLabel = (label) => label
+  .replace(/([A-Z])/g, ' $1')
+  .replace(/^./, (letter) => letter.toUpperCase());
+
+const formatValue = (value) => {
+  if (typeof value === 'number') {
+    return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  if (value === null || value === undefined) {
+    return '-';
+  }
+  return String(value);
+};
+
+const flattenReportRows = (reportType, reportData) => {
+  if (reportType === 'summary' || reportType === 'gst-summary' || reportType === 'scheme-analysis' || reportType === 'profit-analysis') {
+    return Object.entries(reportData || {}).map(([metric, value]) => ({
+      metric: formatLabel(metric),
+      value: formatValue(value),
+    }));
+  }
+
+  if (reportType === 'by-customer') return reportData.customers || [];
+  if (reportType === 'by-item') return reportData.items || [];
+  if (reportType === 'by-salesman') return reportData.salesmen || [];
+  if (reportType === 'by-route') return reportData.routes || [];
+  if (reportType === 'by-category') return reportData.categories || [];
+
+  return [];
+};
+
+const writeReportPDF = (res, reportTitle, reportType, reportData, filters) => {
+  const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 36 });
+  const filename = `${reportTitle.replace(/ /g, '_')}.pdf`;
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+  doc.pipe(res);
+  doc.fontSize(18).font('Helvetica-Bold').text(reportTitle, { align: 'center' });
+  doc.moveDown(0.5);
+  doc.fontSize(9).font('Helvetica');
+
+  if (filters.startDate || filters.endDate) {
+    doc.text(`Period: ${filters.startDate || 'Start'} to ${filters.endDate || 'End'}`, { align: 'center' });
+  }
+  doc.text(`Generated: ${new Date().toLocaleString()}`, { align: 'center' });
+  doc.moveDown();
+
+  const rows = flattenReportRows(reportType, reportData);
+  if (!rows.length) {
+    doc.text('No rows found for the selected filters.');
+    doc.end();
+    return;
+  }
+
+  const keys = Object.keys(rows[0]);
+  const availableWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+  const columnWidth = availableWidth / keys.length;
+  let y = doc.y;
+
+  const writeHeader = () => {
+    doc.font('Helvetica-Bold').fontSize(8);
+    keys.forEach((key, index) => {
+      doc.text(formatLabel(key), doc.page.margins.left + (index * columnWidth), y, {
+        width: columnWidth - 4,
+      });
+    });
+    y += 18;
+    doc.moveTo(doc.page.margins.left, y - 5).lineTo(doc.page.width - doc.page.margins.right, y - 5).stroke();
+    doc.font('Helvetica').fontSize(8);
+  };
+
+  writeHeader();
+
+  rows.forEach((row) => {
+    if (y > doc.page.height - doc.page.margins.bottom - 20) {
+      doc.addPage();
+      y = doc.y;
+      writeHeader();
+    }
+
+    keys.forEach((key, index) => {
+      doc.text(formatValue(row[key]), doc.page.margins.left + (index * columnWidth), y, {
+        width: columnWidth - 4,
+      });
+    });
+    y += 16;
+  });
+
+  doc.end();
+};
 
 exports.getSalesSummary = async (req, res) => {
   try {
@@ -352,12 +446,7 @@ exports.exportReport = async (req, res) => {
 
       res.send(buffer);
     } else if (format === 'pdf') {
-      // PDF export would require a PDF library like pdfkit
-      // For now, return JSON with a message
-      return res.status(501).json({
-        success: false,
-        error: 'PDF export not yet implemented. Please use Excel format.',
-      });
+      return writeReportPDF(res, reportTitle, reportType, reportData, filters);
     } else {
       return res.status(400).json({
         success: false,

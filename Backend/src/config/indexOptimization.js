@@ -169,14 +169,30 @@ async function createOptimizedIndexes() {
 async function getIndexStats(collectionName) {
   try {
     const { db } = mongoose.connection;
-    const stats = await db.collection(collectionName).stats();
-    const indexes = await db.collection(collectionName).indexes();
+    const collection = db.collection(collectionName);
+    let stats;
+
+    try {
+      stats = await db.command({ collStats: collectionName });
+    } catch (error) {
+      if (error.codeName === 'NamespaceNotFound') {
+        return null;
+      }
+
+      stats = {
+        count: await collection.countDocuments(),
+        size: null,
+        avgObjSize: null,
+      };
+    }
+
+    const indexes = await collection.indexes();
 
     return {
       collection: collectionName,
-      count: stats.count,
-      size: stats.size,
-      avgObjSize: stats.avgObjSize,
+      count: stats.count ?? 0,
+      size: stats.size ?? null,
+      avgObjSize: stats.avgObjSize ?? null,
       indexes: indexes.map((idx) => ({
         name: idx.name,
         keys: idx.key,
@@ -229,15 +245,9 @@ async function getAllIndexStats() {
     'bankreconciliations',
   ];
 
-  const stats = [];
-  for (const collection of collections) {
-    const stat = await getIndexStats(collection);
-    if (stat) {
-      stats.push(stat);
-    }
-  }
+  const stats = await Promise.all(collections.map((collection) => getIndexStats(collection)));
 
-  return stats;
+  return stats.filter(Boolean);
 }
 
 module.exports = {

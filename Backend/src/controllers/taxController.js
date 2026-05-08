@@ -1,4 +1,5 @@
 const taxService = require('../services/taxService');
+const Invoice = require('../models/Invoice');
 
 // Helper function to send success response
 const successResponse = (res, data, message = 'Success', statusCode = 200) => res.status(statusCode).json({
@@ -407,23 +408,105 @@ const generateTaxReport = async (req, res) => {
       return errorResponse(res, 'Start date and end date are required', 400, 'VALIDATION_ERROR');
     }
 
-    // This is a placeholder for tax report generation
-    // In a real implementation, this would query invoices and generate reports
+    if (format !== 'json') {
+      return errorResponse(res, 'Tax report currently supports json format only', 501, 'TAX_REPORT_FORMAT_UNSUPPORTED');
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      return errorResponse(res, 'Start date and end date must be valid dates', 400, 'VALIDATION_ERROR');
+    }
+    end.setHours(23, 59, 59, 999);
+
+    const match = {
+      invoiceDate: { $gte: start, $lte: end },
+      status: { $ne: 'cancelled' },
+    };
+
+    const [summary = {}] = await Invoice.aggregate([
+      { $match: match },
+      {
+        $group: {
+          _id: null,
+          transactionCount: { $sum: 1 },
+          totalTaxCollected: { $sum: { $ifNull: ['$totals.totalTax', 0] } },
+          totalGST: {
+            $sum: {
+              $add: [
+                { $ifNull: ['$totals.gst18Total', 0] },
+                { $ifNull: ['$totals.gst4Total', 0] },
+              ],
+            },
+          },
+          gst18Total: { $sum: { $ifNull: ['$totals.gst18Total', 0] } },
+          gst4Total: { $sum: { $ifNull: ['$totals.gst4Total', 0] } },
+          advanceTaxTotal: { $sum: { $ifNull: ['$totals.advanceTaxTotal', 0] } },
+          nonFilerGSTTotal: { $sum: { $ifNull: ['$totals.nonFilerGSTTotal', 0] } },
+          incomeTaxTotal: { $sum: { $ifNull: ['$totals.incomeTaxTotal', 0] } },
+          taxableSales: { $sum: { $ifNull: ['$totals.subtotal', 0] } },
+          grandTotal: { $sum: { $ifNull: ['$totals.grandTotal', 0] } },
+        },
+      },
+      { $project: { _id: 0 } },
+    ]);
+
+    const invoiceBreakdown = await Invoice.find(match)
+      .select('invoiceNumber type invoiceDate customerId supplierId totals')
+      .populate('customerId', 'code name')
+      .populate('supplierId', 'code name')
+      .sort({ invoiceDate: 1, invoiceNumber: 1 })
+      .lean();
+
+    const normalizedTaxType = (taxType || 'ALL').toUpperCase();
+    const totals = {
+      totalTaxCollected: summary.totalTaxCollected || 0,
+      totalGST: summary.totalGST || 0,
+      gst18Total: summary.gst18Total || 0,
+      gst4Total: summary.gst4Total || 0,
+      advanceTaxTotal: summary.advanceTaxTotal || 0,
+      nonFilerGSTTotal: summary.nonFilerGSTTotal || 0,
+      incomeTaxTotal: summary.incomeTaxTotal || 0,
+      transactionCount: summary.transactionCount || 0,
+      taxableSales: summary.taxableSales || 0,
+      grandTotal: summary.grandTotal || 0,
+    };
+
+    const taxBreakdown = [
+      { type: 'GST18', label: 'GST 18%', amount: totals.gst18Total },
+      { type: 'GST4', label: 'GST 4%', amount: totals.gst4Total },
+      { type: 'ADVANCE_TAX', label: 'Advance Tax', amount: totals.advanceTaxTotal },
+      { type: 'NON_FILER_GST', label: 'Non-Filer GST', amount: totals.nonFilerGSTTotal },
+      { type: 'INCOME_TAX', label: 'Income Tax', amount: totals.incomeTaxTotal },
+    ];
+
     const report = {
       period: {
-        startDate,
-        endDate,
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
       },
-      taxType: taxType || 'ALL',
-      summary: {
-        totalTaxCollected: 0,
-        totalGST: 0,
-        totalWHT: 0,
-        transactionCount: 0,
-      },
+      taxType: normalizedTaxType,
+      summary: totals,
+      taxBreakdown: normalizedTaxType === 'ALL'
+        ? taxBreakdown
+        : taxBreakdown.filter((tax) => tax.type === normalizedTaxType || tax.type.includes(normalizedTaxType)),
+      invoices: invoiceBreakdown.map((invoice) => ({
+        id: invoice._id,
+        invoiceNumber: invoice.invoiceNumber,
+        type: invoice.type,
+        invoiceDate: invoice.invoiceDate,
+        party: invoice.customerId || invoice.supplierId || null,
+        subtotal: invoice.totals?.subtotal || 0,
+        totalTax: invoice.totals?.totalTax || 0,
+        gst18Total: invoice.totals?.gst18Total || 0,
+        gst4Total: invoice.totals?.gst4Total || 0,
+        advanceTaxTotal: invoice.totals?.advanceTaxTotal || 0,
+        nonFilerGSTTotal: invoice.totals?.nonFilerGSTTotal || 0,
+        incomeTaxTotal: invoice.totals?.incomeTaxTotal || 0,
+        grandTotal: invoice.totals?.grandTotal || 0,
+      })),
       format,
       generatedAt: new Date().toISOString(),
-      message: 'Tax report generation endpoint - to be implemented with invoice data',
     };
 
     return successResponse(res, report, 'Tax report generated successfully');

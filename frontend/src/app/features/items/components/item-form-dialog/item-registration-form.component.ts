@@ -134,6 +134,7 @@ export class ItemRegistrationFormComponent implements OnInit {
       gstNonFiler: [0, [Validators.min(0), Validators.max(100)]],
 
       // F. Stock Alerts
+      currentStock: [0, [Validators.required, Validators.min(0)]],
       minimumStock: [10, [Validators.required, Validators.min(0)]],
       maximumStock: [1000, [Validators.required, Validators.min(0)]],
       noSalesAlertDays: [30, Validators.min(0)],
@@ -252,6 +253,7 @@ export class ItemRegistrationFormComponent implements OnInit {
       gstFiler: item.tax?.gstRate ?? item.tax?.gstFiler ?? 0,
       gstNonFiler: item.tax?.gstRateNonFilter ?? item.tax?.gstNonFiler ?? 0,
       // Stock Alerts
+      currentStock: item.inventory?.currentStock || item.inventory?.openingStock || 0,
       minimumStock: item.inventory?.minimumStock || 10,
       maximumStock: item.inventory?.maximumStock || 1000,
       noSalesAlertDays: item.inventory?.alertNoSalesDays || item.alerts?.noSalesAlertDays || 30,
@@ -385,10 +387,15 @@ export class ItemRegistrationFormComponent implements OnInit {
 
       // Stock Alerts
       inventory: {
+        openingStock: this.isEditMode
+          ? this.toNumber(this.data.item?.inventory?.openingStock ?? this.data.item?.inventory?.currentStock)
+          : this.toNumber(formValue.currentStock),
         minimumStock: this.toNumber(formValue.minimumStock),
         maximumStock: this.toNumber(formValue.maximumStock),
         reorderPoint: this.toNumber(formValue.minimumStock),
-        currentStock: this.isEditMode ? this.toNumber(this.data.item?.inventory?.currentStock) : 0,
+        currentStock: this.isEditMode
+          ? this.toNumber(this.data.item?.inventory?.currentStock)
+          : this.toNumber(formValue.currentStock),
         alertNoSalesDays: this.toNumber(formValue.noSalesAlertDays)
       },
 

@@ -4,15 +4,15 @@ $purple: #7367f0;
 $purple-light: rgba(115, 103, 240, 0.12);
 $green: #28c76f;
 $red: #ea5455;
-$text-dark: #2d3748;
-$text-muted: #4a5568;
-$border: #b4bccc;
-$page-bg: #f7f8fc;
+$text-dark: #5e5873;
+$text-muted: #6e6b7b;
+$border: #d8d6de;
+$page-bg: #fbfbfd;
 $card-bg: #ffffff;
 $field-bg: #ffffff;
 
 .account-registration-container {
-  padding: 24px;
+  padding: 28px 32px;
   max-width: 1600px;
   margin: 0 auto;
   min-height: 100vh;
@@ -23,24 +23,28 @@ $field-bg: #ffffff;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 20px;
+  margin-bottom: 28px;
 
   .header-text {
+    border-left: 6px solid $purple;
+    padding-left: 18px;
+
     h1 {
       margin: 0;
-      font-size: 24px;
-      font-weight: 700;
+      font-size: 42px;
+      line-height: 1.05;
+      font-weight: 800;
       color: $text-dark;
-      border-left: 4px solid $purple;
-      padding-left: 12px;
+      letter-spacing: 0;
     }
 
     p {
-      margin: 4px 0 0 16px;
+      margin: 12px 0 0;
       color: $text-muted;
-      font-size: 14px;
-      font-weight: 500;
+      font-size: 18px;
+      line-height: 1.4;
+      font-weight: 600;
     }
   }
 
@@ -52,32 +56,36 @@ $field-bg: #ffffff;
 
     .ghost-btn,
     .primary-btn {
-      height: 38px;
-      padding: 0 14px;
+      min-height: 66px;
+      padding: 0 24px;
       border-radius: 8px;
-      font-weight: 600;
-      font-size: 13px;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: 0;
 
       mat-icon {
-        margin-right: 6px;
-        font-size: 18px;
+        margin-right: 8px;
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
       }
     }
 
     .ghost-btn {
-      border-color: rgba($purple, 0.55);
+      border: 1px solid rgba($purple, 0.24);
       color: $purple;
       background: #fff;
+      box-shadow: 0 8px 24px rgba(34, 41, 47, 0.06);
 
       &:hover {
-        background: var(--color-bg-page);
+        background: rgba($purple, 0.06);
       }
     }
 
     .primary-btn {
-      background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.8));
+      background: linear-gradient(135deg, $purple 0%, #5e50ee 100%);
       color: #fff;
-      box-shadow: 0 4px 12px rgba($purple, 0.35);
+      box-shadow: 0 12px 30px rgba($purple, 0.3);
 
       &:hover:not(:disabled) {
         transform: translateY(-1px);
@@ -89,14 +97,14 @@ $field-bg: #ffffff;
 
 .main-card {
   background: $card-bg;
-  border: 1px solid rgba($border, 0.6);
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba($border, 0.86);
+  border-radius: 8px;
+  box-shadow: 0 16px 42px rgba(34, 41, 47, 0.08);
   overflow: hidden;
 }
 
 .form-card {
-  padding: 16px;
+  padding: 0;
 }
 
 .sheet-title-row {
@@ -104,63 +112,88 @@ $field-bg: #ffffff;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-bottom: 12px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.86));
+  margin: 0;
+  padding: 24px 28px;
+  border-radius: 0;
+  border-left: 6px solid $purple;
+  border-bottom: 1px solid rgba($border, 0.8);
+  background: linear-gradient(135deg, #ffffff 0%, #f7f6ff 100%);
 
   h2 {
     margin: 0;
     font-size: 22px;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: 0.2px;
+    line-height: 1.2;
+    font-weight: 800;
+    color: $text-dark;
+    letter-spacing: 0;
   }
 
   .print-status {
     display: inline-flex;
     align-items: center;
     min-height: 28px;
-    padding: 0 10px;
+    padding: 0 12px;
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba($purple, 0.1);
+    border: 1px solid rgba($purple, 0.18);
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-    color: #fff;
+    color: $purple;
   }
 }
 
 .sheet-layout {
   display: grid;
-  grid-template-columns: minmax(0, 2.25fr) minmax(280px, 1fr);
-  gap: 14px;
+  grid-template-columns: minmax(0, 2fr) minmax(360px, 0.9fr);
+  gap: 22px;
+  padding: 24px;
 }
 
 .sheet-panel {
-  border: 1px solid $border;
+  position: relative;
+  border: 1px solid rgba($border, 0.86);
   border-radius: 8px;
   overflow: hidden;
   background: $card-bg;
+  box-shadow: 0 8px 24px rgba(34, 41, 47, 0.04);
+}
+
+.left-panel::before {
+  content: 'Account Profile';
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 0 18px;
+  border-left: 4px solid $purple;
+  border-bottom: 1px solid rgba($border, 0.8);
+  color: $purple;
+  background: #fbfbff;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0;
 }
 
 .biodata-title {
-  padding: 9px 12px;
-  font-size: 13px;
-  font-weight: 700;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0;
   color: $purple;
-  background: var(--color-bg-page);
-  border-bottom: 1px solid $border;
-  border-left: 3px solid $purple;
+  background: #fbfbff;
+  border-bottom: 1px solid rgba($border, 0.8);
+  border-left: 4px solid $purple;
 }
 
 .sheet-row {
   display: grid;
-  grid-template-columns: minmax(220px, 38%) 1fr;
-  min-height: 40px;
-  border-bottom: 1px solid rgba($border, 0.85);
+  grid-template-columns: minmax(190px, 34%) 1fr;
+  min-height: 66px;
+  border-bottom: 1px solid rgba($border, 0.62);
 
   &:last-child {
     border-bottom: 0;
@@ -174,42 +207,46 @@ $field-bg: #ffffff;
 }
 
 .tall-row {
-  min-height: 48px;
+  min-height: 66px;
 }
 
 .accent-row {
   .sheet-label,
   .sheet-control {
-    background: rgba(var(--color-bg-page), 0.07);
+    background: #fcfbff;
   }
 }
 
 .sheet-label {
   display: flex;
   align-items: center;
-  padding: 7px 10px;
-  border-right: 1px solid rgba($border, 0.9);
-  font-size: 12px;
-  font-weight: 700;
+  padding: 13px 14px;
+  border-right: 1px solid rgba($border, 0.72);
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 800;
   color: $text-muted;
+  background: #fafafe;
 }
 
 .sheet-control {
   display: flex;
   align-items: center;
-  padding: 4px;
+  padding: 8px;
+  min-width: 0;
 }
 
 .sheet-input,
 .sheet-select,
 .sheet-textarea {
   width: 100%;
-  min-height: 30px;
-  padding: 5px 8px;
-  border: 1px solid $border;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid rgba($border, 0.98);
   border-radius: 6px;
   background: $field-bg;
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 600;
   color: $text-dark;
   font-family: inherit;
   transition: all 0.2s ease;
@@ -217,7 +254,7 @@ $field-bg: #ffffff;
   &:focus {
     outline: none;
     border-color: $purple;
-    box-shadow: 0 0 0 3px rgba($purple, 0.16);
+    box-shadow: 0 0 0 3px rgba($purple, 0.14);
     background: #fff;
   }
 
@@ -227,7 +264,7 @@ $field-bg: #ffffff;
 }
 
 .sheet-textarea {
-  min-height: 50px;
+  min-height: 76px;
   resize: vertical;
 }
 
@@ -235,24 +272,28 @@ $field-bg: #ffffff;
   width: 100%;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  border: 1px solid $border;
+  gap: 8px;
+  border: 0;
   border-radius: 6px;
-  overflow: hidden;
-  background: $field-bg;
+  overflow: visible;
+  background: transparent;
 }
 
 .account-type-option {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 8px;
-  font-size: 12px;
-  font-weight: 700;
-  color: $text-muted;
-  border-right: 1px solid $border;
+  gap: 8px;
+  min-height: 42px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  color: $text-dark;
+  border: 1px solid rgba($border, 0.98);
+  border-radius: 6px;
+  background: #fff;
 
   &:last-child {
-    border-right: 0;
+    border-right: 1px solid rgba($border, 0.98);
   }
 
   input {
@@ -264,15 +305,15 @@ $field-bg: #ffffff;
 .split-two {
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 120px;
-  gap: 6px;
+  grid-template-columns: minmax(0, 1fr) 130px;
+  gap: 8px;
 }
 
 .split-three {
   width: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
-  gap: 6px;
+  gap: 8px;
 }
 
 .split-with-check {
@@ -282,15 +323,15 @@ $field-bg: #ffffff;
 .inline-check {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 30px;
-  padding: 4px 8px;
-  border: 1px solid $border;
+  gap: 8px;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid rgba($border, 0.98);
   border-radius: 6px;
   background: $field-bg;
-  font-size: 12px;
-  font-weight: 700;
-  color: $text-muted;
+  font-size: 13px;
+  font-weight: 800;
+  color: $text-dark;
 
   input {
     margin: 0;
@@ -302,21 +343,21 @@ $field-bg: #ffffff;
   width: 100%;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  gap: 8px;
 }
 
 .status-option {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 30px;
-  padding: 4px 8px;
-  border: 1px solid $border;
+  gap: 8px;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid rgba($border, 0.98);
   border-radius: 6px;
   background: $field-bg;
-  font-size: 12px;
-  font-weight: 700;
-  color: $text-muted;
+  font-size: 13px;
+  font-weight: 800;
+  color: $text-dark;
 
   input {
     margin: 0;
@@ -335,66 +376,68 @@ $field-bg: #ffffff;
 }
 
 .note-block {
-  margin-top: 14px;
-  padding: 8px 10px;
-  border: 1px solid $border;
+  margin: 0 24px 18px;
+  padding: 14px 16px;
+  border: 1px solid rgba($purple, 0.18);
   border-radius: 8px;
-  background: rgba(var(--color-bg-page), 0.06);
-  border-left: 3px solid $purple;
-  font-size: 12px;
-  font-weight: 600;
-  color: $text-dark;
+  background: rgba($purple, 0.06);
+  border-left: 4px solid $purple;
+  font-size: 13px;
+  font-weight: 700;
+  color: $text-muted;
 }
 
 .signatures-grid {
-  margin-top: 12px;
+  margin: 0 24px 20px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
 
   label {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 800;
     color: $text-muted;
   }
 }
 
 .form-actions {
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid rgba($border, 0.8);
+  margin: 0;
+  padding: 18px 24px 24px;
+  border-top: 1px solid rgba($border, 0.72);
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
+  background: #fbfbff;
 
   button {
-    height: 40px;
+    min-height: 46px;
     min-width: 130px;
     border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0;
 
     &[mat-raised-button] {
-      background: linear-gradient(118deg, $green, rgba($green, 0.8));
+      background: linear-gradient(135deg, $purple 0%, #5e50ee 100%);
       color: #fff;
-      box-shadow: 0 4px 12px rgba($green, 0.35);
+      box-shadow: 0 10px 24px rgba($purple, 0.26);
 
       &:hover:not(:disabled) {
-        box-shadow: 0 6px 16px rgba($green, 0.42);
+        box-shadow: 0 12px 28px rgba($purple, 0.34);
       }
     }
   }
 }
 
 .list-card {
-  margin-top: 16px;
+  margin-top: 28px;
 
   .card-header {
-    padding: 16px 18px;
+    padding: 18px 24px;
     border-bottom: 1px solid rgba($border, 0.6);
     display: flex;
     align-items: center;
@@ -402,16 +445,17 @@ $field-bg: #ffffff;
 
     h2 {
       margin: 0;
-      font-size: 18px;
-      font-weight: 700;
+      font-size: 22px;
+      font-weight: 800;
       color: $text-dark;
-      border-left: 4px solid $purple;
-      padding-left: 10px;
+      border-left: 5px solid $purple;
+      padding-left: 12px;
+      letter-spacing: 0;
     }
   }
 
   .table-container {
-    padding: 0 16px 16px;
+    padding: 0 20px 20px;
   }
 }
 
@@ -429,35 +473,85 @@ $field-bg: #ffffff;
 
 @media (max-width: 900px) {
   .account-registration-container {
-    padding: 12px;
+    padding: 16px;
   }
 
   .page-header {
     flex-direction: column;
     align-items: flex-start;
 
+    .header-text {
+      h1 {
+        font-size: 32px;
+      }
+
+      p {
+        font-size: 15px;
+      }
+    }
+
     .header-actions {
       width: 100%;
+
+      .ghost-btn,
+      .primary-btn {
+        width: 100%;
+        min-height: 52px;
+      }
     }
+  }
+
+  .sheet-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .sheet-layout {
+    padding: 16px;
+    gap: 16px;
   }
 
   .sheet-row,
   .right-panel .sheet-row {
     grid-template-columns: 1fr;
+    min-height: auto;
 
     .sheet-label {
       border-right: 0;
-      border-bottom: 1px solid rgba($border, 0.9);
+      border-bottom: 0;
+      padding-bottom: 4px;
+      background: #fff;
+    }
+
+    .sheet-control {
+      padding-top: 0;
     }
   }
 
   .split-two,
-  .split-three {
+  .split-three,
+  .account-type-grid,
+  .status-grid {
     grid-template-columns: 1fr;
+  }
+
+  .note-block,
+  .signatures-grid {
+    margin-left: 16px;
+    margin-right: 16px;
   }
 
   .signatures-grid {
     grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    padding: 16px;
+
+    button {
+      width: 100%;
+    }
   }
 }
 

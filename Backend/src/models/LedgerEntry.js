@@ -37,8 +37,8 @@ const ledgerEntrySchema = new mongoose.Schema({
     type: String,
     required: [true, 'Reference type is required'],
     enum: {
-      values: ['invoice', 'payment', 'adjustment', 'opening_balance', 'cash_receipt', 'cash_payment'],
-      message: 'Reference type must be one of: invoice, payment, adjustment, opening_balance, cash_receipt, cash_payment',
+      values: ['invoice', 'payment', 'adjustment', 'opening_balance', 'cash_receipt', 'cash_payment', 'capital'],
+      message: 'Reference type must be one of: invoice, payment, adjustment, opening_balance, cash_receipt, cash_payment, capital',
     },
   },
   referenceId: {
@@ -101,6 +101,7 @@ ledgerEntrySchema.methods.getTransactionDescription = function () {
     opening_balance: 'Opening balance',
     cash_receipt: 'Cash receipt',
     cash_payment: 'Cash payment',
+    capital: 'Capital transaction',
   };
 
   return descriptions[this.referenceType] || 'Unknown transaction';

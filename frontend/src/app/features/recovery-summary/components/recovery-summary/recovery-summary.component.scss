@@ -1,13 +1,180 @@
+@import "../../../../../styles/vuexy-vars";
 @import "../../../../../styles/shared-list-styles";
 
-.recovery-summary-page {
-  .dashboard-stats-grid { @include dashboard-stats-grid; }
-  @include data-table;
+$p-bg: #f8f7fa;
 
-  .recovery-analytics {
-    grid-template-columns: repeat(4, 1fr);
-    @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); }
-    @media (max-width: 600px) { grid-template-columns: 1fr; }
+:host {
+  display: block;
+  background: $p-bg;
+}
+
+.recovery-summary-page {
+  @include page-container;
+
+  .list-page-header {
+    @include page-header;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+
+    .header-content {
+      .title-with-accent {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .header-accent-bar {
+          width: 5px;
+          height: 40px;
+          border-radius: 4px;
+          background: $purple;
+        }
+      }
+
+      h1 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+
+        mat-icon {
+          color: $purple;
+        }
+      }
+
+      .page-subtitle {
+        margin: 8px 0 0 17px;
+        color: $grey-dark;
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+
+      .create-btn {
+        background: linear-gradient(118deg, #7367f0, #867cf0) !important;
+        color: #fff !important;
+        font-weight: 600;
+        height: 42px;
+        padding: 0 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(115, 103, 240, 0.35);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.25s ease;
+
+        &:hover {
+          box-shadow: 0 6px 18px rgba(115, 103, 240, 0.5);
+          transform: translateY(-1px);
+        }
+
+        mat-icon {
+          color: #fff !important;
+        }
+      }
+
+      .export-btn {
+        height: 42px;
+        border-radius: 8px;
+      }
+    }
+  }
+
+  .dashboard-stats-grid { 
+    @include dashboard-stats-grid;
+    margin-bottom: 24px;
+  }
+
+  // ─── Table Styling ────────────────────────────────────────────
+  :host ::ng-deep {
+    .recovery-summary-page {
+      .table-wrapper {
+        @include data-table;
+      }
+
+      .mat-mdc-header-row {
+        background-color: $purple !important;
+        th {
+          color: #ffffff !important;
+        }
+      }
+
+      .mat-mdc-paginator {
+        @include paginator;
+        margin-top: 16px;
+        border-radius: 8px;
+      }
+
+      .mat-mdc-footer-row {
+        background: $purple !important;
+
+        .mat-mdc-footer-cell {
+          color: #ffffff !important;
+          border: none;
+        }
+      }
+    }
+  }
+
+  .list-page-card {
+    @include list-card;
+
+    // Standardized No Data Content
+    .no-data-content {
+      padding: 60px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: $grey-dark;
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        margin-bottom: 16px;
+        color: rgba($purple, 0.2);
+      }
+
+      h4 {
+        margin: 0 0 8px 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: $purple-dark;
+      }
+
+      p {
+        margin: 0;
+        color: $grey-dark;
+        font-size: 0.95rem;
+      }
+    }
+
+    mat-paginator {
+      background: $purple !important;
+      color: #ffffff !important;
+      border-radius: 8px;
+      margin-top: 16px;
+
+      ::ng-deep {
+        .mat-mdc-paginator-range-label,
+        .mat-mdc-paginator-page-size-label,
+        .mat-mdc-select-value,
+        .mat-mdc-select-arrow,
+        .mat-mdc-button-base,
+        .mat-mdc-icon-button {
+          color: #ffffff !important;
+        }
+
+        .mat-mdc-icon-button[disabled] {
+          color: rgba(255, 255, 255, 0.45) !important;
+        }
+      }
+    }
   }
 
   .list-filters-section.advanced {
@@ -22,8 +189,15 @@
     .generate-btn {
       height: 44px;
       padding: 0 24px;
-      background: var(--color-bg-page);
-      color: #fff;
+      min-width: 180px;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)) !important;
+      color: var(--color-text-inverse) !important;
+      box-shadow: var(--shadow-button);
+
+      mat-icon,
+      .mdc-button__label {
+        color: var(--color-text-inverse) !important;
+      }
     }
   }
 
@@ -33,6 +207,20 @@
     gap: 8px;
     .sm-icon { color: $grey-medium; font-size: 20px; }
     .name { font-weight: 600; color: $purple-dark; }
+  }
+
+  .summary-row-trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .active-row {
+    background: rgba($purple, 0.08);
   }
 
   .amount-cell {
@@ -75,19 +263,130 @@
     }
   }
 
-  .action-buttons-inline {
-    display: flex;
-    justify-content: center;
-    gap: 4px;
-    .reminder-btn { color: $warning; }
+  .mat-mdc-footer-row.hidden-footer {
+    display: none;
   }
-  @include page-container;
-  @include page-header;
-  @include data-table;
-  @include paginator;
 
-  .dashboard-stats-grid { @include dashboard-stats-grid; }
+  .footer-label,
+  .footer-percent,
+  .footer-count {
+    font-weight: 700;
+    color: #ffffff !important;
+  }
 
-  .list-page-card { @include list-card; }
+  .footer-percent,
+  .footer-count {
+    font-size: 13px;
+  }
+
+  .detail-card {
+    margin-top: 24px;
+  }
+
+  .detail-card-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+
+    h3 {
+      margin: 0 0 4px 0;
+      color: $purple-dark;
+    }
+
+    p {
+      margin: 0;
+      color: $grey-dark;
+    }
+  }
+
+  .detail-card-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .detail-badge {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba($purple, 0.08);
+    color: $purple-dark;
+    font-weight: 600;
+  }
+
+  .detail-aging-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .aging-tile {
+    border-radius: 12px;
+    padding: 14px 16px;
+    background: rgba($purple, 0.04);
+    border: 1px solid rgba($purple, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    strong {
+      color: $purple-dark;
+      font-size: 20px;
+    }
+
+    small {
+      color: $grey-dark;
+    }
+  }
+
+  .aging-label {
+    color: $grey-dark;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .detail-table-wrapper {
+    margin-top: 8px;
+  }
+
+  .customer-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .name {
+      font-weight: 600;
+      color: $purple-dark;
+    }
+
+    .code {
+      color: $grey-medium;
+      font-size: 12px;
+    }
+  }
+
+  @media (max-width: 960px) {
+    .detail-card-header {
+      flex-direction: column;
+    }
+
+    .detail-aging-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .header-actions {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .detail-aging-grid {
+      grid-template-columns: 1fr;
+    }
+  }
 }
 

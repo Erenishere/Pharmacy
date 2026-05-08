@@ -12,6 +12,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { TargetTrackingService } from '../../services/target-tracking.service';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { TargetDashboardData, EmployeeTargetData } from '../../../../core/models/target-tracking.model';
@@ -32,7 +33,8 @@ import { TargetDashboardData, EmployeeTargetData } from '../../../../core/models
     MatInputModule,
     MatTooltipModule,
     MatChipsModule,
-    MatExpansionModule
+    MatExpansionModule,
+    MatPaginatorModule
   ],
   templateUrl: './target-dashboard.component.html',
   styleUrl: './target-dashboard.component.scss'
@@ -50,6 +52,11 @@ export class TargetDashboardComponent implements OnInit {
     'mobileOrders',
     'brandIncentives'
   ];
+
+  // Pagination
+  totalItems = 0;
+  pageSize = 10;
+  currentPage = 0;
 
   // Filters
   monthFilter = new FormControl('');
@@ -131,6 +138,10 @@ export class TargetDashboardComponent implements OnInit {
     return status === 'achieved' ? 'check_circle' : 'cancel';
   }
 
+  formatAmt(amount: number): string {
+    return amount?.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) || '0';
+  }
+
   formatCurrency(amount: number): string {
     return amount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   }
@@ -161,5 +172,10 @@ export class TargetDashboardComponent implements OnInit {
 
   getBrandIncentivesTotal(employee: EmployeeTargetData): number {
     return employee.brandIncentives?.length || 0;
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
   }
 }

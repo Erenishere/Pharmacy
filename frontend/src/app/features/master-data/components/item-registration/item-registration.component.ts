@@ -18,6 +18,30 @@ import { ItemMasterService, Item } from '../../services/item-master.service';
 import { CompanyMasterService, Company } from '../../services/company-master.service';
 import { SupportingMasterService, Category, SubCategory, Formula, FormulaSize, BusinessType, CompanyGroup } from '../../services/supporting-master.service';
 
+const optionalId = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.trim() ? value.trim() : undefined;
+
+const toBackendUnit = (value: unknown): string => {
+  const key = String(value || '').trim().toUpperCase();
+  const units: Record<string, string> = {
+    PCS: 'piece',
+    PIECE: 'piece',
+    PIECES: 'piece',
+    BOX: 'box',
+    PACK: 'pack',
+    STRIP: 'strip',
+    BOTTLE: 'bottle',
+    VIAL: 'bottle',
+    TABLET: 'tablet',
+    CAPSULE: 'capsule',
+    KG: 'kg',
+    GRAM: 'gram',
+    LITER: 'liter',
+    ML: 'ml'
+  };
+  return units[key] || 'piece';
+};
+
 @Component({
   selector: 'app-item-registration',
   standalone: true,
@@ -217,18 +241,21 @@ export class ItemRegistrationComponent implements OnInit {
     this.saving = true;
     const fv = this.itemForm.value;
 
-    const itemData: Partial<Item> = {
+    const unit = toBackendUnit(fv.unitOfMeasurement);
+    const itemData: any = {
       name: fv.name,
       code: fv.code,
       description: fv.description,
       companyId: fv.companyId,
-      companyGroupId: fv.companyGroupId,
-      formulaId: fv.formulaId,
-      formulaSizeId: fv.formulaSizeId,
+      companyGroupId: optionalId(fv.companyGroupId),
+      formulaId: optionalId(fv.formulaId),
+      formulaSizeId: optionalId(fv.formulaSizeId),
       categoryId: fv.categoryId,
-      subCategoryId: fv.subCategoryId,
+      subCategoryId: optionalId(fv.subCategoryId),
       businessTypeId: fv.businessTypeId,
-      supplierId: fv.supplierId,
+      supplierId: optionalId(fv.supplierId),
+      unit,
+      packSize: Number(fv.packingSize) || 1,
 
       pricing: {
         purchasePrice: fv.purchasePrice,
@@ -430,5 +457,30 @@ export class ItemRegistrationComponent implements OnInit {
 
   fmtNum(n: number): string {
     return n ? n.toLocaleString('en-PK') : '—';
+  }
+
+  private optionalId(value: unknown): string | undefined {
+    return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+  }
+
+  private toBackendUnit(value: unknown): string {
+    const key = String(value || '').trim().toUpperCase();
+    const units: Record<string, string> = {
+      PCS: 'piece',
+      PIECE: 'piece',
+      PIECES: 'piece',
+      BOX: 'box',
+      PACK: 'pack',
+      STRIP: 'strip',
+      BOTTLE: 'bottle',
+      VIAL: 'bottle',
+      TABLET: 'tablet',
+      CAPSULE: 'capsule',
+      KG: 'kg',
+      GRAM: 'gram',
+      LITER: 'liter',
+      ML: 'ml'
+    };
+    return units[key] || 'piece';
   }
 }

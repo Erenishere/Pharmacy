@@ -278,6 +278,31 @@ router.get('/summary', authenticate, eOrderController.getOrderSummary);
 
 /**
  * @swagger
+ * /e-orders/sync:
+ *   post:
+ *     summary: Sync orders from mobile device
+ *     tags: [E-Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               orders:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/EOrder'
+ *     responses:
+ *       200:
+ *         description: Orders synced successfully
+ */
+router.post('/sync', authenticate, validateBody(syncFromMobileSchema), eOrderController.syncFromMobile);
+
+/**
+ * @swagger
  * /e-orders/{id}:
  *   get:
  *     summary: Get e-order by ID
@@ -457,30 +482,5 @@ router.put('/:id', authenticate, authorize('admin', 'sales', 'salesman'), valida
  *         description: Cannot delete order
  */
 router.delete('/:id', authenticate, authorize('admin'), eOrderController.deleteOrder);
-
-/**
- * @swagger
- * /e-orders/sync:
- *   post:
- *     summary: Sync orders from mobile device
- *     tags: [E-Orders]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               orders:
- *                 type: array
- *                 items:
- *                   $ref: '#/components/schemas/EOrder'
- *     responses:
- *       200:
- *         description: Orders synced successfully
- */
-router.post('/sync', authenticate, validateBody(syncFromMobileSchema), eOrderController.syncFromMobile);
 
 module.exports = router;

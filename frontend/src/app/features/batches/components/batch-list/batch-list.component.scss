@@ -43,13 +43,13 @@
         }
 
         &.mat-button-toggle-checked {
-          background-color: var(--color-bg-page) !important;
-          box-shadow: 0 4px 12px rgba($purple, 0.25);
-          
+          background-color: $purple !important;
+          box-shadow: 0 4px 12px rgba($purple, 0.35);
+
           .mat-button-toggle-label-content {
             color: #ffffff !important;
           }
-          
+
           mat-icon {
             color: #ffffff !important;
           }

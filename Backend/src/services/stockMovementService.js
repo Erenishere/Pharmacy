@@ -265,8 +265,8 @@ class StockMovementService {
    * @param {Date} asOfDate - As of date
    * @returns {Promise<Number>} Stock balance
    */
-  async getStockBalance(itemId, asOfDate = new Date()) {
-    return await stockMovementRepository.calculateStockBalance(itemId, asOfDate);
+  async getStockBalance(itemId, asOfDate = new Date(), warehouseId = null) {
+    return await stockMovementRepository.calculateStockBalance(itemId, asOfDate, warehouseId);
   }
 
   /**

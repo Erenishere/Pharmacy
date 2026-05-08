@@ -1,12 +1,101 @@
+@import "../../../../../styles/vuexy-vars";
 @import "../../../../../styles/shared-list-styles";
+
+$p-bg: #f8f7fa;
+
+:host {
+  display: block;
+  background: $p-bg;
+}
 
 .e-order-list-page {
   @include page-container;
-  @include page-header;
-  @include data-table;
-  @include paginator;
 
-  .dashboard-stats-grid { @include dashboard-stats-grid; }
+  .list-page-header {
+    @include page-header;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+
+    .header-content {
+      .title-with-accent {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .header-accent-bar {
+          width: 5px;
+          height: 40px;
+          border-radius: 4px;
+          background: $purple;
+        }
+      }
+
+      h1 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+
+        mat-icon {
+          color: $purple;
+        }
+      }
+
+      .page-subtitle {
+        margin: 8px 0 0 17px;
+        color: $grey-dark;
+      }
+    }
+
+    .header-actions {
+      .create-btn {
+        background: linear-gradient(118deg, $purple, rgba($purple, 0.85)) !important;
+        color: #fff !important;
+        font-weight: 600;
+        height: 42px;
+        padding: 0 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba($purple, 0.35);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.25s ease;
+
+        &:hover {
+          box-shadow: 0 6px 18px rgba($purple, 0.5);
+          transform: translateY(-1px);
+        }
+
+        mat-icon {
+          color: #fff !important;
+        }
+      }
+    }
+  }
+
+  .dashboard-stats-grid {
+    @include dashboard-stats-grid;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 900px) {
+    .list-page-header {
+      flex-direction: column;
+      gap: 16px;
+
+      .header-actions {
+        width: 100%;
+
+        .create-btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    }
+
+  }
 
   .stat-card {
     &.primary { --stat-color: #{$purple}; }
@@ -14,6 +103,92 @@
     &.success { --stat-color: #{$success}; }
     &.info { --stat-color: #{$info}; }
     &.primary-alt { --stat-color: #{$purple-dark}; }
+  }
+
+  // ─── Table Styling ────────────────────────────────────────────
+  :host ::ng-deep {
+    .e-order-list-page {
+      .table-wrapper {
+        @include data-table;
+      }
+
+      .mat-mdc-paginator {
+        @include paginator;
+        margin-top: 16px;
+        border-radius: 8px;
+      }
+    }
+  }
+
+  .list-page-card {
+    @include list-card;
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: $purple-dark;
+      font-size: 15px;
+      font-weight: 700;
+
+      mat-icon {
+        color: $purple;
+      }
+    }
+
+    // Standardized No Data Content
+    .no-data-content {
+      padding: 60px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: $grey-dark;
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        margin-bottom: 16px;
+        color: rgba($purple, 0.2);
+      }
+
+      h4 {
+        margin: 0 0 8px 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: $purple-dark;
+      }
+
+      p {
+        margin: 0;
+        color: $grey-dark;
+        font-size: 0.95rem;
+      }
+    }
+
+    mat-paginator {
+      background: $purple !important;
+      color: #ffffff !important;
+      border-radius: 8px;
+      margin-top: 16px;
+
+      ::ng-deep {
+        .mat-mdc-paginator-range-label,
+        .mat-mdc-paginator-page-size-label,
+        .mat-mdc-select-value,
+        .mat-mdc-select-arrow,
+        .mat-mdc-button-base,
+        .mat-mdc-icon-button {
+          color: #ffffff !important;
+        }
+
+        .mat-mdc-icon-button[disabled] {
+          color: rgba(255, 255, 255, 0.45) !important;
+        }
+      }
+    }
   }
 
   .customer-info {
@@ -27,5 +202,34 @@
     opacity: 0.6;
     background-color: rgba($grey-very-light, 0.5);
   }
-}
 
+  .status-chip {
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+
+    &.pending {
+      background: rgba($warning, 0.12);
+      color: darken($warning, 12%);
+    }
+
+    &.approved {
+      background: rgba($success, 0.12);
+      color: darken($success, 8%);
+    }
+
+    &.converted {
+      background: rgba($info, 0.14);
+      color: darken($info, 18%);
+    }
+
+    &.cancelled {
+      background: rgba($danger, 0.12);
+      color: darken($danger, 8%);
+    }
+  }
+
+}

@@ -15,6 +15,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { Router } from '@angular/router';
+import { SupportingMasterService, AccountHead } from '../../../master-data/services/supporting-master.service';
 
 interface AccountHeadNode {
   _id: string;
@@ -59,7 +60,8 @@ export class ChartOfAccountsComponent implements OnInit {
   constructor(
     private router: Router,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private supportingMasterService: SupportingMasterService
   ) {}
 
   ngOnInit(): void {
@@ -69,170 +71,28 @@ export class ChartOfAccountsComponent implements OnInit {
   loadChartOfAccounts(): void {
     this.loading = true;
 
-    // Mock data for demonstration - in real implementation, this would come from service
-    const mockData: AccountHeadNode[] = [
-      {
-        _id: '1',
-        name: 'Assets',
-        code: '1000',
-        level: 1,
-        children: [
-          {
-            _id: '1.1',
-            name: 'Current Assets',
-            code: '1100',
-            level: 2,
-            parentId: '1',
-            children: [
-              {
-                _id: '1.1.1',
-                name: 'Cash & Bank',
-                code: '1110',
-                level: 3,
-                parentId: '1.1',
-                accountCount: 5,
-                totalBalance: 250000
-              },
-              {
-                _id: '1.1.2',
-                name: 'Accounts Receivable',
-                code: '1120',
-                level: 3,
-                parentId: '1.1',
-                accountCount: 25,
-                totalBalance: 180000
-              }
-            ]
-          },
-          {
-            _id: '1.2',
-            name: 'Fixed Assets',
-            code: '1200',
-            level: 2,
-            parentId: '1',
-            children: [
-              {
-                _id: '1.2.1',
-                name: 'Property & Equipment',
-                code: '1210',
-                level: 3,
-                parentId: '1.2',
-                accountCount: 3,
-                totalBalance: 450000
-              }
-            ]
-          }
-        ]
+    this.supportingMasterService.getAccountHeads({ isActive: true }).subscribe({
+      next: (response) => {
+        this.dataSource.data = this.buildTree(response.data || []);
+        this.treeControl.dataNodes = this.dataSource.data;
+        this.treeControl.expandAll();
+        this.loading = false;
       },
-      {
-        _id: '2',
-        name: 'Liabilities',
-        code: '2000',
-        level: 1,
-        children: [
-          {
-            _id: '2.1',
-            name: 'Current Liabilities',
-            code: '2100',
-            level: 2,
-            parentId: '2',
-            children: [
-              {
-                _id: '2.1.1',
-                name: 'Accounts Payable',
-                code: '2110',
-                level: 3,
-                parentId: '2.1',
-                accountCount: 15,
-                totalBalance: -120000
-              }
-            ]
-          }
-        ]
-      },
-      {
-        _id: '3',
-        name: 'Equity',
-        code: '3000',
-        level: 1,
-        children: [
-          {
-            _id: '3.1',
-            name: 'Owner\'s Equity',
-            code: '3100',
-            level: 2,
-            parentId: '3',
-            accountCount: 2,
-            totalBalance: 680000
-          }
-        ]
-      },
-      {
-        _id: '4',
-        name: 'Income',
-        code: '4000',
-        level: 1,
-        children: [
-          {
-            _id: '4.1',
-            name: 'Revenue',
-            code: '4100',
-            level: 2,
-            parentId: '4',
-            accountCount: 8,
-            totalBalance: 850000
-          }
-        ]
-      },
-      {
-        _id: '5',
-        name: 'Expenses',
-        code: '5000',
-        level: 1,
-        children: [
-          {
-            _id: '5.1',
-            name: 'Operating Expenses',
-            code: '5100',
-            level: 2,
-            parentId: '5',
-            children: [
-              {
-                _id: '5.1.1',
-                name: 'Cost of Goods Sold',
-                code: '5110',
-                level: 3,
-                parentId: '5.1',
-                accountCount: 6,
-                totalBalance: -320000
-              }
-            ]
-          }
-        ]
+      error: () => {
+        this.snackBar.open('Failed to load chart of accounts', 'Close', { duration: 3000 });
+        this.loading = false;
       }
-    ];
-
-    this.dataSource.data = mockData;
-    this.loading = false;
+    });
   }
 
   hasChild = (_: number, node: AccountHeadNode) => !!node.children && node.children.length > 0;
 
   onCreateAccountHead(): void {
-    // Implementation for creating new account head
-    this.snackBar.open('Create Account Head functionality coming soon', 'Close', { duration: 3000 });
+    this.router.navigate(['/master-data'], { queryParams: { tab: 'account-heads', action: 'create' } });
   }
 
   onEditAccountHead(node: AccountHeadNode): void {
-    // Implementation for editing account head
-    this.snackBar.open(`Edit ${node.name} functionality coming soon`, 'Close', { duration: 3000 });
-  }
-
-  onDeleteAccountHead(node: AccountHeadNode): void {
-    if (confirm(`Are you sure you want to delete "${node.name}" and all its sub-accounts?`)) {
-      // Implementation for deleting account head
-      this.snackBar.open(`Delete ${node.name} functionality coming soon`, 'Close', { duration: 3000 });
-    }
+    this.router.navigate(['/master-data'], { queryParams: { tab: 'account-heads', edit: node._id } });
   }
 
   onViewAccounts(node: AccountHeadNode): void {
@@ -243,8 +103,7 @@ export class ChartOfAccountsComponent implements OnInit {
   }
 
   onAddSubAccount(node: AccountHeadNode): void {
-    // Implementation for adding sub-account
-    this.snackBar.open(`Add sub-account to ${node.name} functionality coming soon`, 'Close', { duration: 3000 });
+    this.router.navigate(['/accounts/registration'], { queryParams: { accountHeadId: node._id } });
   }
 
   getNodeIcon(node: AccountHeadNode): string {
@@ -273,9 +132,66 @@ export class ChartOfAccountsComponent implements OnInit {
   }
 
   onSearch(): void {
-    // Implementation for searching account heads
-    if (this.searchQuery.trim()) {
-      this.snackBar.open(`Search for "${this.searchQuery}" functionality coming soon`, 'Close', { duration: 3000 });
+    const query = this.searchQuery.trim().toLowerCase();
+    if (!query) {
+      this.loadChartOfAccounts();
+      return;
     }
+
+    const filtered = this.filterTree(this.dataSource.data, query);
+    this.dataSource.data = filtered;
+    this.treeControl.dataNodes = filtered;
+    this.treeControl.expandAll();
+  }
+
+  private buildTree(accountHeads: AccountHead[]): AccountHeadNode[] {
+    const nodes = new Map<string, AccountHeadNode>();
+    accountHeads.forEach(head => {
+      nodes.set(head._id, {
+        _id: head._id,
+        name: head.name,
+        code: head.code,
+        level: 1,
+        parentId: head.parentHeadId,
+        children: []
+      });
+    });
+
+    const roots: AccountHeadNode[] = [];
+    nodes.forEach(node => {
+      if (node.parentId && nodes.has(node.parentId)) {
+        const parent = nodes.get(node.parentId)!;
+        node.level = parent.level + 1;
+        parent.children = parent.children || [];
+        parent.children.push(node);
+      } else {
+        roots.push(node);
+      }
+    });
+
+    return this.sortNodes(roots);
+  }
+
+  private sortNodes(nodes: AccountHeadNode[]): AccountHeadNode[] {
+    return nodes
+      .sort((a, b) => a.code.localeCompare(b.code))
+      .map(node => ({
+        ...node,
+        children: node.children?.length ? this.sortNodes(node.children) : undefined
+      }));
+  }
+
+  private filterTree(nodes: AccountHeadNode[], query: string): AccountHeadNode[] {
+    return nodes.reduce<AccountHeadNode[]>((matches, node) => {
+      const children = node.children ? this.filterTree(node.children, query) : [];
+      const isMatch = node.name.toLowerCase().includes(query) || node.code.toLowerCase().includes(query);
+      if (isMatch || children.length) {
+        matches.push({
+          ...node,
+          children: children.length ? children : undefined
+        });
+      }
+      return matches;
+    }, []);
   }
 }

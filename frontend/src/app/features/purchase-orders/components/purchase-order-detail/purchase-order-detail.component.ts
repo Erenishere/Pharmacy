@@ -65,6 +65,9 @@ export class PurchaseOrderDetailComponent implements OnInit {
       next: (response) => {
         this.purchaseOrder = response.data;
         this.loading = false;
+        if (this.route.snapshot.queryParamMap.get('print') === '1') {
+          setTimeout(() => window.print());
+        }
       },
       error: (error: any) => {
         console.error('Error loading purchase order:', error);
@@ -175,7 +178,7 @@ export class PurchaseOrderDetailComponent implements OnInit {
     this.poService.convertToInvoice(this.purchaseOrder._id).subscribe({
       next: (response) => {
         this.snackBar.open('Purchase order converted to invoice successfully', 'Close', { duration: 3000 });
-        this.router.navigate(['/purchase-invoices', response.data._id]);
+        this.router.navigate(['/purchase-invoices/edit', response.data._id]);
       },
       error: (error) => {
         console.error('Error converting to invoice:', error);
@@ -191,8 +194,7 @@ export class PurchaseOrderDetailComponent implements OnInit {
   }
 
   onPrint(): void {
-    // Implement print functionality
-    this.snackBar.open('Print functionality coming soon', 'Close', { duration: 2000 });
+    window.print();
   }
 
   onBack(): void {

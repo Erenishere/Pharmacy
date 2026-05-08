@@ -13,7 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, Subject, of, combineLatest } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
 import { takeUntil, startWith, map, debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 
 import { BatchService } from '../../services/batch.service';
@@ -228,17 +228,16 @@ export class BatchFormComponent implements OnInit, OnDestroy {
     return null;
   }
 
-  private batchNumberValidator(control: AbstractControl): Observable<ValidationErrors | null> {
+  private batchNumberValidator(control: AbstractControl): ValidationErrors | null {
     const batchNumber = control.get('batchNumber')?.value;
     const itemId = control.get('itemId')?.value;
 
     if (!batchNumber || !itemId || this.isEditMode) {
-      return of(null);
+      return null;
     }
 
-    // This would be implemented as async validation in a real scenario
-    // For now, we'll return null and handle uniqueness on the server
-    return of(null);
+    // Uniqueness is enforced on the server during save.
+    return null;
   }
 
   // Event handlers
@@ -324,7 +323,9 @@ export class BatchFormComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         let errorMessage = 'Failed to create batch';
-        if (error.error?.message) {
+        if (error.error?.error?.message) {
+          errorMessage = error.error.error.message;
+        } else if (error.error?.message) {
           errorMessage = error.error.message;
         } else if (error.message) {
           errorMessage = error.message;
@@ -358,7 +359,9 @@ export class BatchFormComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         let errorMessage = 'Failed to update batch';
-        if (error.error?.message) {
+        if (error.error?.error?.message) {
+          errorMessage = error.error.error.message;
+        } else if (error.error?.message) {
           errorMessage = error.error.message;
         } else if (error.message) {
           errorMessage = error.message;

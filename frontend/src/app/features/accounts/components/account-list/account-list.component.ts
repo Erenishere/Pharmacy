@@ -56,19 +56,34 @@ export class AccountListComponent implements OnInit {
   tableColumns: DataTableColumn[] = [
     { key: 'accountNumber', label: 'Account #', sortable: true },
     { key: 'name', label: 'Name', sortable: true },
+    { key: 'townName', label: 'Town' },
+    { key: 'dimensionName', label: 'Dimension' },
+    { key: 'salesmanName', label: 'Salesman' },
     { key: 'typeLabel', label: 'Type', type: 'status', colorMap: {
       'customer': 'primary',
       'supplier': 'accent',
       'employee': 'warn',
       'investor': 'primary',
-      'both': 'warn'
+      'both': 'warn',
+      'account_manager': 'primary',
+      'sub_account': 'accent'
+    }, classMap: {
+      'customer': 'chip-purple',
+      'supplier': 'chip-warning',
+      'employee': 'chip-danger',
+      'investor': 'chip-info',
+      'both': 'chip-warning',
+      'account_manager': 'chip-info',
+      'sub_account': 'chip-purple'
     }},
     { key: 'balance', label: 'Balance', type: 'currency', sortable: true },
     { key: 'creditLimit', label: 'Credit Limit', type: 'currency' },
-    { key: 'townName', label: 'Town' },
-    { key: 'status', label: 'Status', type: 'status', colorMap: { 'Active': 'primary', 'Inactive': 'warn' } },
+    { key: 'creditDays', label: 'Credit Days', type: 'numeric' },
+    { key: 'qualityStatus', label: 'Quality', type: 'status', colorMap: { 'best': 'primary', 'medium': 'accent', 'low': 'warn' }, classMap: { 'best': 'chip-active', 'medium': 'chip-warning', 'low': 'chip-inactive' } },
+    { key: 'status', label: 'Status', type: 'status', colorMap: { 'Active': 'primary', 'Inactive': 'warn' }, classMap: { 'Active': 'chip-active', 'Inactive': 'chip-inactive' } },
     { key: 'actions', label: 'Actions', type: 'action', actions: [
       { icon: 'edit', label: 'Edit Account', actionKey: 'edit', color: 'primary' },
+      { icon: 'print', label: 'Print Preview', actionKey: 'print' },
       { icon: 'block', label: 'Toggle Status', actionKey: 'toggleStatus' },
       { icon: 'delete', label: 'Delete', actionKey: 'delete', color: 'warn' }
     ]}
@@ -93,7 +108,9 @@ export class AccountListComponent implements OnInit {
     { value: 'supplier', label: 'Supplier' },
     { value: 'employee', label: 'Employee' },
     { value: 'investor', label: 'Investor' },
-    { value: 'both', label: 'Both' }
+    { value: 'both', label: 'Both' },
+    { value: 'account_manager', label: 'Account Manager' },
+    { value: 'sub_account', label: 'Sub Account' }
   ];
 
   statusOptions = [
@@ -163,10 +180,15 @@ export class AccountListComponent implements OnInit {
         if (response.success) {
           this.dataSource.data = (response.data || []).map((acc: any) => ({
             ...acc,
+            accountNumber: acc.code || acc.accountNumber || acc._id,
             typeLabel: acc.accountType,
-            balance: acc.businessDetails?.openingBalance || 0,
-            creditLimit: acc.businessDetails?.creditAmountLimit || 0,
-            townName: acc.townId?.name || 'N/A',
+            balance: acc.currentBalance ?? acc.businessDetails?.openingBalance ?? acc.openingBalance ?? 0,
+            creditLimit: acc.businessDetails?.creditAmountLimit ?? acc.creditAmountLimit ?? acc.financialInfo?.creditLimit ?? 0,
+            creditDays: acc.businessDetails?.creditDaysLimit ?? acc.creditDaysLimit ?? acc.financialInfo?.creditDays ?? 0,
+            townName: this.lookupDisplay(acc.townId),
+            dimensionName: this.lookupDisplay(acc.dimensionId),
+            salesmanName: this.lookupDisplay(acc.assignedSalesmanId || acc.businessDetails?.assignedSalesmanId),
+            qualityStatus: this.getQualityStatus(acc),
             status: acc.isActive ? 'Active' : 'Inactive'
           }));
           this.totalItems = response.pagination?.totalItems || 0;
@@ -189,7 +211,7 @@ export class AccountListComponent implements OnInit {
           this.statistics = {
             totalAccounts: accounts.length,
             activeAccounts: accounts.filter(acc => acc.isActive).length,
-            totalBalance: accounts.reduce((sum, acc) => sum + (acc.businessDetails?.openingBalance || 0), 0),
+            totalBalance: accounts.reduce((sum, acc: any) => sum + (acc.currentBalance ?? acc.businessDetails?.openingBalance ?? acc.openingBalance ?? 0), 0),
             customersCount: accounts.filter(acc => acc.accountType === 'customer').length,
             suppliersCount: accounts.filter(acc => acc.accountType === 'supplier').length
           };
@@ -206,11 +228,17 @@ export class AccountListComponent implements OnInit {
   }
 
   onCreateAccount(): void {
-    this.router.navigate(['/accounts/create']);
+    this.router.navigate(['/accounts/registration']);
   }
 
   onEditAccount(account: Account): void {
-    this.router.navigate(['/accounts/edit', account._id]);
+    this.router.navigate(['/accounts/registration', account._id]);
+  }
+
+  onPrintAccount(account: Account): void {
+    this.router.navigate(['/accounts/registration', account._id], {
+      queryParams: { print: 'filled' }
+    });
   }
 
   onToggleStatus(account: Account): void {
@@ -256,6 +284,21 @@ export class AccountListComponent implements OnInit {
     }).format(amount || 0);
   }
 
+  lookupDisplay(value: any): string {
+    if (!value) return 'N/A';
+    if (typeof value === 'string') return value;
+    return value.name || value.dimensionName || value.routeName || value.code || 'N/A';
+  }
+
+  getQualityStatus(account: any): 'best' | 'medium' | 'low' {
+    if (account.isActive === false) return 'low';
+    const balance = Math.abs(account.currentBalance ?? account.businessDetails?.openingBalance ?? account.openingBalance ?? 0);
+    const creditLimit = account.businessDetails?.creditAmountLimit ?? account.creditAmountLimit ?? account.financialInfo?.creditLimit ?? 0;
+    if (creditLimit > 0 && balance > creditLimit) return 'low';
+    if (balance > 0) return 'medium';
+    return 'best';
+  }
+
   clearFilters(): void {
     this.searchControl.setValue('');
     this.accountTypeFilter.setValue('');
@@ -267,6 +310,7 @@ export class AccountListComponent implements OnInit {
     const acc = event.row as Account;
     switch(event.action) {
       case 'edit': this.onEditAccount(acc); break;
+      case 'print': this.onPrintAccount(acc); break;
       case 'toggleStatus': this.onToggleStatus(acc); break;
       case 'delete': this.onDeleteAccount(acc); break;
     }

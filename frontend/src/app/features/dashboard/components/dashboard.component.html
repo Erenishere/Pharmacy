@@ -13,20 +13,6 @@
     </div>
 
     @if (overview) {
-    <div class="header-summary-grid">
-      @for (highlight of heroHighlights; track highlight.label) {
-      <div class="header-summary-card" [attr.data-tone]="highlight.tone">
-        <div class="header-summary-icon">
-          <mat-icon>{{ highlight.icon }}</mat-icon>
-        </div>
-        <div class="header-summary-copy">
-          <span>{{ highlight.label }}</span>
-          <strong>{{ highlight.value }}</strong>
-          <small>{{ highlight.hint }}</small>
-        </div>
-      </div>
-      }
-    </div>
     } @else {
     <section class="state-card loading-state">
       <mat-spinner diameter="46"></mat-spinner>
@@ -94,6 +80,50 @@
     </button>
   </section>
   } @else if (overview) {
+  <section class="chart-first-grid">
+    <mat-card class="panel-card chart-card wide">
+      <mat-card-header>
+        <mat-card-title>Sales Graph</mat-card-title>
+        <mat-card-subtitle>{{ selectedPeriodLabel }} net revenue trend</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chart-shell first-line-chart">
+          <canvas baseChart [data]="salesTrendData" [options]="salesTrendOptions" type="line"></canvas>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="panel-card chart-card">
+      <mat-card-header>
+        <mat-card-title>Business Mix</mat-card-title>
+        <mat-card-subtitle>Sales, cash, expense, and credit position</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="donut-wrap">
+          <div class="chart-shell donut-chart">
+            <canvas baseChart [data]="financialMixData" [options]="financialMixOptions" type="doughnut"></canvas>
+          </div>
+          <div class="donut-center">
+            <strong>{{ financialMixHasActivity ? formatCompactCurrency(overview.summary.netSales.value) : 'No data' }}</strong>
+            <span>{{ financialMixHasActivity ? 'net sales' : 'this period' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="panel-card chart-card">
+      <mat-card-header>
+        <mat-card-title>Cash Flow</mat-card-title>
+        <mat-card-subtitle>Receipts vs payments</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chart-shell first-bar-chart">
+          <canvas baseChart [data]="cashFlowData" [options]="cashFlowOptions" type="bar"></canvas>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
   <section class="kpi-grid">
     @for (card of summaryCards; track card.label) {
     <a class="kpi-card" [attr.data-tone]="card.tone" [routerLink]="card.route">
@@ -114,25 +144,6 @@
   </section>
 
   <section class="top-grid">
-    <mat-card class="panel-card hero-chart-card">
-      <mat-card-header>
-        <mat-card-title>Revenue Momentum</mat-card-title>
-        <mat-card-subtitle>Net revenue trajectory overview for the active window</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        @if (overview.commercial.salesTrend.length > 0) {
-        <div class="chart-shell hero-chart">
-          <canvas baseChart [data]="salesTrendData" [options]="salesTrendOptions" type="line"></canvas>
-        </div>
-        } @else {
-        <div class="panel-empty">
-          <mat-icon>bar_chart</mat-icon>
-          <p>No revenue signals detected in this period.</p>
-        </div>
-        }
-      </mat-card-content>
-    </mat-card>
-
     <mat-card class="panel-card action-card">
       <mat-card-header>
         <mat-card-title>Risk Watch</mat-card-title>
@@ -309,25 +320,6 @@
   </section>
 
   <section class="content-grid finance-grid">
-    <mat-card class="panel-card cash-card">
-      <mat-card-header>
-        <mat-card-title>Liquidity Flow</mat-card-title>
-        <mat-card-subtitle>Receipt velocity vs procurement outflows</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        @if (overview.finance.cashFlowTrend.length > 0) {
-        <div class="chart-shell cash-chart">
-          <canvas baseChart [data]="cashFlowData" [options]="cashFlowOptions" type="bar"></canvas>
-        </div>
-        } @else {
-        <div class="panel-empty compact">
-          <mat-icon>account_balance</mat-icon>
-          <p>Liquidity data unavailable for this scope.</p>
-        </div>
-        }
-      </mat-card-content>
-    </mat-card>
-
     <mat-card class="panel-card expense-card">
       <mat-card-header>
         <mat-card-title>Expense Burn</mat-card-title>
@@ -363,7 +355,7 @@
             <small>{{ overview.finance.investors.activeInvestors }} active partners</small>
           </a>
 
-          <a class="mini-stat" routerLink="/reports/tax/compliance-summary">
+          <a class="mini-stat" routerLink="/tax-config">
             <span class="mini-label">Fiscal Position</span>
             <strong>{{ formatCompactCurrency(overview.finance.tax.gstSales - overview.finance.tax.gstPurchases)
               }}</strong>

@@ -232,85 +232,74 @@ export interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class AnalyticsService {
-  private baseUrl = `${environment.apiUrl}/analytics`;
+  private baseUrl = `${environment.apiUrl}/reports/analytics`;
+  private reportsUrl = `${environment.apiUrl}/reports`;
 
   constructor(private http: HttpClient) {}
 
-  // Sales Analytics
-  getSalesAnalytics(params: AnalyticsQueryParams = {}): Observable<ApiResponse<SalesAnalytics>> {
+  private toHttpParams(params: Record<string, any> = {}, includeDefaultDateRange = false): HttpParams {
+    let effectiveParams = { ...params };
+
+    if (includeDefaultDateRange && (!effectiveParams['startDate'] || !effectiveParams['endDate'])) {
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(endDate.getDate() - 30);
+      effectiveParams = {
+        ...effectiveParams,
+        startDate: effectiveParams['startDate'] || startDate.toISOString().slice(0, 10),
+        endDate: effectiveParams['endDate'] || endDate.toISOString().slice(0, 10),
+      };
+    }
+
     let httpParams = new HttpParams();
-    Object.entries(params).forEach(([key, value]) => {
+    Object.entries(effectiveParams).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
-        httpParams = httpParams.set(key, value);
+        httpParams = httpParams.set(key, String(value));
       }
     });
-    return this.http.get<ApiResponse<SalesAnalytics>>(`${this.baseUrl}/sales`, { params: httpParams });
+    return httpParams;
+  }
+
+  // Sales Analytics
+  getSalesAnalytics(params: AnalyticsQueryParams = {}): Observable<ApiResponse<SalesAnalytics>> {
+    const httpParams = this.toHttpParams(params, true);
+    return this.http.get<ApiResponse<SalesAnalytics>>(`${this.baseUrl}/sales-trends`, { params: httpParams });
   }
 
   // Inventory Analytics
   getInventoryAnalytics(params: AnalyticsQueryParams = {}): Observable<ApiResponse<InventoryAnalytics>> {
-    let httpParams = new HttpParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        httpParams = httpParams.set(key, value);
-      }
-    });
-    return this.http.get<ApiResponse<InventoryAnalytics>>(`${this.baseUrl}/inventory`, { params: httpParams });
+    const httpParams = this.toHttpParams(params, true);
+    return this.http.get<ApiResponse<InventoryAnalytics>>(`${this.baseUrl}/inventory-turnover`, { params: httpParams });
   }
 
   // Operational Analytics
   getOperationalAnalytics(params: AnalyticsQueryParams = {}): Observable<ApiResponse<OperationalAnalytics>> {
-    let httpParams = new HttpParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        httpParams = httpParams.set(key, value);
-      }
-    });
-    return this.http.get<ApiResponse<OperationalAnalytics>>(`${this.baseUrl}/operational`, { params: httpParams });
+    const httpParams = this.toHttpParams(params);
+    return this.http.get<ApiResponse<OperationalAnalytics>>(`${this.baseUrl}/dashboard`, { params: httpParams });
   }
 
   // Business Intelligence Dashboard
   getBusinessIntelligence(params: AnalyticsQueryParams = {}): Observable<ApiResponse<BusinessIntelligence>> {
-    let httpParams = new HttpParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        httpParams = httpParams.set(key, value);
-      }
-    });
-    return this.http.get<ApiResponse<BusinessIntelligence>>(`${this.baseUrl}/business-intelligence`, { params: httpParams });
+    const httpParams = this.toHttpParams(params);
+    return this.http.get<ApiResponse<BusinessIntelligence>>(`${this.baseUrl}/kpis`, { params: httpParams });
   }
 
   // Demand Forecasting
   getDemandForecast(params: { itemId?: string; period?: string } = {}): Observable<ApiResponse<DemandForecast[]>> {
-    let httpParams = new HttpParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        httpParams = httpParams.set(key, value);
-      }
-    });
-    return this.http.get<ApiResponse<DemandForecast[]>>(`${this.baseUrl}/demand-forecast`, { params: httpParams });
+    const httpParams = this.toHttpParams(params);
+    return this.http.get<ApiResponse<DemandForecast[]>>(`${this.reportsUrl}/inventory`, { params: httpParams });
   }
 
   // Customer Insights
   getCustomerInsights(params: AnalyticsQueryParams = {}): Observable<ApiResponse<CustomerPerformance[]>> {
-    let httpParams = new HttpParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        httpParams = httpParams.set(key, value);
-      }
-    });
-    return this.http.get<ApiResponse<CustomerPerformance[]>>(`${this.baseUrl}/customer-insights`, { params: httpParams });
+    const httpParams = this.toHttpParams(params, true);
+    return this.http.get<ApiResponse<CustomerPerformance[]>>(`${this.baseUrl}/top-customers`, { params: httpParams });
   }
 
   // Predictive Analytics
   getPredictiveAnalytics(params: AnalyticsQueryParams = {}): Observable<ApiResponse<PredictiveInsights>> {
-    let httpParams = new HttpParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        httpParams = httpParams.set(key, value);
-      }
-    });
-    return this.http.get<ApiResponse<PredictiveInsights>>(`${this.baseUrl}/predictive`, { params: httpParams });
+    const httpParams = this.toHttpParams(params);
+    return this.http.get<ApiResponse<PredictiveInsights>>(`${this.baseUrl}/dashboard`, { params: httpParams });
   }
 
   // Custom Analytics Report
@@ -320,7 +309,9 @@ export class AnalyticsService {
     filters: Record<string, any>;
     period: AnalyticsQueryParams['period'];
   }): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(`${this.baseUrl}/custom-report`, reportConfig);
+    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/dashboard`, {
+      params: this.toHttpParams(reportConfig.filters || {})
+    });
   }
 
   // Export Analytics Data
@@ -329,28 +320,16 @@ export class AnalyticsService {
     format: 'csv' | 'excel' | 'pdf';
     filters?: AnalyticsQueryParams;
   }): Observable<Blob> {
-    let httpParams = new HttpParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && key !== 'filters') {
-        const stringValue = value.toString();
-        if (stringValue.length > 0) {
-          httpParams = httpParams.set(key, stringValue);
-        }
-      }
-    });
+    const reportPathMap: Record<string, string> = {
+      sales: 'sales',
+      inventory: 'inventory',
+      operational: 'financial/summary',
+      bi: 'financial/summary',
+    };
+    const reportPath = reportPathMap[params.type] || 'sales';
+    const httpParams = this.toHttpParams({ ...(params.filters || {}), format: params.format }, false);
 
-    if (params.filters) {
-      Object.entries(params.filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          const stringValue = String(value);
-          if (stringValue.length > 0) {
-            httpParams = httpParams.set(`filters.${key}`, stringValue);
-          }
-        }
-      });
-    }
-
-    return this.http.get(`${this.baseUrl}/export`, {
+    return this.http.get(`${this.reportsUrl}/${reportPath}`, {
       params: httpParams,
       responseType: 'blob'
     });

@@ -1,7 +1,7 @@
 <div class="si-page" *ngIf="!loading">
   <form [formGroup]="salesForm" autocomplete="off">
 
-    <!-- ===== PREMIUM HEADER BAR ===== -->
+    <!-- ===== PROFESSIONAL HEADER ===== -->
     <div class="si-header">
       <div class="si-header-left">
         <div class="si-header-accent"></div>
@@ -21,18 +21,29 @@
         <button mat-stroked-button class="si-btn-draft" type="button" (click)="saveDraft()" [disabled]="saving">
           <mat-icon>save_as</mat-icon> Save Draft
         </button>
-        <button mat-raised-button class="si-btn-confirm" type="button" (click)="saveAndConfirm()" [disabled]="saving">
+        <button mat-raised-button class="si-btn-confirm" type="button" (click)="saveAndConfirm()" [disabled]="saving || itemsData.length === 0">
           <mat-icon>check_circle</mat-icon>
           {{ saving ? 'Saving...' : 'Confirm Invoice' }}
         </button>
       </div>
     </div>
 
-    <!-- ===== MAIN BODY ===== -->
-    <div class="si-body">
+    <!-- ===== CARD-BASED STEP LAYOUT ===== -->
 
-      <!-- LEFT PANEL: Invoice Meta -->
-      <div class="si-panel si-panel-left">
+    <!-- STEP 1: Customer & Invoice Details -->
+    <div class="si-card" [class.si-card-collapsed]="step1Complete" [class.si-card-complete]="step1Complete">
+      <div class="si-card-header" (click)="toggleStep1()">
+        <div class="si-card-indicator">
+          <span class="si-step-number">1</span>
+          <mat-icon class="si-check-icon">check_circle</mat-icon>
+        </div>
+        <div class="si-card-title">
+          <span class="si-step-title">Customer & Invoice Details</span>
+          <span class="si-step-subtitle" *ngIf="step1Complete">{{ selectedCustomer?.name || 'Customer selected' }}</span>
+        </div>
+        <mat-icon class="si-expand-icon">{{ step1Complete ? 'expand_more' : 'expand_less' }}</mat-icon>
+      </div>
+      <div class="si-card-content" *ngIf="!step1Complete">
         <div class="si-section-label">
           <mat-icon>assignment</mat-icon>
           Invoice Details
@@ -127,10 +138,31 @@
           <label class="si-label">Detail Note</label>
           <textarea class="si-textarea" formControlName="detailNote" rows="2" placeholder="Optional notes..." id="si-detail-note"></textarea>
         </div>
-      </div>
 
-      <!-- RIGHT PANEL: Item Entry -->
-      <div class="si-panel si-panel-right" [formGroup]="currentItem">
+        <div class="si-card-actions">
+          <button mat-raised-button class="si-btn-primary" type="button" (click)="completeStep1()">
+            <mat-icon>arrow_forward</mat-icon> Continue to Add Items
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connector Line -->
+    <div class="si-connector" *ngIf="step1Complete"></div>
+
+    <!-- STEP 2: Add Items to Invoice -->
+    <div class="si-card si-card-active" [formGroup]="currentItem" *ngIf="step1Complete">
+      <div class="si-card-header">
+        <div class="si-card-indicator">
+          <span class="si-step-number">2</span>
+          <mat-icon class="si-check-icon">check_circle</mat-icon>
+        </div>
+        <div class="si-card-title">
+          <span class="si-step-title">Add Items to Invoice</span>
+          <span class="si-step-badge" *ngIf="itemsData.length > 0">{{ itemsData.length }} item(s) added</span>
+        </div>
+      </div>
+      <div class="si-card-content">
         <div class="si-section-label">
           <mat-icon>add_shopping_cart</mat-icon>
           Add Item to Invoice
@@ -176,30 +208,19 @@
           </select>
         </div>
 
-        <!-- Quantity Calculator Row -->
-        <div class="si-calc-section">
-          <div class="si-calc-label">Quantity Calculator</div>
-          <div class="si-calc-row">
-            <!-- Box Qty -->
-            <div class="calc-card">
-              <div class="calc-card-label">Box Qty</div>
-              <input class="calc-card-input" formControlName="boxQuantity" type="number" min="0" id="si-box-qty">
-              <div class="calc-card-sub">× {{ currentItem.get('boxPacking')?.value || 1 }} units</div>
-            </div>
-            <div class="calc-op">+</div>
-            <!-- Unit Qty -->
-            <div class="calc-card">
-              <div class="calc-card-label">Unit Qty</div>
-              <input class="calc-card-input" formControlName="unitQuantity" type="number" min="0" id="si-unit-qty">
-              <div class="calc-card-sub">individual</div>
-            </div>
-            <div class="calc-op">=</div>
-            <!-- Total -->
-            <div class="calc-card calc-card-total">
-              <div class="calc-card-label">Total Units</div>
-              <div class="calc-card-value">{{ currentItem.getRawValue().totalUnitQty }}</div>
-              <div class="calc-card-sub">calculated</div>
-            </div>
+        <!-- Quantity Row -->
+        <div class="si-field-row-3">
+          <div class="si-field-group">
+            <label class="si-label">Box Qty <small>(×{{ currentItem.get('boxPacking')?.value || 1 }} units)</small></label>
+            <input class="si-input" formControlName="boxQuantity" type="number" min="0" id="si-box-qty">
+          </div>
+          <div class="si-field-group">
+            <label class="si-label">Unit Qty</label>
+            <input class="si-input" formControlName="unitQuantity" type="number" min="0" id="si-unit-qty">
+          </div>
+          <div class="si-field-group si-field-total">
+            <label class="si-label">Total Units</label>
+            <div class="si-total-display">{{ currentItem.getRawValue().totalUnitQty || 0 }}</div>
           </div>
         </div>
 
@@ -293,6 +314,23 @@
         </div>
       </div>
     </div>
+
+    <!-- Connector Line -->
+    <div class="si-connector" *ngIf="itemsData.length > 0"></div>
+
+    <!-- STEP 3: Invoice Items & Summary -->
+    <div class="si-card si-card-summary" *ngIf="itemsData.length > 0">
+      <div class="si-card-header">
+        <div class="si-card-indicator">
+          <span class="si-step-number">3</span>
+          <mat-icon class="si-check-icon">check_circle</mat-icon>
+        </div>
+        <div class="si-card-title">
+          <span class="si-step-title">Review & Confirm</span>
+          <span class="si-step-subtitle">{{ calculateTotals().netBillTotal | currency:'PKR':'symbol':'1.0-0' }}</span>
+        </div>
+      </div>
+      <div class="si-card-content">
 
     <!-- ===== ITEMS TABLE ===== -->
     <div class="si-table-section">
@@ -422,82 +460,86 @@
       <ng-template #noItems>
         <div class="si-no-items">
           <mat-icon>inventory_2</mat-icon>
-          <p>No items added yet. Use the panel above to add products.</p>
+          <p>No items added yet. Use Step 2 above to add products.</p>
         </div>
       </ng-template>
     </div>
 
-    <!-- ===== BOTTOM SECTION ===== -->
-    <div class="si-bottom">
+    <!-- Summary Section -->
+        <div class="si-summary-section" *ngIf="itemsData.length > 0">
+          <div class="si-summary-grid">
+            <!-- Left: Additional Options -->
+            <div class="si-summary-left">
+              <div class="si-section-label"><mat-icon>tune</mat-icon> Additional Discounts</div>
+              <div class="si-field-row-2">
+                <div class="si-field-group">
+                  <label class="si-label">Overall Discount %</label>
+                  <input class="si-input" formControlName="overallDiscountPercent" type="number" min="0" max="100" id="si-overall-disc-pct">
+                </div>
+                <div class="si-field-group">
+                  <label class="si-label">Overall Discount Amount</label>
+                  <input class="si-input" formControlName="overallDiscountAmount" type="number" min="0" id="si-overall-disc-amt">
+                </div>
+              </div>
+              <div class="si-field-group">
+                <label class="si-label">Warranty Info</label>
+                <textarea class="si-textarea" formControlName="warrantyInfo" rows="2" placeholder="Paste warranty info if applicable..." id="si-warranty"></textarea>
+              </div>
+            </div>
 
-      <!-- Left: Additional Options -->
-      <div class="si-bottom-left">
-        <div class="si-section-label"><mat-icon>tune</mat-icon> Additional Discounts</div>
-        <div class="si-field-row-2">
-          <div class="si-field-group">
-            <label class="si-label">Overall Discount %</label>
-            <input class="si-input" formControlName="overallDiscountPercent" type="number" min="0" max="100" id="si-overall-disc-pct">
-          </div>
-          <div class="si-field-group">
-            <label class="si-label">Overall Discount Amount</label>
-            <input class="si-input" formControlName="overallDiscountAmount" type="number" min="0" id="si-overall-disc-amt">
+            <!-- Right: Invoice Summary Card -->
+            <div class="si-summary-card">
+              <div class="sc-title">
+                <mat-icon>summarize</mat-icon> Invoice Summary
+              </div>
+              <div class="sc-rows">
+                <div class="sc-row">
+                  <span>Gross Total</span>
+                  <strong>{{ fmt(calculateTotals().grossTotal) }}</strong>
+                </div>
+                <div class="sc-row sc-deduct">
+                  <span>Total Discount</span>
+                  <strong>-{{ fmt(calculateTotals().totalDiscount) }}</strong>
+                </div>
+                <div class="sc-row">
+                  <span>Sub Total</span>
+                  <strong>{{ fmt(calculateTotals().subtotal) }}</strong>
+                </div>
+                <div class="sc-row sc-add" *ngIf="calculateTotals().gstTotal > 0">
+                  <span>GST Total</span>
+                  <strong>+{{ fmt(calculateTotals().gstTotal) }}</strong>
+                </div>
+                <div class="sc-row sc-add" *ngIf="calculateTotals().advanceTaxTotal > 0">
+                  <span>Advance Tax</span>
+                  <strong>+{{ fmt(calculateTotals().advanceTaxTotal) }}</strong>
+                </div>
+                <div class="sc-divider"></div>
+                <div class="sc-row sc-net-bill">
+                  <span>Net Bill Total</span>
+                  <strong>{{ fmt(calculateTotals().netBillTotal) }}</strong>
+                </div>
+                <div class="sc-row sc-prev-bal" *ngIf="calculateTotals().previousBalance > 0">
+                  <span>Previous Balance</span>
+                  <strong>{{ fmt(calculateTotals().previousBalance) }}</strong>
+                </div>
+                <div class="sc-row sc-total-bal" *ngIf="calculateTotals().previousBalance > 0">
+                  <span>Total Balance Due</span>
+                  <strong>{{ fmt(calculateTotals().totalBalance) }}</strong>
+                </div>
+              </div>
+              <div class="sc-actions">
+                <button mat-raised-button class="si-btn-confirm-lg" type="button" (click)="saveAndConfirm()" [disabled]="saving || itemsData.length === 0" id="si-confirm-btn-bottom">
+                  <mat-icon>check_circle</mat-icon>
+                  {{ saving ? 'Saving...' : 'Confirm & Save Invoice' }}
+                </button>
+                <button mat-stroked-button class="si-btn-draft-sm" type="button" (click)="saveDraft()" [disabled]="saving">
+                  <mat-icon>save_as</mat-icon> Draft
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="si-field-group">
-          <label class="si-label">Warranty Info</label>
-          <textarea class="si-textarea" formControlName="warrantyInfo" rows="2" placeholder="Paste warranty info if applicable..." id="si-warranty"></textarea>
-        </div>
-      </div>
 
-      <!-- Right: Glassmorphic Summary Card -->
-      <div class="si-summary-card">
-        <div class="sc-title">
-          <mat-icon>summarize</mat-icon> Invoice Summary
-        </div>
-        <div class="sc-rows">
-          <div class="sc-row">
-            <span>Gross Total</span>
-            <strong>{{ fmt(calculateTotals().grossTotal) }}</strong>
-          </div>
-          <div class="sc-row sc-deduct">
-            <span>Total Discount</span>
-            <strong>-{{ fmt(calculateTotals().totalDiscount) }}</strong>
-          </div>
-          <div class="sc-row">
-            <span>Sub Total</span>
-            <strong>{{ fmt(calculateTotals().subtotal) }}</strong>
-          </div>
-          <div class="sc-row sc-add" *ngIf="calculateTotals().gstTotal > 0">
-            <span>GST Total</span>
-            <strong>+{{ fmt(calculateTotals().gstTotal) }}</strong>
-          </div>
-          <div class="sc-row sc-add" *ngIf="calculateTotals().advanceTaxTotal > 0">
-            <span>Advance Tax</span>
-            <strong>+{{ fmt(calculateTotals().advanceTaxTotal) }}</strong>
-          </div>
-          <div class="sc-divider"></div>
-          <div class="sc-row sc-net-bill">
-            <span>Net Bill Total</span>
-            <strong>{{ fmt(calculateTotals().netBillTotal) }}</strong>
-          </div>
-          <div class="sc-row sc-prev-bal" *ngIf="calculateTotals().previousBalance > 0">
-            <span>Previous Balance</span>
-            <strong>{{ fmt(calculateTotals().previousBalance) }}</strong>
-          </div>
-          <div class="sc-row sc-total-bal" *ngIf="calculateTotals().previousBalance > 0">
-            <span>Total Balance Due</span>
-            <strong>{{ fmt(calculateTotals().totalBalance) }}</strong>
-          </div>
-        </div>
-        <div class="sc-actions">
-          <button mat-raised-button class="si-btn-confirm-lg" type="button" (click)="saveAndConfirm()" [disabled]="saving" id="si-confirm-btn-bottom">
-            <mat-icon>check_circle</mat-icon>
-            {{ saving ? 'Saving...' : 'Confirm & Save Invoice' }}
-          </button>
-          <button mat-stroked-button class="si-btn-draft-sm" type="button" (click)="saveDraft()" [disabled]="saving">
-            <mat-icon>save_as</mat-icon> Draft
-          </button>
-        </div>
       </div>
     </div>
 

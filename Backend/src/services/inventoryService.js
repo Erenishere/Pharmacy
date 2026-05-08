@@ -83,6 +83,8 @@ class InventoryService {
       throw new Error('Quantity must be greater than zero');
     }
 
+    const { session } = options;
+
     // Verify item exists and has sufficient stock
     const currentStock = await this.getItemStock(itemId);
     if (currentStock < quantity) {
@@ -94,23 +96,24 @@ class InventoryService {
       itemId,
       locationId,
       -quantity,
-      options.batchId,
+      options.batchId || options.batchNumber,
+      session,
     );
 
     // Log the transaction
     await this.logTransaction({
       itemId,
-      locationId,
-      batchId: options.batchId,
+      warehouseId: locationId,
+      batchNumber: options.batchId || options.batchNumber,
       referenceId: options.referenceId,
       quantity: -quantity,
       transactionType: 'STOCK_OUT',
       notes: options.notes || `Removed ${quantity} units from inventory`,
       createdBy: options.userId,
-    });
+    }, session);
 
     // Sync Item.inventory.currentStock
-    await this.syncItemCurrentStock(itemId);
+    await this.syncItemCurrentStock(itemId, session);
 
     return inventory;
   }
@@ -1373,6 +1376,8 @@ class InventoryService {
       warehouseId = reservation.warehouse;
       releaseQuantity = reservation.quantity;
       options.batchNumber = reservation.batchNumber;
+      options.orderId = options.orderId || reservation.orderId;
+      options.userId = options.userId || reservation.createdBy?._id || reservation.createdBy;
     } else {
       // Validate required parameters
       if (!itemId) {
@@ -1726,6 +1731,8 @@ class InventoryService {
    * @returns {Promise<Object>} Updated inventory
    */
   async adjustInventory(itemId, quantity, operation, reason, options = {}) {
+    const session = options.session || null;
+
     if (!itemId) {
       throw new Error('Item ID is required');
     }
@@ -1769,19 +1776,20 @@ class InventoryService {
           $inc: { quantity: adjustmentAmount },
           $set: { lastUpdated: new Date() },
         },
-        { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
+        { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true, session },
       );
 
       // Sync Item.inventory.currentStock from Inventory collection
       await this.syncItemCurrentStock(itemId);
     } else {
       // Legacy fallback: update Item directly when no warehouse specified
-      const itemDoc = await Item.findById(itemId);
+      const itemDocQuery = Item.findById(itemId);
+      const itemDoc = session ? await itemDocQuery.session(session) : await itemDocQuery;
       if (!itemDoc) {
         throw new Error('Item not found');
       }
       itemDoc.inventory.currentStock = Math.max(0, (itemDoc.inventory.currentStock || 0) + adjustmentAmount);
-      await itemDoc.save();
+      await itemDoc.save({ session });
     }
 
     // Log the transaction
@@ -1793,10 +1801,10 @@ class InventoryService {
       referenceType: 'adjustment',
       notes: reason,
       createdBy: options.userId,
-    });
+    }, session);
 
-    const itemDoc = await Item.findById(itemId);
-    return itemDoc;
+    const itemDocQuery = Item.findById(itemId);
+    return session ? itemDocQuery.session(session) : itemDocQuery;
   }
 
   /**
@@ -2547,17 +2555,27 @@ class InventoryService {
    * This ensures the Item model's stock field stays accurate after any stock change
    * @param {string} itemId - Item ID to sync
    */
-  async syncItemCurrentStock(itemId) {
+  async syncItemCurrentStock(itemId, session = null) {
     const Inventory = require('../models/Inventory');
     const Item = require('../models/Item');
     const mongoose = require('mongoose');
 
-    const result = await Inventory.aggregate([
+    const aggregate = Inventory.aggregate([
       { $match: { item: new mongoose.Types.ObjectId(itemId) } },
       { $group: { _id: null, total: { $sum: '$quantity' } } },
     ]);
+    if (session) {
+      aggregate.session(session);
+    }
+
+    const result = await aggregate || [];
     const totalStock = result.length > 0 ? result[0].total : 0;
-    await Item.findByIdAndUpdate(itemId, { 'inventory.currentStock': Math.max(0, totalStock) });
+    const update = { 'inventory.currentStock': Math.max(0, totalStock) };
+    if (session) {
+      await Item.findByIdAndUpdate(itemId, update, { session });
+    } else {
+      await Item.findByIdAndUpdate(itemId, update);
+    }
   }
 }
 

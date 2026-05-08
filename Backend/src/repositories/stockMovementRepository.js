@@ -10,9 +10,9 @@ class StockMovementRepository {
    * @param {Object} movementData - Stock movement data
    * @returns {Promise<Object>} Created stock movement
    */
-  async create(movementData) {
+  async create(movementData, options = {}) {
     const movement = new StockMovement(movementData);
-    return await movement.save();
+    return await movement.save({ session: options.session || null });
   }
 
   /**
@@ -116,8 +116,8 @@ class StockMovementRepository {
    * @param {Date} asOfDate - As of date
    * @returns {Promise<Number>} Stock balance
    */
-  async calculateStockBalance(itemId, asOfDate = new Date()) {
-    return await StockMovement.calculateStockBalance(itemId, asOfDate);
+  async calculateStockBalance(itemId, asOfDate = new Date(), warehouseId = null) {
+    return await StockMovement.calculateStockBalance(itemId, warehouseId, asOfDate);
   }
 
   /**

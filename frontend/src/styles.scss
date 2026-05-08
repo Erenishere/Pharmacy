@@ -31,13 +31,17 @@
     --heading-color: #{$text-card-title};
     --border-color: #{$border-table};
 
-    /* Brand-specific Purple Angular Material MDC Tokens */
+    /* Table Header MDC Variables */
+    --mat-table-header-container-background-color: #7367f0;
+    --mat-table-header-headline-color: #ffffff;
+
+    /* Brand-specific Angular Material MDC Tokens */
     --mdc-outlined-text-field-outline-color: #D8D6DE;
     --mdc-outlined-text-field-hover-outline-color: #{$primary};
     --mdc-outlined-text-field-focus-outline-color: #{$primary};
-    --mdc-outlined-text-field-input-text-placeholder-color: #{$primary} !important;
+    --mdc-outlined-text-field-input-text-placeholder-color: #6e6b7b !important;
     --mdc-outlined-text-field-input-text-color: #5E5873 !important;
-    --mdc-outlined-text-field-label-text-color: #{$primary} !important;
+    --mdc-outlined-text-field-label-text-color: #6e6b7b !important;
     --mdc-outlined-text-field-focus-label-text-color: #{$primary} !important;
 }
 
@@ -376,73 +380,68 @@ p {
     border-radius: 4px 4px 0 0;
 }
 
-/* Global Material Table Styling - Force White Theme */
-::ng-deep .mat-mdc-table,
-::ng-deep .mat-table,
-::ng-deep .mat-mdc-row,
-::ng-deep .mat-row,
-::ng-deep .mat-mdc-header-row,
-::ng-deep .mat-header-row,
-::ng-deep .table-container,
-::ng-deep .list-container,
-::ng-deep .card-body {
+/* Global Material Table Styling - Purple Header Theme */
+.mat-mdc-table,
+.mat-table {
     background-color: #ffffff !important;
-    background: #ffffff !important;
 }
 
-::ng-deep .mat-mdc-header-cell,
-::ng-deep .mat-header-cell {
-    background-color: #ffffff !important;
-    background: #ffffff !important;
-    color: #5E5873 !important;
+.mat-mdc-header-row,
+.mat-header-row {
+    background-color: #7367f0 !important;
+}
+
+.mat-mdc-header-cell,
+.mat-header-cell {
+    background-color: #7367f0 !important;
+    color: #ffffff !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
     font-size: 13px !important;
 }
 
-::ng-deep .mat-mdc-row {
+.mat-mdc-row,
+.mat-row {
     background-color: #ffffff !important;
-    transition: all 0.25s ease !important;
-
-    &:hover {
-        background-color: #7367f0 !important;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(115, 103, 240, 0.35);
-        z-index: 5;
-        position: relative;
-
-        .mat-mdc-cell {
-            color: #ffffff !important;
-        }
-
-        mat-icon, 
-        .mat-icon,
-        .warehouse-code,
-        span, p, strong, b {
-            color: #ffffff !important;
-        }
-
-        .mat-mdc-button, 
-        .mat-mdc-icon-button {
-            color: #ffffff !important;
-        }
-
-        mat-chip {
-            background-color: rgba(255, 255, 255, 0.2) !important;
-            color: #ffffff !important;
-            ::ng-deep {
-                .mdc-evolution-chip__text-label,
-                .mat-mdc-chip-label {
-                    color: #ffffff !important;
-                }
-            }
-        }
-    }
 }
 
-::ng-deep .mat-mdc-cell {
+.mat-mdc-cell,
+.mat-cell {
+    background-color: transparent !important;
     color: #6E6B7B !important;
     font-size: 14px;
+}
+
+/* Status and Type chips in tables */
+.mat-mdc-chip, .mat-chip,
+.role-badge, .status-badge,
+.type-badge, .status-chip {
+    background-color: #7367f0 !important; /* Default purple */
+    color: #ffffff !important;
+    border: none !important;
+    font-weight: 600 !important;
+}
+
+.mat-mdc-row:hover,
+.mat-row:hover {
+    background-color: rgba(115, 103, 240, 0.08) !important; /* Very light purple tint */
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+    z-index: 1;
+    
+    .mat-mdc-cell, .mat-cell, 
+    .mat-icon, .material-icons,
+    span, p, b, strong {
+        color: #7367f0 !important; /* Change text to purple on hover */
+    }
+
+    /* Keep chips purple with white text on hover for contrast */
+    .mat-mdc-chip, .mat-chip,
+    .role-badge, .status-badge,
+    .type-badge, .status-chip {
+        background-color: #7367f0 !important;
+        color: #ffffff !important;
+    }
 }
 
 ::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-surface {
@@ -493,7 +492,7 @@ p {
 
     .mat-mdc-input-element::placeholder {
         color: #82868b !important;
-        opacity: 1 !important;
+        opacity: 0 !important;
     }
 
     .mat-mdc-form-field-icon-prefix,
@@ -543,7 +542,7 @@ p {
 
     .mat-mdc-input-element::placeholder {
         color: #82868b !important;
-        opacity: 1 !important;
+        opacity: 0 !important;
     }
 
     .mat-mdc-form-field-icon-prefix,
@@ -593,7 +592,7 @@ p {
 
     .mat-mdc-input-element::placeholder {
         color: #82868b !important;
-        opacity: 1 !important;
+        opacity: 0 !important;
     }
 
     .mat-mdc-form-field-icon-prefix,
@@ -803,3 +802,7 @@ p {
         color: var(--color-primary-light, #9E95F5) !important;
     }
 }
+
+// Final product theme layer. This intentionally comes last so the app has
+// one consistent visual system even while older feature SCSS is migrated.
+@import 'styles/indus-theme';

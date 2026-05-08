@@ -1,24 +1,224 @@
+@import "../../../../../styles/vuexy-vars";
 @import "../../../../../styles/shared-list-styles";
 
-.target-dashboard-page {
-  @include dashboard-stats-grid;
-  @include data-table;
+$p-bg: #f8f7fa;
 
-  .target-summary {
-    grid-template-columns: repeat(4, 1fr);
-    @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); }
-    @media (max-width: 600px) { grid-template-columns: 1fr; }
+:host {
+  display: block;
+  background: $p-bg;
+
+  ::ng-deep {
+    --color-bg-page: #ffffff;
+    --color-bg-card: #ffffff;
+  }
+}
+
+:host ::ng-deep .target-dashboard .standard-purple-footer.mat-mdc-paginator {
+  --mat-paginator-container-background-color: #7367f0;
+  --mat-paginator-container-text-color: #ffffff;
+  --mat-paginator-enabled-icon-color: #ffffff;
+  --mat-paginator-disabled-icon-color: rgba(255, 255, 255, 0.45);
+  --mat-select-enabled-trigger-text-color: #ffffff;
+  --mat-select-enabled-arrow-color: #ffffff;
+  --mat-select-focused-arrow-color: #ffffff;
+  --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.45);
+  --mdc-outlined-text-field-hover-outline-color: #ffffff;
+  --mdc-outlined-text-field-focus-outline-color: #ffffff;
+  background: #7367f0 !important;
+  background-color: #7367f0 !important;
+  color: #ffffff !important;
+  border-radius: 8px;
+  margin-top: 16px;
+
+  .mat-mdc-paginator-outer-container,
+  .mat-mdc-paginator-container,
+  .mat-mdc-paginator-page-size,
+  .mat-mdc-paginator-range-actions {
+    background: #7367f0 !important;
+    background-color: #7367f0 !important;
+    color: #ffffff !important;
   }
 
-  .date-filters {
-    display: flex;
-    gap: 12px;
-    align-items: center;
+  .mat-mdc-paginator-range-label,
+  .mat-mdc-paginator-page-size-label,
+  .mat-mdc-select-value,
+  .mat-mdc-select-arrow,
+  .mat-mdc-button-base,
+  .mat-mdc-icon-button,
+  mat-icon {
+    color: #ffffff !important;
+  }
 
-    .refresh-btn {
-      height: 44px;
-      padding: 0 20px;
-      background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.8));
+  .mat-mdc-icon-button[disabled],
+  .mat-mdc-icon-button[disabled] mat-icon {
+    color: rgba(255, 255, 255, 0.45) !important;
+  }
+}
+
+.target-dashboard {
+  @include page-container;
+
+  .list-page-header {
+    @include page-header;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+
+    .header-content {
+      .title-with-accent {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .header-accent-bar {
+          width: 5px;
+          height: 40px;
+          border-radius: 4px;
+          background: $purple;
+        }
+      }
+
+      h1 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+
+        mat-icon {
+          color: $purple;
+        }
+      }
+
+      .page-subtitle {
+        margin: 8px 0 0 17px;
+        color: $grey-dark;
+      }
+    }
+    
+    .header-actions {
+      .date-filters {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+
+        .refresh-btn {
+          height: 44px;
+          padding: 0 20px;
+          background: linear-gradient(118deg, #7367f0, #867cf0) !important;
+          color: #fff !important;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(115, 103, 240, 0.35);
+          transition: all 0.25s ease;
+
+          &:hover {
+            box-shadow: 0 6px 18px rgba(115, 103, 240, 0.5);
+            transform: translateY(-1px);
+          }
+        }
+      }
+    }
+  }
+
+  .dashboard-stats-grid { 
+    @include dashboard-stats-grid;
+    margin-bottom: 24px;
+  }
+
+  .list-page-card {
+    @include list-card;
+    background: #ffffff !important;
+
+    ::ng-deep {
+      mat-card-footer {
+        background: $purple !important;
+        background-color: $purple !important;
+      }
+    }
+  }
+
+  // ─── Table Styling ────────────────────────────────────────────
+  :host ::ng-deep {
+    .target-dashboard {
+      .table-wrapper {
+        @include data-table;
+        background: #ffffff !important;
+      }
+
+      .mat-mdc-header-row {
+        background-color: $purple !important;
+        th {
+          color: #ffffff !important;
+        }
+      }
+
+      mat-paginator,
+      .mat-mdc-paginator {
+        @include paginator;
+        background: $purple !important;
+        background-color: $purple !important;
+        color: #ffffff !important;
+        border-radius: 8px;
+        margin-top: 16px;
+
+        ::ng-deep {
+          background: $purple !important;
+          background-color: $purple !important;
+
+          .mat-mdc-paginator-container,
+          .mat-mdc-paginator-page-size,
+          .mat-mdc-paginator-range-actions,
+          .mat-mdc-form-field,
+          .mat-mdc-text-field-wrapper {
+            background: transparent !important;
+          }
+
+          .mat-mdc-paginator-range-label,
+          .mat-mdc-paginator-page-size-label,
+          .mat-mdc-select-value,
+          .mat-mdc-select-arrow,
+          .mat-mdc-button-base,
+          .mat-mdc-icon-button {
+            color: #ffffff !important;
+          }
+
+          .mat-mdc-icon-button[disabled] {
+            color: rgba(255, 255, 255, 0.45) !important;
+          }
+        }
+      }
+    }
+  }
+
+  // Global No Data Content
+  .no-data-content {
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: $grey-dark;
+
+    mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      color: rgba($purple, 0.2);
+    }
+
+    h4 {
+      margin: 0 0 8px 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: $purple-dark;
+    }
+
+    p {
+      margin: 0;
+      color: $grey-dark;
+      font-size: 0.95rem;
     }
   }
 

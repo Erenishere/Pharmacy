@@ -1,23 +1,22 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatDatepickerModule } from '@angular/material/datepicker';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatNativeDateModule } from '@angular/material/core';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
-import { HttpClient } from '@angular/common/http';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { CashBookService } from '../services/cashbook.service';
-import { environment } from '../../../../environments/environment';
+import { CashBookEntry, CashBookLookupOption, CashBookLookups } from '../models/cashbook.model';
 
 interface InvoiceRow {
   invoiceId: string;
@@ -28,26 +27,6 @@ interface InvoiceRow {
   dueAmount: number;
   receivedAmount: number;
   difference: number;
-}
-
-interface CombinedEntry {
-  _id: string;
-  entryType: 'receive' | 'payment';
-  number: string;
-  accountTitle: string;
-  cashAccount: string;
-  salesman: string;
-  userId: string;
-  receive: number;
-  paid: number;
-  difference: number;
-  date: string;
-  postDatedCheque: boolean;
-  bankName: string;
-  chequeNumber: string;
-  status: string;
-  detail: string;
-  raw: any;
 }
 
 @Component({
@@ -75,47 +54,38 @@ interface CombinedEntry {
   styleUrls: ['./cashbook.component.scss']
 })
 export class CashBookComponent implements OnInit, OnDestroy {
-  // ── Form ──────────────────────────────────────────────────────────
   form!: FormGroup;
   saving = false;
   editingId: string | null = null;
 
-  // ── Lookup data ───────────────────────────────────────────────────
-  customers: any[] = [];
-  suppliers: any[] = [];
-  salesmen: any[] = [];
+  customers: CashBookLookupOption[] = [];
+  suppliers: CashBookLookupOption[] = [];
+  salesmen: CashBookLookupOption[] = [];
+  cashAccountOptions: CashBookLookupOption[] = [];
+  private loadedLookupModes = new Set<'receive' | 'payment'>();
 
-  cashAccountOptions = [
-    { value: 'Main Cash', label: 'Main Cash' },
-    { value: 'Bank Account', label: 'Bank Account' },
-    { value: 'Online Transfer', label: 'Online Transfer' },
-  ];
-
-  // ── Invoice allocation rows ───────────────────────────────────────
   invoiceRows: InvoiceRow[] = [];
   loadingInvoices = false;
 
   get invoiceTotals() {
     return {
-      due: this.invoiceRows.reduce((s, r) => s + (r.dueAmount || 0), 0),
-      received: this.invoiceRows.reduce((s, r) => s + (r.receivedAmount || 0), 0),
-      difference: this.invoiceRows.reduce((s, r) => s + (r.difference || 0), 0),
+      due: this.invoiceRows.reduce((sum, row) => sum + (row.dueAmount || 0), 0),
+      received: this.invoiceRows.reduce((sum, row) => sum + (row.receivedAmount || 0), 0),
+      difference: this.invoiceRows.reduce((sum, row) => sum + (row.difference || 0), 0),
     };
   }
 
-  // ── Combined list ─────────────────────────────────────────────────
   listColumns = [
     'sno', 'accountTitle', 'cashAccount', 'salesman', 'userId',
     'receive', 'paid', 'difference', 'date', 'postDateCheq',
     'bankName', 'chequeNumber', 'status', 'detail', 'actions'
   ];
-  dataSource = new MatTableDataSource<CombinedEntry>([]);
+  dataSource = new MatTableDataSource<CashBookEntry>([]);
   loadingList = false;
   totalCount = 0;
   pageSize = 20;
   pageIndex = 0;
 
-  // List filters
   listFilterType = '';
   listFilterFrom: Date | null = null;
   listFilterTo: Date | null = null;
@@ -126,32 +96,21 @@ export class CashBookComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private cashBookService: CashBookService,
-    private snackBar: MatSnackBar,
-    private http: HttpClient
-  ) { }
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit(): void {
     this.initForm();
-    this.loadCustomers();
-    this.loadSuppliers();
-    this.loadSalesmen();
+    this.ensureLookupsLoaded('receive');
     this.loadList();
 
-    // Watch transactionType to reset account selection & invoices
     this.form.get('transactionType')!.valueChanges
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
+      .subscribe((transactionType: 'receive' | 'payment') => {
         this.form.get('accountId')!.setValue('');
         this.invoiceRows = [];
+        this.ensureLookupsLoaded(transactionType);
       });
-  }
-
-  onFilterFromChange(val: any): void {
-    this.listFilterFrom = val ? new Date(val) : null;
-  }
-
-  onFilterToChange(val: any): void {
-    this.listFilterTo = val ? new Date(val) : null;
   }
 
   ngOnDestroy(): void {
@@ -159,16 +118,25 @@ export class CashBookComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  onFilterFromChange(value: Date | string | null): void {
+    this.listFilterFrom = value ? new Date(value) : null;
+  }
+
+  onFilterToChange(value: Date | string | null): void {
+    this.listFilterTo = value ? new Date(value) : null;
+  }
+
   private initForm(): void {
     this.form = this.fb.group({
       transactionType: ['receive', Validators.required],
       date: [new Date(), Validators.required],
       accountId: ['', Validators.required],
-      cashAccount: ['Main Cash', Validators.required],
+      cashAccountId: ['', Validators.required],
       salesmanId: [''],
       detailReference: [''],
       bankName: [''],
       chequeNumber: [''],
+      chequeDate: [null],
     });
   }
 
@@ -176,69 +144,121 @@ export class CashBookComponent implements OnInit, OnDestroy {
     return this.form.get('transactionType')?.value === 'receive';
   }
 
+  get currentTransactionType(): 'receive' | 'payment' {
+    return this.isReceive ? 'receive' : 'payment';
+  }
+
   get accountLabel(): string {
     return this.isReceive ? 'Account Title (Customer)' : 'Account Title (Supplier)';
   }
 
-  get accountList(): any[] {
+  get accountList(): CashBookLookupOption[] {
     return this.isReceive ? this.customers : this.suppliers;
   }
 
-  get selectedAccount(): any | null {
+  get selectedAccount(): CashBookLookupOption | null {
     const id = this.form.get('accountId')?.value;
-    return this.accountList.find(a => a._id === id) || null;
+    return this.accountList.find((account) => account._id === id) || null;
   }
 
-  // ── Lookups ───────────────────────────────────────────────────────
-  loadCustomers(): void {
-    this.http.get<any>(`${environment.apiUrl}/customers?limit=500&isActive=true`)
+  private applyLookups(lookups: CashBookLookups): void {
+    if (lookups.transactionType === 'payment') {
+      this.suppliers = lookups.accountOptions;
+    } else {
+      this.customers = lookups.accountOptions;
+    }
+
+    this.salesmen = lookups.salesmen;
+    this.cashAccountOptions = lookups.cashAccountOptions;
+
+    if (!this.form.get('cashAccountId')?.value && this.cashAccountOptions.length) {
+      this.form.get('cashAccountId')?.setValue(this.cashAccountOptions[0]._id);
+    }
+  }
+
+  private ensureLookupsLoaded(
+    transactionType: 'receive' | 'payment',
+    forceRefresh = false,
+    afterLoad?: () => void
+  ): void {
+    if (!forceRefresh && this.loadedLookupModes.has(transactionType)) {
+      afterLoad?.();
+      return;
+    }
+
+    this.cashBookService.getLookups(transactionType, forceRefresh)
       .pipe(takeUntil(this.destroy$))
-      .subscribe(res => { this.customers = res.data || []; });
+      .subscribe({
+        next: (response) => {
+          this.applyLookups(response.data);
+          this.loadedLookupModes.add(response.data.transactionType);
+          afterLoad?.();
+        },
+        error: (error: any) => {
+          this.snackBar.open(
+            error?.error?.message || 'Failed to load cash book lookups',
+            'Close',
+            { duration: 3000 }
+          );
+        }
+      });
   }
 
-  loadSuppliers(): void {
-    this.http.get<any>(`${environment.apiUrl}/suppliers?limit=500&isActive=true`)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(res => { this.suppliers = res.data || []; });
+  private refreshLookups(transactionType: 'receive' | 'payment' = this.currentTransactionType): void {
+    this.cashBookService.clearLookupCache();
+    this.loadedLookupModes.clear();
+    this.customers = [];
+    this.suppliers = [];
+    this.salesmen = [];
+    this.cashAccountOptions = [];
+    this.ensureLookupsLoaded(transactionType, true);
   }
 
-  loadSalesmen(): void {
-    this.http.get<any>(`${environment.apiUrl}/users?role=salesman&limit=200`)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(res => { this.salesmen = res.data || res.users || []; });
-  }
-
-  // ── Invoice allocation ────────────────────────────────────────────
   onAccountChange(): void {
     const accountId = this.form.get('accountId')?.value;
-    if (!accountId || !this.isReceive) {
+    if (!accountId) {
       this.invoiceRows = [];
       return;
     }
+
     this.loadingInvoices = true;
-    this.cashBookService.getCustomerPendingInvoices(accountId)
+
+    const request$ = this.isReceive
+      ? this.cashBookService.getCustomerPendingInvoices(accountId)
+      : this.cashBookService.getSupplierPendingInvoices(accountId);
+
+    request$
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (res) => {
+        next: (response) => {
           this.loadingInvoices = false;
-          const invoices: any[] = res.data || [];
+          const invoices: any[] = response.data || [];
           const today = Date.now();
-          this.invoiceRows = invoices.map(inv => {
-            const dueDate = new Date(inv.invoiceDate || inv.createdAt);
+
+          this.invoiceRows = invoices.map((invoice) => {
+            const dueDate = new Date(invoice.invoiceDate || invoice.createdAt);
             const daysOld = Math.floor((today - dueDate.getTime()) / 86400000);
+            const dueAmount = invoice.totals?.dueAmount
+              ?? invoice.balanceDue
+              ?? invoice.totals?.grandTotal
+              ?? invoice.grandTotal
+              ?? 0;
+
             return {
-              invoiceId: inv._id,
-              invoiceNumber: inv.invoiceNumber || inv.invoiceNo || '',
-              invoiceDate: inv.invoiceDate || inv.createdAt,
-              invoiceAmount: inv.grandTotal || inv.netAmount || 0,
+              invoiceId: invoice._id,
+              invoiceNumber: invoice.invoiceNumber || invoice.invoiceNo || '',
+              invoiceDate: invoice.invoiceDate || invoice.createdAt,
+              invoiceAmount: invoice.totals?.grandTotal || invoice.grandTotal || invoice.netAmount || 0,
               daysOld,
-              dueAmount: inv.balanceDue || inv.grandTotal || 0,
+              dueAmount,
               receivedAmount: 0,
-              difference: inv.balanceDue || inv.grandTotal || 0,
+              difference: dueAmount,
             };
           });
         },
-        error: () => { this.loadingInvoices = false; }
+        error: () => {
+          this.loadingInvoices = false;
+        }
       });
   }
 
@@ -247,7 +267,6 @@ export class CashBookComponent implements OnInit, OnDestroy {
     row.difference = row.dueAmount - row.receivedAmount;
   }
 
-  // ── Save ──────────────────────────────────────────────────────────
   save(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -255,12 +274,16 @@ export class CashBookComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const fv = this.form.value;
+    const formValue = this.form.value;
     const allocations = this.invoiceRows
-      .filter(r => r.receivedAmount > 0)
-      .map(r => ({ invoiceId: r.invoiceId, invoiceNumber: r.invoiceNumber, amount: r.receivedAmount }));
+      .filter((row) => row.receivedAmount > 0)
+      .map((row) => ({
+        invoiceId: row.invoiceId,
+        invoiceNumber: row.invoiceNumber,
+        amount: row.receivedAmount,
+      }));
 
-    const totalAllocated = allocations.reduce((s, a) => s + a.amount, 0);
+    const totalAllocated = allocations.reduce((sum, allocation) => sum + allocation.amount, 0);
     const amount = totalAllocated || 0;
 
     if (amount <= 0) {
@@ -268,50 +291,69 @@ export class CashBookComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const isPostDated = !!(fv.bankName || fv.chequeNumber);
+    const isPostDated = !!(formValue.bankName || formValue.chequeNumber);
     const payload: any = {
-      date: fv.date,
+      date: formValue.date,
       amount,
-      cashAccount: fv.cashAccount,
-      salesmanId: fv.salesmanId || undefined,
-      notes: fv.detailReference || '',
-      allocations,
+      cashAccountId: formValue.cashAccountId,
+      salesmanId: formValue.salesmanId || undefined,
+      notes: formValue.detailReference || '',
+      invoiceAllocations: allocations,
       postDatedCheque: isPostDated,
       bankDetails: isPostDated ? {
-        bankName: fv.bankName,
-        chequeNumber: fv.chequeNumber,
+        bankName: formValue.bankName,
+        chequeNumber: formValue.chequeNumber,
+        chequeDate: formValue.chequeDate,
       } : undefined,
     };
 
     this.saving = true;
 
     if (this.isReceive) {
-      payload.customerId = fv.accountId;
-      payload.receiptDate = fv.date;
+      payload.customerId = formValue.accountId;
+      payload.receiptDate = formValue.date;
       payload.paymentMethod = isPostDated ? 'cheque' : 'cash';
-      const req$ = this.editingId
+
+      const request$ = this.editingId
         ? this.cashBookService.updateReceipt(this.editingId, payload)
         : this.cashBookService.createReceipt(payload);
-      req$.pipe(takeUntil(this.destroy$)).subscribe({
-        next: () => { this.saving = false; this.afterSave(); },
-        error: (e: any) => { this.saving = false; this.snackBar.open(e?.error?.message || 'Failed to save receipt', 'Close', { duration: 3000 }); }
+
+      request$.pipe(takeUntil(this.destroy$)).subscribe({
+        next: () => {
+          this.saving = false;
+          this.afterSave();
+        },
+        error: (error: any) => {
+          this.saving = false;
+          this.snackBar.open(error?.error?.message || 'Failed to save receipt', 'Close', { duration: 3000 });
+        }
       });
-    } else {
-      payload.supplierId = fv.accountId;
-      payload.paymentDate = fv.date;
-      payload.paymentMethod = isPostDated ? 'cheque' : 'cash';
-      const req$ = this.editingId
-        ? this.cashBookService.updatePayment(this.editingId, payload)
-        : this.cashBookService.createPayment(payload);
-      req$.pipe(takeUntil(this.destroy$)).subscribe({
-        next: () => { this.saving = false; this.afterSave(); },
-        error: (e: any) => { this.saving = false; this.snackBar.open(e?.error?.message || 'Failed to save payment', 'Close', { duration: 3000 }); }
-      });
+      return;
     }
+
+    payload.supplierId = formValue.accountId;
+    payload.paymentDate = formValue.date;
+    payload.paymentMethod = isPostDated ? 'cheque' : 'cash';
+
+    const request$ = this.editingId
+      ? this.cashBookService.updatePayment(this.editingId, payload)
+      : this.cashBookService.createPayment(payload);
+
+    request$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.saving = false;
+        this.afterSave();
+      },
+      error: (error: any) => {
+        this.saving = false;
+        this.snackBar.open(error?.error?.message || 'Failed to save payment', 'Close', { duration: 3000 });
+      }
+    });
   }
 
   private afterSave(): void {
     this.snackBar.open('Saved successfully', 'Close', { duration: 3000, panelClass: 'snack-success' });
+    this.refreshLookups('receive');
     this.resetForm();
     this.loadList();
   }
@@ -319,80 +361,47 @@ export class CashBookComponent implements OnInit, OnDestroy {
   resetForm(): void {
     this.editingId = null;
     this.invoiceRows = [];
-    this.form.reset({ transactionType: 'receive', date: new Date(), cashAccount: 'Main Cash' });
+    this.form.reset({
+      transactionType: 'receive',
+      date: new Date(),
+      cashAccountId: this.cashAccountOptions[0]?._id || '',
+      chequeDate: null,
+    });
   }
 
-  // ── List ──────────────────────────────────────────────────────────
   loadList(): void {
     this.loadingList = true;
-    const params: any = { page: this.pageIndex + 1, limit: this.pageSize };
+
+    const params: any = {
+      page: this.pageIndex + 1,
+      limit: this.pageSize,
+    };
+
+    if (this.listFilterType) params.type = this.listFilterType;
     if (this.listFilterFrom) params.startDate = this.listFilterFrom.toISOString();
     if (this.listFilterTo) params.endDate = this.listFilterTo.toISOString();
     if (this.listFilterStatus) params.status = this.listFilterStatus;
 
-    let receipts: any[] = [];
-    let payments: any[] = [];
-    let done = 0;
-
-    const merge = () => {
-      done++;
-      if (done < 2) return;
-      this.loadingList = false;
-      const entries: CombinedEntry[] = [
-        ...receipts.map(r => this.toEntry(r, 'receive')),
-        ...payments.map(p => this.toEntry(p, 'payment')),
-      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-      if (this.listFilterType) {
-        this.dataSource.data = entries.filter(e => e.entryType === this.listFilterType);
-      } else {
-        this.dataSource.data = entries;
-      }
-    };
-
-    this.cashBookService.getReceipts(params).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (res) => { receipts = res.data || []; merge(); },
-      error: () => merge()
-    });
-
-    this.cashBookService.getPayments(params).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (res) => { payments = res.data || []; merge(); },
-      error: () => merge()
-    });
+    this.cashBookService.getEntries(params)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.loadingList = false;
+          const payload = response.data;
+          this.dataSource.data = payload?.entries || [];
+          this.totalCount = payload?.pagination?.totalItems || 0;
+        },
+        error: () => {
+          this.loadingList = false;
+          this.dataSource.data = [];
+          this.totalCount = 0;
+        }
+      });
   }
 
-  private toEntry(item: any, type: 'receive' | 'payment'): CombinedEntry {
-    const isR = type === 'receive';
-    const salesman = item.salesmanId?.name || item.salesman || '';
-    const userId = item.createdBy?.username || item.createdBy?.name || item.createdBy || '';
-    const bank = item.bankDetails?.bankName || '';
-    const cheq = item.bankDetails?.chequeNumber || '';
-    return {
-      _id: item._id,
-      entryType: type,
-      number: isR ? (item.receiptNumber || '') : (item.paymentNumber || ''),
-      accountTitle: isR
-        ? (item.customerId?.name || item.customerName || '')
-        : (item.supplierId?.name || item.supplierName || ''),
-      cashAccount: item.cashAccount || item.paymentMethod || '',
-      salesman,
-      userId,
-      receive: isR ? (item.amount || 0) : 0,
-      paid: !isR ? (item.amount || 0) : 0,
-      difference: 0,
-      date: isR ? item.receiptDate : item.paymentDate,
-      postDatedCheque: !!item.postDatedCheque,
-      bankName: bank,
-      chequeNumber: cheq,
-      status: item.status || '',
-      detail: item.notes || '',
-      raw: item,
-    };
-  }
-
-  onPageChange(e: PageEvent): void {
-    this.pageIndex = e.pageIndex;
-    this.pageSize = e.pageSize;
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
     this.loadList();
   }
 
@@ -401,55 +410,82 @@ export class CashBookComponent implements OnInit, OnDestroy {
     this.loadList();
   }
 
-  // ── Row actions ───────────────────────────────────────────────────
-  editEntry(entry: CombinedEntry): void {
+  editEntry(entry: CashBookEntry): void {
     const raw = entry.raw;
-    this.editingId = entry._id;
-    this.form.patchValue({
-      transactionType: entry.entryType,
-      date: new Date(entry.date),
-      accountId: entry.entryType === 'receive' ? raw.customerId?._id || raw.customerId : raw.supplierId?._id || raw.supplierId,
-      cashAccount: raw.cashAccount || 'Main Cash',
-      salesmanId: raw.salesmanId?._id || raw.salesmanId || '',
-      detailReference: raw.notes || '',
-      bankName: raw.bankDetails?.bankName || '',
-      chequeNumber: raw.bankDetails?.chequeNumber || '',
+
+    this.ensureLookupsLoaded(entry.entryType, false, () => {
+      this.editingId = entry._id;
+      this.form.patchValue({
+        transactionType: entry.entryType,
+        date: new Date(entry.date),
+        accountId: entry.entryType === 'receive'
+          ? raw.customerId?._id || raw.customerId
+          : raw.supplierId?._id || raw.supplierId,
+        cashAccountId: raw.cashAccountId?._id || raw.cashAccountId || this.cashAccountOptions[0]?._id || '',
+        salesmanId: raw.salesmanId?._id || raw.salesmanId || '',
+        detailReference: raw.notes || '',
+        bankName: raw.bankDetails?.bankName || '',
+        chequeNumber: raw.bankDetails?.chequeNumber || '',
+        chequeDate: raw.bankDetails?.chequeDate ? new Date(raw.bankDetails.chequeDate) : null,
+      });
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  deleteEntry(entry: CombinedEntry): void {
-    if (!confirm(`Delete this ${entry.entryType === 'receive' ? 'receipt' : 'payment'} entry?`)) return;
+  deleteEntry(entry: CashBookEntry): void {
+    if (!confirm(`Delete this ${entry.entryType === 'receive' ? 'receipt' : 'payment'} entry?`)) {
+      return;
+    }
 
-    const req$: Observable<any> = entry.entryType === 'receive'
+    const request$: Observable<any> = entry.entryType === 'receive'
       ? this.cashBookService.cancelReceipt(entry._id, 'deleted')
       : this.cashBookService.cancelPayment(entry._id, 'deleted');
 
-    req$.pipe(takeUntil(this.destroy$)).subscribe({
+    request$.pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
+        this.refreshLookups(this.currentTransactionType);
         this.snackBar.open('Entry cancelled', 'Close', { duration: 2000 });
         this.loadList();
       },
-      error: (e: any) => this.snackBar.open(e?.error?.message || 'Failed', 'Close', { duration: 3000 })
+      error: (error: any) => {
+        this.snackBar.open(error?.error?.message || 'Failed', 'Close', { duration: 3000 });
+      }
     });
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────
-  formatAmt(v: number): string {
-    if (!v) return '—';
-    return new Intl.NumberFormat('en-PK', { minimumFractionDigits: 0 }).format(v);
+  formatAmt(value: number): string {
+    if (!value) return '-';
+    return new Intl.NumberFormat('en-PK', { minimumFractionDigits: 0 }).format(value);
   }
 
-  formatDate(d: string): string {
-    if (!d) return '—';
-    return new Date(d).toLocaleDateString('en-PK', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  formatDate(value: string): string {
+    if (!value) return '-';
+    return new Date(value).toLocaleDateString('en-PK', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
   }
 
-  statusClass(s: string): string {
-    return { pending: 'chip-pending', cleared: 'chip-cleared', cancelled: 'chip-cancelled' }[s] || '';
+  statusClass(status: string): string {
+    return {
+      pending: 'chip-pending',
+      cleared: 'chip-cleared',
+      bounced: 'chip-cancelled',
+      cancelled: 'chip-cancelled',
+    }[status] || '';
   }
 
-  trackById(index: number, item: any): string { return item._id; }
-  trackByValue(index: number, item: any): any { return item.value; }
-  trackByInvoiceId(index: number, row: any): string { return row.invoiceId; }
+  trackById(index: number, item: { _id: string }): string {
+    return item._id;
+  }
+
+  trackByValue(index: number, item: { value: unknown }): unknown {
+    return item.value;
+  }
+
+  trackByInvoiceId(index: number, row: InvoiceRow): string {
+    return row.invoiceId;
+  }
 }

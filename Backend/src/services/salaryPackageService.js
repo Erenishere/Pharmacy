@@ -1,5 +1,5 @@
 const SalaryPackage = require('../models/SalaryPackage');
-const Account = require('../models/Account');
+const Customer = require('../models/Customer');
 const Item = require('../models/Item');
 
 class SalaryPackageService {
@@ -12,12 +12,12 @@ class SalaryPackageService {
   async createPackage(packageData, userId) {
     try {
       // Validate employee exists
-      const employee = await Account.findById(packageData.employeeId);
+      const employee = await Customer.findById(packageData.employeeId);
       if (!employee) {
         throw new Error('Employee not found');
       }
 
-      if (employee.accountType !== 'Employee') {
+      if (employee.accountType !== 'employee') {
         throw new Error('Selected account is not an employee');
       }
 
@@ -28,7 +28,7 @@ class SalaryPackageService {
           if (!item) {
             throw new Error(`Item not found: ${incentive.itemId}`);
           }
-          incentive.itemName = item.itemName;
+          incentive.itemName = item.name;
         }
       }
 
@@ -73,7 +73,7 @@ class SalaryPackageService {
           if (!item) {
             throw new Error(`Item not found: ${incentive.itemId}`);
           }
-          incentive.itemName = item.itemName;
+          incentive.itemName = item.name;
         }
       }
 
@@ -101,8 +101,8 @@ class SalaryPackageService {
   async getPackageById(packageId) {
     try {
       const salaryPackage = await SalaryPackage.findById(packageId)
-        .populate('employeeId', 'accountName basicPay')
-        .populate('brandIncentives.itemId', 'itemName')
+        .populate('employeeId', 'name employeeBiodata.basicPay')
+        .populate('brandIncentives.itemId', 'name')
         .populate('createdBy', 'username')
         .populate('updatedBy', 'username');
 
@@ -128,7 +128,7 @@ class SalaryPackageService {
     try {
       const packages = await SalaryPackage.find({ employeeId })
         .sort({ 'duration.fromDate': -1 })
-        .populate('employeeId', 'accountName')
+        .populate('employeeId', 'name employeeBiodata.basicPay')
         .populate('createdBy', 'username');
 
       return {
@@ -175,7 +175,7 @@ class SalaryPackageService {
         .sort({ 'duration.fromDate': -1 })
         .skip(skip)
         .limit(limit)
-        .populate('employeeId', 'accountName')
+        .populate('employeeId', 'name employeeBiodata.basicPay')
         .populate('createdBy', 'username');
 
       const total = await SalaryPackage.countDocuments(query);
@@ -243,7 +243,7 @@ class SalaryPackageService {
         throw new Error('Item not found');
       }
 
-      incentiveData.itemName = item.itemName;
+      incentiveData.itemName = item.name;
 
       // Add incentive
       salaryPackage.brandIncentives.push(incentiveData);

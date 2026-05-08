@@ -60,7 +60,7 @@ import { InvestorProfitShareService, InvestorProfitShare, ProfitShareDetail } fr
             </mat-form-field>
           </div>
 
-          <button mat-stroked-button (click)="calculateShares()" [disabled]="!createForm.get('totalProfit')?.value" style="margin-bottom:16px">
+          <button mat-stroked-button class="calculate-btn" (click)="calculateShares()" [disabled]="!createForm.get('totalProfit')?.value">
             <mat-icon>calculate</mat-icon> Calculate Shares
           </button>
 
@@ -142,12 +142,25 @@ import { InvestorProfitShareService, InvestorProfitShare, ProfitShareDetail } fr
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="historyColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: historyColumns;"></tr>
+                <tr class="mat-mdc-no-data-row no-data-row" *matNoDataRow>
+                  <td class="mat-cell" [attr.colspan]="historyColumns.length">
+                    <div class="table-empty-state">
+                      <mat-icon>pie_chart</mat-icon>
+                      <h4>No distributions found</h4>
+                      <p>Create a profit distribution to start tracking investor shares.</p>
+                    </div>
+                  </td>
+                </tr>
               </table>
-              @if (dataSource.data.length === 0) {
-                <div class="no-data"><mat-icon>pie_chart</mat-icon><p>No distributions yet</p></div>
-              }
             </div>
-            <mat-paginator [pageSizeOptions]="[10, 25]" showFirstLastButtons></mat-paginator>
+            <mat-paginator
+              class="standard-purple-footer"
+              [length]="dataSource.data.length"
+              [pageSize]="pageSize"
+              [pageSizeOptions]="pageSizeOptions"
+              showFirstLastButtons
+              aria-label="Select page of profit share distributions">
+            </mat-paginator>
           }
         </mat-card-content>
       </mat-card>
@@ -156,11 +169,18 @@ import { InvestorProfitShareService, InvestorProfitShare, ProfitShareDetail } fr
   styleUrl: './profit-share.component.scss'
 })
 export class ProfitShareComponent implements OnInit {
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatPaginator)
+  set matPaginator(paginator: MatPaginator | undefined) {
+    if (paginator) {
+      this.dataSource.paginator = paginator;
+    }
+  }
 
   historyColumns = ['periodFrom', 'periodTo', 'totalProfit', 'status', 'actions'];
   detailColumns = ['investor', 'contribution', 'sharePercent', 'profitAmount'];
   dataSource = new MatTableDataSource<InvestorProfitShare>([]);
+  pageSize = 10;
+  pageSizeOptions = [10, 25, 50];
   calculatedDetails: ProfitShareDetail[] = [];
   loading = false;
   saving = false;
@@ -186,7 +206,7 @@ export class ProfitShareComponent implements OnInit {
     this.profitShareService.getProfitShares().subscribe({
       next: (res) => {
         this.loading = false;
-        if (res.success) { this.dataSource.data = res.data; this.dataSource.paginator = this.paginator; }
+        if (res.success) { this.dataSource.data = res.data; }
       },
       error: () => { this.loading = false; }
     });

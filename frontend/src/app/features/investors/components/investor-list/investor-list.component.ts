@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -18,16 +19,26 @@ import { InvestorFormDialogComponent } from '../investor-form-dialog/investor-fo
   standalone: true,
   imports: [
     CommonModule, RouterModule, FormsModule, MatCardModule, MatIconModule,
-    MatButtonModule, MatTableModule, MatProgressSpinnerModule,
+    MatButtonModule, MatTableModule, MatPaginatorModule, MatProgressSpinnerModule,
     MatDialogModule, MatSnackBarModule, MatMenuModule
   ],
   templateUrl: './investor-list.component.html',
   styleUrl: './investor-list.component.scss'
 })
 export class InvestorListComponent implements OnInit {
+  @ViewChild(MatPaginator)
+  set matPaginator(paginator: MatPaginator | undefined) {
+    if (paginator) {
+      this.dataSource.paginator = paginator;
+    }
+  }
+
   loading = false;
   investors: Investor[] = [];
+  dataSource = new MatTableDataSource<Investor>([]);
   displayedColumns = ['code', 'name', 'contactPerson', 'balance', 'status', 'actions'];
+  pageSize = 10;
+  pageSizeOptions = [10, 25, 50];
 
   summary = {
     totalInvestors: 0,
@@ -51,6 +62,7 @@ export class InvestorListComponent implements OnInit {
       next: (response) => {
         if (response.success && response.data) {
           this.investors = response.data;
+          this.dataSource.data = response.data;
           this.calculateSummary();
         }
         this.loading = false;

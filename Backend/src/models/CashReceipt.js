@@ -113,6 +113,38 @@ const cashReceiptSchema = new mongoose.Schema(
       trim: true,
       maxlength: [500, 'Description cannot exceed 500 characters'],
     },
+    notes: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Notes cannot exceed 500 characters'],
+    },
+    invoiceAllocations: [
+      {
+        invoiceId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Invoice',
+          required: true,
+        },
+        invoiceNumber: {
+          type: String,
+          trim: true,
+        },
+        amount: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+      },
+    ],
+    totalAllocated: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    difference: {
+      type: Number,
+      default: 0,
+    },
     status: {
       type: String,
       required: [true, 'Status is required'],
@@ -124,6 +156,29 @@ const cashReceiptSchema = new mongoose.Schema(
     },
     clearedDate: {
       type: Date,
+    },
+    clearedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    cancelledAt: {
+      type: Date,
+    },
+    cancelledBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    cancellationReason: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Cancellation reason cannot exceed 500 characters'],
+    },
+    bouncedDate: {
+      type: Date,
+    },
+    bouncedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
     },
     // Phase 2 - Salesman tracking (Requirement 9.2, 9.3)
     salesmanId: {
@@ -156,6 +211,7 @@ cashReceiptSchema.index({ postDatedCheque: 1, 'bankDetails.chequeDate': 1 });
 cashReceiptSchema.index({ chequeStatus: 1 });
 cashReceiptSchema.index({ 'bankDetails.bankName': 1, 'bankDetails.chequeNumber': 1 });
 cashReceiptSchema.index({ salesmanId: 1 });
+cashReceiptSchema.index({ cashAccountId: 1 });
 
 // Virtual for days since receipt
 cashReceiptSchema.virtual('daysSinceReceipt').get(function () {
@@ -168,6 +224,9 @@ cashReceiptSchema.virtual('daysSinceReceipt').get(function () {
 cashReceiptSchema.methods.clearReceipt = function () {
   if (this.status === 'pending') {
     this.status = 'cleared';
+    if (this.postDatedCheque) {
+      this.chequeStatus = 'cleared';
+    }
     this.clearedDate = new Date();
     return this.save();
   }
@@ -178,6 +237,9 @@ cashReceiptSchema.methods.clearReceipt = function () {
 cashReceiptSchema.methods.markAsBounced = function () {
   if (this.status === 'pending' || this.status === 'cleared') {
     this.status = 'bounced';
+    if (this.postDatedCheque) {
+      this.chequeStatus = 'bounced';
+    }
     return this.save();
   }
   throw new Error('Only pending or cleared receipts can be marked as bounced');

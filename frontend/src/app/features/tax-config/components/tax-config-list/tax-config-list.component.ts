@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -19,7 +20,7 @@ import { TaxConfigService, TaxConfig } from '../../services/tax-config.service';
   imports: [
     CommonModule, ReactiveFormsModule, MatTableModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatSnackBarModule, MatCardModule,
-    MatProgressSpinnerModule, MatTooltipModule, MatSlideToggleModule
+    MatProgressSpinnerModule, MatTooltipModule, MatSlideToggleModule, MatPaginatorModule
   ],
   template: `
     <div class="page-container">
@@ -36,13 +37,13 @@ import { TaxConfigService, TaxConfig } from '../../services/tax-config.service';
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Tax Type</mat-label>
-            <input matInput formControlName="taxType" placeholder="GST, WHT, etc.">
+            <input matInput formControlName="taxType" placeholder="GST, WHT, SALES_TAX, CUSTOM">
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Rate (%)</mat-label>
             <input matInput type="number" formControlName="rate" min="0" max="100">
           </mat-form-field>
-          <button mat-raised-button type="submit" [disabled]="form.invalid || saving">
+          <button mat-raised-button color="primary" class="add-tax-btn" type="submit" [disabled]="form.invalid || saving">
             <mat-icon>add</mat-icon> Add
           </button>
         </form>
@@ -82,10 +83,24 @@ import { TaxConfigService, TaxConfig } from '../../services/tax-config.service';
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
               <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              <tr class="mat-mdc-no-data-row no-data-row" *matNoDataRow>
+                <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+                  <div class="table-empty-state">
+                    <mat-icon>receipt_long</mat-icon>
+                    <h4>No tax configurations found</h4>
+                    <p>Add a tax rate to start configuring GST, WHT, or other tax rules.</p>
+                  </div>
+                </td>
+              </tr>
             </table>
-            @if (dataSource.data.length === 0) {
-              <div class="no-data"><mat-icon>receipt_long</mat-icon><p>No tax configurations found</p></div>
-            }
+            <mat-paginator
+              class="standard-purple-footer"
+              [length]="dataSource.data.length"
+              [pageSize]="pageSize"
+              [pageSizeOptions]="pageSizeOptions"
+              showFirstLastButtons
+              aria-label="Select page of tax configurations">
+            </mat-paginator>
           </div>
         </mat-card>
       }
@@ -94,8 +109,17 @@ import { TaxConfigService, TaxConfig } from '../../services/tax-config.service';
   styleUrl: './tax-config-list.component.scss'
 })
 export class TaxConfigListComponent implements OnInit {
+  @ViewChild(MatPaginator)
+  set matPaginator(paginator: MatPaginator | undefined) {
+    if (paginator) {
+      this.dataSource.paginator = paginator;
+    }
+  }
+
   displayedColumns = ['taxName', 'taxType', 'rate', 'isActive', 'actions'];
   dataSource = new MatTableDataSource<TaxConfig>([]);
+  pageSize = 10;
+  pageSizeOptions = [10, 25, 50];
   loading = false;
   saving = false;
   form: FormGroup;

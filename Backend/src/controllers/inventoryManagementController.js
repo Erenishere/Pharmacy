@@ -3,6 +3,8 @@ const physicalCountService = require('../services/physicalCountService');
 const inventoryReportService = require('../services/inventoryReportService');
 const Item = require('../models/Item');
 
+const escapeRegex = (value = '') => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 exports.getStock = async (req, res) => {
   try {
     const {
@@ -11,132 +13,249 @@ exports.getStock = async (req, res) => {
       itemId,
       warehouseId,
       categoryId,
+      companyId,
       search,
       stockStatus,
+      sortBy,
+      sortOrder,
     } = req.query;
 
     const Inventory = require('../models/Inventory');
     const mongoose = require('mongoose');
+    const pageNumber = Math.max(parseInt(page, 10) || 1, 1);
+    const pageSize = Math.min(Math.max(parseInt(limit, 10) || 25, 1), 200);
+    const skip = (pageNumber - 1) * pageSize;
 
-    // Build the aggregation pipeline for flexible filtering and joining
-    const pipeline = [];
+    const baseMatch = {};
+    if (warehouseId) baseMatch.warehouse = new mongoose.Types.ObjectId(warehouseId);
+    if (stockStatus === 'out_of_stock') {
+      baseMatch.quantity = { $lte: 0 };
+    }
 
-    // 1. Initial Match (Inventory filters)
-    const match = {};
-    if (itemId) match.item = new mongoose.Types.ObjectId(itemId);
-    if (warehouseId) match.warehouse = new mongoose.Types.ObjectId(warehouseId);
-    pipeline.push({ $match: match });
+    const itemFilters = { isActive: true };
+    let requiresItemPrefilter = false;
 
-    // 2. Join with Item
-    pipeline.push({
-      $lookup: {
-        from: 'items',
-        localField: 'item',
-        foreignField: '_id',
-        as: 'itemInfo',
-      },
-    });
-    pipeline.push({ $unwind: '$itemInfo' });
-
-    // 3. Post-join filters (Item filters)
-    const postMatch = { 'itemInfo.isActive': true };
-    if (categoryId) postMatch['itemInfo.categoryId'] = new mongoose.Types.ObjectId(categoryId);
-
-    if (search) {
-      postMatch.$or = [
-        { 'itemInfo.name': { $regex: search, $options: 'i' } },
-        { 'itemInfo.code': { $regex: search, $options: 'i' } },
+    if (itemId) {
+      itemFilters._id = new mongoose.Types.ObjectId(itemId);
+      requiresItemPrefilter = true;
+    }
+    if (categoryId) {
+      itemFilters.categoryId = new mongoose.Types.ObjectId(categoryId);
+      requiresItemPrefilter = true;
+    }
+    if (companyId) {
+      itemFilters.companyId = new mongoose.Types.ObjectId(companyId);
+      requiresItemPrefilter = true;
+    }
+    if (search && search.trim()) {
+      const searchRegex = new RegExp(escapeRegex(search.trim()), 'i');
+      itemFilters.$or = [
+        { name: searchRegex },
+        { code: searchRegex },
+        { barcode: searchRegex },
       ];
+      requiresItemPrefilter = true;
     }
 
-    if (stockStatus) {
-      switch (stockStatus) {
-        case 'low_stock':
-          pipeline.push({
-            $match: {
-              $expr: { $lte: ['$quantity', { $ifNull: ['$itemInfo.inventory.minimumStock', 10] }] }
-            }
-          });
-          break;
-        case 'out_of_stock':
-          postMatch.quantity = { $lte: 0 };
-          break;
+    if (requiresItemPrefilter) {
+      const matchingItems = await Item.find(itemFilters).select('_id').lean();
+      if (matchingItems.length === 0) {
+        return res.status(200).json({
+          success: true,
+          data: [],
+          pagination: {
+            currentPage: pageNumber,
+            itemsPerPage: pageSize,
+            totalItems: 0,
+            totalPages: 0,
+            page: pageNumber,
+            limit: pageSize,
+            total: 0,
+          },
+        });
       }
+
+      baseMatch.item = { $in: matchingItems.map((itemDoc) => itemDoc._id) };
     }
 
-    if (Object.keys(postMatch).length > 0) {
-      pipeline.push({ $match: postMatch });
+    const sortFieldMap = {
+      itemCode: 'itemCode',
+      itemName: 'itemName',
+      categoryName: 'categoryName',
+      companyName: 'companyName',
+      warehouseName: 'warehouseName',
+      quantity: 'quantity',
+      reservedQuantity: 'reservedQuantity',
+      availableQuantity: 'availableQuantity',
+      minimumLevel: 'minimumLevel',
+      reorderLevel: 'reorderLevel',
+      lastUpdated: 'lastUpdated',
+      batchNumber: 'batchNumber',
+    };
+    const resolvedSortField = sortFieldMap[sortBy] || 'itemName';
+    const resolvedSortOrder = sortOrder === 'desc' ? -1 : 1;
+
+    const pipeline = [
+      { $match: baseMatch },
+      {
+        $lookup: {
+          from: 'items',
+          let: { itemId: '$item' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$_id', '$$itemId'] },
+                isActive: true,
+              },
+            },
+            {
+              $project: {
+                code: 1,
+                name: 1,
+                barcode: 1,
+                categoryId: 1,
+                companyId: 1,
+                'inventory.minimumStock': 1,
+                'inventory.reorderPoint': 1,
+              },
+            },
+          ],
+          as: 'itemInfo',
+        },
+      },
+      { $unwind: '$itemInfo' },
+    ];
+
+    if (stockStatus === 'low_stock') {
+      pipeline.push({
+        $match: {
+          $expr: {
+            $lte: ['$quantity', { $ifNull: ['$itemInfo.inventory.minimumStock', 10] }],
+          },
+        },
+      });
     }
 
-    // 4. Join with Warehouse
-    pipeline.push({
-      $lookup: {
-        from: 'warehouses',
-        localField: 'warehouse',
-        foreignField: '_id',
-        as: 'warehouseInfo',
+    pipeline.push(
+      {
+        $lookup: {
+          from: 'warehouses',
+          let: { warehouseId: '$warehouse' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$_id', '$$warehouseId'] },
+              },
+            },
+            {
+              $project: {
+                name: 1,
+                code: 1,
+              },
+            },
+          ],
+          as: 'warehouseInfo',
+        },
       },
-    });
-    pipeline.push({ $unwind: { path: '$warehouseInfo', preserveNullAndEmptyArrays: true } });
-
-    // 5. Join with Category (optional for name)
-    pipeline.push({
-      $lookup: {
-        from: 'categories',
-        localField: 'itemInfo.categoryId',
-        foreignField: '_id',
-        as: 'categoryInfo',
+      { $unwind: { path: '$warehouseInfo', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'categories',
+          let: { categoryIdLookup: '$itemInfo.categoryId' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$_id', '$$categoryIdLookup'] },
+              },
+            },
+            {
+              $project: {
+                name: 1,
+              },
+            },
+          ],
+          as: 'categoryInfo',
+        },
       },
-    });
-    pipeline.push({ $unwind: { path: '$categoryInfo', preserveNullAndEmptyArrays: true } });
-
-    // 6. Project to match StockLevel interface
-    pipeline.push({
-      $project: {
-        _id: 1,
-        itemId: '$itemInfo._id',
-        itemCode: '$itemInfo.code',
-        itemName: '$itemInfo.name',
-        categoryId: '$itemInfo.categoryId',
-        categoryName: '$categoryInfo.name',
-        companyId: '$itemInfo.companyId',
-        warehouseId: '$warehouseInfo._id',
-        warehouseName: { $ifNull: ['$warehouseInfo.name', 'Global Stock'] },
-        quantity: 1,
-        reservedQuantity: { $ifNull: ['$reservedQuantity', '$allocated', 0] },
-        availableQuantity: { $ifNull: ['$available', '$quantity'] },
-        minimumLevel: '$itemInfo.inventory.minimumStock',
-        reorderLevel: '$itemInfo.inventory.reorderPoint',
-        batchNumber: 1,
-        lastUpdated: 1,
+      { $unwind: { path: '$categoryInfo', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'companies',
+          let: { companyIdLookup: '$itemInfo.companyId' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$_id', '$$companyIdLookup'] },
+              },
+            },
+            {
+              $project: {
+                name: 1,
+              },
+            },
+          ],
+          as: 'companyInfo',
+        },
       },
-    });
+      { $unwind: { path: '$companyInfo', preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          _id: 1,
+          itemId: '$itemInfo._id',
+          itemCode: '$itemInfo.code',
+          itemName: '$itemInfo.name',
+          categoryId: '$itemInfo.categoryId',
+          categoryName: '$categoryInfo.name',
+          companyId: '$itemInfo.companyId',
+          companyName: '$companyInfo.name',
+          warehouseId: '$warehouseInfo._id',
+          warehouseName: { $ifNull: ['$warehouseInfo.name', 'Global Stock'] },
+          quantity: 1,
+          reservedQuantity: { $ifNull: ['$reservedQuantity', '$allocated', 0] },
+          availableQuantity: {
+            $max: [
+              0,
+              {
+                $subtract: ['$quantity', { $ifNull: ['$reservedQuantity', '$allocated', 0] }],
+              },
+            ],
+          },
+          minimumLevel: '$itemInfo.inventory.minimumStock',
+          reorderLevel: '$itemInfo.inventory.reorderPoint',
+          batchNumber: 1,
+          lastUpdated: 1,
+        },
+      },
+      {
+        $facet: {
+          data: [
+            { $sort: { [resolvedSortField]: resolvedSortOrder, warehouseName: 1, _id: 1 } },
+            { $skip: skip },
+            { $limit: pageSize },
+          ],
+          metadata: [
+            { $count: 'totalItems' },
+          ],
+        },
+      },
+    );
 
-    // 7. Sort
-    pipeline.push({ $sort: { itemName: 1, warehouseName: 1 } });
-
-    // 8. Pagination
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-
-    // Total count for pagination
-    const countPipeline = [...pipeline];
-    countPipeline.push({ $count: 'total' });
-    const countResult = await Inventory.aggregate(countPipeline);
-    const totalItems = countResult.length > 0 ? countResult[0].total : 0;
-
-    pipeline.push({ $skip: skip });
-    pipeline.push({ $limit: parseInt(limit) });
-
-    const results = await Inventory.aggregate(pipeline);
+    const [result] = await Inventory.aggregate(pipeline);
+    const results = result?.data || [];
+    const totalItems = result?.metadata?.[0]?.totalItems || 0;
+    const totalPages = totalItems === 0 ? 0 : Math.ceil(totalItems / pageSize);
 
     return res.status(200).json({
       success: true,
       data: results,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        currentPage: pageNumber,
+        itemsPerPage: pageSize,
+        totalItems,
+        totalPages,
+        page: pageNumber,
+        limit: pageSize,
         total: totalItems,
-        totalPages: Math.ceil(totalItems / parseInt(limit)),
       },
     });
   } catch (error) {

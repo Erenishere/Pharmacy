@@ -374,6 +374,7 @@ export class UserListComponent implements OnInit, OnDestroy, AfterViewInit {
         const dialogRef = this.dialog.open(UserFormDialogComponent, {
             width: '500px',
             disableClose: false,
+            panelClass: 'standard-form-dialog-panel',
             data: { user: null }
         });
 
@@ -398,6 +399,7 @@ export class UserListComponent implements OnInit, OnDestroy, AfterViewInit {
         const dialogRef = this.dialog.open(UserFormDialogComponent, {
             width: '500px',
             disableClose: false,
+            panelClass: 'standard-form-dialog-panel',
             data: { user }
         });
 

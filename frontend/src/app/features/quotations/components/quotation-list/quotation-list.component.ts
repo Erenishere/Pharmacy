@@ -124,6 +124,14 @@ export class QuotationListComponent implements OnInit {
     this.loadQuotations();
   }
 
+  clearFilters(): void {
+    this.statusFilter.setValue('');
+    this.customerFilter.setValue('');
+    this.dateFrom.setValue(null);
+    this.dateTo.setValue(null);
+    this.applyFilters();
+  }
+
   viewDetails(quotation: Quotation): void {
     this.router.navigate(['/quotations', quotation._id]);
   }
@@ -131,6 +139,8 @@ export class QuotationListComponent implements OnInit {
   openCreate(): void {
     const ref = this.dialog.open(QuotationFormDialogComponent, {
       width: '1000px', maxWidth: '95vw',
+      panelClass: ['standard-form-dialog-panel', 'quotation-dialog-panel'],
+      autoFocus: false,
       data: {}
     });
     ref.afterClosed().subscribe(result => {
@@ -141,6 +151,8 @@ export class QuotationListComponent implements OnInit {
   openEdit(quotation: Quotation): void {
     const ref = this.dialog.open(QuotationFormDialogComponent, {
       width: '1000px', maxWidth: '95vw',
+      panelClass: ['standard-form-dialog-panel', 'quotation-dialog-panel'],
+      autoFocus: false,
       data: { quotation }
     });
     ref.afterClosed().subscribe(result => {

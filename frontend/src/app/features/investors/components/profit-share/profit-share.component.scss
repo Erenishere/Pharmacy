@@ -16,7 +16,58 @@
 @include expansion-panel;
 
 .create-panel {
-  margin-bottom: 16px;
+  margin-bottom: 22px;
+  background: var(--indus-surface, #fff) !important;
+  border: 1px solid var(--indus-border, #ebe9f1) !important;
+  border-radius: var(--indus-radius-lg, 16px) !important;
+  box-shadow: var(--indus-shadow-card, 0 8px 24px rgba(34, 41, 47, 0.07)) !important;
+  color: var(--indus-text, #5e5873) !important;
+  overflow: hidden !important;
+
+  ::ng-deep .mat-expansion-panel-header {
+    min-height: 64px;
+    padding: 0 28px;
+    background: var(--indus-surface, #fff) !important;
+    border-bottom: 1px solid var(--indus-border, #ebe9f1);
+    color: var(--indus-text, #5e5873) !important;
+  }
+
+  ::ng-deep .mat-expansion-panel-header:hover,
+  ::ng-deep .mat-expansion-panel-header.mat-expanded:hover {
+    background: var(--indus-primary-softer, rgba(115, 103, 240, 0.05)) !important;
+  }
+
+  ::ng-deep .mat-expansion-panel-header-title {
+    align-items: center;
+    gap: 12px;
+    color: var(--indus-text, #5e5873) !important;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  ::ng-deep .mat-expansion-panel-header-title mat-icon {
+    width: 34px;
+    height: 34px;
+    padding: 5px;
+    border-radius: 10px;
+    background: var(--indus-primary-soft, rgba(115, 103, 240, 0.1));
+    color: var(--indus-primary, #7367f0) !important;
+    font-size: 24px;
+  }
+
+  ::ng-deep .mat-expansion-indicator::after {
+    color: var(--indus-primary, #7367f0) !important;
+  }
+
+  ::ng-deep .mat-expansion-panel-content,
+  ::ng-deep .mat-expansion-panel-body {
+    background: var(--indus-surface, #fff) !important;
+    color: var(--indus-text-soft, #6e6b7b) !important;
+  }
+
+  ::ng-deep .mat-expansion-panel-body {
+    padding: 28px;
+  }
 }
 
 .form-row {
@@ -27,6 +78,35 @@
   &.three-col mat-form-field {
     flex: 1;
     min-width: 180px;
+  }
+}
+
+.calculate-btn {
+  margin-bottom: 16px;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid var(--indus-primary, #7367f0) !important;
+  border-radius: var(--indus-radius-sm, 8px) !important;
+  background: var(--indus-surface, #fff) !important;
+  color: var(--indus-primary, #7367f0) !important;
+  box-shadow: 0 6px 16px rgba(115, 103, 240, 0.12);
+  font-weight: 800;
+
+  mat-icon {
+    margin-right: 8px;
+    color: var(--indus-primary, #7367f0) !important;
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--indus-primary-soft, rgba(115, 103, 240, 0.1)) !important;
+    color: var(--indus-primary-dark, #5e50ee) !important;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    border-color: var(--indus-border-strong, #d8d6de) !important;
+    box-shadow: none;
+    color: var(--indus-text-muted, #a8a5b6) !important;
   }
 }
 
@@ -73,19 +153,27 @@ mat-chip {
   text-align: right;
 
   button[mat-raised-button] {
-    background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), .8));
-    box-shadow: 0 0 10px 1px rgba($purple, .4);
-    color: #fff;
-    font-weight: 500;
+    min-height: 46px;
+    padding: 0 22px;
+    border-radius: var(--indus-radius-sm, 8px);
+    background: linear-gradient(135deg, var(--indus-primary, #7367f0) 0%, var(--indus-primary-dark, #5e50ee) 100%) !important;
+    box-shadow: var(--indus-shadow-button, 0 8px 18px rgba(115, 103, 240, 0.28));
+    color: var(--indus-white, #fff) !important;
+    font-weight: 800;
+
+    mat-icon,
+    .mdc-button__label {
+      color: var(--indus-white, #fff) !important;
+    }
 
     &:hover {
-      box-shadow: 0 0 14px 2px rgba($purple, .6);
+      box-shadow: 0 12px 26px rgba(115, 103, 240, 0.34);
       transform: translateY(-1px);
     }
   }
 }
 
-button[mat-stroked-button] {
+button[mat-stroked-button]:not(.calculate-btn) {
   border: 2px solid $purple;
   color: $purple;
   background: white;
@@ -100,5 +188,22 @@ button[mat-stroked-button] {
 
   mat-icon {
     margin-right: 6px;
+  }
+}
+
+@media (max-width: 768px) {
+  .create-panel {
+    ::ng-deep .mat-expansion-panel-header {
+      padding: 0 18px;
+    }
+
+    ::ng-deep .mat-expansion-panel-body {
+      padding: 20px;
+    }
+  }
+
+  .form-row.three-col mat-form-field,
+  .calculate-btn {
+    width: 100%;
   }
 }

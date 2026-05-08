@@ -73,7 +73,7 @@ class SalaryCalculationController {
         month,
         year: parseInt(year),
       })
-        .populate('employeeId', 'accountName basicPay')
+        .populate('employeeId', 'name employeeBiodata.basicPay')
         .populate('packageId');
 
       if (!calculation) {
@@ -124,7 +124,7 @@ class SalaryCalculationController {
 
       // Query calculations with filters
       const calculations = await SalaryCalculation.find(filters)
-        .populate('employeeId', 'accountName basicPay')
+        .populate('employeeId', 'name employeeBiodata.basicPay')
         .populate('packageId', 'duration status')
         .populate('calculatedBy', 'username')
         .sort({ year: -1, month: -1, createdAt: -1 })

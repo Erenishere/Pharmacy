@@ -1,5 +1,5 @@
 const { body, param, validationResult } = require('express-validator');
-const Account = require('../models/Account');
+const Customer = require('../models/Customer');
 const Item = require('../models/Item');
 const SalaryPackage = require('../models/SalaryPackage');
 
@@ -288,7 +288,7 @@ const validateEmployeeExists = async (req, res, next) => {
     }
 
     // Check if employee exists
-    const employee = await Account.findById(employeeId);
+    const employee = await Customer.findById(employeeId);
 
     if (!employee) {
       return res.status(404).json({
@@ -299,7 +299,7 @@ const validateEmployeeExists = async (req, res, next) => {
     }
 
     // Check if account is an employee
-    if (employee.accountType !== 'Employee') {
+    if (employee.accountType !== 'employee') {
       return res.status(400).json({
         success: false,
         error: 'Invalid account type',
@@ -308,7 +308,7 @@ const validateEmployeeExists = async (req, res, next) => {
     }
 
     // Check if employee is active
-    if (employee.status !== 'Active') {
+    if (!employee.isActive) {
       return res.status(400).json({
         success: false,
         error: 'Inactive employee',

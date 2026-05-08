@@ -8,14 +8,43 @@ const Redis = require('ioredis');
 let client = null;
 let isConnected = false;
 
-function createClient() {
-  const tlsEnabled = process.env.REDIS_TLS === 'true';
+function getConnectionConfig() {
+  const redisUrl = process.env.REDIS_URL;
+  const envTlsEnabled = process.env.REDIS_TLS === 'true';
+  const rejectUnauthorized = process.env.REDIS_TLS_REJECT_UNAUTHORIZED !== 'false';
 
-  const config = {
+  if (redisUrl) {
+    const parsedUrl = new URL(redisUrl);
+    const tlsEnabled = parsedUrl.protocol === 'rediss:' || envTlsEnabled;
+
+    return {
+      host: parsedUrl.hostname,
+      port: parseInt(parsedUrl.port || '6379', 10),
+      username: decodeURIComponent(parsedUrl.username || process.env.REDIS_USERNAME || 'default'),
+      password: decodeURIComponent(parsedUrl.password || process.env.REDIS_PASSWORD || '') || undefined,
+      tlsEnabled,
+      rejectUnauthorized,
+    };
+  }
+
+  return {
     host: process.env.REDIS_HOST,
-    port: parseInt(process.env.REDIS_PORT, 10),
+    port: parseInt(process.env.REDIS_PORT || '6379', 10),
     username: process.env.REDIS_USERNAME || 'default',
     password: process.env.REDIS_PASSWORD || undefined,
+    tlsEnabled: envTlsEnabled,
+    rejectUnauthorized,
+  };
+}
+
+function createClient() {
+  const connection = getConnectionConfig();
+
+  const config = {
+    host: connection.host,
+    port: connection.port,
+    username: connection.username,
+    password: connection.password,
     // Retry strategy: exponential backoff, give up after 10 attempts
     retryStrategy(times) {
       if (times > 10) {
@@ -28,10 +57,10 @@ function createClient() {
     connectTimeout: 10000,
     lazyConnect: false,
     keepAlive: 30000,
-    // TLS for Redis Cloud
-    ...(tlsEnabled && {
+    // TLS is required by providers such as Upstash/Redis Cloud.
+    ...(connection.tlsEnabled && {
       tls: {
-        rejectUnauthorized: false, // Redis Cloud uses self-signed certs
+        rejectUnauthorized: connection.rejectUnauthorized,
       },
     }),
   };

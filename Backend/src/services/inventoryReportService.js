@@ -1,6 +1,7 @@
 const Inventory = require('../models/Inventory');
 const StockMovement = require('../models/StockMovement');
 const Batch = require('../models/Batch');
+const Invoice = require('../models/Invoice');
 const mongoose = require('mongoose');
 
 /**
@@ -64,17 +65,35 @@ class InventoryReportService {
 
       // Deduplicate items (multiple inventory records per item across warehouses/batches)
       const itemMap = new Map();
+      const categorySet = new Set();
+      let totalReserved = 0;
+      let totalAvailable = 0;
+
       for (const inv of filteredStock) {
         const itemId = inv.item._id.toString();
+        const reservedQuantity = this.getReservedQuantity(inv);
+        const availableQuantity = this.getAvailableQuantity(inv);
+
+        totalReserved += reservedQuantity;
+        totalAvailable += availableQuantity;
+        if (inv.item.categoryId) {
+          categorySet.add(inv.item.categoryId.toString());
+        }
+
         if (!itemMap.has(itemId)) {
           itemMap.set(itemId, {
             totalQty: 0,
+            availableQty: 0,
+            reservedQty: 0,
             costPrice: inv.item.pricing?.costPrice || 0,
             minimumStock: inv.item.inventory?.minimumStock || 0,
             maximumStock: inv.item.inventory?.maximumStock || 0,
           });
         }
-        itemMap.get(itemId).totalQty += (inv.quantity || 0);
+        const itemEntry = itemMap.get(itemId);
+        itemEntry.totalQty += (inv.quantity || 0);
+        itemEntry.availableQty += availableQuantity;
+        itemEntry.reservedQty += reservedQuantity;
       }
 
       let lowStockCount = 0;
@@ -86,13 +105,14 @@ class InventoryReportService {
       for (const data of itemMap.values()) {
         totalQuantity += data.totalQty;
         totalValue += data.totalQty * data.costPrice;
-        if (data.totalQty <= 0) outOfStockCount++;
-        else if (data.minimumStock > 0 && data.totalQty <= data.minimumStock) lowStockCount++;
+        if (data.availableQty <= 0) outOfStockCount++;
+        else if (data.minimumStock > 0 && data.availableQty <= data.minimumStock) lowStockCount++;
         if (data.maximumStock > 0 && data.totalQty > data.maximumStock) overstockCount++;
       }
 
       return {
         totalItems: itemMap.size,
+        totalCategories: categorySet.size,
         totalQuantity,
         totalValue: Math.round(totalValue * 100) / 100,
         totalInventoryValue: Math.round(totalValue * 100) / 100,
@@ -101,8 +121,8 @@ class InventoryReportService {
         outOfStockItems: outOfStockCount,
         outOfStockCount: outOfStockCount,
         overstockItems: overstockCount,
-        totalReserved: 0,
-        totalAvailable: totalQuantity,
+        totalReserved: Math.round(totalReserved * 100) / 100,
+        totalAvailable: Math.round(totalAvailable * 100) / 100,
       };
     } catch (error) {
       console.error('getStockSummary service error:', error);
@@ -126,6 +146,8 @@ class InventoryReportService {
       .populate('warehouse', 'name code')
       .lean();
 
+    const batches = await this.getBatchMap(inventoryDocs);
+
     // Map to a format suitable for the report
     return inventoryDocs.map(doc => ({
       itemId: doc.item?._id,
@@ -135,11 +157,14 @@ class InventoryReportService {
       warehouseName: doc.warehouse?.name,
       warehouseCode: doc.warehouse?.code,
       quantity: doc.quantity,
-      availableQuantity: doc.available,
-      reservedQuantity: doc.reservedQuantity || doc.allocated || 0,
+      availableQuantity: this.getAvailableQuantity(doc),
+      reservedQuantity: this.getReservedQuantity(doc),
       unit: doc.item?.unit,
+      batchNumber: doc.batchNumber || null,
+      expiryDate: batches.get(this.getBatchKey(doc))?.expiryDate || null,
       costPrice: doc.item?.pricing?.costPrice,
-      totalValue: (doc.quantity || 0) * (doc.item?.pricing?.costPrice || 0)
+      totalValue: (doc.quantity || 0) * (doc.item?.pricing?.costPrice || 0),
+      lastUpdated: doc.lastUpdated,
     }));
   }
 
@@ -159,11 +184,11 @@ class InventoryReportService {
     }
 
     if (warehouseId) query.warehouse = warehouseId;
-    if (itemId) query.item = itemId;
+    if (itemId) query.itemId = itemId;
     if (movementType) query.movementType = movementType;
 
     const movements = await StockMovement.find(query)
-      .populate('item', 'code name')
+      .populate('itemId', 'code name')
       .populate('warehouse', 'name')
       .sort({ movementDate: -1 })
       .lean();
@@ -173,9 +198,9 @@ class InventoryReportService {
       inwardMovements: movements.filter((m) => m.movementType === 'in').length,
       outwardMovements: movements.filter((m) => m.movementType === 'out').length,
       totalInwardQty: movements.filter((m) => m.movementType === 'in')
-        .reduce((sum, m) => sum + m.quantity, 0),
+        .reduce((sum, m) => sum + Math.abs(m.quantity), 0),
       totalOutwardQty: movements.filter((m) => m.movementType === 'out')
-        .reduce((sum, m) => sum + m.quantity, 0),
+        .reduce((sum, m) => sum + Math.abs(m.quantity), 0),
     };
 
     return {
@@ -318,50 +343,48 @@ class InventoryReportService {
    * @param {number} days - Days to consider for slow movement
    * @returns {Promise<Object>} Slow-moving items report
    */
-  async getSlowMovingItemsReport(days = 90) {
+  async getSlowMovingItemsReport(warehouseId, days = 90, limit = 50) {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
-    const inventory = await Inventory.find({
-      quantity: { $gt: 0 },
-    })
-      .populate('item', 'code name pricing')
-      .populate('warehouse', 'name')
-      .lean();
+    const inventoryRows = await this.getPositiveInventoryRows(warehouseId);
+    const salesMovementMap = await this.getLatestMovementDateMap(
+      inventoryRows,
+      { movementType: 'out', referenceTypes: ['sales_invoice'] },
+    );
 
-    const slowMovingItems = [];
+    const slowMovingItems = inventoryRows
+      .map((row) => {
+        const key = this.getRowMovementKey(row.item._id, row.warehouse?._id);
+        const lastSaleDate = salesMovementMap.get(key) || null;
+        const daysSinceLastSale = lastSaleDate
+          ? Math.floor((Date.now() - lastSaleDate.getTime()) / (1000 * 60 * 60 * 24))
+          : days;
 
-    for (const inv of inventory) {
-      if (!inv.item || !inv.warehouse) continue;
-
-      const recentMovements = await StockMovement.countDocuments({
-        item: inv.item._id,
-        warehouse: inv.warehouse._id,
-        movementDate: { $gte: cutoffDate },
-        movementType: 'out', // assuming 'out' indicates sales/usage
-      });
-
-      if (recentMovements === 0) {
-        slowMovingItems.push({
-          item: inv.item,
-          warehouse: inv.warehouse,
-          quantity: inv.quantity,
-          value: inv.quantity * (inv.item.pricing?.costPrice || 0),
-          daysWithoutMovement: days,
-        });
-      }
-    }
-
-    const summary = {
-      totalSlowMovingItems: slowMovingItems.length,
-      totalValue: slowMovingItems.reduce((sum, item) => sum + item.value, 0),
-    };
+        return {
+          itemId: row.item._id,
+          itemCode: row.item.code,
+          itemName: row.item.name,
+          warehouseId: row.warehouse?._id,
+          warehouseName: row.warehouse?.name,
+          currentStock: row.availableQuantity,
+          quantity: row.quantity,
+          stockValue: row.quantity * (row.item.pricing?.costPrice || 0),
+          value: row.quantity * (row.item.pricing?.costPrice || 0),
+          lastSaleDate,
+          daysSinceLastSale,
+          daysInactive: daysSinceLastSale,
+        };
+      })
+      .filter((row) => !row.lastSaleDate || row.lastSaleDate < cutoffDate)
+      .sort((left, right) => right.daysSinceLastSale - left.daysSinceLastSale)
+      .slice(0, limit);
 
     return {
-      reportType: 'slow_moving',
-      days,
       items: slowMovingItems,
-      summary,
+      total: slowMovingItems.length,
+      totalValue: slowMovingItems.reduce((sum, item) => sum + item.value, 0),
+      period: { days, startDate: cutoffDate },
     };
   }
 
@@ -378,7 +401,9 @@ class InventoryReportService {
 
     const matchStage = {
       movementDate: { $gte: cutoffDate },
-      movementType: 'out', // assumption that sales is 'out'
+      movementType: 'out',
+      status: 'completed',
+      referenceType: 'sales_invoice',
     };
     if (warehouseId) matchStage.warehouse = new mongoose.Types.ObjectId(warehouseId);
 
@@ -386,8 +411,8 @@ class InventoryReportService {
       { $match: matchStage },
       {
         $group: {
-          _id: { item: '$item', warehouse: '$warehouse' },
-          totalQuantity: { $sum: '$quantity' },
+          _id: { item: '$itemId', warehouse: '$warehouse' },
+          totalQuantity: { $sum: { $abs: '$quantity' } },
           movementCount: { $sum: 1 },
         },
       },
@@ -395,27 +420,34 @@ class InventoryReportService {
       { $limit: limit },
     ]);
 
-    const Item = require('../models/Item');
-    const Warehouse = require('../models/Warehouse');
+    const currentStockMap = await this.getCurrentStockMap(warehouseId);
 
-    const enrichedItems = await Promise.all(
+    const items = await Promise.all(
       fastMoving.map(async (move) => {
-        const itemDetails = await Item.findById(move._id.item).select('code name').lean();
-        const warehouseDetails = await Warehouse.findById(move._id.warehouse).select('name').lean();
+        const itemDetails = await mongoose.model('Item').findById(move._id.item).select('code name').lean();
+        const warehouseDetails = await mongoose.model('Warehouse').findById(move._id.warehouse).select('name code').lean();
+        const stockKey = this.getRowMovementKey(move._id.item, move._id.warehouse);
 
         return {
-          item: itemDetails,
-          warehouse: warehouseDetails,
+          itemId: move._id.item,
+          itemCode: itemDetails?.code,
+          itemName: itemDetails?.name,
+          warehouseId: move._id.warehouse,
+          warehouseName: warehouseDetails?.name,
+          warehouseCode: warehouseDetails?.code,
+          totalSold: move.totalQuantity,
           totalQuantity: move.totalQuantity,
           movementCount: move.movementCount,
-          averageDaily: (move.totalQuantity / days).toFixed(2),
+          currentStock: currentStockMap.get(stockKey) || 0,
+          avgDailySales: move.totalQuantity / days,
+          avgDaily: move.totalQuantity / days,
         };
       }),
     );
 
     return {
-      items: enrichedItems,
-      total: enrichedItems.length,
+      items,
+      total: items.length,
       period: { days, startDate: cutoffDate },
     };
   }
@@ -431,36 +463,36 @@ class InventoryReportService {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
-    const query = { quantity: { $gt: 0 } };
-    if (warehouseId) query.warehouse = warehouseId;
+    const inventoryRows = await this.getPositiveInventoryRows(warehouseId);
+    const latestMovementMap = await this.getLatestMovementDateMap(inventoryRows);
 
-    const inventory = await Inventory.find(query)
-      .populate('item', 'code name pricing')
-      .populate('warehouse', 'name')
-      .limit(limit)
-      .lean();
+    const deadStockItems = inventoryRows
+      .map((row) => {
+        const key = this.getRowMovementKey(row.item._id, row.warehouse?._id);
+        const lastMovementDate = latestMovementMap.get(key) || null;
+        const daysSinceLastMovement = lastMovementDate
+          ? Math.floor((Date.now() - lastMovementDate.getTime()) / (1000 * 60 * 60 * 24))
+          : days;
 
-    const deadStockItems = [];
-
-    for (const inv of inventory) {
-      if (!inv.item || !inv.warehouse) continue;
-
-      const recentMovements = await StockMovement.countDocuments({
-        item: inv.item._id,
-        warehouse: inv.warehouse._id,
-        movementDate: { $gte: cutoffDate },
-      });
-
-      if (recentMovements === 0) {
-        deadStockItems.push({
-          item: inv.item,
-          warehouse: inv.warehouse,
-          currentStock: inv.quantity,
-          value: inv.quantity * (inv.item.pricing?.costPrice || 0),
-          daysWithoutMovement: days,
-        });
-      }
-    }
+        return {
+          itemId: row.item._id,
+          itemCode: row.item.code,
+          itemName: row.item.name,
+          warehouseId: row.warehouse?._id,
+          warehouseName: row.warehouse?.name,
+          currentStock: row.availableQuantity,
+          quantity: row.quantity,
+          stock: row.availableQuantity,
+          value: row.quantity * (row.item.pricing?.costPrice || 0),
+          stockValue: row.quantity * (row.item.pricing?.costPrice || 0),
+          lastMovementDate,
+          daysSinceLastMovement,
+          daysInactive: daysSinceLastMovement,
+        };
+      })
+      .filter((row) => !row.lastMovementDate || row.lastMovementDate < cutoffDate)
+      .sort((left, right) => right.daysSinceLastMovement - left.daysSinceLastMovement)
+      .slice(0, limit);
 
     return {
       items: deadStockItems,
@@ -476,26 +508,36 @@ class InventoryReportService {
    * @returns {Promise<Object>} Low stock report
    */
   async getLowStockReport(warehouseId, limit = 50) {
-    const query = {
-      $expr: { $lte: ['$quantity', '$reorderPoint'] },
-      quantity: { $gte: 0 },
-    };
+    const query = { quantity: { $gte: 0 } };
     if (warehouseId) query.warehouse = warehouseId;
 
-    const lowStockItems = await Inventory.find(query)
-      .populate('item', 'code name pricing')
-      .populate('warehouse', 'name')
-      .limit(limit)
+    const inventoryDocs = await Inventory.find(query)
+      .populate('item', 'code name pricing inventory')
+      .populate('warehouse', 'name code')
       .lean();
 
-    const items = lowStockItems.map((inv) => ({
-      item: inv.item,
-      warehouse: inv.warehouse,
-      currentStock: inv.quantity,
-      reorderLevel: inv.reorderPoint,
-      deficit: Math.max(0, (inv.reorderPoint || 0) - inv.quantity),
-      value: inv.quantity * (inv.item?.pricing?.costPrice || 0),
-    }));
+    const groupedRows = this.aggregateInventoryRows(inventoryDocs, { warehouseScoped: Boolean(warehouseId) });
+    const items = groupedRows
+      .map((row) => {
+        const minimumLevel = row.item.inventory?.minimumStock || 0;
+        const reorderLevel = row.item.inventory?.reorderPoint || minimumLevel;
+        return {
+          itemId: row.item._id,
+          itemCode: row.item.code,
+          itemName: row.item.name,
+          warehouseId: row.warehouse?._id,
+          warehouseName: row.warehouse?.name,
+          currentStock: row.availableQuantity,
+          quantity: row.quantity,
+          minimumLevel,
+          reorderLevel,
+          deficit: Math.max(0, reorderLevel - row.availableQuantity),
+          value: row.quantity * (row.item?.pricing?.costPrice || 0),
+        };
+      })
+      .filter((row) => row.currentStock <= row.reorderLevel)
+      .sort((left, right) => left.currentStock - right.currentStock)
+      .slice(0, limit);
 
     return {
       items,
@@ -530,9 +572,15 @@ class InventoryReportService {
       '91-180': [],
       '180+': [],
     };
+    const items = [];
 
     batches.forEach((batch) => {
-      const receiveDate = batch.createdAt || batch.manufacturingDate || today;
+      const referenceDates = [batch.createdAt, batch.manufacturingDate]
+        .filter(Boolean)
+        .map((value) => new Date(value));
+      const receiveDate = referenceDates.length
+        ? new Date(Math.min(...referenceDates.map((value) => value.getTime())))
+        : today;
       const ageInDays = Math.floor((today - new Date(receiveDate)) / (1000 * 60 * 60 * 24));
 
       let bucket;
@@ -542,28 +590,378 @@ class InventoryReportService {
       else if (ageInDays <= 180) bucket = '91-180';
       else bucket = '180+';
 
-      agingBuckets[bucket].push({
-        item: batch.item,
-        warehouse: batch.warehouse,
+      const row = {
+        itemId: batch.item?._id,
+        itemCode: batch.item?.code,
+        itemName: batch.item?.name,
+        warehouseId: batch.warehouse?._id,
+        warehouseName: batch.warehouse?.name,
         batchNumber: batch.batchNumber,
         quantity: batch.remainingQuantity,
         value: batch.remainingQuantity * (batch.unitCost || 0),
         ageInDays,
-      });
+        ageDays: ageInDays,
+        expiryDate: batch.expiryDate,
+        bracket: bucket,
+      };
+
+      agingBuckets[bucket].push(row);
+      items.push(row);
     });
 
-    const summary = Object.keys(agingBuckets).reduce((acc, bucket) => {
-      acc[bucket] = {
-        count: agingBuckets[bucket].length,
-        totalValue: agingBuckets[bucket].reduce((sum, item) => sum + item.value, 0),
-      };
-      return acc;
-    }, {});
+    const brackets = Object.keys(agingBuckets).map((bucket) => ({
+      label: bucket,
+      count: agingBuckets[bucket].length,
+      quantity: agingBuckets[bucket].reduce((sum, item) => sum + item.quantity, 0),
+      totalValue: agingBuckets[bucket].reduce((sum, item) => sum + item.value, 0),
+    }));
 
     return {
       agingBuckets,
-      summary,
+      brackets,
+      summary: brackets,
+      summaryByBucket: brackets.reduce((acc, bucket) => {
+        acc[bucket.label] = {
+          count: bucket.count,
+          quantity: bucket.quantity,
+          totalValue: bucket.totalValue,
+        };
+        return acc;
+      }, {}),
+      items: items.sort((left, right) => right.ageInDays - left.ageInDays),
       totalBatches: batches.length,
+    };
+  }
+
+  async getInventoryTurnoverReport(warehouseId, startDate, endDate) {
+    const period = this.resolveDateRange(startDate, endDate, 30);
+    const invoiceMatch = {
+      type: 'sales',
+      status: { $ne: 'cancelled' },
+      invoiceDate: {
+        $gte: period.startDate,
+        $lte: period.endDate,
+      },
+    };
+
+    const invoicePipeline = [
+      { $match: invoiceMatch },
+      { $unwind: '$items' },
+    ];
+
+    if (warehouseId) {
+      invoicePipeline.push({
+        $match: { 'items.warehouseId': new mongoose.Types.ObjectId(warehouseId) },
+      });
+    }
+
+    invoicePipeline.push(
+      {
+        $lookup: {
+          from: 'items',
+          localField: 'items.itemId',
+          foreignField: '_id',
+          as: 'itemDetails',
+          pipeline: [{ $project: { code: 1, name: 1, 'pricing.costPrice': 1 } }],
+        },
+      },
+      { $unwind: { path: '$itemDetails', preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: '$items.itemId',
+          itemCode: { $first: '$itemDetails.code' },
+          itemName: { $first: '$itemDetails.name' },
+          soldQuantity: { $sum: '$items.quantity' },
+          costOfGoodsSold: {
+            $sum: {
+              $multiply: ['$items.quantity', { $ifNull: ['$itemDetails.pricing.costPrice', 0] }],
+            },
+          },
+          salesRevenue: { $sum: '$items.lineTotal' },
+        },
+      },
+      { $sort: { soldQuantity: -1 } },
+    );
+
+    const soldByItem = await Invoice.aggregate(invoicePipeline);
+    const inventoryRows = await this.getPositiveInventoryRows(warehouseId);
+
+    const inventoryValue = inventoryRows.reduce(
+      (sum, row) => sum + (row.quantity * (row.item.pricing?.costPrice || 0)),
+      0,
+    );
+    const stockQuantity = inventoryRows.reduce((sum, row) => sum + row.quantity, 0);
+    const soldQuantity = soldByItem.reduce((sum, row) => sum + row.soldQuantity, 0);
+    const costOfGoodsSold = soldByItem.reduce((sum, row) => sum + row.costOfGoodsSold, 0);
+    const salesRevenue = soldByItem.reduce((sum, row) => sum + row.salesRevenue, 0);
+
+    return {
+      period,
+      warehouseId: warehouseId || null,
+      costOfGoodsSold,
+      salesRevenue,
+      inventoryValue,
+      averageInventoryValue: inventoryValue,
+      soldQuantity,
+      stockQuantity,
+      turnoverRatio: inventoryValue > 0 ? costOfGoodsSold / inventoryValue : 0,
+      items: soldByItem.map((row) => ({
+        itemId: row._id,
+        itemCode: row.itemCode,
+        itemName: row.itemName,
+        soldQuantity: row.soldQuantity,
+        costOfGoodsSold: row.costOfGoodsSold,
+        salesRevenue: row.salesRevenue,
+      })),
+    };
+  }
+
+  async getReorderSuggestions(warehouseId, limit = 50) {
+    const inventoryDocs = await Inventory.find(
+      warehouseId ? { warehouse: warehouseId, quantity: { $gte: 0 } } : { quantity: { $gte: 0 } },
+    )
+      .populate('item', 'code name pricing inventory')
+      .populate('warehouse', 'name code')
+      .lean();
+
+    const groupedRows = this.aggregateInventoryRows(inventoryDocs, { warehouseScoped: Boolean(warehouseId) });
+    const suggestions = groupedRows
+      .map((row) => {
+        const minimumLevel = row.item.inventory?.minimumStock || 0;
+        const reorderLevel = row.item.inventory?.reorderPoint || minimumLevel;
+        const maximumLevel = row.item.inventory?.maximumStock || 0;
+        const targetLevel = Math.max(reorderLevel, minimumLevel);
+        const suggestedOrderQuantity = Math.max(0, targetLevel - row.availableQuantity);
+
+        return {
+          itemId: row.item._id,
+          itemCode: row.item.code,
+          itemName: row.item.name,
+          warehouseId: row.warehouse?._id,
+          warehouseName: row.warehouse?.name,
+          currentStock: row.availableQuantity,
+          quantity: row.quantity,
+          reservedQuantity: row.reservedQuantity,
+          minimumLevel,
+          reorderLevel,
+          maximumLevel,
+          suggestedOrderQuantity,
+          estimatedCost: suggestedOrderQuantity * (row.item.pricing?.costPrice || 0),
+        };
+      })
+      .filter((row) => row.suggestedOrderQuantity > 0)
+      .sort((left, right) => right.suggestedOrderQuantity - left.suggestedOrderQuantity)
+      .slice(0, limit);
+
+    return {
+      items: suggestions,
+      total: suggestions.length,
+      totalEstimatedCost: suggestions.reduce((sum, row) => sum + row.estimatedCost, 0),
+    };
+  }
+
+  async getStockoutHistory(warehouseId, days = 30, limit = 50) {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    const inventoryDocs = await Inventory.find(
+      warehouseId ? { warehouse: warehouseId, quantity: { $gte: 0 } } : { quantity: { $gte: 0 } },
+    )
+      .populate('item', 'code name')
+      .populate('warehouse', 'name code')
+      .lean();
+
+    const groupedRows = this.aggregateInventoryRows(inventoryDocs, { warehouseScoped: true });
+    const latestMovementMap = await this.getLatestMovementDateMap(groupedRows);
+
+    const items = groupedRows
+      .map((row) => {
+        const key = this.getRowMovementKey(row.item._id, row.warehouse?._id);
+        const lastMovementDate = latestMovementMap.get(key) || null;
+        const daysSinceLastMovement = lastMovementDate
+          ? Math.floor((Date.now() - lastMovementDate.getTime()) / (1000 * 60 * 60 * 24))
+          : days;
+
+        return {
+          itemId: row.item._id,
+          itemCode: row.item.code,
+          itemName: row.item.name,
+          warehouseId: row.warehouse?._id,
+          warehouseName: row.warehouse?.name,
+          currentStock: row.availableQuantity,
+          lastMovementDate,
+          daysSinceLastMovement,
+          stockoutSince: row.availableQuantity <= 0 ? lastMovementDate : null,
+        };
+      })
+      .filter((row) => row.currentStock <= 0 && (!row.lastMovementDate || row.lastMovementDate >= cutoffDate))
+      .sort((left, right) => right.daysSinceLastMovement - left.daysSinceLastMovement)
+      .slice(0, limit);
+
+    return {
+      items,
+      total: items.length,
+      period: { days, startDate: cutoffDate },
+    };
+  }
+
+  getReservedQuantity(doc) {
+    return doc.reservedQuantity ?? doc.allocated ?? 0;
+  }
+
+  getAvailableQuantity(doc) {
+    if (typeof doc.available === 'number') {
+      return doc.available;
+    }
+
+    return Math.max(0, (doc.quantity || 0) - this.getReservedQuantity(doc));
+  }
+
+  getBatchKey(doc) {
+    return [
+      doc.item?._id?.toString?.() || doc.item?.toString?.() || '',
+      doc.warehouse?._id?.toString?.() || doc.warehouse?.toString?.() || '',
+      doc.batchNumber || '',
+    ].join('::');
+  }
+
+  async getBatchMap(inventoryDocs) {
+    const batchBearingDocs = inventoryDocs.filter((doc) => doc.batchNumber);
+    if (!batchBearingDocs.length) {
+      return new Map();
+    }
+
+    const itemIds = [...new Set(batchBearingDocs.map((doc) => doc.item?._id?.toString()).filter(Boolean))];
+    const warehouseIds = [...new Set(batchBearingDocs.map((doc) => doc.warehouse?._id?.toString()).filter(Boolean))];
+    const batchNumbers = [...new Set(batchBearingDocs.map((doc) => doc.batchNumber).filter(Boolean))];
+
+    const batches = await Batch.find({
+      item: { $in: itemIds },
+      warehouse: { $in: warehouseIds },
+      batchNumber: { $in: batchNumbers },
+    }).select('item warehouse batchNumber expiryDate');
+
+    return new Map(
+      batches.map((batch) => ([
+        [
+          batch.item?.toString?.() || '',
+          batch.warehouse?.toString?.() || '',
+          batch.batchNumber || '',
+        ].join('::'),
+        batch,
+      ])),
+    );
+  }
+
+  aggregateInventoryRows(inventoryDocs, options = {}) {
+    const { warehouseScoped = false } = options;
+    const rowMap = new Map();
+
+    for (const doc of inventoryDocs) {
+      if (!doc.item) {
+        continue;
+      }
+
+      const warehouseKey = warehouseScoped ? (doc.warehouse?._id?.toString() || 'global') : 'global';
+      const key = `${doc.item._id.toString()}::${warehouseKey}`;
+      const reservedQuantity = this.getReservedQuantity(doc);
+      const availableQuantity = this.getAvailableQuantity(doc);
+
+      if (!rowMap.has(key)) {
+        rowMap.set(key, {
+          item: doc.item,
+          warehouse: warehouseScoped ? doc.warehouse : null,
+          quantity: 0,
+          reservedQuantity: 0,
+          availableQuantity: 0,
+        });
+      }
+
+      const row = rowMap.get(key);
+      row.quantity += doc.quantity || 0;
+      row.reservedQuantity += reservedQuantity;
+      row.availableQuantity += availableQuantity;
+    }
+
+    return Array.from(rowMap.values());
+  }
+
+  async getPositiveInventoryRows(warehouseId) {
+    const query = { quantity: { $gt: 0 } };
+    if (warehouseId) {
+      query.warehouse = warehouseId;
+    }
+
+    const inventoryDocs = await Inventory.find(query)
+      .populate('item', 'code name pricing inventory')
+      .populate('warehouse', 'name code')
+      .lean();
+
+    return this.aggregateInventoryRows(inventoryDocs, { warehouseScoped: true });
+  }
+
+  async getLatestMovementDateMap(rows, filters = {}) {
+    if (!rows.length) {
+      return new Map();
+    }
+
+    const itemIds = [...new Set(rows.map((row) => row.item._id.toString()))]
+      .map((id) => new mongoose.Types.ObjectId(id));
+    const warehouseIds = [...new Set(rows.map((row) => row.warehouse?._id?.toString()).filter(Boolean))]
+      .map((id) => new mongoose.Types.ObjectId(id));
+
+    const match = {
+      itemId: { $in: itemIds },
+      status: 'completed',
+    };
+    if (warehouseIds.length) {
+      match.warehouse = { $in: warehouseIds };
+    }
+    if (filters.movementType) {
+      match.movementType = filters.movementType;
+    }
+    if (filters.referenceTypes?.length) {
+      match.referenceType = { $in: filters.referenceTypes };
+    }
+
+    const latestMovements = await StockMovement.aggregate([
+      { $match: match },
+      {
+        $group: {
+          _id: { itemId: '$itemId', warehouse: '$warehouse' },
+          lastMovementDate: { $max: '$movementDate' },
+        },
+      },
+    ]);
+
+    return new Map(
+      latestMovements.map((row) => ([
+        this.getRowMovementKey(row._id.itemId, row._id.warehouse),
+        row.lastMovementDate,
+      ])),
+    );
+  }
+
+  async getCurrentStockMap(warehouseId) {
+    const inventoryRows = await this.getPositiveInventoryRows(warehouseId);
+    return new Map(
+      inventoryRows.map((row) => ([
+        this.getRowMovementKey(row.item._id, row.warehouse?._id),
+        row.availableQuantity,
+      ])),
+    );
+  }
+
+  getRowMovementKey(itemId, warehouseId) {
+    return `${itemId?.toString?.() || itemId}::${warehouseId?.toString?.() || warehouseId || 'global'}`;
+  }
+
+  resolveDateRange(startDate, endDate, fallbackDays = 30) {
+    const end = endDate ? new Date(endDate) : new Date();
+    const start = startDate ? new Date(startDate) : new Date(end.getTime() - (fallbackDays * 24 * 60 * 60 * 1000));
+    return {
+      startDate: start,
+      endDate: end,
     };
   }
 }

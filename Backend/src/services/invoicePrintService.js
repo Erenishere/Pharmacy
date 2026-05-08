@@ -1,5 +1,6 @@
 const PDFDocument = require('pdfkit');
 const Invoice = require('../models/Invoice');
+const AppError = require('../utils/appError');
 
 /**
  * Invoice Print Service
@@ -429,18 +430,16 @@ class InvoicePrintService {
       throw new Error('Customer email not found');
     }
 
-    // Generate PDF
-    const pdfBuffer = await this.generateInvoicePDF(invoiceId);
+    await this.generateInvoicePDF(invoiceId);
 
-    // Email configuration would go here
-    // For now, return a placeholder response
-    return {
-      success: true,
-      message: 'Email functionality to be implemented',
-      recipient: invoice.customerId.email,
-      invoiceNumber: invoice.invoiceNumber,
-    };
+    throw new AppError(
+      'Invoice email delivery is not configured. Use the print/download endpoint until SMTP settings are available.',
+      501,
+    );
   }
+
+  /**
+   * Format invoice line items for print payloads.
    * @returns {Array} Formatted items
    */
   _formatItems(items) {

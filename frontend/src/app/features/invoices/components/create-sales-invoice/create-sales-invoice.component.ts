@@ -73,6 +73,9 @@ export class CreateSalesInvoiceComponent implements OnInit, OnDestroy {
     'saleRate', 'discount', 'gst', 'advanceTax', 'netAmount', 'actions'
   ];
 
+  // Step tracking for card-based layout
+  public step1Complete = false;
+
   public invoiceTypes = [
     { value: 'normal', label: 'Normal Invoice' },
     { value: 'sales_tax', label: 'Sales Tax Invoice' }
@@ -193,6 +196,21 @@ export class CreateSalesInvoiceComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe(() => this.recalcCurrentItem());
     });
+  }
+
+  // Card-based step navigation
+  public toggleStep1(): void {
+    if (this.step1Complete) {
+      this.step1Complete = false;
+    }
+  }
+
+  public completeStep1(): void {
+    if (!this.selectedCustomer) {
+      this.toastService.error('Please select a customer');
+      return;
+    }
+    this.step1Complete = true;
   }
 
   public recalcCurrentItem(): void {
@@ -519,9 +537,11 @@ export class CreateSalesInvoiceComponent implements OnInit, OnDestroy {
         unitQty: item.unitQuantity,
         scheme1Qty: item.scheme1Qty,
         scheme2Qty: item.scheme2Qty,
+        quantity: item.totalUnitQty,
         totalUnitQty: item.totalUnitQty,
         boxTP: item.saleBoxRate,
         unitTP: item.saleUnitRate,
+        unitPrice: item.saleUnitRate || (item.saleBoxRate && item.boxPacking ? item.saleBoxRate / item.boxPacking : 0),
         discount1Percent: item.discount1Percent,
         discount1Amount: item.discount1Amount,
         discount2Percent: item.discount2Percent,
@@ -532,31 +552,7 @@ export class CreateSalesInvoiceComponent implements OnInit, OnDestroy {
         netAmount: item.netAmount,
       }))
     };
-    delete invoiceData.items; // re-add mapped items
-    invoiceData.items = this.itemsData.map((item: any) => ({
-      itemId: item.itemId,
-      itemName: item.itemName,
-      itemCode: item.itemCode,
-      companyName: item.companyName,
-      warehouseId: item.warehouseId,
-      batchNumber: item.batchNumber,
-      expiryDate: item.expiryDate,
-      boxQty: item.boxQuantity,
-      unitQty: item.unitQuantity,
-      scheme1Qty: item.scheme1Qty,
-      scheme2Qty: item.scheme2Qty,
-      totalUnitQty: item.totalUnitQty,
-      boxTP: item.saleBoxRate,
-      unitTP: item.saleUnitRate,
-      discount1Percent: item.discount1Percent,
-      discount1Amount: item.discount1Amount,
-      discount2Percent: item.discount2Percent,
-      discount2Amount: item.discount2Amount,
-      gstRate: item.gstRate,
-      gstTotal: item.gstAmount,
-      advanceTaxAmount: item.advanceTaxAmount,
-      netAmount: item.netAmount,
-    }));
+    this.omitEmptyObjectIds(invoiceData, ['salesmanId', 'claimAccountId']);
 
     const request$ = this.mode === 'create'
       ? this.invoiceService.createSalesInvoice(invoiceData)
@@ -580,6 +576,14 @@ export class CreateSalesInvoiceComponent implements OnInit, OnDestroy {
   public cancel(): void { this.router.navigate(['/sales-invoices']); }
 
   private round(n: number): number { return Math.round(n * 100) / 100; }
+
+  private omitEmptyObjectIds(payload: any, keys: string[]): void {
+    keys.forEach((key) => {
+      if (payload[key] === '' || payload[key] === null || payload[key] === undefined) {
+        delete payload[key];
+      }
+    });
+  }
 
   public fmt(amount: number): string {
     if (amount === undefined || amount === null || isNaN(amount)) return '0';

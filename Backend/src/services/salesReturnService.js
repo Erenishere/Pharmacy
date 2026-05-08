@@ -5,7 +5,27 @@ const StockMovement = require('../models/StockMovement');
 const LedgerEntry = require('../models/LedgerEntry');
 const batchService = require('./batchService');
 const inventoryService = require('./inventoryService');
+const { applyReturnCreditToInvoice } = require('./invoicePaymentAllocationService');
 const AppError = require('../utils/appError');
+
+const getInvoiceItemQuantity = (item) => Math.abs(
+  item.totalUnitQty
+  || item.quantity
+  || ((item.boxQuantity || 0) + (item.unitQuantity || 0))
+  || 0,
+);
+
+const getInvoiceItemBatchNumber = (item) => (
+  item.batchInfo?.batchNumber
+  || item.batchNumber
+  || null
+);
+
+const getInvoiceItemExpiryDate = (item) => (
+  item.batchInfo?.expiryDate
+  || item.expiryDate
+  || null
+);
 
 /**
  * Sales Return Service
@@ -117,7 +137,7 @@ class SalesReturnService {
       }
 
       // Validate return quantity doesn't exceed original quantity
-      const originalTotalQty = originalItem.totalUnitQty || originalItem.quantity || 0;
+      const originalTotalQty = getInvoiceItemQuantity(originalItem);
       if (returnQuantity > originalTotalQty) {
         errors.push(
           `Return quantity (${returnQuantity}) exceeds original quantity (${originalTotalQty}) for ${originalItem.itemName}`,
@@ -125,9 +145,10 @@ class SalesReturnService {
       }
 
       // Validate batch number matches if specified
-      if (batchNumber && originalItem.batchNumber && batchNumber !== originalItem.batchNumber) {
+      const originalBatchNumber = getInvoiceItemBatchNumber(originalItem);
+      if (batchNumber && originalBatchNumber && batchNumber !== originalBatchNumber) {
         errors.push(
-          `Batch number ${batchNumber} doesn't match original batch ${originalItem.batchNumber} for ${originalItem.itemName}`,
+          `Batch number ${batchNumber} doesn't match original batch ${originalBatchNumber} for ${originalItem.itemName}`,
         );
       }
 
@@ -164,8 +185,10 @@ class SalesReturnService {
       }
 
       // Calculate proportional amounts based on return quantity
-      const originalTotalQty = originalItem.totalUnitQty || originalItem.quantity || 0;
+      const originalTotalQty = getInvoiceItemQuantity(originalItem);
       const returnRatio = originalTotalQty ? (returnQuantity / originalTotalQty) : 1;
+      const returnBatchNumber = batchNumber || getInvoiceItemBatchNumber(originalItem);
+      const returnExpiryDate = getInvoiceItemExpiryDate(originalItem);
 
       // Calculate return amounts (negative) — default every field to 0 to avoid NaN
       const returnBoxQty = Math.floor(returnQuantity / (originalItem.itemId.packSize || 1));
@@ -186,8 +209,10 @@ class SalesReturnService {
         itemCode: originalItem.itemCode,
         companyName: originalItem.companyName,
         warehouseId: originalItem.warehouseId,
-        batchNumber: batchNumber || originalItem.batchNumber,
-        expiryDate: originalItem.expiryDate,
+        batchInfo: returnBatchNumber ? {
+          batchNumber: returnBatchNumber,
+          expiryDate: returnExpiryDate,
+        } : undefined,
         // Negative quantities for return
         boxQuantity: -returnBoxQty,
         unitQuantity: -returnUnitQty,
@@ -272,17 +297,26 @@ class SalesReturnService {
     try {
       // 1. Restore stock to original warehouse
       for (const item of returnInvoice.items) {
-        const returnQuantity = Math.abs(item.totalUnitQty);
+        const returnQuantity = getInvoiceItemQuantity(item);
+        const batchNumber = getInvoiceItemBatchNumber(item);
+        const expiryDate = getInvoiceItemExpiryDate(item);
+
+        if (!returnQuantity) {
+          throw new Error(`Return item ${item.itemId} has no quantity to restore`);
+        }
 
         // Create stock movement (in) to restore stock
         await StockMovement.create([{
           itemId: item.itemId,
+          warehouse: item.warehouseId,
           movementType: 'in',
           quantity: returnQuantity,
-          toWarehouse: item.warehouseId,
           referenceType: 'sales_return',
           referenceId: returnInvoice._id,
-          batchNumber: item.batchNumber,
+          batchInfo: batchNumber ? {
+            batchNumber,
+            expiryDate,
+          } : undefined,
           movementDate: returnInvoice.invoiceDate,
           notes: `Sales Return ${returnInvoice.invoiceNumber} (Original: ${returnInvoice.originalInvoiceId})`,
           createdBy: userId,
@@ -302,8 +336,8 @@ class SalesReturnService {
         );
 
         // 3. Restore batch quantities if batch tracking is used
-        if (item.batchNumber) {
-          await batchService.returnToBatch(item.batchNumber, returnQuantity, session);
+        if (batchNumber) {
+          await batchService.returnToBatch(batchNumber, returnQuantity, { session });
         }
       }
 
@@ -317,6 +351,9 @@ class SalesReturnService {
 
       // 5. Create reverse ledger entries
       await this.createReverseLedgerEntries(returnInvoice, userId, session);
+
+      // 5.5. Update original invoice payment state with return credit
+      await applyReturnCreditToInvoice(returnInvoice, { session });
 
       // 6. Update return invoice status to confirmed
       const processedInvoice = await Invoice.findByIdAndUpdate(

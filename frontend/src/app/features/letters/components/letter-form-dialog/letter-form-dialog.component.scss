@@ -1,9 +1,119 @@
-@import 'styles/shared-list-styles';
-
 :host {
-  @include dialog-container;
+  display: block;
+  color: var(--indus-text, #5e5873);
+}
+
+.letter-dialog {
+  display: flex;
+  flex-direction: column;
+  background: var(--indus-surface, #ffffff);
+}
+
+.dialog-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0;
+  padding: 20px 24px;
+  min-height: 72px;
+  border-left: 6px solid var(--indus-primary, #7367f0);
+  border-bottom: 1px solid var(--indus-border, #ebe9f1);
+  background: linear-gradient(135deg, var(--indus-surface, #ffffff) 0%, var(--indus-surface-muted, #f7f6ff) 100%);
+  color: var(--indus-text, #5e5873);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.title-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.title-content mat-icon,
+.close-btn mat-icon {
+  color: var(--indus-primary, #7367f0);
+}
+
+.close-btn {
+  flex-shrink: 0;
+}
+
+.dialog-content {
+  padding: 24px !important;
+  background: var(--indus-surface, #ffffff);
+}
+
+.letter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.two-column {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.full-width-field {
+  width: 100%;
+}
+
+.dialog-actions {
+  min-height: 72px;
+  padding: 16px 24px !important;
+  gap: 12px;
+  border-top: 1px solid var(--indus-border, #ebe9f1);
+  background: var(--indus-surface-muted, #f7f6ff);
 }
 
 textarea {
   min-height: 120px;
+}
+
+:host ::ng-deep .mat-mdc-form-field {
+  width: 100%;
+}
+
+:host ::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  min-height: 56px !important;
+  background: var(--indus-surface, #ffffff) !important;
+  overflow: visible !important;
+}
+
+:host ::ng-deep .mat-mdc-form-field-infix {
+  min-height: 56px !important;
+  padding-top: 18px !important;
+  padding-bottom: 8px !important;
+}
+
+:host ::ng-deep .mdc-text-field--outlined .mdc-floating-label--float-above {
+  transform: translateY(-34px) scale(0.75) !important;
+  background: var(--indus-surface, #ffffff) !important;
+  padding: 0 4px !important;
+}
+
+@media (max-width: 768px) {
+  .two-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .dialog-title,
+  .dialog-content,
+  .dialog-actions {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .dialog-title {
+    font-size: 20px;
+  }
 }

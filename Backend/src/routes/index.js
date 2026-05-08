@@ -43,8 +43,6 @@ const quotationRoutes = require('./quotationRoutes');
 const salesReportRoutes = require('./salesReportRoutes');
 const purchaseReportRoutes = require('./purchaseReportRoutes');
 const inventoryManagementRoutes = require('./inventoryManagementRoutes');
-const cashReceiptRoutes = require('./cashReceiptRoutes');
-const cashPaymentRoutes = require('./cashPaymentRoutes');
 const cashAdjustmentRoutes = require('./cashAdjustmentRoutes');
 const pdcRoutes = require('./pdcRoutes');
 const bankReconciliationRoutes = require('./bankReconciliationRoutes');
@@ -107,8 +105,6 @@ router.get('/', (req, res) => {
       eOrders: '/api/v1/e-orders',
       quotations: '/api/v1/quotations',
       inventoryManagement: '/api/v1/inventory',
-      cashReceipts: '/api/v1/cash-receipts',
-      cashPayments: '/api/v1/cash-payments',
       cashAdjustments: '/api/v1/cash-adjustments',
       pdc: '/api/v1/pdc',
       bankReconciliation: '/api/v1/bank-reconciliation',
@@ -143,26 +139,19 @@ router.use('/v1/batches', batchRoutes); // Batch routes mounted at /v1/batches
 router.use('/v1/tax', taxRoutes); // Tax calculation routes
 router.use('/v1/invoices/sales', salesInvoiceRoutes); // Sales invoice routes
 router.use('/v1/invoices/purchase', purchaseInvoiceRoutes); // Purchase invoice routes
-router.use('/v1/purchase-invoices', purchaseInvoiceRoutes); // Alternative purchase invoice routes for returns
 router.use('/v1/accounts', accountsRoutes); // Accounts and ledger routes
 router.use('/v1/cashbook', cashbookRoutes); // Cash book routes
 router.use('/v1/reports', reportRoutes); // Reporting and analytics routes
 router.use('/v1/stock-movements', stockMovementRoutes); // Stock movement routes
 router.use('/v1/monitoring', monitoringRoutes); // Monitoring and health check routes
 router.use('/v1/warehouses', warehouseRoutes); // Warehouse routes (mounted at /api/v1/warehouses)
-router.use('/warehouses', warehouseRoutes); // Warehouse routes (mounted at /api/warehouses to match task requirements)
-router.use('/inventory', itemRoutes); // Inventory routes (mounted at /api/inventory to support /api/inventory/transfer)
 router.use('/v1/schemes', schemeRoutes); // Scheme routes (mounted at /api/v1/schemes)
 router.use('/v1/salesmen', salesmanRoutes); // Salesman routes
 router.use('/v1/purchase-orders', purchaseOrderRoutes); // Purchase order routes
 router.use('/v1/routes', routeRoutes); // Versioned route routes
-router.use('/routes', routeRoutes); // Route routes
 router.use('/v1/quotation-history', quotationHistoryRoutes); // Versioned quotation history routes
-router.use('/quotation-history', quotationHistoryRoutes); // Quotation history routes
 router.use('/v1/rate-suggestions', rateSuggestionRoutes); // Versioned rate suggestion routes
-router.use('/rate-suggestions', rateSuggestionRoutes); // Rate suggestion routes
 router.use('/v1/print', printRoutes); // Versioned print routes
-router.use('/print', printRoutes); // Print routes
 router.use('/v1/sms', smsRoutes); // SMS routes
 router.use('/v1/salary-packages', salaryPackageRoutes); // Salary package routes
 router.use('/v1/salary', salaryCalculationRoutes); // Salary calculation routes
@@ -182,8 +171,6 @@ router.use('/v1/quotations', quotationRoutes); // Quotation routes
 router.use('/v1/reports/sales', salesReportRoutes); // Sales report routes
 router.use('/v1/purchase-reports', purchaseReportRoutes); // Purchase report routes
 router.use('/v1/inventory', inventoryManagementRoutes); // Inventory management routes
-router.use('/v1/cash-receipts', cashReceiptRoutes); // Cash receipt routes
-router.use('/v1/cash-payments', cashPaymentRoutes); // Cash payment routes
 router.use('/v1/cash-adjustments', cashAdjustmentRoutes); // Cash adjustment routes
 router.use('/v1/pdc', pdcRoutes); // Post-dated cheque routes
 router.use('/v1/bank-reconciliation', bankReconciliationRoutes); // Bank reconciliation routes

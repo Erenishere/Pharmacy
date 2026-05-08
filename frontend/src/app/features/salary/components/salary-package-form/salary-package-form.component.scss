@@ -71,11 +71,11 @@ $purple: #867cf0;
         margin-right: 4px;
       }
 
-      &[mat-raised-button] {
-        background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.8));
-        box-shadow: 0 0 10px 1px rgba($purple, 0.4);
-        color: #fff;
-        font-weight: 500;
+       &[mat-raised-button] {
+         background: linear-gradient(118deg, $purple 0%, darken($purple, 5%) 80%);
+         box-shadow: 0 0 10px 1px rgba($purple, 0.4);
+         color: #fff;
+         font-weight: 500;
 
         &:hover {
           box-shadow: 0 0 14px 2px rgba($purple, 0.6);

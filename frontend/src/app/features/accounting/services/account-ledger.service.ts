@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 // Account Ledger Interfaces
@@ -107,19 +107,29 @@ export interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class AccountLedgerService {
-  private baseUrl = `${environment.apiUrl}/accounting/ledger`;
+  private baseUrl = `${environment.apiUrl}/accounts`;
 
   constructor(private http: HttpClient) {}
 
   // Ledger Entry Operations
   getLedgerEntries(params: LedgerQueryParams = {}): Observable<ApiResponse<LedgerEntry[]>> {
+    if (!params.accountId) {
+      return throwError(() => new Error('accountId is required for the mounted account ledger endpoint'));
+    }
+
+    const { accountId, ...queryParams } = params;
     let httpParams = new HttpParams();
-    Object.entries(params).forEach(([key, value]) => {
+    Object.entries(queryParams).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         httpParams = httpParams.set(key, value.toString());
       }
     });
-    return this.http.get<ApiResponse<LedgerEntry[]>>(`${this.baseUrl}`, { params: httpParams });
+    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/${accountId}/ledger`, { params: httpParams })
+      .pipe(map(response => ({
+        ...response,
+        data: response.data?.entries || [],
+        pagination: response.data?.pagination
+      })));
   }
 
   getAccountLedger(accountId: string, params: { startDate?: string; endDate?: string; page?: number; limit?: number } = {}): Observable<ApiResponse<LedgerEntry[]>> {
@@ -129,37 +139,57 @@ export class AccountLedgerService {
         httpParams = httpParams.set(key, value.toString());
       }
     });
-    return this.http.get<ApiResponse<LedgerEntry[]>>(`${this.baseUrl}/accounts/${accountId}`, { params: httpParams });
+    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/${accountId}/ledger`, { params: httpParams })
+      .pipe(map(response => ({
+        ...response,
+        data: response.data?.entries || [],
+        pagination: response.data?.pagination
+      })));
   }
 
   createLedgerEntry(entry: Partial<LedgerEntry>): Observable<ApiResponse<LedgerEntry>> {
-    return this.http.post<ApiResponse<LedgerEntry>>(`${this.baseUrl}`, entry);
+    if (!entry.accountId) {
+      return throwError(() => new Error('accountId is required to create an account ledger adjustment'));
+    }
+
+    const debit = entry.debit || 0;
+    const credit = entry.credit || 0;
+    const amount = debit > 0 ? debit : credit;
+    return this.http.patch<ApiResponse<any>>(`${this.baseUrl}/${entry.accountId}/balance`, {
+      amount,
+      transactionType: debit > 0 ? 'debit' : 'credit',
+      description: entry.description,
+      referenceType: entry.transactionType === 'adjustment' ? 'adjustment' : entry.transactionType,
+      referenceId: entry.sourceId
+    }).pipe(map(response => ({
+      ...response,
+      data: response.data?.ledgerEntry || response.data
+    })));
   }
 
   updateLedgerEntry(id: string, entry: Partial<LedgerEntry>): Observable<ApiResponse<LedgerEntry>> {
-    return this.http.put<ApiResponse<LedgerEntry>>(`${this.baseUrl}/${id}`, entry);
+    return throwError(() => new Error('Ledger entries are append-only; create a reversing adjustment instead of editing an entry.'));
   }
 
   deleteLedgerEntry(id: string): Observable<ApiResponse<null>> {
-    return this.http.delete<ApiResponse<null>>(`${this.baseUrl}/${id}`);
+    return throwError(() => new Error('Ledger entries are append-only and cannot be deleted.'));
   }
 
   // Reconciliation Operations
   getReconciliations(accountId?: string): Observable<ApiResponse<Reconciliation[]>> {
-    const params = accountId ? new HttpParams().set('accountId', accountId) : new HttpParams();
-    return this.http.get<ApiResponse<Reconciliation[]>>(`${this.baseUrl}/reconciliations`, { params });
+    return throwError(() => new Error('Bank reconciliation is handled by the bank-reconciliation/PDC modules, not the account ledger endpoint.'));
   }
 
   getReconciliationById(id: string): Observable<ApiResponse<Reconciliation>> {
-    return this.http.get<ApiResponse<Reconciliation>>(`${this.baseUrl}/reconciliations/${id}`);
+    return throwError(() => new Error('Bank reconciliation is handled by the bank-reconciliation/PDC modules, not the account ledger endpoint.'));
   }
 
   createReconciliation(reconciliation: Partial<Reconciliation>): Observable<ApiResponse<Reconciliation>> {
-    return this.http.post<ApiResponse<Reconciliation>>(`${this.baseUrl}/reconciliations`, reconciliation);
+    return throwError(() => new Error('Bank reconciliation is handled by the bank-reconciliation/PDC modules, not the account ledger endpoint.'));
   }
 
   updateReconciliation(id: string, reconciliation: Partial<Reconciliation>): Observable<ApiResponse<Reconciliation>> {
-    return this.http.put<ApiResponse<Reconciliation>>(`${this.baseUrl}/reconciliations/${id}`, reconciliation);
+    return throwError(() => new Error('Bank reconciliation is handled by the bank-reconciliation/PDC modules, not the account ledger endpoint.'));
   }
 
   completeReconciliation(id: string, completionData: {
@@ -169,11 +199,11 @@ export class AccountLedgerService {
     notes?: string;
     reconciledEntries: string[]; // Array of ledger entry IDs
   }): Observable<ApiResponse<Reconciliation>> {
-    return this.http.post<ApiResponse<Reconciliation>>(`${this.baseUrl}/reconciliations/${id}/complete`, completionData);
+    return throwError(() => new Error('Bank reconciliation is handled by the bank-reconciliation/PDC modules, not the account ledger endpoint.'));
   }
 
   cancelReconciliation(id: string, cancellationData: { cancelledBy: string; reason: string }): Observable<ApiResponse<Reconciliation>> {
-    return this.http.post<ApiResponse<Reconciliation>>(`${this.baseUrl}/reconciliations/${id}/cancel`, cancellationData);
+    return throwError(() => new Error('Bank reconciliation is handled by the bank-reconciliation/PDC modules, not the account ledger endpoint.'));
   }
 
   // Ledger Summary Operations
@@ -181,21 +211,42 @@ export class AccountLedgerService {
     const httpParams = new HttpParams()
       .set('startDate', params.startDate)
       .set('endDate', params.endDate);
-    return this.http.get<ApiResponse<LedgerSummary>>(`${this.baseUrl}/accounts/${accountId}/summary`, { params: httpParams });
+    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/${accountId}/ledger`, { params: httpParams })
+      .pipe(map(response => {
+        const entries = response.data?.entries || [];
+        const summary = this.calculatePeriodSummary(
+          entries.map((entry: any) => ({
+            ...entry,
+            debit: entry.transactionType === 'debit' ? entry.amount : 0,
+            credit: entry.transactionType === 'credit' ? entry.amount : 0
+          })),
+          response.data?.openingBalance || 0
+        );
+
+        return {
+          ...response,
+          data: {
+            ...summary,
+            accountId,
+            accountNumber: response.data?.account?.code || '',
+            accountName: response.data?.account?.name || '',
+            period: {
+              startDate: params.startDate,
+              endDate: params.endDate
+            },
+            closingBalance: response.data?.closingBalance ?? summary.closingBalance
+          }
+        };
+      }));
   }
 
   // Bulk Operations
   bulkReconcileEntries(accountId: string, entryIds: string[], reconciliationId: string): Observable<ApiResponse<null>> {
-    return this.http.post<ApiResponse<null>>(`${this.baseUrl}/accounts/${accountId}/bulk-reconcile`, {
-      entryIds,
-      reconciliationId
-    });
+    return throwError(() => new Error('Bulk reconciliation is not exposed on the mounted account ledger API.'));
   }
 
   bulkUnreconcileEntries(accountId: string, entryIds: string[]): Observable<ApiResponse<null>> {
-    return this.http.post<ApiResponse<null>>(`${this.baseUrl}/accounts/${accountId}/bulk-unreconcile`, {
-      entryIds
-    });
+    return throwError(() => new Error('Bulk reconciliation is not exposed on the mounted account ledger API.'));
   }
 
   // Audit Trail Operations
@@ -206,21 +257,16 @@ export class AccountLedgerService {
         httpParams = httpParams.set(key, value.toString());
       }
     });
-    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/accounts/${accountId}/audit-trail`, { params: httpParams });
+    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/${accountId}/transactions`, { params: httpParams })
+      .pipe(map(response => ({
+        ...response,
+        data: response.data || []
+      })));
   }
 
   // Export Operations
   exportLedger(accountId: string, params: LedgerQueryParams & { format: 'csv' | 'excel' | 'pdf' }): Observable<Blob> {
-    let httpParams = new HttpParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        httpParams = httpParams.set(key, value.toString());
-      }
-    });
-    return this.http.get(`${this.baseUrl}/accounts/${accountId}/export`, {
-      params: httpParams,
-      responseType: 'blob'
-    });
+    return throwError(() => new Error('Ledger export is not exposed on the mounted account ledger API yet.'));
   }
 
   // Utility Methods

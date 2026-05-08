@@ -16,6 +16,7 @@ const {
   resetMetrics,
 } = require('../middleware/performanceMonitoring');
 const { CacheManager } = require('../utils/cache');
+const { cacheMiddleware } = require('../middleware/cacheMiddleware');
 const { getAllIndexStats } = require('../config/indexOptimization');
 const stockReconciliationService = require('../services/stockReconciliationService');
 
@@ -213,7 +214,13 @@ router.get('/metrics/cache', authenticate, requireAdmin, (req, res) => {
  * @desc    Get database index statistics
  * @access  Private (Admin only)
  */
-router.get('/metrics/database', authenticate, requireAdmin, async (req, res) => {
+const monitoringIndexesCache = cacheMiddleware({
+  duration: 'short',
+  ttl: 120,
+  keyGenerator: () => 'monitoring:indexes',
+});
+
+router.get('/metrics/database', authenticate, requireAdmin, monitoringIndexesCache, async (req, res) => {
   try {
     const indexStats = await getAllIndexStats();
 
@@ -226,6 +233,30 @@ router.get('/metrics/database', authenticate, requireAdmin, async (req, res) => 
       success: false,
       error: {
         code: 'DATABASE_STATS_ERROR',
+        message: error.message,
+      },
+    });
+  }
+});
+
+/**
+ * @route   GET /indexes
+ * @desc    Get database index statistics
+ * @access  Private (Admin only)
+ */
+router.get('/indexes', authenticate, requireAdmin, monitoringIndexesCache, async (req, res) => {
+  try {
+    const indexStats = await getAllIndexStats();
+
+    res.json({
+      success: true,
+      data: indexStats,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'INDEX_STATS_ERROR',
         message: error.message,
       },
     });

@@ -63,13 +63,6 @@ router.get('/validate-availability', stockMovementController.validateStockAvaila
 router.get('/by-date-range', stockMovementController.getMovementsByDateRange);
 
 /**
- * @route   GET /api/v1/stock-movements/:id
- * @desc    Get stock movement by ID
- * @access  Private
- */
-router.get('/:id', stockMovementController.getMovementById);
-
-/**
  * @route   GET /api/v1/stock-movements/item/:itemId
  * @desc    Get stock movements for a specific item
  * @access  Private
@@ -92,6 +85,13 @@ router.get('/item/:itemId/history', stockMovementController.getItemMovementHisto
  * @query   asOfDate (optional, defaults to today)
  */
 router.get('/item/:itemId/balance', stockMovementController.getStockBalance);
+
+/**
+ * @route   GET /api/v1/stock-movements/:id
+ * @desc    Get stock movement by ID
+ * @access  Private
+ */
+router.get('/:id', stockMovementController.getMovementById);
 
 /**
  * @route   POST /api/v1/stock-movements/adjustment

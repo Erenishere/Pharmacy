@@ -1,0 +1,561 @@
+{
+  "startedAt": "2026-04-27T17:18:12.199Z",
+  "baseUrl": "http://127.0.0.1:4200",
+  "apiUrl": "http://localhost:3001/api/v1",
+  "qa": {
+    "id": "20260427171812",
+    "accountName": "QA Customer 20260427171812",
+    "categoryName": "QA Category 20260427171812",
+    "businessTypeName": "QA Business 20260427171812",
+    "itemName": "QA Test Item 20260427171812",
+    "itemCode": "QAITEM20260427171812",
+    "batchNumber": "QAB20260427171812",
+    "taxName": "QA Tax 20260427171812"
+  },
+  "auth": {
+    "passed": true,
+    "finalUrl": "http://127.0.0.1:4200/dashboard"
+  },
+  "prerequisites": {
+    "counts": {
+      "companies": 1,
+      "customers": 3,
+      "suppliers": 1,
+      "warehouses": 1
+    },
+    "company": {
+      "_id": "69a2d5cbd49f9a68103b9232",
+      "name": "abc",
+      "code": "1",
+      "groupType": "B",
+      "isActive": true,
+      "createdBy": "699ee2b1b9f1f88ac75fc1ca",
+      "createdAt": "2026-02-28T11:47:23.223Z",
+      "updatedAt": "2026-02-28T11:47:23.227Z",
+      "__v": 0
+    },
+    "category": {
+      "_id": "69ef9a5a89bee6fd4fbda67c",
+      "name": "QA Category 20260427171812",
+      "parentCategoryId": null,
+      "description": "QA prerequisite for submit workflow",
+      "isActive": true,
+      "createdAt": "2026-04-27T17:18:18.225Z",
+      "updatedAt": "2026-04-27T17:18:18.225Z",
+      "__v": 0
+    },
+    "businessType": {
+      "_id": "69ef978389bee6fd4fbda3a6",
+      "name": "General Items",
+      "description": "QA prerequisite for submit workflow",
+      "isActive": true,
+      "createdAt": "2026-04-27T17:06:11.616Z",
+      "updatedAt": "2026-04-27T17:06:11.617Z",
+      "__v": 0
+    },
+    "item": {
+      "_id": "69ef9a7989bee6fd4fbda6aa",
+      "code": "QAFB0427171812",
+      "name": "QA Test Item 20260427171812 API Fallback",
+      "companyId": {
+        "_id": "69a2d5cbd49f9a68103b9232",
+        "name": "abc",
+        "code": "1",
+        "groupType": "B"
+      },
+      "sellingGroup": null,
+      "companyGroupId": null,
+      "businessTypeId": {
+        "_id": "69ef978389bee6fd4fbda3a6",
+        "name": "General Items"
+      },
+      "categoryId": {
+        "_id": "69ef9a5a89bee6fd4fbda67c",
+        "name": "QA Category 20260427171812"
+      },
+      "unit": "piece",
+      "pricing": {
+        "purchasePrice": 10,
+        "costPrice": 10,
+        "salePrice": 15,
+        "retailPrice": 16,
+        "wholesalePrice": 14,
+        "distributorPrice": 13,
+        "mrp": 18,
+        "boxPurchasePrice": 0,
+        "cartonPurchasePrice": 0,
+        "boxSalePrice": 0,
+        "cartonSalePrice": 0,
+        "tradePrice": 0,
+        "boxRetailPrice": 0,
+        "currency": "PKR",
+        "goodsChargesOnUnit": 0
+      },
+      "tax": {
+        "taxType": "GST",
+        "gstRate": 18,
+        "gstRateNonFilter": 0,
+        "whtRate": 0,
+        "taxCategory": "standard"
+      },
+      "regulatory": {
+        "complianceStatus": "Not Applicable",
+        "licenseNumbers": []
+      },
+      "inventory": {
+        "openingStock": 50,
+        "currentStock": 50,
+        "reorderPoint": 10,
+        "leadTime": 0,
+        "batches": [],
+        "minimumStock": 0,
+        "maximumStock": 1000,
+        "alertNoSalesDays": 0
+      },
+      "packSize": 1,
+      "carton": {
+        "size": {
+          "length": 0,
+          "width": 0,
+          "height": 0
+        },
+        "unitsInCarton": 0,
+        "boxInCarton": 0,
+        "weight": 0
+      },
+      "box": {
+        "unitsInBox": 0,
+        "weight": 0
+      },
+      "unitWeight": 0,
+      "batchTrackingEnabled": true,
+      "expiryTrackingEnabled": true,
+      "supplier": {
+        "leadTimeFromSupplier": 0,
+        "alternativeSuppliers": []
+      },
+      "defaultWarrantyMonths": 0,
+      "isActive": true,
+      "createdAt": "2026-04-27T17:18:49.673Z",
+      "updatedAt": "2026-04-27T17:18:49.673Z",
+      "__v": 0
+    }
+  },
+  "steps": [
+    {
+      "name": "Create prerequisite category via API",
+      "passed": true,
+      "status": "passed",
+      "notes": [],
+      "evidence": {
+        "response": {
+          "status": 201,
+          "ok": true,
+          "body": {
+            "success": true,
+            "data": {
+              "_id": "69ef9a5a89bee6fd4fbda67c",
+              "name": "QA Category 20260427171812",
+              "parentCategoryId": null,
+              "description": "QA prerequisite for submit workflow",
+              "isActive": true,
+              "createdAt": "2026-04-27T17:18:18.225Z",
+              "updatedAt": "2026-04-27T17:18:18.225Z",
+              "__v": 0
+            },
+            "message": "Category created successfully",
+            "timestamp": "2026-04-27T17:18:18.645Z"
+          },
+          "bodyPreview": "{\"success\":true,\"data\":{\"_id\":\"69ef9a5a89bee6fd4fbda67c\",\"name\":\"QA Category 20260427171812\",\"parentCategoryId\":null,\"description\":\"QA prerequisite for submit workflow\",\"isActive\":true,\"createdAt\":\"2026-04-27T17:18:18.225Z\",\"updatedAt\":\"2026-04-27T17:18:18.225Z\",\"__v\":0},\"message\":\"Category created successfully\",\"timestamp\":\"2026-04-27T17:18:18.645Z\"}"
+        }
+      },
+      "error": null
+    },
+    {
+      "name": "Create prerequisite business type via API",
+      "passed": true,
+      "status": "passed",
+      "notes": [
+        "Business type already existed; reused General Items."
+      ],
+      "evidence": {
+        "response": {
+          "status": 400,
+          "ok": false,
+          "body": {
+            "success": false,
+            "error": {
+              "code": "VALIDATION_ERROR",
+              "message": "Business type with this name already exists"
+            },
+            "timestamp": "2026-04-27T17:18:19.044Z"
+          },
+          "bodyPreview": "{\"success\":false,\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"Business type with this name already exists\"},\"timestamp\":\"2026-04-27T17:18:19.044Z\"}"
+        },
+        "existingLookup": {
+          "status": 200,
+          "ok": true,
+          "body": {
+            "success": true,
+            "data": [
+              {
+                "_id": "69ef978389bee6fd4fbda3a6",
+                "name": "General Items",
+                "description": "QA prerequisite for submit workflow",
+                "isActive": true,
+                "createdAt": "2026-04-27T17:06:11.616Z",
+                "updatedAt": "2026-04-27T17:06:11.617Z",
+                "__v": 0
+              }
+            ],
+            "pagination": {
+              "totalItems": 1,
+              "totalPages": 1,
+              "currentPage": 1,
+              "itemsPerPage": 50,
+              "hasNextPage": false,
+              "hasPreviousPage": false
+            },
+            "message": "Business types retrieved successfully",
+            "timestamp": "2026-04-27T17:18:19.453Z"
+          },
+          "bodyPreview": "{\"success\":true,\"data\":[{\"_id\":\"69ef978389bee6fd4fbda3a6\",\"name\":\"General Items\",\"description\":\"QA prerequisite for submit workflow\",\"isActive\":true,\"createdAt\":\"2026-04-27T17:06:11.616Z\",\"updatedAt\":\"2026-04-27T17:06:11.617Z\",\"__v\":0}],\"pagination\":{\"totalItems\":1,\"totalPages\":1,\"currentPage\":1,\"itemsPerPage\":50,\"hasNextPage\":false,\"hasPreviousPage\":false},\"message\":\"Business types retrieved successfully\",\"timestamp\":\"2026-04-27T17:18:19.453Z\"}"
+        }
+      },
+      "error": null
+    },
+    {
+      "name": "Submit Account form and verify account list/API",
+      "passed": false,
+      "status": "failed",
+      "notes": [],
+      "evidence": {
+        "apiVerify": {
+          "status": 200,
+          "ok": true,
+          "body": {
+            "success": true,
+            "data": [],
+            "pagination": {
+              "totalItems": 0,
+              "totalPages": 0,
+              "currentPage": 1,
+              "itemsPerPage": 20,
+              "hasNextPage": false,
+              "hasPreviousPage": false,
+              "nextPage": null,
+              "previousPage": null
+            },
+            "message": "Accounts retrieved successfully",
+            "timestamp": "2026-04-27T17:18:43.522Z"
+          },
+          "bodyPreview": "{\"success\":true,\"data\":[],\"pagination\":{\"totalItems\":0,\"totalPages\":0,\"currentPage\":1,\"itemsPerPage\":20,\"hasNextPage\":false,\"hasPreviousPage\":false,\"nextPage\":null,\"previousPage\":null},\"message\":\"Accounts retrieved successfully\",\"timestamp\":\"2026-04-27T17:18:43.522Z\"}"
+        },
+        "consoleErrors": [
+          {
+            "url": "http://127.0.0.1:4200/accounts/create",
+            "text": "ERROR Error: Cannot find control with name: 'businessDetails.balanceType' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33"
+          },
+          {
+            "url": "http://127.0.0.1:4200/accounts/create",
+            "text": "ERROR Error: Cannot find control with name: 'businessDetails.openingBalance' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v="
+          },
+          {
+            "url": "http://127.0.0.1:4200/accounts/create",
+            "text": "ERROR Error: Cannot find control with name: 'businessDetails.customerType' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c3"
+          },
+          {
+            "url": "http://127.0.0.1:4200/accounts/create",
+            "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+          },
+          {
+            "url": "http://127.0.0.1:4200/accounts/create",
+            "text": "Error saving account: HttpErrorResponse"
+          }
+        ]
+      },
+      "error": "Error: Created account was not returned by list API: 200 {\"success\":true,\"data\":[],\"pagination\":{\"totalItems\":0,\"totalPages\":0,\"currentPage\":1,\"itemsPerPage\":20,\"hasNextPage\":false,\"hasPreviousPage\":false,\"nextPage\":null,\"previousPage\":null},\"message\":\"Accounts retrieved successfully\",\"timestamp\":\"2026-04-27T17:18:43.522Z\"} at C:\\Users\\DC\\Desktop\\pharmacy\\qa\\web-submit-functional.spec.js:274:15 at recordStep (C:\\Users\\DC\\Desktop\\pharmacy\\qa\\web-submit-functional.spec.js:95:5) at C:\\Users\\DC\\Desktop\\pharmacy\\qa\\web-submit-functional.spec.js:259:5 at C:\\Users\\DC\\AppData\\Local\\Temp\\pharmacy-qa-playwright\\node_modules\\playwright\\lib\\worker\\workerMain.js:326:9 at C:\\Users\\DC\\AppData\\Local\\Temp\\pharmacy-qa-playwright\\node_modules\\playwright\\lib\\worker\\testInfo.js:320:11 at TimeoutManager.withRunnable (C:\\Users\\DC\\AppData\\Local\\Temp\\pharmacy-qa-playwright\\node_modules\\playwright\\lib\\worker\\timeoutManager.js:75:14) at TestInfoImpl._runWithTimeout (C:\\Users\\DC\\AppData\\Local\\Temp\\pharmacy-qa-playwright\\node_modules\\playwright\\lib\\worker\\testInfo.js:318:7) at C:\\Users\\DC\\AppData\\Local\\Temp\\pharmacy-qa-playwright\\node_modules\\playwright\\lib\\worker\\workerMain.js:324:7 at WorkerMain._runTest (C:"
+    },
+    {
+      "name": "Submit Item Registration form and verify item table/API",
+      "passed": false,
+      "status": "failed",
+      "notes": [
+        "UI item form posted invalid empty optional ObjectId fields; API fallback item created so invoice flows could continue."
+      ],
+      "evidence": {
+        "apiVerify": {
+          "status": 200,
+          "ok": true,
+          "body": {
+            "success": true,
+            "data": [],
+            "pagination": {
+              "totalItems": 0,
+              "totalPages": 0,
+              "currentPage": 1,
+              "itemsPerPage": 20,
+              "hasNextPage": false,
+              "hasPreviousPage": false,
+              "nextPage": null,
+              "previousPage": null
+            },
+            "message": "Items retrieved successfully",
+            "timestamp": "2026-04-27T17:18:48.600Z"
+          },
+          "bodyPreview": "{\"success\":true,\"data\":[],\"pagination\":{\"totalItems\":0,\"totalPages\":0,\"currentPage\":1,\"itemsPerPage\":20,\"hasNextPage\":false,\"hasPreviousPage\":false,\"nextPage\":null,\"previousPage\":null},\"message\":\"Items retrieved successfully\",\"timestamp\":\"2026-04-27T17:18:48.600Z\"}"
+        },
+        "apiFallback": {
+          "status": 201,
+          "ok": true,
+          "body": {
+            "success": true,
+            "data": {
+              "_id": "69ef9a7989bee6fd4fbda6aa",
+              "code": "QAFB0427171812",
+              "name": "QA Test Item 20260427171812 API Fallback",
+              "companyId": {
+                "_id": "69a2d5cbd49f9a68103b9232",
+                "name": "abc",
+                "code": "1",
+                "groupType": "B"
+              },
+              "sellingGroup": null,
+              "companyGroupId": null,
+              "businessTypeId": {
+                "_id": "69ef978389bee6fd4fbda3a6",
+                "name": "General Items"
+              },
+              "categoryId": {
+                "_id": "69ef9a5a89bee6fd4fbda67c",
+                "name": "QA Category 20260427171812"
+              },
+              "unit": "piece",
+              "pricing": {
+                "purchasePrice": 10,
+                "costPrice": 10,
+                "salePrice": 15,
+                "retailPrice": 16,
+                "wholesalePrice": 14,
+                "distributorPrice": 13,
+                "mrp": 18,
+                "boxPurchasePrice": 0,
+                "cartonPurchasePrice": 0,
+                "boxSalePrice": 0,
+                "cartonSalePrice": 0,
+                "tradePrice": 0,
+                "boxRetailPrice": 0,
+                "currency": "PKR",
+                "goodsChargesOnUnit": 0
+              },
+              "tax": {
+                "taxType": "GST",
+                "gstRate": 18,
+                "gstRateNonFilter": 0,
+                "whtRate": 0,
+                "taxCategory": "standard"
+              },
+              "regulatory": {
+                "complianceStatus": "Not Applicable",
+                "licenseNumbers": []
+              },
+              "inventory": {
+                "openingStock": 50,
+                "currentStock": 50,
+                "reorderPoint": 10,
+                "leadTime": 0,
+                "batches": [],
+                "minimumStock": 0,
+                "maximumStock": 1000,
+                "alertNoSalesDays": 0
+              },
+              "packSize": 1,
+              "carton": {
+                "size": {
+                  "length": 0,
+                  "width": 0,
+                  "height": 0
+                },
+                "unitsInCarton": 0,
+                "boxInCarton": 0,
+                "weight": 0
+              },
+              "box": {
+                "unitsInBox": 0,
+                "weight": 0
+              },
+              "unitWeight": 0,
+              "batchTrackingEnabled": true,
+              "expiryTrackingEnabled": true,
+              "supplier": {
+                "leadTimeFromSupplier": 0,
+                "alternativeSuppliers": []
+              },
+              "defaultWarrantyMonths": 0,
+              "isActive": true,
+              "createdAt": "2026-04-27T17:18:49.673Z",
+              "updatedAt": "2026-04-27T17:18:49.673Z",
+              "__v": 0
+            },
+            "message": "Item created successfully",
+            "timestamp": "2026-04-27T17:18:50.286Z"
+          },
+          "bodyPreview": "{\"success\":true,\"data\":{\"_id\":\"69ef9a7989bee6fd4fbda6aa\",\"code\":\"QAFB0427171812\",\"name\":\"QA Test Item 20260427171812 API Fallback\",\"companyId\":{\"_id\":\"69a2d5cbd49f9a68103b9232\",\"name\":\"abc\",\"code\":\"1\",\"groupType\":\"B\"},\"sellingGroup\":null,\"companyGroupId\":null,\"businessTypeId\":{\"_id\":\"69ef978389bee6fd4fbda3a6\",\"name\":\"General Items\"},\"categoryId\":{\"_id\":\"69ef9a5a89bee6fd4fbda67c\",\"name\":\"QA Category 20260427171812\"},\"unit\":\"piece\",\"pricing\":{\"purchasePrice\":10,\"costPrice\":10,\"salePrice\":15,\"retai"
+        }
+      },
+      "error": "UI item submit failed verification: 200 {\"success\":true,\"data\":[],\"pagination\":{\"totalItems\":0,\"totalPages\":0,\"currentPage\":1,\"itemsPerPage\":20,\"hasNextPage\":false,\"hasPreviousPage\":false,\"nextPage\":null,\"previousPage\":null},\"message\":\"Items retrieved successfully\",\"timestamp\":\"2026-04-27T17:18:48.600Z\"}"
+    },
+    {
+      "name": "Submit Purchase Invoice form and verify invoice record",
+      "passed": false,
+      "status": "failed",
+      "notes": [],
+      "evidence": {},
+      "error": "Error: Purchase invoice item table did not render \"QA Test Item 20260427171812 API Fallback\". Page tail: ght account_balance_wallet Expenses savings Investors pie_chart Profit Share receipt_long Tax Config payments Salary Packages calculate Calculate Salary local_shipping Operations chevron_right request_quote Quotations shopping_cart E-Orders map Route Plans description Bilty summarize Recovery Summary track_changes Target Dashboard percent Schemes & Claims account_balance_wallet Cash Book swap_horiz Cash Adjustment account_balance Post-Dated Cheques account_balance_wallet Capital Assets mail Letters receipt_long Create Purchase Invoice close Cancel save Save Draft check_circle Save Invoice Invoice Information Invoice Type New Purchase Invoice Date Account Title (Supplier) Adeel Umer Other Title (Manual) Salesman Advance Tax Status Memo No (Manual) Supplier Bill No Credit Days (Manual) Invoice Tax Type Normal Invoice Claim Account Title None Insert Sales Item Detail Formula Size With Available Qty Item / Formula (Avail Qty) — Item Code Barcode Batch & Expiry Warehouse With Available Qty Purchase Box Qty Purchase Unit Qty Box TP Rate Unit TP Rate Total Unit Qty 0 Gross Total Withou"
+    },
+    {
+      "name": "Submit Sales Invoice form and verify invoice record",
+      "passed": false,
+      "status": "failed",
+      "notes": [],
+      "evidence": {},
+      "error": "Error: Sales invoice item table did not render \"QA Test Item 20260427171812 API Fallback\". Page tail: ings User Management person Customers dataset Master Data account_balance Accounts chevron_right account_balance_wallet Chart of Accounts person_add Account Registration account_balance_wallet Expenses chevron_right account_balance_wallet Expenses savings Investors pie_chart Profit Share receipt_long Tax Config payments Salary Packages calculate Calculate Salary local_shipping Operations chevron_right request_quote Quotations shopping_cart E-Orders map Route Plans description Bilty summarize Recovery Summary track_changes Target Dashboard percent Schemes & Claims account_balance_wallet Cash Book swap_horiz Cash Adjustment account_balance Post-Dated Cheques account_balance_wallet Capital Assets mail Letters receipt_long Create Sales Invoice Pharmaceuticals Distribution — Billing Module close Cancel save_as Save Draft check_circle Confirm Invoice 1 check_circle Customer & Invoice Details ahmeed expand_more 2 check_circle Add Items to Invoice 1 item(s) added add_shopping_cart ADD ITEM TO INVOICE Search Item (Name / Code / Barcode) Warehouse — Select Warehouse — Adeel Umer Box Qty (×1 "
+    },
+    {
+      "name": "Submit Tax Config form",
+      "passed": false,
+      "status": "expected-fail",
+      "notes": [
+        "Tax UI submits to /api/v1/tax, while backend exposes /api/v1/tax/config."
+      ],
+      "evidence": {
+        "correctEndpoint": {
+          "status": 200,
+          "ok": true,
+          "body": {
+            "success": true,
+            "message": "Tax configurations retrieved successfully",
+            "data": [],
+            "timestamp": "2026-04-27T17:19:03.592Z"
+          },
+          "bodyPreview": "{\"success\":true,\"message\":\"Tax configurations retrieved successfully\",\"data\":[],\"timestamp\":\"2026-04-27T17:19:03.592Z\"}"
+        },
+        "wrongEndpointObserved": true
+      },
+      "error": null
+    }
+  ],
+  "consoleErrors": [
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'contactInfo.email' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'contactInfo.phone' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'contactInfo.mobile' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:468"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'contactInfo.nicNumber' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'contactInfo.address' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:46"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'contactInfo.city' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'bankingInfo.bankName' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'bankingInfo.accountNumber' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d8"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'bankingInfo.iban' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'bankingInfo.swiftCode' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'businessDetails.creditAmountLimit' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'businessDetails.creditDaysLimit' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'businessDetails.balanceType' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'businessDetails.openingBalance' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v="
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'businessDetails.customerType' at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9) at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19) at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5) at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c3"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "Error saving account: HttpErrorResponse"
+    },
+    {
+      "url": "http://127.0.0.1:4200/item-registration",
+      "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/tax-config",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/tax-config",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "failedRequests": [
+    {
+      "route": "http://127.0.0.1:4200/accounts/create",
+      "url": "http://localhost:3001/api/v1/accounts",
+      "status": 400
+    },
+    {
+      "route": "http://127.0.0.1:4200/item-registration",
+      "url": "http://localhost:3001/api/v1/items",
+      "status": 400
+    },
+    {
+      "route": "http://127.0.0.1:4200/tax-config",
+      "url": "http://localhost:3001/api/v1/tax",
+      "status": 404
+    },
+    {
+      "route": "http://127.0.0.1:4200/tax-config",
+      "url": "http://localhost:3001/api/v1/tax",
+      "status": 404
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "blocked": 0,
+    "expectedFail": 1,
+    "failed": 4,
+    "consoleErrorCount": 20,
+    "failedRequestCount": 4
+  },
+  "finishedAt": "2026-04-27T17:19:03.600Z"
+}

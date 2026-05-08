@@ -9,7 +9,7 @@
   overflow-x: auto !important;
   width: 100% !important;
   position: relative;
-  min-height: 200px;
+  min-height: 250px;
   background-color: transparent !important;
   border-radius: 8px;
   border: none !important; // Cards handle borders globally
@@ -52,6 +52,51 @@
 
 .status-chip-sm {
   @include status-chip-base;
+  display: inline-flex !important;
+  align-items: center !important;
+  min-width: 96px !important;
+  min-height: 34px !important;
+  justify-content: center !important;
+  border: 1px solid rgba(var(--color-primary-rgb, 115, 103, 240), 0.14) !important;
+  background: rgba(var(--color-primary-rgb, 115, 103, 240), 0.12) !important;
+  color: var(--color-primary, #7367f0) !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+
+  .mdc-evolution-chip__cell,
+  .mdc-evolution-chip__action,
+  .mdc-evolution-chip__text-label,
+  .mat-mdc-chip-action-label {
+    color: inherit !important;
+    opacity: 1 !important;
+    font-weight: 800 !important;
+  }
+
+  &.chip-active,
+  &.chip-success {
+    border-color: rgba(40, 199, 111, 0.22) !important;
+    background: rgba(40, 199, 111, 0.13) !important;
+    color: #159456 !important;
+  }
+
+  &.chip-inactive,
+  &.chip-warning {
+    border-color: rgba(255, 159, 67, 0.24) !important;
+    background: rgba(255, 159, 67, 0.14) !important;
+    color: #b56a14 !important;
+  }
+
+  &.chip-danger {
+    border-color: rgba(234, 84, 85, 0.22) !important;
+    background: rgba(234, 84, 85, 0.12) !important;
+    color: #c23b3c !important;
+  }
+
+  &.chip-info {
+    border-color: rgba(0, 184, 217, 0.22) !important;
+    background: rgba(0, 184, 217, 0.12) !important;
+    color: #008fa8 !important;
+  }
 }
 
 /* Base Loader */
@@ -72,4 +117,43 @@
 /* Paginator Standardization */
 ::ng-deep .mat-mdc-paginator {
   @include paginator;
+}
+
+// Empty State Overlay - Positioned over table container, stays centered
+.empty-state-overlay {
+  position: absolute;
+  top: 56px; // Below header row
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-card, white);
+  z-index: 5;
+  pointer-events: none; // Let clicks pass through if needed
+}
+
+.list-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    color: rgba(var(--color-primary-rgb), 0.25);
+  }
+
+  p {
+    margin: 0;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-body);
+  }
 }

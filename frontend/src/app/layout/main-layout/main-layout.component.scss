@@ -26,6 +26,21 @@ $navbar-height: 72px;
   background: #ffffff;
   box-shadow: none;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: $primary transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $primary;
+    border-radius: 999px;
+  }
 }
 
 .main-content {

@@ -1,4 +1,14 @@
+@import 'styles/vuexy-vars';
 @import 'styles/shared-list-styles';
+
+// ─── Design Tokens ────────────────────────────────────────────
+$p-bg: #f8f7fa;
+$p-border: #ebe9f1;
+
+:host {
+  display: block;
+  background: $p-bg;
+}
 
 .list-page-container {
   @include page-container;
@@ -9,25 +19,72 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 16px;
+  margin-bottom: 28px;
+
+  .header-content {
+    .title-with-accent {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .header-accent-bar {
+        width: 5px;
+        height: 40px;
+        border-radius: 4px;
+        background: $purple;
+      }
+    }
+
+    h1 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0;
+
+      mat-icon {
+        color: $purple;
+      }
+    }
+
+    .page-description {
+      margin: 8px 0 0 17px;
+      color: $grey-dark;
+    }
+  }
 
   .header-actions {
     display: flex;
     align-items: center;
     gap: 12px;
 
-    .btn-create, .btn-export {
+    .btn-create {
+      background: linear-gradient(118deg, $purple, rgba($purple, 0.85)) !important;
+      color: #fff !important;
+      font-weight: 600;
+      height: 42px;
+      padding: 0 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba($purple, 0.35);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      transition: all 0.25s ease;
+
+      &:hover {
+        box-shadow: 0 6px 18px rgba($purple, 0.5);
+        transform: translateY(-1px);
+      }
     }
 
     .btn-export {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       transition: all 0.3s ease;
+
       &:hover {
-        background-color: rgba(var(--color-primary-rgb), 0.05);
-        color: var(--color-primary);
+        background-color: rgba($purple, 0.05);
+        color: $purple;
       }
       &:active {
         transform: scale(0.98);
@@ -39,33 +96,39 @@
 // ─── Main List Card ────────────────────────────────────────────
 .list-page-card {
   @include list-card;
+  border: 1px solid $p-border;
   overflow: hidden;
 }
 
 .list-filters-section {
+  padding: 20px 24px !important;
+  border-bottom: 1px solid $p-border;
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
-  align-items: flex-start;
-  padding: 24px;
-  background: var(--color-bg-card);
-  border-bottom: 1px solid var(--color-border);
+  gap: 14px;
+  align-items: center;
 
   .filter-group-primary {
-    flex: 1 1 300px;
-    display: flex;
+    flex: 2;
+    min-width: 260px;
+
+    .search-field {
+      width: 100%;
+    }
   }
 
   .filter-group-secondary {
     display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    flex-wrap: wrap;
-    flex: 2 1 500px;
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 200px;
   }
 
-  .search-field {
-    width: 100%;
+  mat-form-field {
+    flex: 1;
+    min-width: 160px;
   }
 }
 
@@ -103,27 +166,13 @@
   &::-webkit-scrollbar-thumb:hover { background: #b1b1b1; }
 }
 
-// ─── Table Styling ────────────────────────────────────────────
+// ─── Table Styling (Uses Global Styles) ──────────────────────
 ::ng-deep {
   .items-enhanced-page {
     app-data-table {
       @include data-table;
-      
-      .data-table {
-        min-width: 1400px;
-      }
-      
-      .mat-mdc-header-row {
-        .mat-mdc-header-cell {
-          color: #ffffff !important;
-          font-weight: 600;
-        }
-      }
 
-      .mat-mdc-row:hover {
-        background-color: rgba(var(--color-primary-rgb), 0.05) !important;
-      }
-      
+      // Low stock styling (specific to items)
       .low-stock-text {
         color: #ea5455 !important;
         font-weight: 600;

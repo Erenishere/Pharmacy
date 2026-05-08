@@ -20,6 +20,8 @@ describe('PurchaseReturnService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    Invoice.find.mockResolvedValue([]);
+    Invoice.findByIdAndUpdate.mockResolvedValue({});
     mockUserId = new mongoose.Types.ObjectId();
     mockInvoiceId = new mongoose.Types.ObjectId();
     mockItemId = new mongoose.Types.ObjectId();
@@ -717,16 +719,24 @@ describe('PurchaseReturnService', () => {
         50, // Absolute value
         'decrease',
         'Purchase return',
+        {
+          session: null,
+          userId: mockUserId,
+          warehouseId: mockWarehouseId,
+        },
       );
 
       // Requirement 3.9: Update stock movement records with return type
       expect(stockMovementRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           itemId: mockItemId,
-          movementType: 'return_to_supplier',
-          quantity: -50,
+          movementType: 'out',
+          quantity: 50,
           referenceType: 'return_purchase',
+          referenceId: mockReturnInvoice._id,
+          warehouse: mockWarehouseId,
         }),
+        { session: null },
       );
     });
   });
@@ -769,6 +779,7 @@ describe('PurchaseReturnService', () => {
           debit: 0,
           credit: 8500,
         }),
+        { session: null },
       );
 
       // Verify supplier account debit (reduces balance)
@@ -778,6 +789,7 @@ describe('PurchaseReturnService', () => {
           debit: 10000,
           credit: 0,
         }),
+        { session: null },
       );
 
       // Verify GST input account credit
@@ -787,6 +799,7 @@ describe('PurchaseReturnService', () => {
           debit: 0,
           credit: 1500,
         }),
+        { session: null },
       );
     });
 

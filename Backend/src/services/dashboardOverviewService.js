@@ -180,12 +180,12 @@ class DashboardOverviewService {
         quantity: inventorySnapshot.totalQuantity,
         totalItems: inventorySnapshot.totalItems,
         lowStockCount: inventorySnapshot.lowStockItems,
-        route: '/reports/inventory/stock-valuation',
+        route: '/inventory/reports',
       },
       expiryExposure: {
         value: expiryExposure.totalValue,
         count: expiryExposure.count,
-        route: '/reports/inventory/batch-expiry',
+        route: '/batches',
       },
     };
   }
@@ -1006,7 +1006,7 @@ class DashboardOverviewService {
     return rows.map((row) => ({
       ...row,
       daysLeft: this._diffInDays(new Date(), row.expiryDate),
-      route: '/reports/inventory/batch-expiry',
+      route: '/batches',
     }));
   }
 

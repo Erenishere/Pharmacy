@@ -75,10 +75,6 @@ import { AuthService } from '../../core/services/auth.service';
               <mat-icon matListItemIcon>fact_check</mat-icon>
               <span matListItemTitle>Physical Count</span>
             </a>
-            <a mat-list-item routerLink="/inventory/reports" routerLinkActive="active" class="submenu-item">
-              <mat-icon matListItemIcon>warning</mat-icon>
-              <span matListItemTitle>Low Stock / Expiry</span>
-            </a>
           </div>
         </div>
 
@@ -210,27 +206,27 @@ import { AuthService } from '../../core/services/auth.service';
             </mat-icon>
           </div>
           <div class="submenu" [class.open]="expandedSections['expenses']">
-            <a mat-list-item routerLink="/expenses" routerLinkActive="active" class="submenu-item">
+            <a mat-list-item routerLink="/expenses" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="submenu-item">
               <mat-icon matListItemIcon>account_balance_wallet</mat-icon>
               <span matListItemTitle>Expenses</span>
             </a>
-            <a mat-list-item routerLink="/investors" routerLinkActive="active" class="submenu-item">
+            <a mat-list-item routerLink="/investors" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="submenu-item">
               <mat-icon matListItemIcon>savings</mat-icon>
               <span matListItemTitle>Investors</span>
             </a>
-            <a mat-list-item routerLink="/investors/profit-share" routerLinkActive="active" class="submenu-item">
+            <a mat-list-item routerLink="/investors/profit-share" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="submenu-item">
               <mat-icon matListItemIcon>pie_chart</mat-icon>
               <span matListItemTitle>Profit Share</span>
             </a>
-            <a mat-list-item routerLink="/tax-config" routerLinkActive="active" class="submenu-item">
+            <a mat-list-item routerLink="/tax-config" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="submenu-item">
               <mat-icon matListItemIcon>receipt_long</mat-icon>
               <span matListItemTitle>Tax Config</span>
             </a>
-            <a mat-list-item routerLink="/salary-packages" routerLinkActive="active" class="submenu-item">
+            <a mat-list-item routerLink="/salary-packages" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="submenu-item">
               <mat-icon matListItemIcon>payments</mat-icon>
               <span matListItemTitle>Salary Packages</span>
             </a>
-            <a mat-list-item routerLink="/salary/calculate" routerLinkActive="active" class="submenu-item">
+            <a mat-list-item routerLink="/salary/calculate" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="submenu-item">
               <mat-icon matListItemIcon>calculate</mat-icon>
               <span matListItemTitle>Calculate Salary</span>
             </a>
@@ -298,15 +294,6 @@ import { AuthService } from '../../core/services/auth.service';
             </a>
           </div>
         </div>
-
-        <mat-divider></mat-divider>
-
-        <!-- Reports -->
-        <a mat-list-item routerLink="/reports" routerLinkActive="active">
-          <mat-icon matListItemIcon>assessment</mat-icon>
-          <span matListItemTitle>Reports</span>
-        </a>
-
 
       </ng-container>
 

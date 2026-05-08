@@ -4,7 +4,7 @@
       <mat-icon>inventory_2</mat-icon>
       <div class="banner-text">
         <h1>{{ isEditMode ? 'Edit Product' : 'New Item Registration' }}</h1>
-        <p>{{ isEditMode ? 'Modify existing catalog details' : 'Register a new medicine or inventory product' }}</p>
+        <p>{{ isEditMode ? 'Update the item workspace and review inventory-facing details before saving.' : 'Create a product with clear identity, pricing, and stock controls.' }}</p>
       </div>
     </div>
     <button mat-icon-button class="close-btn" (click)="onCancel()" matTooltip="Close Dialog">
@@ -13,316 +13,443 @@
   </div>
 
   <mat-dialog-content class="dense-content">
-    <form [formGroup]="itemForm" class="single-page-form">
-      <section class="form-section">
-        <h3 class="section-title">
-          <mat-icon>account_tree</mat-icon>
-          Classification & Origin
-        </h3>
+    <form [formGroup]="itemForm" class="workspace-form">
+      <div class="workspace-grid">
+        <div class="editor-shell">
+          <section class="editor-panel profile-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="panel-step">Step 1</span>
+                <h3>Catalog Profile</h3>
+                <p>Start with the fields staff uses first: name, code, unit, quantity, and classification.</p>
+              </div>
+            </div>
 
-        <div class="form-grid">
-          <mat-form-field appearance="outline">
-            <mat-label>Company</mat-label>
-            <mat-select formControlName="companyId">
-              @for (company of companies; track company._id) {
-              <mat-option [value]="company._id">{{ company.name || company.companyName }}</mat-option>
-              }
-            </mat-select>
-            <mat-icon matPrefix>store</mat-icon>
-          </mat-form-field>
+            <div class="profile-grid">
+              <div class="panel-card">
+                <div class="card-heading">
+                  <h4>Basics</h4>
+                  <span>{{ isEditMode ? 'Live item details' : 'New item setup' }}</span>
+                </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Selling Group</mat-label>
-            <mat-select formControlName="sellingGroup">
-              @for (group of sellingGroups; track group.value) {
-              <mat-option [value]="group.value">{{ group.label }}</mat-option>
-              }
-            </mat-select>
-            <mat-icon matPrefix>groups</mat-icon>
-          </mat-form-field>
+                <div class="form-grid two-col">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Item Code</mat-label>
+                    <input matInput formControlName="code" placeholder="MED-001">
+                    <mat-icon matIconPrefix>qr_code</mat-icon>
+                  </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Medicine Formula / Generic</mat-label>
-            <mat-select formControlName="formulaId">
-              @for (formula of formulas; track formula._id) {
-              <mat-option [value]="formula._id">{{ formula.name }}</mat-option>
-              }
-            </mat-select>
-            <mat-icon matPrefix>biotech</mat-icon>
-          </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Unit</mat-label>
+                    <mat-select formControlName="unit">
+                      @for (unitOption of units; track unitOption.value) {
+                      <mat-option [value]="unitOption.value">{{ unitOption.label }}</mat-option>
+                      }
+                    </mat-select>
+                    <mat-icon matIconPrefix>straighten</mat-icon>
+                  </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Generic Size</mat-label>
-            <mat-select formControlName="formulaSizeId">
-              @for (size of formulaSizes; track size._id) {
-              <mat-option [value]="size._id">{{ size.size || size.name || size.label }}</mat-option>
-              }
-            </mat-select>
-            <mat-icon matPrefix>straighten</mat-icon>
-          </mat-form-field>
+                  <mat-form-field appearance="outline" class="span-2">
+                    <mat-label>Product Name</mat-label>
+                    <input matInput formControlName="name" placeholder="e.g. Paracetamol 500mg">
+                    <mat-icon matIconPrefix>medication</mat-icon>
+                  </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Category</mat-label>
-            <mat-select formControlName="categoryId">
-              @for (cat of categories; track cat._id) {
-              <mat-option [value]="cat._id">{{ cat.name }}</mat-option>
-              }
-            </mat-select>
-            <mat-icon matPrefix>category</mat-icon>
-          </mat-form-field>
+                  <mat-form-field appearance="outline" class="qty-field">
+                    <mat-label>{{ isEditMode ? 'Current Qty' : 'Opening Qty' }}</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      formControlName="currentStock"
+                      min="0"
+                      [readonly]="isEditMode">
+                    <mat-icon matIconPrefix>inventory_2</mat-icon>
+                  </mat-form-field>
+                </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Sub Category</mat-label>
-            <mat-select formControlName="subCategoryId">
-              @for (sub of subCategories; track sub._id) {
-              <mat-option [value]="sub._id">{{ sub.name }}</mat-option>
-              }
-            </mat-select>
-            <mat-icon matPrefix>dynamic_feed</mat-icon>
-          </mat-form-field>
+                <div class="profile-note">
+                  <strong>Qty shown in list:</strong>
+                  <span>{{ isEditMode ? 'This current quantity matches the Qty column in the item list.' : 'This opening quantity becomes the starting Qty shown in the item list.' }}</span>
+                </div>
+              </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Business Type</mat-label>
-            <mat-select formControlName="businessTypeId">
-              @for (type of businessTypes; track type._id) {
-              <mat-option [value]="type._id">{{ type.name || type.label }}</mat-option>
-              }
-            </mat-select>
-            <mat-icon matPrefix>work</mat-icon>
-          </mat-form-field>
+              <div class="panel-card">
+                <div class="card-heading">
+                  <h4>Classification</h4>
+                  <span>How this item is grouped</span>
+                </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Main Supplier</mat-label>
-            <mat-select formControlName="mainSupplierId">
-              @for (supplier of suppliers; track supplier._id) {
-              <mat-option [value]="supplier._id">{{ supplier.name || supplier.accountName || supplier.title }}</mat-option>
-              }
-            </mat-select>
-            <mat-icon matPrefix>local_shipping</mat-icon>
-          </mat-form-field>
+                <div class="form-grid two-col">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Company</mat-label>
+                    <mat-select formControlName="companyId">
+                      @for (company of companies; track company._id) {
+                      <mat-option [value]="company._id">{{ company.name || company.companyName }}</mat-option>
+                      }
+                    </mat-select>
+                    <mat-icon matIconPrefix>store</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Category</mat-label>
+                    <mat-select formControlName="categoryId">
+                      @for (cat of categories; track cat._id) {
+                      <mat-option [value]="cat._id">{{ cat.name }}</mat-option>
+                      }
+                    </mat-select>
+                    <mat-icon matIconPrefix>category</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Sub Category</mat-label>
+                    <mat-select formControlName="subCategoryId">
+                      @for (sub of subCategories; track sub._id) {
+                      <mat-option [value]="sub._id">{{ sub.name }}</mat-option>
+                      }
+                    </mat-select>
+                    <mat-icon matIconPrefix>dynamic_feed</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Business Type</mat-label>
+                    <mat-select formControlName="businessTypeId">
+                      @for (type of businessTypes; track type._id) {
+                      <mat-option [value]="type._id">{{ type.name || type.label }}</mat-option>
+                      }
+                    </mat-select>
+                    <mat-icon matIconPrefix>work</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Selling Group</mat-label>
+                    <mat-select formControlName="sellingGroup">
+                      @for (group of sellingGroups; track group.value) {
+                      <mat-option [value]="group.value">{{ group.label }}</mat-option>
+                      }
+                    </mat-select>
+                    <mat-icon matIconPrefix>groups</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Main Supplier</mat-label>
+                    <mat-select formControlName="mainSupplierId">
+                      @for (supplier of suppliers; track supplier._id) {
+                      <mat-option [value]="supplier._id">{{ supplier.name || supplier.accountName || supplier.title }}</mat-option>
+                      }
+                    </mat-select>
+                    <mat-icon matIconPrefix>local_shipping</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Medicine Formula</mat-label>
+                    <mat-select formControlName="formulaId">
+                      @for (formula of formulas; track formula._id) {
+                      <mat-option [value]="formula._id">{{ formula.name }}</mat-option>
+                      }
+                    </mat-select>
+                    <mat-icon matIconPrefix>biotech</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Formula Size</mat-label>
+                    <mat-select formControlName="formulaSizeId">
+                      @for (size of formulaSizes; track size._id) {
+                      <mat-option [value]="size._id">{{ size.size || size.name || size.label }}</mat-option>
+                      }
+                    </mat-select>
+                    <mat-icon matIconPrefix>straighten</mat-icon>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="editor-panel pricing-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="panel-step">Step 2</span>
+                <h3>Pricing Matrix</h3>
+                <p>Compare all pack-level rates in one aligned table instead of separate stacked cards.</p>
+              </div>
+            </div>
+
+            <div class="pricing-matrix">
+              <div class="matrix-header">
+                <span>Pack Level</span>
+                <span>Purchase</span>
+                <span>Sale</span>
+                <span>Retail</span>
+              </div>
+
+              <div class="matrix-row matrix-row-unit">
+                <div class="matrix-label">
+                  <strong>Unit</strong>
+                  <small>Single sale piece</small>
+                </div>
+                <mat-form-field appearance="outline">
+                  <mat-label>Purchase</mat-label>
+                  <span matTextPrefix class="currency-prefix">Rs</span>
+                  <input matInput type="number" formControlName="unitPurchaseTP" min="0" step="0.01">
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Sale</mat-label>
+                  <span matTextPrefix class="currency-prefix">Rs</span>
+                  <input matInput type="number" formControlName="unitSaleTP" min="0" step="0.01">
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Retail</mat-label>
+                  <span matTextPrefix class="currency-prefix">Rs</span>
+                  <input matInput type="number" formControlName="unitRetailPrice" min="0" step="0.01">
+                </mat-form-field>
+              </div>
+
+              <div class="matrix-row matrix-row-box">
+                <div class="matrix-label">
+                  <strong>Box</strong>
+                  <small>Bundle or box pricing</small>
+                </div>
+                <mat-form-field appearance="outline">
+                  <mat-label>Purchase</mat-label>
+                  <span matTextPrefix class="currency-prefix">Rs</span>
+                  <input matInput type="number" formControlName="boxPurchaseTP" min="0" step="0.01">
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Sale</mat-label>
+                  <span matTextPrefix class="currency-prefix">Rs</span>
+                  <input matInput type="number" formControlName="boxSaleTP" min="0" step="0.01">
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Retail</mat-label>
+                  <span matTextPrefix class="currency-prefix">Rs</span>
+                  <input matInput type="number" formControlName="boxRetailPrice" min="0" step="0.01">
+                </mat-form-field>
+              </div>
+
+              <div class="matrix-row matrix-row-carton">
+                <div class="matrix-label">
+                  <strong>Carton</strong>
+                  <small>Full carton pricing</small>
+                </div>
+                <mat-form-field appearance="outline">
+                  <mat-label>Purchase</mat-label>
+                  <span matTextPrefix class="currency-prefix">Rs</span>
+                  <input matInput type="number" formControlName="cartonPurchaseTP" min="0" step="0.01">
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Sale</mat-label>
+                  <span matTextPrefix class="currency-prefix">Rs</span>
+                  <input matInput type="number" formControlName="cartonSaleTP" min="0" step="0.01">
+                </mat-form-field>
+                <div class="matrix-placeholder">
+                  <span>Retail not used</span>
+                  <small>Carton MRP is usually managed from unit or box rates.</small>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="editor-panel logistics-panel">
+            <div class="split-panels">
+              <div class="panel-card">
+                <div class="card-heading">
+                  <div>
+                    <span class="panel-step">Step 3</span>
+                    <h4>Packaging</h4>
+                  </div>
+                  <span>Conversion and carton detail</span>
+                </div>
+
+                <div class="form-grid three-col">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Units/Carton</mat-label>
+                    <input matInput type="number" formControlName="unitsInCarton" min="1">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Units/Box</mat-label>
+                    <input matInput type="number" formControlName="unitsInBox" min="1">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Boxes/Carton</mat-label>
+                    <input matInput type="number" formControlName="boxesInCarton" min="1">
+                  </mat-form-field>
+                </div>
+
+                <div class="form-grid three-col">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Carton L (cm)</mat-label>
+                    <input matInput type="number" formControlName="cartonLength">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Carton W (cm)</mat-label>
+                    <input matInput type="number" formControlName="cartonWidth">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Carton H (cm)</mat-label>
+                    <input matInput type="number" formControlName="cartonHeight">
+                  </mat-form-field>
+                </div>
+
+                <div class="form-grid three-col">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Unit Wt (kg)</mat-label>
+                    <input matInput type="number" formControlName="unitWeight" step="0.001">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Box Wt (kg)</mat-label>
+                    <input matInput type="number" formControlName="boxWeight" step="0.01">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Carton Wt (kg)</mat-label>
+                    <input matInput type="number" formControlName="cartonWeight" step="0.01">
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <div class="panel-card">
+                <div class="card-heading">
+                  <div>
+                    <span class="panel-step">Step 4</span>
+                    <h4>Tax & Charges</h4>
+                  </div>
+                  <span>Commercial values applied on sale</span>
+                </div>
+
+                <div class="form-grid tax-grid">
+                  <mat-form-field appearance="outline">
+                    <mat-label>GST (Filer)</mat-label>
+                    <mat-select formControlName="gstFiler">
+                      @for (rate of gstRateOptions; track rate) {
+                      <mat-option [value]="rate">{{ rate }}%</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>GST (Non-Filer)</mat-label>
+                    <mat-select formControlName="gstNonFiler">
+                      @for (rate of gstRateOptions; track rate) {
+                      <mat-option [value]="rate">{{ rate }}%</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="span-2">
+                    <mat-label>Surcharge/Unit</mat-label>
+                    <span matTextPrefix class="currency-prefix">Rs</span>
+                    <input matInput type="number" formControlName="goodsChargesPerUnit" min="0" step="0.01">
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
-      </section>
 
-      <section class="form-section">
-        <h3 class="section-title">
-          <mat-icon>description</mat-icon>
-          Product Identity
-        </h3>
+        <aside class="insight-rail">
+          <section class="rail-card snapshot-card">
+            <div class="snapshot-topline">
+              <span class="summary-label">Item Snapshot</span>
+              <span class="status-pill" [class.inactive]="!itemForm.get('isActive')?.value">
+                {{ itemForm.get('isActive')?.value ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
 
-        <div class="form-grid">
-          <mat-form-field appearance="outline">
-            <mat-label>Item Code (SKU)</mat-label>
-            <input matInput formControlName="code" placeholder="MED-001">
-            <mat-icon matPrefix>qr_code</mat-icon>
-          </mat-form-field>
+            <h3>{{ itemForm.get('name')?.value || 'New Item' }}</h3>
+            <p>{{ itemForm.get('code')?.value || 'Code will appear here once entered.' }}</p>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Product Name</mat-label>
-            <input matInput formControlName="name" placeholder="e.g. Paracetamol 500mg">
-            <mat-icon matPrefix>medication</mat-icon>
-          </mat-form-field>
+            <div class="snapshot-grid">
+              <div class="snapshot-metric snapshot-metric-primary">
+                <span>{{ isEditMode ? 'Current Qty' : 'Opening Qty' }}</span>
+                <strong>{{ itemForm.get('currentStock')?.value || 0 }}</strong>
+              </div>
+              <div class="snapshot-metric">
+                <span>Unit</span>
+                <strong>{{ itemForm.get('unit')?.value || '-' }}</strong>
+              </div>
+              <div class="snapshot-metric">
+                <span>Supplier</span>
+                <strong>{{ itemForm.get('mainSupplierId')?.value ? 'Linked' : 'Pending' }}</strong>
+              </div>
+            </div>
+          </section>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Unit</mat-label>
-            <mat-select formControlName="unit">
-              @for (unitOption of units; track unitOption.value) {
-              <mat-option [value]="unitOption.value">{{ unitOption.label }}</mat-option>
-              }
-            </mat-select>
-            <mat-icon matPrefix>straighten</mat-icon>
-          </mat-form-field>
+          <section class="rail-card">
+            <div class="rail-heading">
+              <div>
+                <span class="summary-label">Inventory Controls</span>
+                <h4>Stock Rules</h4>
+              </div>
+              <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+            </div>
 
-          <div class="status-toggle">
-            <mat-checkbox formControlName="isActive">Status: Active</mat-checkbox>
-          </div>
+            <div class="summary-form-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Min Stock</mat-label>
+                <input matInput type="number" formControlName="minimumStock" min="0">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Max Stock</mat-label>
+                <input matInput type="number" formControlName="maximumStock" min="0">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="span-2">
+                <mat-label>Alert Days</mat-label>
+                <input matInput type="number" formControlName="noSalesAlertDays" min="0">
+              </mat-form-field>
+            </div>
+          </section>
 
-          <div class="image-upload-section">
-            <label class="upload-label">Product Visual</label>
+          <section class="rail-card">
+            <div class="rail-heading">
+              <div>
+                <span class="summary-label">Barcode</span>
+                <h4>Identification</h4>
+              </div>
+              <button mat-stroked-button type="button" (click)="generateBarcode()" class="generate-btn">
+                <mat-icon>refresh</mat-icon>
+                Generate
+              </button>
+            </div>
+
+            <mat-checkbox formControlName="autoGenerateBarcode" class="auto-checkbox">Auto-Generate Barcode</mat-checkbox>
+            <mat-form-field appearance="outline" class="barcode-input">
+              <mat-label>Barcode</mat-label>
+              <input matInput formControlName="barcode" placeholder="Scan or type">
+              <mat-icon matSuffix>barcode_scanner</mat-icon>
+            </mat-form-field>
+
+            @if (itemForm.get('barcode')?.value) {
+            <div class="barcode-preview">
+              <div class="barcode-display">{{ itemForm.get('barcode')?.value }}</div>
+            </div>
+            }
+          </section>
+
+          <section class="rail-card">
+            <span class="summary-label">Image</span>
+            <h4>Product Photo</h4>
+
             <div class="image-upload-area">
               @if (imagePreview) {
               <div class="image-preview">
                 <img [src]="imagePreview" alt="Item Preview">
-                <button
-                  mat-icon-button
-                  class="remove-image"
-                  type="button"
-                  (click)="imagePreview = null; itemForm.patchValue({image: null})">
+                <button mat-icon-button class="remove-image" type="button" (click)="imagePreview = null; itemForm.patchValue({image: null})">
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>
               } @else {
               <label class="upload-placeholder" for="imageInput">
                 <mat-icon>add_photo_alternate</mat-icon>
-                <span>Click to upload product image</span>
+                <span>Upload Image</span>
+                <small>JPG, PNG or WEBP</small>
                 <input type="file" id="imageInput" accept="image/*" (change)="onImageSelect($event)" hidden>
               </label>
               }
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
 
-      <section class="form-section">
-        <h3 class="section-title">
-          <mat-icon>package_2</mat-icon>
-          Packaging & Measurements
-        </h3>
+          <section class="rail-card totals-card">
+            <span class="summary-label">Calculated View</span>
+            <h4>Price Summary</h4>
 
-        <div class="subsection">
-          <h4>Carton Dimensions (L x W x H)</h4>
-          <div class="form-grid three-col">
-            <mat-form-field appearance="outline">
-              <mat-label>Length (cm)</mat-label>
-              <input matInput type="number" formControlName="cartonLength">
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Width (cm)</mat-label>
-              <input matInput type="number" formControlName="cartonWidth">
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Height (cm)</mat-label>
-              <input matInput type="number" formControlName="cartonHeight">
-            </mat-form-field>
-          </div>
-        </div>
-
-        <div class="subsection">
-          <h4>Unit Hierarchy Configuration</h4>
-          <div class="form-grid three-col">
-            <mat-form-field appearance="outline">
-              <mat-label>Units per Carton</mat-label>
-              <input matInput type="number" formControlName="unitsInCarton" min="1">
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Units per Box</mat-label>
-              <input matInput type="number" formControlName="unitsInBox" min="1">
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Boxes per Carton</mat-label>
-              <input matInput type="number" formControlName="boxesInCarton" min="1">
-            </mat-form-field>
-          </div>
-        </div>
-
-        <div class="subsection">
-          <h4>Weight Specification (kg)</h4>
-          <div class="form-grid three-col">
-            <mat-form-field appearance="outline">
-              <mat-label>Unit Weight</mat-label>
-              <input matInput type="number" formControlName="unitWeight" step="0.001">
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Box Weight</mat-label>
-              <input matInput type="number" formControlName="boxWeight" step="0.01">
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Carton Weight</mat-label>
-              <input matInput type="number" formControlName="cartonWeight" step="0.01">
-            </mat-form-field>
-          </div>
-        </div>
-      </section>
-
-      <section class="form-section">
-        <h3 class="section-title">
-          <mat-icon>payments</mat-icon>
-          Pricing & Tax
-        </h3>
-
-        <div class="pricing-grid">
-          <div class="pricing-card">
-            <h4>
-              <mat-icon>shopping_bag</mat-icon>
-              Single Unit Pricing
-            </h4>
-            <div class="form-grid three-col">
-              <mat-form-field appearance="outline">
-                <mat-label>Purchase TP</mat-label>
-                <input matInput type="number" formControlName="unitPurchaseTP" min="0" step="0.01">
-                <span matPrefix>Rs&nbsp;</span>
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Sale TP</mat-label>
-                <input matInput type="number" formControlName="unitSaleTP" min="0" step="0.01">
-                <span matPrefix>Rs&nbsp;</span>
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Retail Price (MRP)</mat-label>
-                <input matInput type="number" formControlName="unitRetailPrice" min="0" step="0.01">
-                <span matPrefix>Rs&nbsp;</span>
-              </mat-form-field>
-            </div>
-          </div>
-
-          <div class="pricing-card pricing-card-warn">
-            <h4>
-              <mat-icon>grid_view</mat-icon>
-              Inner Box Pricing
-            </h4>
-            <div class="form-grid three-col">
-              <mat-form-field appearance="outline">
-                <mat-label>Box Purchase TP</mat-label>
-                <input matInput type="number" formControlName="boxPurchaseTP" min="0" step="0.01">
-                <span matPrefix>Rs&nbsp;</span>
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Box Sale TP</mat-label>
-                <input matInput type="number" formControlName="boxSaleTP" min="0" step="0.01">
-                <span matPrefix>Rs&nbsp;</span>
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Box Retail Price</mat-label>
-                <input matInput type="number" formControlName="boxRetailPrice" min="0" step="0.01">
-                <span matPrefix>Rs&nbsp;</span>
-              </mat-form-field>
-            </div>
-          </div>
-
-          <div class="pricing-card pricing-card-success">
-            <h4>
-              <mat-icon>inventory_2</mat-icon>
-              Bulk Carton Pricing
-            </h4>
-            <div class="form-grid two-col">
-              <mat-form-field appearance="outline">
-                <mat-label>Carton Purchase TP</mat-label>
-                <input matInput type="number" formControlName="cartonPurchaseTP" min="0" step="0.01">
-                <span matPrefix>Rs&nbsp;</span>
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Carton Sale TP</mat-label>
-                <input matInput type="number" formControlName="cartonSaleTP" min="0" step="0.01">
-                <span matPrefix>Rs&nbsp;</span>
-              </mat-form-field>
-            </div>
-          </div>
-        </div>
-
-        <div class="subsection">
-          <h4>Tax Compliance</h4>
-          <div class="form-grid two-col">
-            <mat-form-field appearance="outline">
-              <mat-label>GST Rate (Filer)</mat-label>
-              <mat-select formControlName="gstFiler">
-                @for (rate of gstRateOptions; track rate) {
-                <mat-option [value]="rate">{{ rate }}%</mat-option>
-                }
-              </mat-select>
-              <mat-icon matPrefix>percent</mat-icon>
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>GST Rate (Non-Filer)</mat-label>
-              <mat-select formControlName="gstNonFiler">
-                @for (rate of gstRateOptions; track rate) {
-                <mat-option [value]="rate">{{ rate }}%</mat-option>
-                }
-              </mat-select>
-              <mat-icon matPrefix>percent</mat-icon>
-            </mat-form-field>
-          </div>
-
-          <div class="calculated-prices">
-            <h4>Net Value Summary (GST Filer Basis)</h4>
             <div class="price-summary">
               <div class="price-item">
                 <span>Net Landing</span>
@@ -337,101 +464,23 @@
                 <strong>Rs {{ netPrices.retailWithGST.toFixed(2) }}</strong>
               </div>
             </div>
-          </div>
-
-          <div class="form-grid two-col">
-            <mat-form-field appearance="outline">
-              <mat-label>Landing Surcharge (per unit)</mat-label>
-              <input matInput type="number" formControlName="goodsChargesPerUnit" min="0" step="0.01">
-              <span matPrefix>Rs&nbsp;</span>
-            </mat-form-field>
-          </div>
-        </div>
-      </section>
-
-      <section class="form-section">
-        <h3 class="section-title">
-          <mat-icon>inventory</mat-icon>
-          Inventory & Barcode
-        </h3>
-
-        <div class="subsection">
-          <h4>Inventory Thresholds</h4>
-          <div class="form-grid three-col">
-            <mat-form-field appearance="outline">
-              <mat-label>Min Stock (Safety)</mat-label>
-              <input matInput type="number" formControlName="minimumStock" min="0">
-              <mat-icon matSuffix>low_priority</mat-icon>
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Max Stock (Cap)</mat-label>
-              <input matInput type="number" formControlName="maximumStock" min="0">
-              <mat-icon matSuffix>vertical_align_top</mat-icon>
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Slow Moving Alert (Days)</mat-label>
-              <input matInput type="number" formControlName="noSalesAlertDays" min="0">
-              <mat-icon matSuffix>hourglass_empty</mat-icon>
-            </mat-form-field>
-          </div>
-
-          <div class="alert-info">
-            <mat-icon>info</mat-icon>
-            <div>
-              <p>System Intelligence Guidelines</p>
-              <ul>
-                <li><strong>Reorder Point:</strong> Real-time alerts when stock hits minimum level.</li>
-                <li><strong>Overstock Alert:</strong> Prevents capital blockage if limits are exceeded.</li>
-                <li><strong>Sales Activity:</strong> Monitors product circulation speed automatically.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div class="subsection">
-          <h4>Barcode Management</h4>
-          <div class="barcode-section">
-            <div class="barcode-options">
-              <mat-checkbox formControlName="autoGenerateBarcode">
-                Auto-Generate SKU Barcode
-              </mat-checkbox>
-              <button mat-stroked-button type="button" (click)="generateBarcode()" class="generate-btn">
-                <mat-icon>refresh</mat-icon>
-                Re-Generate Barcode
-              </button>
-            </div>
-
-            <mat-form-field appearance="outline" class="barcode-input">
-              <mat-label>UPC / EAN / SKU Barcode</mat-label>
-              <input matInput formControlName="barcode" placeholder="Scan or type barcode string">
-              <mat-icon matSuffix>barcode_scanner</mat-icon>
-            </mat-form-field>
-
-            @if (itemForm.get('barcode')?.value) {
-            <div class="barcode-preview">
-              <p>Digital Representation</p>
-              <div class="barcode-display">{{ itemForm.get('barcode')?.value }}</div>
-            </div>
-            }
-          </div>
-        </div>
-      </section>
+          </section>
+        </aside>
+      </div>
     </form>
   </mat-dialog-content>
 
   <div class="dialog-footer">
-    <button mat-button (click)="onCancel()" [disabled]="saving">
-      Discard Changes
-    </button>
+    <button mat-button (click)="onCancel()" [disabled]="saving">Discard</button>
     @if (saving) {
     <button mat-raised-button color="primary" disabled>
-      <mat-spinner diameter="20" style="margin-right: 8px;"></mat-spinner>
+      <mat-spinner diameter="20"></mat-spinner>
       Processing...
     </button>
     } @else {
     <button mat-raised-button color="primary" (click)="onSubmit()">
       <mat-icon>check_circle</mat-icon>
-      {{ isEditMode ? 'Commit Updates' : 'Publish Product' }}
+      {{ isEditMode ? 'Update' : 'Save' }}
     </button>
     }
   </div>

@@ -1,0 +1,116 @@
+<div class="profile-page">
+  <section class="profile-hero">
+    <div class="hero-copy">
+      <span class="hero-kicker">Account Center</span>
+      <h1 class="page-title"><mat-icon>account_circle</mat-icon> My Profile</h1>
+      <p class="page-subtitle">Manage your account details, identity, and password from one clean workspace.</p>
+    </div>
+    <div class="hero-badge">
+      <span>Signed in as</span>
+      <strong>{{ currentUser?.role || 'user' }}</strong>
+    </div>
+  </section>
+
+  @if (loading) {
+    <div class="loading-state">
+      <mat-spinner diameter="42"></mat-spinner>
+    </div>
+  } @else {
+    <div class="profile-grid">
+      <aside class="profile-sidebar">
+        <mat-card class="profile-summary">
+          <div class="avatar-shell">
+            <div class="avatar">
+              <mat-icon>person</mat-icon>
+            </div>
+          </div>
+
+          <div class="summary-copy">
+            <h2>{{ currentUser?.username || 'User' }}</h2>
+            <p>{{ currentUser?.email || '-' }}</p>
+            <span class="role-chip">{{ currentUser?.role || 'user' }}</span>
+          </div>
+
+          <div class="summary-stats">
+            <div class="stat-block">
+              <span>Profile</span>
+              <strong>Active</strong>
+            </div>
+            <div class="stat-block">
+              <span>Security</span>
+              <strong>Password Enabled</strong>
+            </div>
+          </div>
+        </mat-card>
+
+        <mat-card class="profile-note-card">
+          <span class="card-kicker">Quick Tip</span>
+          <h3>Keep account details current</h3>
+          <p>Update your email and password here so alerts and profile-based actions stay tied to the right account.</p>
+        </mat-card>
+      </aside>
+
+      <div class="profile-content">
+        <mat-card class="settings-card">
+          <div class="card-head">
+            <div>
+              <span class="card-kicker">Account Details</span>
+              <h3>Identity & Contact</h3>
+            </div>
+          </div>
+
+          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="form-grid two-column">
+            <mat-form-field appearance="outline">
+              <mat-label>Username</mat-label>
+              <input matInput formControlName="username" />
+              <mat-error>Username is required</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Email</mat-label>
+              <input matInput type="email" formControlName="email" />
+              <mat-error>Enter a valid email</mat-error>
+            </mat-form-field>
+
+            <div class="actions span-2">
+              <button mat-raised-button color="primary" type="submit" [disabled]="savingProfile">
+                <mat-icon>save</mat-icon>
+                {{ savingProfile ? 'Saving...' : 'Save Changes' }}
+              </button>
+            </div>
+          </form>
+        </mat-card>
+
+        <mat-card class="settings-card password-card">
+          <div class="card-head">
+            <div>
+              <span class="card-kicker">Security</span>
+              <h3>Change Password</h3>
+            </div>
+          </div>
+
+          <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="form-grid two-column">
+            <mat-form-field appearance="outline">
+              <mat-label>Current Password</mat-label>
+              <input matInput type="password" formControlName="currentPassword" />
+              <mat-error>Current password is required</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>New Password</mat-label>
+              <input matInput type="password" formControlName="newPassword" />
+              <mat-error>Use at least 6 characters</mat-error>
+            </mat-form-field>
+
+            <div class="actions span-2">
+              <button mat-raised-button color="primary" type="submit" [disabled]="savingPassword">
+                <mat-icon>lock_reset</mat-icon>
+                {{ savingPassword ? 'Updating...' : 'Update Password' }}
+              </button>
+            </div>
+          </form>
+        </mat-card>
+      </div>
+    </div>
+  }
+</div>

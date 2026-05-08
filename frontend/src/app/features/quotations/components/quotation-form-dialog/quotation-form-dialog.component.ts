@@ -25,7 +25,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
     MatAutocompleteModule, MatTooltipModule, MatProgressSpinnerModule, MatDividerModule
   ],
   template: `
-    <h2 mat-dialog-title>
+    <h2 mat-dialog-title class="dialog-title">
       <mat-icon style="vertical-align:middle;margin-right:8px">request_quote</mat-icon>
       {{ data.quotation ? 'Edit Quotation' : 'New Quotation' }}
     </h2>
@@ -35,8 +35,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
       <div class="form-row">
         <mat-form-field appearance="outline" style="flex:2">
           <mat-label>Customer *</mat-label>
-          <input matInput [matAutocomplete]="custAuto" formControlName="customerSearch"
-            placeholder="Search customer...">
+          <input matInput [matAutocomplete]="custAuto" formControlName="customerSearch">
           <mat-autocomplete #custAuto="matAutocomplete" [displayWith]="displayCustomer"
             (optionSelected)="onCustomerSelect($event.option.value)">
             @for (c of filteredCustomers; track c._id) {
@@ -165,14 +164,160 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
     </mat-dialog-actions>
   `,
   styles: [`
-    .dialog-content { min-width: 760px; max-width: 960px; padding: 16px 24px; }
-    .form-row { display: flex; gap: 16px; margin-bottom: 12px; mat-form-field { flex: 1; } }
-    .section-title { font-weight: 600; color: #333; margin: 12px 0 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .items-header { display: grid; grid-template-columns: 2fr 0.8fr 1fr 0.7fr 0.7fr 1fr 40px; gap: 8px; padding: 4px 0; font-size: 12px; font-weight: 600; color: #666; }
-    .item-row { display: grid; grid-template-columns: 2fr 0.8fr 1fr 0.7fr 0.7fr 1fr 40px; gap: 8px; align-items: center; }
-    .total-cell { font-weight: 600; color: #1565c0; font-size: 13px; }
-    .totals-row { display: flex; gap: 24px; justify-content: flex-end; margin-top: 12px; padding: 12px; background: #f5f5f5; border-radius: 8px; font-size: 13px; }
-    .grand-total strong { font-size: 16px; color: #1565c0; }
+    :host { display: block; }
+
+    .dialog-title {
+      min-height: 72px;
+      margin: 0;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-left: 6px solid var(--indus-primary, #7367f0);
+      border-bottom: 1px solid var(--indus-border, #ebe9f1);
+      background: linear-gradient(135deg, var(--indus-surface, #ffffff) 0%, var(--indus-surface-muted, #f7f6ff) 100%);
+      color: var(--indus-text, #5e5873);
+      font-size: 24px;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .dialog-title mat-icon {
+      color: var(--indus-primary, #7367f0);
+      margin-right: 0 !important;
+    }
+
+    .dialog-content {
+      min-width: 760px;
+      max-width: 960px;
+      padding: 24px !important;
+      background: var(--indus-surface, #ffffff);
+      color: var(--indus-text, #5e5873);
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .form-row mat-form-field {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .section-title {
+      font-weight: 800;
+      color: var(--indus-text, #5e5873);
+      margin: 16px 0 12px;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      padding-left: 14px;
+      border-left: 4px solid var(--indus-primary, #7367f0);
+    }
+
+    .items-table {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .items-header {
+      display: grid;
+      grid-template-columns: 2fr 0.8fr 1fr 0.7fr 0.7fr 1fr 40px;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--indus-border, #ebe9f1);
+      border-radius: 8px;
+      background: var(--indus-surface-muted, #f7f6ff);
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--indus-text-soft, #6e6b7b);
+      text-transform: uppercase;
+    }
+
+    .item-row {
+      display: grid;
+      grid-template-columns: 2fr 0.8fr 1fr 0.7fr 0.7fr 1fr 40px;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 10px;
+      border: 1px solid var(--indus-border, #ebe9f1);
+      border-radius: 8px;
+      background: var(--indus-surface, #ffffff);
+    }
+
+    .total-cell {
+      font-weight: 800;
+      color: var(--indus-primary, #7367f0);
+      font-size: 13px;
+    }
+
+    .totals-row {
+      display: flex;
+      gap: 24px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      padding: 14px;
+      background: var(--indus-surface-muted, #f7f6ff);
+      border: 1px solid var(--indus-border, #ebe9f1);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--indus-text-soft, #6e6b7b);
+    }
+
+    .grand-total strong {
+      font-size: 16px;
+      color: var(--indus-primary, #7367f0);
+    }
+
+    mat-dialog-actions {
+      min-height: 72px;
+      padding: 16px 24px !important;
+      gap: 12px;
+      border-top: 1px solid var(--indus-border, #ebe9f1);
+      background: var(--indus-surface-muted, #f7f6ff);
+    }
+
+    mat-dialog-actions button[mat-button] {
+      min-height: 44px;
+      padding: 0 22px;
+      border: 1px solid var(--indus-border-strong, #d8d6de);
+      border-radius: 8px;
+      background: var(--indus-surface, #ffffff);
+      color: var(--indus-text, #5e5873);
+      font-weight: 700;
+    }
+
+    mat-dialog-actions button[mat-raised-button] {
+      min-height: 44px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--indus-primary, #7367f0) 0%, var(--indus-primary-dark, #5e50ee) 100%) !important;
+      color: var(--indus-white, #ffffff) !important;
+      box-shadow: 0 8px 18px rgba(115, 103, 240, 0.26) !important;
+      font-weight: 800;
+    }
+
+    :host ::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+      min-height: 56px !important;
+      background: var(--indus-surface, #ffffff) !important;
+      overflow: visible !important;
+    }
+
+    :host ::ng-deep .mat-mdc-form-field-infix {
+      min-height: 56px !important;
+      padding-top: 18px !important;
+      padding-bottom: 8px !important;
+    }
+
+    :host ::ng-deep .mdc-text-field--outlined .mdc-floating-label--float-above {
+      transform: translateY(-34px) scale(0.75) !important;
+      background: var(--indus-surface, #ffffff) !important;
+      padding: 0 4px !important;
+    }
   `]
 })
 export class QuotationFormDialogComponent implements OnInit {

@@ -147,6 +147,61 @@
 // Material Design Overrides
 @include mixins.form-field-overrides;
 
+.account-form {
+  ::ng-deep .mat-mdc-form-field {
+    width: 100%;
+  }
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    min-height: 56px !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: var(--indus-surface, #fff) !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field-flex,
+  ::ng-deep .mat-mdc-form-field-infix {
+    min-height: 56px !important;
+    height: auto !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    padding-top: 18px !important;
+    padding-bottom: 8px !important;
+  }
+
+  ::ng-deep textarea.mat-mdc-input-element {
+    padding-top: 4px !important;
+  }
+
+  ::ng-deep .mdc-notched-outline__notch {
+    overflow: visible !important;
+  }
+
+  ::ng-deep .mdc-text-field--outlined .mdc-floating-label--float-above {
+    transform: translateY(-34px) scale(0.75) !important;
+    background: var(--indus-surface, #fff) !important;
+    padding: 0 4px !important;
+    max-width: calc(133.333% - 24px) !important;
+    color: var(--indus-text-soft, #6e6b7b) !important;
+  }
+
+  ::ng-deep .mat-mdc-input-element,
+  ::ng-deep .mat-mdc-select-value,
+  ::ng-deep .mat-mdc-select-value-text {
+    color: var(--indus-text, #5e5873) !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    line-height: 24px !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field-icon-prefix,
+  ::ng-deep .mat-mdc-form-field-icon-suffix,
+  ::ng-deep .mat-mdc-select-arrow {
+    color: var(--indus-primary, #7367f0) !important;
+  }
+}
+
 // Tab overrides are handled by tabs-override mixin
 
 // Button overrides

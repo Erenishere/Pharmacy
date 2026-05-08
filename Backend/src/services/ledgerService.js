@@ -12,7 +12,7 @@ class LedgerService {
    * @param {Object} entryData - Ledger entry data
    * @returns {Promise<Object>} Created ledger entry
    */
-  async createLedgerEntry(entryData) {
+  async createLedgerEntry(entryData, options = {}) {
     // Validate required fields
     if (!entryData.accountId) {
       throw new Error('Account ID is required');
@@ -39,7 +39,7 @@ class LedgerService {
     // Validate account exists
     await this.validateAccount(entryData.accountId, entryData.accountType);
 
-    return ledgerRepository.create(entryData);
+    return ledgerRepository.create(entryData, options);
   }
 
   /**
@@ -53,7 +53,7 @@ class LedgerService {
    * @param {string} createdBy - User ID creating the entry
    * @returns {Promise<Object>} Created entries
    */
-  async createDoubleEntry(debitAccount, creditAccount, amount, description, referenceType, referenceId, createdBy) {
+  async createDoubleEntry(debitAccount, creditAccount, amount, description, referenceType, referenceId, createdBy, options = {}) {
     // Validate inputs
     if (!debitAccount || !debitAccount.accountId || !debitAccount.accountType) {
       throw new Error('Valid debit account details are required');
@@ -86,6 +86,7 @@ class LedgerService {
       referenceType,
       referenceId,
       createdBy,
+      options,
     );
   }
 
@@ -395,7 +396,7 @@ class LedgerService {
    * @param {string} createdBy - User ID creating the reversal
    * @returns {Promise<Array>} Created reversal entries
    */
-  async reverseLedgerEntries(referenceType, referenceId, reason, createdBy) {
+  async reverseLedgerEntries(referenceType, referenceId, reason, createdBy, options = {}) {
     if (!referenceType || !referenceId) {
       throw new Error('Reference type and ID are required');
     }
@@ -407,7 +408,7 @@ class LedgerService {
     }
 
     // Get original entries
-    const originalEntries = await ledgerRepository.findByReference(referenceType, referenceId);
+    const originalEntries = await ledgerRepository.findByReference(referenceType, referenceId, options);
 
     if (originalEntries.length === 0) {
       throw new Error('No ledger entries found for the given reference');
@@ -430,7 +431,7 @@ class LedgerService {
         currency: entry.currency,
         exchangeRate: entry.exchangeRate,
         createdBy,
-      });
+      }, options);
 
       reversalEntries.push(reversalEntry);
     }

@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Designation = require('../models/designation');
 const Response = require('../utils/response');
+const { clearCacheMiddleware } = require('../middleware/cacheMiddleware');
+
+const clearAccountRegistrationLookupsCache = clearCacheMiddleware(['accounts:registration-lookups']);
 
 // Get all designations
 router.get('/', async (req, res) => {
@@ -14,7 +17,7 @@ router.get('/', async (req, res) => {
 });
 
 // Create new designation
-router.post('/', async (req, res) => {
+router.post('/', clearAccountRegistrationLookupsCache, async (req, res) => {
     try {
         const designation = new Designation(req.body);
         await designation.save();
@@ -25,7 +28,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update designation
-router.put('/:id', async (req, res) => {
+router.put('/:id', clearAccountRegistrationLookupsCache, async (req, res) => {
     try {
         const designation = await Designation.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!designation) return Response.error(res, 'Designation not found', 404);
@@ -36,7 +39,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete designation (soft delete)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', clearAccountRegistrationLookupsCache, async (req, res) => {
     try {
         const designation = await Designation.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
         if (!designation) return Response.error(res, 'Designation not found', 404);

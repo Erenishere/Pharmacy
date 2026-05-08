@@ -1,6 +1,19 @@
-@import 'styles/shared-list-styles';
+@import "../../../../../styles/vuexy-vars";
+@import "../../../../../styles/shared-list-styles";
+
+:host {
+  display: block;
+  background: #ffffff;
+}
 
 .schemes-page {
+  @include page-container;
+  background-color: #ffffff;
+
+  .list-page-header {
+    @include page-header;
+  }
+
   .schemes-grid {
     display: grid;
     grid-template-columns: 1fr 340px;
@@ -14,21 +27,28 @@
   }
 
   .form-card {
+    @include list-card;
     background: #ffffff;
-    padding: 24px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-    border: 1px solid $p-border;
 
     .card-header {
       margin-bottom: 20px;
+
       .section-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
         font-size: 16px;
         font-weight: 700;
         color: $purple;
         margin: 0;
-        border-left: 3px solid $purple;
-        padding-left: 12px;
+
+        &::before {
+          content: '';
+          width: 3px;
+          height: 20px;
+          background: $purple;
+          border-radius: 4px;
+        }
       }
     }
 
@@ -47,20 +67,96 @@
       gap: 12px;
       margin-top: 20px;
       padding-top: 20px;
-      border-top: 1px solid $p-border;
+      border-top: 1px solid rgba($purple, 0.1);
 
-      .save-btn {
-        height: 44px;
-        background-color: var(--color-bg-page);
-        color: white;
+      button.save-btn {
+        background: linear-gradient(118deg, $purple, rgba($purple, 0.85));
+        color: #fff;
+        font-weight: 600;
+        height: 42px;
+        padding: 0 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba($purple, 0.35);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.25s ease;
+        border: none;
+
+        &:hover {
+          box-shadow: 0 6px 18px rgba($purple, 0.5);
+          transform: translateY(-1px);
+        }
+
+        mat-icon {
+          color: #fff;
+        }
+      }
+
+      button.cancel-btn {
+        background: linear-gradient(118deg, $purple, rgba($purple, 0.85));
+        color: #fff;
+        font-weight: 600;
+        height: 42px;
+        padding: 0 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba($purple, 0.35);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.25s ease;
+        border: none;
+
+        &:hover {
+          box-shadow: 0 6px 18px rgba($purple, 0.5);
+          transform: translateY(-1px);
+        }
       }
     }
   }
 
-  /* Claim Accounts Section */
+  .list-page-card {
+    @include list-card;
+    background: #ffffff;
+
+    .no-data-content {
+      padding: 60px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: $grey-dark;
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        margin-bottom: 16px;
+        color: rgba($purple, 0.2);
+      }
+
+      h4 {
+        margin: 0 0 8px 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: $purple-dark;
+      }
+
+      p {
+        margin: 0;
+        color: $grey-dark;
+        font-size: 0.95rem;
+      }
+    }
+
+    mat-paginator {
+      @include paginator;
+    }
+  }
+
   .ca-input-section {
     margin-bottom: 20px;
-    .w-full { width: 100%; }
   }
 
   .ca-list-section {
@@ -97,45 +193,53 @@
       &:hover {
         transform: translateX(4px);
         background: #f0f0f0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       }
 
       .ca-info {
         display: flex;
         flex-direction: column;
-        .ca-name { font-weight: 600; color: #444; font-size: 13px; }
-        .ca-date { font-size: 10px; color: #888; }
+
+        .ca-name {
+          font-weight: 600;
+          color: #444;
+          font-size: 13px;
+        }
+
+        .ca-date {
+          font-size: 10px;
+          color: #888;
+        }
       }
 
       .ca-actions {
         display: flex;
         gap: 4px;
-        
+
         button {
           width: 32px;
           height: 32px;
           line-height: normal;
-          mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
         }
 
-        .edit-btn { color: $purple; }
-        .status-btn { 
-          color: #aaa; 
-          .active-icon { color: $success; }
+        .edit-btn {
+          color: $purple;
+        }
+
+        .status-btn {
+          color: #aaa;
+
+          .active-icon {
+            color: $success;
+          }
         }
       }
     }
   }
 }
-
-.list-page-card {
-  @include list-card;
-}
-
-::ng-deep {
-  .schemes-page {
-    @include data-table;
-    @include paginator;
-  }
-}
-

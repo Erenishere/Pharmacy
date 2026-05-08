@@ -175,7 +175,7 @@ export class PurchaseInvoiceListComponent implements OnInit, OnDestroy {
             this.dataSource.data = (response.data || []).map((inv: any) => ({
               ...inv,
               type: this.getPurchaseTypeLabel(inv),
-              accountTitle: inv.supplierName + (inv.otherTitle ? ` - ${inv.otherTitle}` : ''),
+              accountTitle: this.getInvoiceAccountTitle(inv),
               supplierBillNo: inv.supplierBillNo || '-',
               previousBalance: inv.previousBalance || 0,
               invoiceTotal: inv.totals?.grandTotal || 0,
@@ -434,6 +434,43 @@ export class PurchaseInvoiceListComponent implements OnInit, OnDestroy {
     });
   }
 
+  printInvoice(invoice: Invoice): void {
+    const printWindow = window.open('', '_blank', 'width=900,height=700');
+    if (!printWindow) {
+      this.toastService.error('Unable to open print preview');
+      return;
+    }
+
+    printWindow.document.open();
+    printWindow.document.write(this.generatePurchaseInvoicePrintHtml(invoice));
+    printWindow.document.close();
+  }
+
+  exportInvoice(invoice: Invoice): void {
+    const row = {
+      invoiceNumber: invoice.invoiceNumber,
+      invoiceDate: invoice.invoiceDate,
+      purchaseType: this.getPurchaseTypeLabel(invoice),
+      accountTitle: (invoice as any).accountTitle || (invoice as any).supplierName || '',
+      supplierBillNo: (invoice as any).supplierBillNo || '',
+      previousBalance: (invoice as any).previousBalance || 0,
+      invoiceTotal: invoice.totals?.grandTotal || 0,
+      invoiceType: this.getTaxInvoiceTypeLabel(invoice),
+      gstAmount: this.getTotalGST(invoice),
+      status: invoice.status,
+      paymentStatus: invoice.paymentStatus
+    };
+
+    const columns = Object.keys(row);
+    const csv = [
+      columns.map(column => this.escapeCsv(this.formatColumnLabel(column))).join(','),
+      columns.map(column => this.escapeCsv(String((row as any)[column] ?? ''))).join(',')
+    ].join('\r\n');
+
+    this.downloadText(csv, `purchase-invoice-${invoice.invoiceNumber || invoice._id}.csv`);
+    this.toastService.success('Purchase invoice exported');
+  }
+
   calculateTotalAmount(invoices: Invoice[]): number {
     return invoices.reduce((sum, inv) => sum + (inv.totals?.grandTotal || 0), 0);
   }
@@ -458,8 +495,330 @@ export class PurchaseInvoiceListComponent implements OnInit, OnDestroy {
       case 'markPaid': this.markAsPaid(inv); break;
       case 'cancel': this.cancelInvoice(inv); break;
       case 'delete': this.deleteInvoice(inv); break;
-      case 'print': this.toastService.info('Print functionality coming soon'); break;
-      case 'export': this.toastService.info('Export functionality coming soon'); break;
+      case 'print': this.printInvoice(inv); break;
+      case 'export': this.exportInvoice(inv); break;
     }
+  }
+
+  private downloadText(content: string, filename: string): void {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  private escapeCsv(value: string): string {
+    const escaped = value.replace(/"/g, '""');
+    return /[",\r\n]/.test(escaped) ? `"${escaped}"` : escaped;
+  }
+
+  private formatColumnLabel(value: string): string {
+    return value.replace(/([A-Z])/g, ' $1').replace(/^./, letter => letter.toUpperCase());
+  }
+
+  private getInvoiceAccountTitle(invoice: Invoice | any): string {
+    const supplier = invoice?.supplierId;
+    const supplierName =
+      (supplier && typeof supplier === 'object' ? supplier.name : '') ||
+      invoice?.supplierName ||
+      'Unknown Supplier';
+    return invoice?.otherTitle ? `${supplierName} - ${invoice.otherTitle}` : supplierName;
+  }
+
+  private generatePurchaseInvoicePrintHtml(invoice: Invoice): string {
+    const supplierName = this.getSupplierName(invoice);
+    const supplierCode = this.getSupplierCode(invoice);
+    const supplierAddress = this.getSupplierAddress(invoice);
+    const itemsHtml = invoice.items.map((item, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td>
+          <div>${item.itemName || item.itemCode || '-'}</div>
+          <div class="subtle">Code: ${item.itemCode || '-'}</div>
+          <div class="subtle">Batch: ${item.batchInfo?.batchNumber || item.batchNumber || '-'}</div>
+        </td>
+        <td class="center">${item.quantity ?? 0}</td>
+        <td class="right">${this.formatCurrency(item.unitPrice ?? 0)}</td>
+        <td class="right">${this.formatCurrency(item.gstAmount ?? item.taxAmount ?? 0)}</td>
+        <td class="right">${this.formatCurrency(item.lineTotal ?? 0)}</td>
+      </tr>
+    `).join('');
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Purchase Invoice ${invoice.invoiceNumber}</title>
+        <style>
+          @page { size: A4; margin: 14mm; }
+          * { box-sizing: border-box; }
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #2b2f36;
+            margin: 0;
+            padding: 24px;
+            background: #ffffff;
+          }
+          .document {
+            max-width: 980px;
+            margin: 0 auto;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            gap: 24px;
+            border-bottom: 3px solid #22577a;
+            padding-bottom: 18px;
+            margin-bottom: 24px;
+          }
+          .brand h1 {
+            margin: 0 0 6px;
+            font-size: 28px;
+            color: #22577a;
+          }
+          .brand p, .meta p, .party p {
+            margin: 4px 0;
+            font-size: 12px;
+          }
+          .title {
+            text-align: right;
+          }
+          .title h2 {
+            margin: 0;
+            font-size: 30px;
+            letter-spacing: 1px;
+          }
+          .tag {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: #e8f1f8;
+            color: #22577a;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+          }
+          .parties {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 24px;
+          }
+          .party {
+            flex: 1;
+            border: 1px solid #dbe4ee;
+            border-radius: 10px;
+            padding: 14px 16px;
+            background: #f8fbfd;
+          }
+          .party h3 {
+            margin: 0 0 10px;
+            color: #22577a;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+          }
+          th {
+            background: #22577a;
+            color: #ffffff;
+            padding: 10px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            text-align: left;
+          }
+          td {
+            padding: 10px;
+            border-bottom: 1px solid #e5e9ef;
+            font-size: 12px;
+            vertical-align: top;
+          }
+          .center { text-align: center; }
+          .right { text-align: right; }
+          .subtle {
+            color: #65758b;
+            font-size: 10px;
+            margin-top: 2px;
+          }
+          .totals {
+            width: 340px;
+            margin-left: auto;
+            border: 1px solid #dbe4ee;
+            border-radius: 10px;
+            overflow: hidden;
+          }
+          .totals-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-bottom: 1px solid #e5e9ef;
+            font-size: 12px;
+          }
+          .totals-row:last-child {
+            border-bottom: none;
+          }
+          .totals-row.grand {
+            background: #22577a;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+          }
+          .footer {
+            margin-top: 28px;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+          }
+          .notes {
+            flex: 1;
+            font-size: 11px;
+            color: #546274;
+          }
+          .signature {
+            width: 220px;
+            text-align: center;
+            font-size: 11px;
+            color: #546274;
+          }
+          .signature-line {
+            margin-top: 48px;
+            border-top: 1px solid #2b2f36;
+            padding-top: 6px;
+          }
+          @media print {
+            body {
+              padding: 0;
+              print-color-adjust: exact;
+              -webkit-print-color-adjust: exact;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="document">
+          <div class="header">
+            <div class="brand">
+              <h1>Indus Traders</h1>
+              <p>Pharmaceutical Wholesale & Distribution</p>
+              <p>info@industraders.com</p>
+              <p>+92-XXX-XXXXXXX</p>
+            </div>
+            <div class="title">
+              <h2>PURCHASE INVOICE</h2>
+              <p><strong>No:</strong> ${invoice.invoiceNumber}</p>
+              <p><strong>Date:</strong> ${this.formatDate(invoice.invoiceDate)}</p>
+              <p><strong>Supplier Bill:</strong> ${invoice.supplierBillNo || '-'}</p>
+              <span class="tag">${invoice.status}</span>
+            </div>
+          </div>
+
+          <div class="parties">
+            <div class="party">
+              <h3>Supplier</h3>
+              <p><strong>${supplierName}</strong></p>
+              <p>${supplierCode ? `Code: ${supplierCode}` : ''}</p>
+              <p>${supplierAddress || 'Address not available'}</p>
+            </div>
+            <div class="party meta">
+              <h3>Invoice Details</h3>
+              <p><strong>Type:</strong> ${this.getPurchaseTypeLabel(invoice)}</p>
+              <p><strong>Tax Mode:</strong> ${this.getTaxInvoiceTypeLabel(invoice)}</p>
+              <p><strong>Payment Status:</strong> ${invoice.paymentStatus}</p>
+              <p><strong>Due Date:</strong> ${this.formatDate(invoice.dueDate)}</p>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 6%;">#</th>
+                <th style="width: 46%;">Item</th>
+                <th style="width: 12%;" class="center">Qty</th>
+                <th style="width: 14%;" class="right">Unit Price</th>
+                <th style="width: 10%;" class="right">GST</th>
+                <th style="width: 12%;" class="right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+          </table>
+
+          <div class="totals">
+            <div class="totals-row">
+              <span>Subtotal</span>
+              <span>${this.formatCurrency(invoice.totals?.subtotal || 0)}</span>
+            </div>
+            <div class="totals-row">
+              <span>Total Discount</span>
+              <span>${this.formatCurrency(invoice.totals?.totalDiscount || 0)}</span>
+            </div>
+            <div class="totals-row">
+              <span>GST Total</span>
+              <span>${this.formatCurrency(this.getTotalGST(invoice))}</span>
+            </div>
+            <div class="totals-row">
+              <span>Previous Balance</span>
+              <span>${this.formatCurrency(invoice.previousBalance || 0)}</span>
+            </div>
+            <div class="totals-row grand">
+              <span>Grand Total</span>
+              <span>${this.formatCurrency(invoice.totals?.grandTotal || 0)}</span>
+            </div>
+          </div>
+
+          <div class="footer">
+            <div class="notes">
+              <p><strong>Notes</strong></p>
+              <p>Goods received subject to supplier bill verification and batch validation.</p>
+            </div>
+            <div class="signature">
+              <div class="signature-line">Authorized Signature</div>
+            </div>
+          </div>
+        </div>
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 300);
+          };
+        </script>
+      </body>
+      </html>
+    `;
+  }
+
+  private getSupplierName(invoice: Invoice): string {
+    const supplier = invoice.supplierId as any;
+    if (supplier && typeof supplier === 'object' && supplier.name) {
+      return supplier.name;
+    }
+
+    return invoice.supplierName || (invoice as any).accountTitle || 'Unknown Supplier';
+  }
+
+  private getSupplierCode(invoice: Invoice): string {
+    const supplier = invoice.supplierId as any;
+    if (supplier && typeof supplier === 'object' && supplier.code) {
+      return supplier.code;
+    }
+
+    return '';
+  }
+
+  private getSupplierAddress(invoice: Invoice): string {
+    const supplier = invoice.supplierId as any;
+    return supplier && typeof supplier === 'object'
+      ? (supplier.address || supplier.contactInfo?.address || '')
+      : '';
   }
 }

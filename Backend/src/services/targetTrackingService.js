@@ -1,6 +1,7 @@
 const SalaryPackage = require('../models/SalaryPackage');
 const Invoice = require('../models/Invoice');
 const CashReceipt = require('../models/CashReceipt');
+const monthlyPerformanceService = require('./monthlyPerformanceService');
 
 class TargetTrackingService {
   /**
@@ -42,35 +43,15 @@ class TargetTrackingService {
         };
       }
 
-      // Get month date range
-      const { startDate, endDate } = this._getMonthDateRange(month, year);
-
-      // Query Invoice model for employee's sales
-      const salesInvoices = await Invoice.find({
-        salesmanId: employeeId,
-        type: 'sales',
-        status: { $ne: 'cancelled' },
-        invoiceDate: { $gte: startDate, $lte: endDate },
-      });
-
-      // Calculate total sales
-      const achieved = salesInvoices.reduce(
-        (sum, invoice) => sum + (invoice.totals.grandTotal || 0),
-        0,
+      const performance = await monthlyPerformanceService.getEmployeeMonthlyPerformance(
+        employeeId,
+        month,
+        year,
       );
-
-      const percentage = target > 0 ? (achieved / target) * 100 : 0;
-      const status = achieved >= target ? 'achieved' : 'pending';
 
       return {
         success: true,
-        data: {
-          target: Math.round(target * 100) / 100,
-          achieved: Math.round(achieved * 100) / 100,
-          percentage: Math.round(percentage * 100) / 100,
-          status,
-          remaining: Math.max(0, target - achieved),
-        },
+        data: this._formatTargetData(target, performance.salesAmount),
       };
     } catch (error) {
       throw new Error(`Failed to track sales target: ${error.message}`);
@@ -116,34 +97,15 @@ class TargetTrackingService {
         };
       }
 
-      // Get month date range
-      const { startDate, endDate } = this._getMonthDateRange(month, year);
-
-      // Query CashReceipt model for employee's collections
-      const cashReceipts = await CashReceipt.find({
-        salesmanId: employeeId,
-        status: { $in: ['cleared', 'pending'] },
-        receiptDate: { $gte: startDate, $lte: endDate },
-      });
-
-      // Calculate total recovery
-      const achieved = cashReceipts.reduce(
-        (sum, receipt) => sum + (receipt.amount || 0),
-        0,
+      const performance = await monthlyPerformanceService.getEmployeeMonthlyPerformance(
+        employeeId,
+        month,
+        year,
       );
-
-      const percentage = target > 0 ? (achieved / target) * 100 : 0;
-      const status = achieved >= target ? 'achieved' : 'pending';
 
       return {
         success: true,
-        data: {
-          target: Math.round(target * 100) / 100,
-          achieved: Math.round(achieved * 100) / 100,
-          percentage: Math.round(percentage * 100) / 100,
-          status,
-          remaining: Math.max(0, target - achieved),
-        },
+        data: this._formatTargetData(target, performance.recoveryAmount),
       };
     } catch (error) {
       throw new Error(`Failed to track recovery target: ${error.message}`);
@@ -189,32 +151,15 @@ class TargetTrackingService {
         };
       }
 
-      // Get month date range
-      const { startDate, endDate } = this._getMonthDateRange(month, year);
-
-      // Query Invoice model for unique customers visited
-      const uniqueCustomers = await Invoice.find({
-        salesmanId: employeeId,
-        type: 'sales',
-        status: { $ne: 'cancelled' },
-        invoiceDate: { $gte: startDate, $lte: endDate },
-      }).distinct('customerId');
-
-      // Count unique customers
-      const achieved = uniqueCustomers.length;
-
-      const percentage = target > 0 ? (achieved / target) * 100 : 0;
-      const status = achieved >= target ? 'achieved' : 'pending';
+      const performance = await monthlyPerformanceService.getEmployeeMonthlyPerformance(
+        employeeId,
+        month,
+        year,
+      );
 
       return {
         success: true,
-        data: {
-          target,
-          achieved,
-          percentage: Math.round(percentage * 100) / 100,
-          status,
-          remaining: Math.max(0, target - achieved),
-        },
+        data: this._formatTargetData(target, performance.visitedParties),
       };
     } catch (error) {
       throw new Error(`Failed to track party visit target: ${error.message}`);
@@ -247,25 +192,16 @@ class TargetTrackingService {
       const incentiveValue = salaryPackage.mobileOrderIncentive.value || 0;
       const incentiveConfigured = incentiveValue > 0;
 
-      // Get month date range
-      const { startDate, endDate } = this._getMonthDateRange(month, year);
-
-      // Query Invoice model for mobile orders
-      // Note: Assuming there's a field to track mobile orders
-      // For now, counting all orders as potential mobile orders
-      const mobileOrders = await Invoice.countDocuments({
-        salesmanId: employeeId,
-        type: 'sales',
-        status: { $ne: 'cancelled' },
-        invoiceDate: { $gte: startDate, $lte: endDate },
-        // Add mobile order filter when field is available
-        // createdVia: 'mobile'
-      });
+      const performance = await monthlyPerformanceService.getEmployeeMonthlyPerformance(
+        employeeId,
+        month,
+        year,
+      );
 
       return {
         success: true,
         data: {
-          ordersCreated: mobileOrders,
+          ordersCreated: performance.mobileOrders,
           incentiveConfigured,
           incentiveType: salaryPackage.mobileOrderIncentive.type,
           incentiveValue,
@@ -302,30 +238,16 @@ class TargetTrackingService {
       const incentiveValue = salaryPackage.mobileCashRecoveryIncentive.value || 0;
       const incentiveConfigured = incentiveValue > 0;
 
-      // Get month date range
-      const { startDate, endDate } = this._getMonthDateRange(month, year);
-
-      // Query CashReceipt model for mobile cash collections
-      // Note: Assuming there's a field to track mobile collections
-      // For now, summing all cash receipts for the salesman
-      const cashReceipts = await CashReceipt.find({
-        salesmanId: employeeId,
-        status: { $in: ['cleared', 'pending'] },
-        receiptDate: { $gte: startDate, $lte: endDate },
-        // Add mobile collection filter when field is available
-        // collectedVia: 'mobile'
-      });
-
-      // Calculate total mobile cash recovery
-      const amountRecovered = cashReceipts.reduce(
-        (sum, receipt) => sum + (receipt.amount || 0),
-        0,
+      const performance = await monthlyPerformanceService.getEmployeeMonthlyPerformance(
+        employeeId,
+        month,
+        year,
       );
 
       return {
         success: true,
         data: {
-          amountRecovered: Math.round(amountRecovered * 100) / 100,
+          amountRecovered: performance.mobileCashRecoveryAmount,
           incentiveConfigured,
           incentiveType: salaryPackage.mobileCashRecoveryIncentive.type,
           incentiveValue,
@@ -433,20 +355,41 @@ class TargetTrackingService {
       for (const pkg of salaryPackages) {
         const empId = pkg.employeeId._id.toString();
 
-        // Track sales target
-        const salesTarget = await this.trackSalesTarget(empId, month, year);
-
-        // Track recovery target
-        const recoveryTarget = await this.trackRecoveryTarget(empId, month, year);
-
-        // Track party visit target
-        const partyVisitTarget = await this.trackPartyVisitTarget(empId, month, year);
-
-        // Track mobile orders
-        const mobileOrders = await this.trackMobileOrders(empId, month, year);
-
-        // Track mobile cash recovery
-        const mobileCashRecovery = await this.trackMobileCashRecovery(empId, month, year);
+        const performance = await monthlyPerformanceService.getEmployeeMonthlyPerformance(
+          empId,
+          month,
+          year,
+        );
+        const salesTarget = {
+          success: true,
+          data: this._formatTargetData(pkg.salesTarget?.targetAmount || 0, performance.salesAmount),
+        };
+        const recoveryTarget = {
+          success: true,
+          data: this._formatTargetData(pkg.recoveryTarget?.targetAmount || 0, performance.recoveryAmount),
+        };
+        const partyVisitTarget = {
+          success: true,
+          data: this._formatTargetData(pkg.partyVisitTarget?.numberOfOrders || 0, performance.visitedParties),
+        };
+        const mobileOrders = {
+          success: true,
+          data: {
+            ordersCreated: performance.mobileOrders,
+            incentiveConfigured: (pkg.mobileOrderIncentive?.value || 0) > 0,
+            incentiveType: pkg.mobileOrderIncentive?.type,
+            incentiveValue: pkg.mobileOrderIncentive?.value || 0,
+          },
+        };
+        const mobileCashRecovery = {
+          success: true,
+          data: {
+            amountRecovered: performance.mobileCashRecoveryAmount,
+            incentiveConfigured: (pkg.mobileCashRecoveryIncentive?.value || 0) > 0,
+            incentiveType: pkg.mobileCashRecoveryIncentive?.type,
+            incentiveValue: pkg.mobileCashRecoveryIncentive?.value || 0,
+          },
+        };
 
         // Track brand incentives
         const brandIncentives = [];
@@ -559,6 +502,30 @@ class TargetTrackingService {
     const endDate = new Date(year, monthIndex + 1, 0, 23, 59, 59, 999);
 
     return { startDate, endDate };
+  }
+
+  _formatTargetData(target, achieved) {
+    const safeTarget = Math.round(Number(target || 0) * 100) / 100;
+    const safeAchieved = Math.round(Number(achieved || 0) * 100) / 100;
+    const percentage = safeTarget > 0 ? (safeAchieved / safeTarget) * 100 : 0;
+
+    if (safeTarget === 0) {
+      return {
+        target: 0,
+        achieved: safeAchieved,
+        percentage: 0,
+        status: 'no_target',
+        remaining: 0,
+      };
+    }
+
+    return {
+      target: safeTarget,
+      achieved: safeAchieved,
+      percentage: Math.round(percentage * 100) / 100,
+      status: safeAchieved >= safeTarget ? 'achieved' : 'pending',
+      remaining: Math.max(0, Math.round((safeTarget - safeAchieved) * 100) / 100),
+    };
   }
 }
 

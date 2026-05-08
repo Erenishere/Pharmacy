@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { shareReplay } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { ApiResponse } from './item-master.service';
 
@@ -72,11 +73,29 @@ export interface AccountFilters {
   limit?: number;
 }
 
+export interface AccountLookupOption {
+  _id: string;
+  name?: string;
+  code?: string;
+  type?: string;
+  region?: string;
+  isActive?: boolean;
+}
+
+export interface AccountRegistrationLookups {
+  dimensions: AccountLookupOption[];
+  designations: AccountLookupOption[];
+  customerTypes: AccountLookupOption[];
+  accountHeads: AccountLookupOption[];
+  towns: AccountLookupOption[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AccountMasterService {
   private apiUrl = `${environment.apiUrl}/accounts`;
+  private registrationLookups$?: Observable<ApiResponse<AccountRegistrationLookups>>;
 
   constructor(private http: HttpClient) {}
 
@@ -103,6 +122,16 @@ export class AccountMasterService {
 
   getAccountsByType(type: string): Observable<ApiResponse<Account[]>> {
     return this.http.get<ApiResponse<Account[]>>(`${this.apiUrl}/type/${type}`);
+  }
+
+  getRegistrationLookups(forceRefresh = false): Observable<ApiResponse<AccountRegistrationLookups>> {
+    if (!this.registrationLookups$ || forceRefresh) {
+      this.registrationLookups$ = this.http
+        .get<ApiResponse<AccountRegistrationLookups>>(`${this.apiUrl}/registration-lookups`)
+        .pipe(shareReplay(1));
+    }
+
+    return this.registrationLookups$;
   }
 
   updateAccount(id: string, accountData: Partial<Account>): Observable<ApiResponse<Account>> {

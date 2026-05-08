@@ -1,3 +1,4 @@
+@import '../../../../../styles/vuexy-vars';
 @import '../../../../../styles/shared-list-styles';
 
 .list-page-container {
@@ -6,6 +7,36 @@
 
 .list-page-header {
   @include page-header;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    button {
+      background: linear-gradient(118deg, $purple, rgba($purple, 0.85)) !important;
+      color: #fff !important;
+      font-weight: 600;
+      height: 42px;
+      padding: 0 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba($purple, 0.35);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s ease;
+
+      &:hover {
+        box-shadow: 0 6px 18px rgba($purple, 0.5);
+        transform: translateY(-1px);
+      }
+    }
+  }
 }
 
 .list-page-card {
@@ -27,10 +58,25 @@
   .warehouse-page {
     .data-table {
       @include data-table;
-      
+
       .warehouse-code {
         font-weight: 600;
         color: $purple;
+      }
+
+      // Status chip - Active is dark purple (like table header)
+      .status-chip-sm {
+        &.mat-primary {
+          background-color: $purple !important;
+          color: #ffffff !important;
+          font-weight: 600;
+        }
+
+        &.mat-warn {
+          background-color: #ea5455 !important;
+          color: #ffffff !important;
+          font-weight: 600;
+        }
       }
     }
 

@@ -13,11 +13,11 @@
       <button mat-icon-button (click)="refreshData()" [disabled]="refreshing" matTooltip="Refresh data">
         <mat-icon [class.spinning]="refreshing">refresh</mat-icon>
       </button>
-      <button mat-button (click)="exportToExcel()">
+      <button mat-button (click)="exportToExcel()" [disabled]="loading || exporting || dataSource.data.length === 0">
         <mat-icon>download</mat-icon>
         Excel
       </button>
-      <button mat-button (click)="exportToPDF()">
+      <button mat-button (click)="exportToPDF()" [disabled]="loading || exporting || dataSource.data.length === 0">
         <mat-icon>picture_as_pdf</mat-icon>
         PDF
       </button>
@@ -215,4 +215,4 @@
       [pageIndex]="pageIndex" (page)="onPageChange($event)" showFirstLastButtons>
     </mat-paginator>
   </div>
-</div>
+</div>

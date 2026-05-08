@@ -3,11 +3,15 @@
     <div class="loader"></div>
   </div>
 
-  <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSortChange($event)" [trackBy]="trackByRowId" class="w-100 data-table">
+  <div class="empty-state-overlay" *ngIf="!loading && rowCount === 0">
+    <div class="list-empty-state">
+      <mat-icon>inbox</mat-icon>
+      <p>No Records Found</p>
+    </div>
+  </div>
 
-    <ng-container *ngFor="let col of columns" [matColumnDef]="col.key">
-      
-      <!-- Header -->
+  <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSortChange($event)" [trackBy]="trackByRowId" class="w-100 data-table">
+    <ng-container *ngFor="let col of columns; trackBy: trackByColumnKey" [matColumnDef]="col.key">
       <ng-container *ngIf="col.sortable; else noSort">
         <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'text-align': col.align || 'left'}">
           {{ col.label }}
@@ -19,51 +23,40 @@
         </th>
       </ng-template>
 
-      <!-- Cell -->
-      <td mat-cell *matCellDef="let row" 
+      <td mat-cell *matCellDef="let row"
           [ngStyle]="{'text-align': col.align || 'left'}"
-          [ngClass]="col.getCellClass ? col.getCellClass(row) : ''">
-        
-        <!-- Standard Value Handling (Dynamic or Property) -->
+          [ngClass]="getCellClass(col, row)">
         <ng-container *ngIf="col.type !== 'status' && col.type !== 'action' && col.type !== 'custom'">
-          
-          <!-- Text Type -->
           <span *ngIf="!col.type || col.type === 'text'">
-            {{ col.getValue ? col.getValue(row) : (row[col.key] || '—') }}
+            {{ getTextCellValue(col, row) }}
           </span>
 
-          <!-- Numeric Type -->
           <span *ngIf="col.type === 'numeric'" class="numeric-val">
-            {{ (col.getValue ? col.getValue(row) : row[col.key]) | number: col.pipeFormat || '1.0-2' }}
+            {{ getCellValue(col, row) | number: col.pipeFormat || '1.0-2' }}
           </span>
 
-          <!-- Currency Type -->
           <span *ngIf="col.type === 'currency'" class="numeric-val fw-bold">
-            {{ (col.getValue ? col.getValue(row) : row[col.key]) | currency: 'PKR' : 'symbol' : col.pipeFormat || '1.0-0' }}
+            {{ getCellValue(col, row) | currency: 'PKR' : 'symbol' : col.pipeFormat || '1.0-0' }}
           </span>
 
-          <!-- Date Type -->
           <span *ngIf="col.type === 'date'">
-            {{ (col.getValue ? col.getValue(row) : row[col.key]) | date: col.pipeFormat || 'dd/MM/yyyy' }}
+            {{ getCellValue(col, row) | date: col.pipeFormat || 'dd/MM/yyyy' }}
           </span>
         </ng-container>
 
-        <!-- Status Type -->
         <span *ngIf="col.type === 'status'">
-          <mat-chip 
+          <mat-chip
             [color]="col.colorMap ? col.colorMap[row[col.key]] : 'primary'"
             [ngClass]="col.classMap ? col.classMap[row[col.key]] : ''"
             class="status-chip-sm">
-            {{ (col.getValue ? col.getValue(row) : row[col.key]) | titlecase }}
+            {{ getCellValue(col, row) | titlecase }}
           </mat-chip>
         </span>
 
-        <!-- Custom HTML projection -->
         <span *ngIf="col.type === 'custom'">
-          {{ col.getValue ? col.getValue(row) : (row[col.key] !== undefined ? row[col.key] : '—') }}
+          {{ getTextCellValue(col, row) }}
         </span>
 
-        <!-- Action Type -->
         <div *ngIf="col.type === 'action' && col.actions">
           <ng-container *ngIf="col.actions.length > 2; else inlineActions">
             <button mat-icon-button [matMenuTriggerFor]="actionMenu" (click)="$event.stopPropagation()">
@@ -82,7 +75,7 @@
           <ng-template #inlineActions>
             <ng-container *ngFor="let act of col.actions">
               <button mat-icon-button *ngIf="!act.showIf || act.showIf(row)"
-                      [color]="act.color || ''" 
+                      [color]="act.color || ''"
                       [matTooltip]="act.tooltip || act.label"
                       (click)="onActionClick(act.actionKey, row, $event)">
                 <mat-icon>{{ act.icon }}</mat-icon>
@@ -90,29 +83,13 @@
             </ng-container>
           </ng-template>
         </div>
-
       </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumnKeys; sticky: true"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumnKeys;" 
+    <tr mat-row *matRowDef="let row; columns: displayedColumnKeys;"
         class="data-table-row"
         [class]="getRowClass(row)"></tr>
-
-    
-    <!-- Empty State -->
-    <tr class="mat-row empty-state-row" *matNoDataRow>
-      <td class="mat-cell" [attr.colspan]="displayedColumnKeys.length">
-        <div class="empty-state-premium">
-          <div class="icon-wrapper">
-            <mat-icon>inbox</mat-icon>
-            <div class="icon-bg-glow"></div>
-          </div>
-          <h4>No Records Found</h4>
-          <p>There is no data to display matching the current criteria.</p>
-        </div>
-      </td>
-    </tr>
   </table>
 </div>
 

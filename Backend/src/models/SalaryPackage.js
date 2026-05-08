@@ -10,7 +10,7 @@ const salaryPackageSchema = new mongoose.Schema(
     // Employee Information
     employeeId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Account',
+      ref: 'Customer',
       required: true,
     },
     employeeName: {
@@ -311,8 +311,8 @@ salaryPackageSchema.path('brandIncentives').validate((brandIncentives) => {
   return true;
 }, 'Brand incentive To Date must be after From Date');
 
-// Pre-save hook: Generate packageId
-salaryPackageSchema.pre('save', async function (next) {
+// Pre-validate hook: Generate packageId before required validation runs.
+salaryPackageSchema.pre('validate', async function (next) {
   if (!this.packageId) {
     const count = await this.constructor.countDocuments();
     const year = new Date().getFullYear();
@@ -321,27 +321,29 @@ salaryPackageSchema.pre('save', async function (next) {
   next();
 });
 
-// Pre-save hook: Fetch basic pay from Account model
-salaryPackageSchema.pre('save', async function (next) {
+// Pre-validate hook: Fetch basic pay from the canonical account model before required validation runs.
+salaryPackageSchema.pre('validate', async function (next) {
   if (this.isNew || this.isModified('employeeId')) {
     try {
-      const Account = mongoose.model('Account');
-      const employee = await Account.findById(this.employeeId);
+      const Customer = mongoose.model('Customer');
+      const employee = await Customer.findById(this.employeeId);
 
       if (!employee) {
         throw new Error('Employee not found');
       }
 
-      if (employee.accountType !== 'Employee') {
+      if (employee.accountType !== 'employee') {
         throw new Error('Selected account is not an employee');
       }
 
-      // Fetch basic pay from employee biodata
-      if (employee.basicPay) {
-        this.basicPay.amount = employee.basicPay;
-      }
+      const basicPay = Number(employee.employeeBiodata?.basicPay || 0);
+      this.basicPay = {
+        ...(this.basicPay?.toObject ? this.basicPay.toObject() : this.basicPay || {}),
+        amount: basicPay,
+        source: 'biodata',
+      };
 
-      this.employeeName = employee.accountName;
+      this.employeeName = employee.name;
     } catch (error) {
       return next(error);
     }

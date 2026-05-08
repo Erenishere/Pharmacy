@@ -330,8 +330,41 @@ export class AnalyticsDashboardComponent implements OnInit {
   }
 
   onExportDashboard(): void {
-    // Implementation for exporting dashboard data
-    this.snackBar.open('Dashboard export functionality coming soon', 'Close', { duration: 3000 });
+    if (!this.salesAnalytics || !this.inventoryAnalytics || !this.operationalAnalytics || !this.businessIntelligence) {
+      this.snackBar.open('Generate analytics before exporting', 'Close', { duration: 3000 });
+      return;
+    }
+
+    const rows = [
+      ['Period', this.periodFilter.value || 'monthly'],
+      ['Start Date', this.startDate.value?.toISOString() || ''],
+      ['End Date', this.endDate.value?.toISOString() || ''],
+      ['Total Sales', this.salesAnalytics.totalSales],
+      ['Total Orders', this.salesAnalytics.totalOrders],
+      ['Average Order Value', this.salesAnalytics.averageOrderValue],
+      ['Inventory Items', this.inventoryAnalytics.totalItems],
+      ['Low Stock Items', this.inventoryAnalytics.lowStockItems],
+      ['Out Of Stock Items', this.inventoryAnalytics.outOfStockItems],
+      ['Inventory Value', this.inventoryAnalytics.inventoryValue],
+      ['Inventory Turnover Rate', this.inventoryAnalytics.turnoverRate],
+      ['Fulfillment Time', this.operationalAnalytics.orderFulfillmentTime],
+      ['Customer Satisfaction', this.operationalAnalytics.customerSatisfaction],
+      ['Product Quality Score', this.operationalAnalytics.qualityMetrics.productQualityScore],
+      ['Revenue KPI', this.businessIntelligence.kpiDashboard.revenue.current],
+      ['Profit KPI', this.businessIntelligence.kpiDashboard.profit.current],
+      ['Customer KPI', this.businessIntelligence.kpiDashboard.customers.current],
+      ['Order KPI', this.businessIntelligence.kpiDashboard.orders.current]
+    ];
+
+    const csv = ['Metric,Value', ...rows.map(([metric, value]) => `${this.escapeCsv(String(metric))},${this.escapeCsv(String(value))}`)].join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `analytics-dashboard-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+    this.snackBar.open('Analytics dashboard exported', 'Close', { duration: 3000 });
   }
 
   formatCurrency(amount: number, compact: boolean = false): string {
@@ -351,6 +384,11 @@ export class AnalyticsDashboardComponent implements OnInit {
 
   formatPercentage(value: number): string {
     return (value * 100).toFixed(1) + '%';
+  }
+
+  private escapeCsv(value: string): string {
+    const escaped = value.replace(/"/g, '""');
+    return /[",\r\n]/.test(escaped) ? `"${escaped}"` : escaped;
   }
 
   getKPITrendIcon(trend: 'up' | 'down' | 'stable'): string {

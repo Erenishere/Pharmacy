@@ -15,6 +15,7 @@
     "test:properties": "jest tests/integration/real-time-sync/properties --config=tests/integration/real-time-sync/jest.config.js",
     "test:performance": "jest tests/integration/real-time-sync/performance --config=tests/integration/real-time-sync/jest.config.js",
     "test:workflows": "jest tests/integration/real-time-sync/workflows --config=tests/integration/real-time-sync/jest.config.js",
+    "perf:baseline": "node scripts/performance-baseline.js",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write src/",

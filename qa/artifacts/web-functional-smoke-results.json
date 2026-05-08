@@ -1,0 +1,1072 @@
+{
+  "startedAt": "2026-04-27T16:44:09.484Z",
+  "baseUrl": "http://127.0.0.1:4200",
+  "apiUrl": "http://localhost:3001/api/v1",
+  "auth": {
+    "passed": true,
+    "finalUrl": "http://127.0.0.1:4200/dashboard"
+  },
+  "dashboard": {
+    "passed": true,
+    "visibleCanvasCount": 3,
+    "hasHorizontalOverflow": false
+  },
+  "listPages": [
+    {
+      "path": "/items",
+      "area": "Inventory",
+      "expects": [
+        "Items"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/items",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/batches",
+      "area": "Inventory",
+      "expects": [
+        "Batch"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/batches",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/inventory/stock-levels",
+      "area": "Inventory",
+      "expects": [
+        "Stock"
+      ],
+      "table": true,
+      "finalUrl": "http://127.0.0.1:4200/inventory/stock-levels",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": null,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/inventory/reports",
+      "area": "Inventory",
+      "expects": [
+        "Inventory"
+      ],
+      "table": true,
+      "finalUrl": "http://127.0.0.1:4200/inventory/reports",
+      "passed": false,
+      "tablePassed": false,
+      "actionPassed": null,
+      "failures": [
+        "No table/list/empty-state surface detected"
+      ],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/warehouses",
+      "area": "Warehouse",
+      "expects": [
+        "Warehouse"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/warehouses",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/customers",
+      "area": "Customers",
+      "expects": [
+        "Customer"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/customers",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/suppliers",
+      "area": "Suppliers",
+      "expects": [
+        "Supplier"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/suppliers",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/purchase-orders",
+      "area": "Purchase",
+      "expects": [
+        "Purchase"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/purchase-orders",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/purchase-invoices",
+      "area": "Purchase",
+      "expects": [
+        "Purchase"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/purchase-invoices",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/sales-invoices",
+      "area": "Sales",
+      "expects": [
+        "Sales"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/sales-invoices",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/sales-returns",
+      "area": "Sales",
+      "expects": [
+        "Return"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/sales-returns",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/e-orders",
+      "area": "E-Orders",
+      "expects": [
+        "Order"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/e-orders",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/quotations",
+      "area": "Quotations",
+      "expects": [
+        "Quotation"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/quotations",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/accounts",
+      "area": "Accounts",
+      "expects": [
+        "Account"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/accounts",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/cashbook",
+      "area": "Cash Book",
+      "expects": [
+        "Cash"
+      ],
+      "table": true,
+      "finalUrl": "http://127.0.0.1:4200/cashbook",
+      "passed": false,
+      "tablePassed": true,
+      "actionPassed": null,
+      "failures": [
+        "1 API 5xx response(s)"
+      ],
+      "consoleErrors": [
+        {
+          "url": "http://127.0.0.1:4200/cashbook",
+          "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/cashbook",
+          "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/cashbook",
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        }
+      ],
+      "failedRequests": [
+        {
+          "url": "http://localhost:3001/api/v1/cashbook/receipts?page=1&limit=20",
+          "status": 400,
+          "route": "http://127.0.0.1:4200/cashbook"
+        },
+        {
+          "url": "http://localhost:3001/api/v1/cashbook/payments?page=1&limit=20",
+          "status": 400,
+          "route": "http://127.0.0.1:4200/cashbook"
+        },
+        {
+          "url": "http://localhost:3001/api/v1/users?role=salesman&limit=200",
+          "status": 500,
+          "route": "http://127.0.0.1:4200/cashbook"
+        }
+      ]
+    },
+    {
+      "path": "/expenses",
+      "area": "Expenses",
+      "expects": [
+        "Expense"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/expenses",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/investors",
+      "area": "Investors",
+      "expects": [
+        "Investor"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/investors",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/investors/profit-share",
+      "area": "Profit Share",
+      "expects": [
+        "Profit"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/investors/profit-share",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/tax-config",
+      "area": "Tax Config",
+      "expects": [
+        "Tax"
+      ],
+      "table": true,
+      "finalUrl": "http://127.0.0.1:4200/tax-config",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": null,
+      "failures": [],
+      "consoleErrors": [
+        {
+          "url": "http://127.0.0.1:4200/tax-config",
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+        }
+      ],
+      "failedRequests": [
+        {
+          "url": "http://localhost:3001/api/v1/tax",
+          "status": 404,
+          "route": "http://127.0.0.1:4200/tax-config"
+        }
+      ]
+    },
+    {
+      "path": "/salary-packages",
+      "area": "Salary Packages",
+      "expects": [
+        "Salary"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/salary-packages",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/users",
+      "area": "Users",
+      "expects": [
+        "User"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/users",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/bilty",
+      "area": "Bilty",
+      "expects": [
+        "Bilty"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/bilty",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/recovery-summary",
+      "area": "Recovery",
+      "expects": [
+        "Recovery"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/recovery-summary",
+      "passed": false,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [
+        "2 Angular runtime error(s)"
+      ],
+      "consoleErrors": [
+        {
+          "url": "http://127.0.0.1:4200/recovery-summary",
+          "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RecoverySummaryComponent_Template (http://127.0.0.1:4200/chunk-2L34DPWZ.js:715:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/recovery-summary",
+          "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RecoverySummaryComponent_Template (http://127.0.0.1:4200/chunk-2L34DPWZ.js:715:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/recovery-summary",
+          "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RecoverySummaryComponent_Template (http://127.0.0.1:4200/chunk-2L34DPWZ.js:715:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/recovery-summary",
+          "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RecoverySummaryComponent_Template (http://127.0.0.1:4200/chunk-2L34DPWZ.js:715:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+        }
+      ],
+      "failedRequests": []
+    },
+    {
+      "path": "/route-plans",
+      "area": "Route Plans",
+      "expects": [
+        "Route"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/route-plans",
+      "passed": false,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [
+        "5 Angular runtime error(s)"
+      ],
+      "consoleErrors": [
+        {
+          "url": "http://127.0.0.1:4200/route-plans",
+          "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RoutePlanListComponent_Template (http://127.0.0.1:4200/chunk-3OBQP6KV.js:871:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/route-plans",
+          "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RoutePlanListComponent_Template (http://127.0.0.1:4200/chunk-3OBQP6KV.js:871:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/route-plans",
+          "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RoutePlanListComponent_Template (http://127.0.0.1:4200/chunk-3OBQP6KV.js:871:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/route-plans",
+          "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RoutePlanListComponent_Template (http://127.0.0.1:4200/chunk-3OBQP6KV.js:871:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/route-plans",
+          "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RoutePlanListComponent_Template (http://127.0.0.1:4200/chunk-3OBQP6KV.js:871:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/route-plans",
+          "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RoutePlanListComponent_Template (http://127.0.0.1:4200/chunk-3OBQP6KV.js:871:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/route-plans",
+          "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RoutePlanListComponent_Template (http://127.0.0.1:4200/chunk-3OBQP6KV.js:871:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+        }
+      ],
+      "failedRequests": []
+    },
+    {
+      "path": "/letters",
+      "area": "Letters",
+      "expects": [
+        "Letter"
+      ],
+      "table": true,
+      "action": {},
+      "finalUrl": "http://127.0.0.1:4200/letters",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": true,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/master-data",
+      "area": "Master Data",
+      "expects": [
+        "Master"
+      ],
+      "table": true,
+      "finalUrl": "http://127.0.0.1:4200/master-data",
+      "passed": true,
+      "tablePassed": true,
+      "actionPassed": null,
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    }
+  ],
+  "generationPages": [
+    {
+      "path": "/sales-invoices/create",
+      "area": "Sales Invoice Builder",
+      "expects": [
+        "Invoice"
+      ],
+      "controls": [
+        {},
+        {},
+        {}
+      ],
+      "finalUrl": "http://127.0.0.1:4200/sales-invoices/create",
+      "passed": true,
+      "controlResults": [
+        {
+          "pattern": "/customer/i",
+          "passed": true
+        },
+        {
+          "pattern": "/item/i",
+          "passed": true
+        },
+        {
+          "pattern": "/save|submit|create|invoice/i",
+          "passed": true
+        }
+      ],
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/purchase-invoices/create",
+      "area": "Purchase Invoice Builder",
+      "expects": [
+        "Purchase",
+        "Invoice"
+      ],
+      "controls": [
+        {},
+        {},
+        {}
+      ],
+      "finalUrl": "http://127.0.0.1:4200/purchase-invoices/create",
+      "passed": true,
+      "controlResults": [
+        {
+          "pattern": "/supplier/i",
+          "passed": true
+        },
+        {
+          "pattern": "/item/i",
+          "passed": true
+        },
+        {
+          "pattern": "/save|submit|create|invoice/i",
+          "passed": true
+        }
+      ],
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/purchase-invoices/return/create",
+      "area": "Purchase Return Builder",
+      "expects": [
+        "Return"
+      ],
+      "controls": [
+        {},
+        {},
+        {}
+      ],
+      "finalUrl": "http://127.0.0.1:4200/purchase-invoices/return/create",
+      "passed": true,
+      "controlResults": [
+        {
+          "pattern": "/supplier|invoice/i",
+          "passed": true
+        },
+        {
+          "pattern": "/item|return/i",
+          "passed": true
+        },
+        {
+          "pattern": "/save|submit|create/i",
+          "passed": true
+        }
+      ],
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/purchase-orders/create",
+      "area": "Purchase Order Builder",
+      "expects": [
+        "Purchase",
+        "Order"
+      ],
+      "controls": [
+        {},
+        {},
+        {}
+      ],
+      "finalUrl": "http://127.0.0.1:4200/purchase-orders/create",
+      "passed": true,
+      "controlResults": [
+        {
+          "pattern": "/supplier/i",
+          "passed": true
+        },
+        {
+          "pattern": "/item/i",
+          "passed": true
+        },
+        {
+          "pattern": "/save|submit|create|order/i",
+          "passed": true
+        }
+      ],
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/accounts/create",
+      "area": "Account Builder",
+      "expects": [
+        "Account"
+      ],
+      "controls": [
+        {},
+        {},
+        {}
+      ],
+      "finalUrl": "http://127.0.0.1:4200/accounts/create",
+      "passed": true,
+      "controlResults": [
+        {
+          "pattern": "/name|title/i",
+          "passed": true
+        },
+        {
+          "pattern": "/type/i",
+          "passed": true
+        },
+        {
+          "pattern": "/save|submit|create/i",
+          "passed": true
+        }
+      ],
+      "failures": [],
+      "consoleErrors": [
+        {
+          "url": "http://127.0.0.1:4200/accounts/create",
+          "text": "ERROR Error: Cannot find control with name: 'contactInfo.email'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/accounts/create",
+          "text": "ERROR Error: Cannot find control with name: 'contactInfo.phone'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/accounts/create",
+          "text": "ERROR Error: Cannot find control with name: 'contactInfo.mobile'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/accounts/create",
+          "text": "ERROR Error: Cannot find control with name: 'contactInfo.nicNumber'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/accounts/create",
+          "text": "ERROR Error: Cannot find control with name: 'contactInfo.address'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/accounts/create",
+          "text": "ERROR Error: Cannot find control with name: 'contactInfo.city'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/accounts/create",
+          "text": "ERROR Error: Cannot find control with name: 'bankingInfo.bankName'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/accounts/create",
+          "text": "ERROR Error: Cannot find control with name: 'bankingInfo.accountNumber'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/accounts/create",
+          "text": "ERROR Error: Cannot find control with name: 'bankingInfo.iban'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/accounts/create",
+          "text": "ERROR Error: Cannot find control with name: 'bankingInfo.swiftCode'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/accounts/create",
+          "text": "ERROR Error: Cannot find control with name: 'businessDetails.creditAmountLimit'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/accounts/create",
+          "text": "ERROR Error: Cannot find control with name: 'businessDetails.creditDaysLimit'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/accounts/create",
+          "text": "ERROR Error: Cannot find control with name: 'businessDetails.balanceType'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/accounts/create",
+          "text": "ERROR Error: Cannot find control with name: 'businessDetails.openingBalance'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+        },
+        {
+          "url": "http://127.0.0.1:4200/accounts/create",
+          "text": "ERROR Error: Cannot find control with name: 'businessDetails.customerType'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+        }
+      ],
+      "failedRequests": []
+    },
+    {
+      "path": "/salary-packages/new",
+      "area": "Salary Package Builder",
+      "expects": [
+        "Salary"
+      ],
+      "controls": [
+        {},
+        {},
+        {}
+      ],
+      "finalUrl": "http://127.0.0.1:4200/salary-packages/new",
+      "passed": true,
+      "controlResults": [
+        {
+          "pattern": "/employee|basic/i",
+          "passed": true
+        },
+        {
+          "pattern": "/year|date/i",
+          "passed": true
+        },
+        {
+          "pattern": "/save|submit|create/i",
+          "passed": true
+        }
+      ],
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    },
+    {
+      "path": "/batches/create",
+      "area": "Batch Builder",
+      "expects": [
+        "Batch"
+      ],
+      "controls": [
+        {},
+        {},
+        {}
+      ],
+      "finalUrl": "http://127.0.0.1:4200/batches/create",
+      "passed": true,
+      "controlResults": [
+        {
+          "pattern": "/item/i",
+          "passed": true
+        },
+        {
+          "pattern": "/quantity|qty/i",
+          "passed": true
+        },
+        {
+          "pattern": "/expiry|date/i",
+          "passed": true
+        }
+      ],
+      "failures": [],
+      "consoleErrors": [],
+      "failedRequests": []
+    }
+  ],
+  "apiChecks": [
+    {
+      "method": "GET",
+      "path": "/dashboard/overview?period=mtd",
+      "area": "Dashboard API",
+      "expectStatus": [
+        200
+      ],
+      "status": 200,
+      "passed": true,
+      "bodyPreview": "{\"success\":true,\"message\":\"Dashboard overview retrieved successfully\",\"data\":{\"scope\":{\"period\":\"mtd\",\"startDate\":\"2026-04-01\",\"endDate\":\"2026-04-27\",\"granularity\":\"daily\",\"warehouseId\":null,\"salesmanId\":null},\"summary\":{\"netSales\":{\"value\":0,\"previousValue\":0,\"deltaPercent\":0,\"route\":\"/sales-invoices\",\"meta\":{\"invoiceCount\":0,\"returnsValue\":0}},\"grossMargin\":{\"value\":0,\"previousValue\":0,\"deltaPercent\":0,\"route\":\"/items\",\"meta\":{\"marginPercent\":0}},\"collections\":{\"value\":0,\"previousValue\":0,\"del"
+    },
+    {
+      "method": "GET",
+      "path": "/invoices/sales?page=1&limit=10",
+      "area": "Sales Invoice API",
+      "expectStatus": [
+        200
+      ],
+      "status": 200,
+      "passed": true,
+      "bodyPreview": "{\"success\":true,\"message\":\"Sales invoices retrieved successfully\",\"data\":[],\"pagination\":{\"total\":0,\"limit\":10,\"page\":1,\"pages\":0,\"totalItems\":0,\"itemsPerPage\":10,\"currentPage\":1,\"totalPages\":0,\"links\":{\"self\":\"http://localhost:3001/api/v1/invoices/sales/?page=1&limit=10\",\"first\":\"http://localhost:3001/api/v1/invoices/sales/?page=1&limit=10\",\"last\":\"http://localhost:3001/api/v1/invoices/sales/?page=0&limit=10\",\"next\":null,\"prev\":null}},\"metadata\":{\"requestId\":\"74a6033b-8bb1-4edf-9b40-b284e245551"
+    },
+    {
+      "method": "GET",
+      "path": "/invoices/purchase?page=1&limit=10",
+      "area": "Purchase Invoice API",
+      "expectStatus": [
+        200
+      ],
+      "status": 200,
+      "passed": true,
+      "bodyPreview": "{\"success\":true,\"data\":[],\"pagination\":{\"totalItems\":0,\"totalPages\":0,\"currentPage\":1,\"itemsPerPage\":10,\"hasNextPage\":false,\"hasPreviousPage\":false,\"nextPage\":null,\"previousPage\":null},\"message\":\"Purchase invoices retrieved successfully\",\"timestamp\":\"2026-04-27T16:44:22.354Z\"}"
+    },
+    {
+      "method": "GET",
+      "path": "/purchase-orders?page=1&limit=10",
+      "area": "Purchase Order API",
+      "expectStatus": [
+        200
+      ],
+      "status": 200,
+      "passed": true,
+      "bodyPreview": "{\"success\":true,\"data\":[],\"pagination\":{\"total\":0,\"page\":1,\"limit\":50,\"pages\":0}}"
+    },
+    {
+      "method": "GET",
+      "path": "/quotations?page=1&limit=10",
+      "area": "Quotation API",
+      "expectStatus": [
+        200
+      ],
+      "status": 200,
+      "passed": true,
+      "bodyPreview": "{\"status\":\"success\",\"data\":[],\"pagination\":{\"total\":0,\"page\":1,\"limit\":10,\"totalPages\":0}}"
+    },
+    {
+      "method": "GET",
+      "path": "/e-orders?page=1&limit=10",
+      "area": "E-Order API",
+      "expectStatus": [
+        200
+      ],
+      "status": 200,
+      "passed": true,
+      "bodyPreview": "{\"success\":true,\"orders\":[],\"pagination\":{\"total\":0,\"page\":1,\"limit\":10,\"pages\":0}}"
+    },
+    {
+      "method": "GET",
+      "path": "/cashbook/receipts?page=1&limit=20",
+      "area": "Cash Receipts API",
+      "expectStatus": [
+        200
+      ],
+      "status": 400,
+      "passed": false,
+      "bodyPreview": "{\"success\":false,\"error\":\"Failed to retrieve cash receipts\",\"message\":\"cashReceiptService.getAllCashReceipts is not a function\"}"
+    },
+    {
+      "method": "GET",
+      "path": "/cashbook/payments?page=1&limit=20",
+      "area": "Cash Payments API",
+      "expectStatus": [
+        200
+      ],
+      "status": 400,
+      "passed": false,
+      "bodyPreview": "{\"success\":false,\"error\":\"Failed to retrieve cash payments\",\"message\":\"cashPaymentService.getAllCashPayments is not a function\"}"
+    },
+    {
+      "method": "GET",
+      "path": "/tax/config",
+      "area": "Tax Config API",
+      "expectStatus": [
+        200
+      ],
+      "status": 200,
+      "passed": true,
+      "bodyPreview": "{\"success\":true,\"message\":\"Tax configurations retrieved successfully\",\"data\":[],\"timestamp\":\"2026-04-27T16:44:24.503Z\"}"
+    },
+    {
+      "method": "GET",
+      "path": "/salesmen?limit=200",
+      "area": "Salesmen API",
+      "expectStatus": [
+        200
+      ],
+      "status": 200,
+      "passed": true,
+      "bodyPreview": "{\"success\":true,\"message\":\"Salesmen retrieved successfully\",\"data\":{\"salesmen\":[{\"_id\":\"69abdde3f57afa472f3652f9\",\"name\":\"ahmed\",\"email\":\"ahmed@gmail.com\",\"userId\":\"69abdde0f57afa472f3652f6\",\"commissionRate\":0,\"warehouseId\":null,\"isActive\":true,\"code\":\"SM0001\",\"createdAt\":\"2026-03-07T08:12:19.945Z\",\"updatedAt\":\"2026-03-07T08:12:19.945Z\",\"__v\":0}],\"pagination\":{\"totalItems\":1,\"totalPages\":1,\"currentPage\":1,\"itemsPerPage\":200,\"hasNextPage\":false,\"hasPreviousPage\":false}}}"
+    }
+  ],
+  "consoleErrors": [
+    {
+      "url": "http://127.0.0.1:4200/cashbook",
+      "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/cashbook",
+      "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/cashbook",
+      "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/tax-config",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/recovery-summary",
+      "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RecoverySummaryComponent_Template (http://127.0.0.1:4200/chunk-2L34DPWZ.js:715:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/recovery-summary",
+      "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RecoverySummaryComponent_Template (http://127.0.0.1:4200/chunk-2L34DPWZ.js:715:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/recovery-summary",
+      "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RecoverySummaryComponent_Template (http://127.0.0.1:4200/chunk-2L34DPWZ.js:715:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/recovery-summary",
+      "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RecoverySummaryComponent_Template (http://127.0.0.1:4200/chunk-2L34DPWZ.js:715:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/route-plans",
+      "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RoutePlanListComponent_Template (http://127.0.0.1:4200/chunk-3OBQP6KV.js:871:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/route-plans",
+      "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RoutePlanListComponent_Template (http://127.0.0.1:4200/chunk-3OBQP6KV.js:871:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/route-plans",
+      "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RoutePlanListComponent_Template (http://127.0.0.1:4200/chunk-3OBQP6KV.js:871:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/route-plans",
+      "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RoutePlanListComponent_Template (http://127.0.0.1:4200/chunk-3OBQP6KV.js:871:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/route-plans",
+      "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RoutePlanListComponent_Template (http://127.0.0.1:4200/chunk-3OBQP6KV.js:871:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/route-plans",
+      "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RoutePlanListComponent_Template (http://127.0.0.1:4200/chunk-3OBQP6KV.js:871:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/route-plans",
+      "text": "ERROR TypeError: newCollection[Symbol.iterator] is not a function\n    at reconcile (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15394:65)\n    at Module.ɵɵrepeater (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:15709:5)\n    at RoutePlanListComponent_Template (http://127.0.0.1:4200/chunk-3OBQP6KV.js:871:11)\n    at executeTemplate (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:8462:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9509:7)\n    at detectChangesInView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9673:5)\n    at detectChangesInViewIfAttached (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9656:3)\n    at detectChangesInComponent (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9650:3)\n    at detectChangesInChildComponents (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9693:5)\n    at refreshView (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:9567:7)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'contactInfo.email'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'contactInfo.phone'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'contactInfo.mobile'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'contactInfo.nicNumber'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'contactInfo.address'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'contactInfo.city'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'bankingInfo.bankName'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'bankingInfo.accountNumber'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'bankingInfo.iban'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'bankingInfo.swiftCode'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'businessDetails.creditAmountLimit'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'businessDetails.creditDaysLimit'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'businessDetails.balanceType'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'businessDetails.openingBalance'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+    },
+    {
+      "url": "http://127.0.0.1:4200/accounts/create",
+      "text": "ERROR Error: Cannot find control with name: 'businessDetails.customerType'\n    at _throwError (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2665:9)\n    at setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:2527:19)\n    at _FormGroupDirective.addControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4143:5)\n    at _FormControlName._setUpControl (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4680:39)\n    at _FormControlName.ngOnChanges (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-5NT6O4YD.js?v=c33d86e0:4629:28)\n    at _FormControlName.rememberChangeHistoryAndInvokeOnChangesHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4055:10)\n    at callHookInternal (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4639:10)\n    at callHook (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4657:5)\n    at callHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4628:9)\n    at executeInitAndCheckHooks (http://127.0.0.1:4200/@fs/C:/Users/DC/Desktop/pharmacy/frontend/.angular/cache/18.2.21/pharma-management-system/vite/deps/chunk-QJB5IFYQ.js?v=c33d86e0:4597:5)"
+    }
+  ],
+  "pageErrors": [],
+  "failedRequests": [
+    {
+      "url": "http://localhost:3001/api/v1/cashbook/receipts?page=1&limit=20",
+      "status": 400,
+      "route": "http://127.0.0.1:4200/cashbook"
+    },
+    {
+      "url": "http://localhost:3001/api/v1/cashbook/payments?page=1&limit=20",
+      "status": 400,
+      "route": "http://127.0.0.1:4200/cashbook"
+    },
+    {
+      "url": "http://localhost:3001/api/v1/users?role=salesman&limit=200",
+      "status": 500,
+      "route": "http://127.0.0.1:4200/cashbook"
+    },
+    {
+      "url": "http://localhost:3001/api/v1/tax",
+      "status": 404,
+      "route": "http://127.0.0.1:4200/tax-config"
+    }
+  ],
+  "finishedAt": "2026-04-27T16:46:14.932Z",
+  "summary": {
+    "listPagesPassed": 22,
+    "listPagesFailed": 4,
+    "generationPagesPassed": 7,
+    "generationPagesFailed": 0,
+    "apiChecksPassed": 8,
+    "apiChecksFailed": 2,
+    "consoleErrorCount": 30,
+    "pageErrorCount": 0,
+    "failedRequestCount": 4
+  }
+}

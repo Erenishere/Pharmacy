@@ -2,6 +2,18 @@ const PurchaseOrder = require('../models/PurchaseOrder');
 const Supplier = require('../models/Supplier');
 const Item = require('../models/Item');
 
+const getObjectId = (value) => value?._id || value;
+const getTotalUnitQuantity = (item) => ((item.boxQty || 0) * (item.boxPacking || 1)) + (item.unitQty || 0);
+const getUnitPurchasePrice = (item) => {
+  if (item.unitTP !== undefined && item.unitTP > 0) {
+    return item.unitTP;
+  }
+  if (item.boxTP !== undefined && item.boxTP > 0) {
+    return item.boxTP / (item.boxPacking || 1);
+  }
+  return 0;
+};
+
 /**
  * Purchase Order Service
  * Requirements 4.1-4.18: Complete Purchase Order Management
@@ -414,25 +426,32 @@ class PurchaseOrderService {
     // Requirement 4.12: Auto-fill all PO details
     const invoiceData = {
       invoiceType: 'purchase',
-      supplierId: purchaseOrder.supplierId._id,
+      supplierId: getObjectId(purchaseOrder.supplierId),
       invoiceDate: additionalData.invoiceDate || new Date(),
+      dueDate: additionalData.dueDate,
       supplierBillNo: additionalData.supplierBillNo || `PO-${purchaseOrder.poNumber}`,
       poNumber: purchaseOrder.poNumber,
       poId: purchaseOrder._id,
 
       // Map PO items to invoice items
-      items: purchaseOrder.items.map((item) => ({
-        itemId: item.itemId._id,
-        itemName: item.itemName,
-        boxPacking: item.boxPacking,
-        boxQty: item.boxQty,
-        unitQty: item.unitQty,
-        boxTP: item.boxTP,
-        unitTP: item.unitTP,
-        discount: item.discount,
-        warehouseId: additionalData.warehouseId, // Required for goods receipt
-        gstRate: additionalData.gstRate || 18, // Default to 18% if not specified
-      })),
+      items: purchaseOrder.items.map((item) => {
+        const itemId = getObjectId(item.itemId);
+        const itemIdKey = itemId.toString();
+        return {
+          itemId,
+          itemName: item.itemName,
+          quantity: getTotalUnitQuantity(item),
+          unitPrice: getUnitPurchasePrice(item),
+          boxPacking: item.boxPacking,
+          boxQty: item.boxQty,
+          unitQty: item.unitQty,
+          boxTP: item.boxTP,
+          unitTP: item.unitTP,
+          discount: item.discount,
+          warehouseId: additionalData.warehouseId || item.warehouseId,
+          batchInfo: additionalData.batchInfoByItemId?.[itemIdKey] || additionalData.batchInfo || item.batchInfo || {},
+        };
+      }),
 
       notes: additionalData.notes || `Converted from PO: ${purchaseOrder.poNumber}`,
       createdBy: userId,

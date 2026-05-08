@@ -1,15 +1,137 @@
+const mongoose = require('mongoose');
 const CashReceipt = require('../models/CashReceipt');
 const Invoice = require('../models/Invoice');
 const Customer = require('../models/Customer');
-const Account = require('../models/Account');
 const ledgerService = require('./ledgerService');
 const counterService = require('../utils/counterService');
+const { resolveCashAccount } = require('./cashAccountResolver');
+const {
+  applyInvoiceAllocations,
+  reverseInvoiceAllocations,
+} = require('./invoicePaymentAllocationService');
 
 /**
  * Cash Receipt Service
  * Requirement 1: Cash Receipt Management with invoice-wise allocation
  */
 class CashReceiptService {
+  async createCashReceipt(receiptData) {
+    return this.createReceipt(receiptData, receiptData.createdBy);
+  }
+
+  async getAllCashReceipts(filters = {}, options = {}) {
+    return this.getReceipts({
+      ...filters,
+      dateFrom: filters.dateFrom || filters.startDate,
+      dateTo: filters.dateTo || filters.endDate,
+    }, options);
+  }
+
+  async getCashReceiptById(id) {
+    return this.getReceiptById(id);
+  }
+
+  async updateCashReceipt(id, receiptData) {
+    const existing = await CashReceipt.findById(id);
+    if (!existing) {
+      throw new Error('Cash receipt not found');
+    }
+
+    const protectedFields = [
+      'amount',
+      'customerId',
+      'cashAccountId',
+      'cashAccount',
+      'paymentMethod',
+      'invoiceAllocations',
+      'allocations',
+      'receiptDate',
+    ];
+    const changesProtectedAccounting = protectedFields.some((field) => receiptData[field] !== undefined);
+    if (changesProtectedAccounting) {
+      throw new Error('Accounting fields cannot be edited after posting. Cancel and recreate the receipt.');
+    }
+
+    const receipt = await CashReceipt.findByIdAndUpdate(id, receiptData, {
+      new: true,
+      runValidators: true,
+    });
+    if (!receipt) {
+      throw new Error('Cash receipt not found');
+    }
+    return receipt;
+  }
+
+  async clearCashReceipt(id, userId) {
+    const receipt = await CashReceipt.findById(id);
+    if (!receipt) {
+      throw new Error('Receipt not found');
+    }
+    if (typeof receipt.clearReceipt === 'function') {
+      return receipt.clearReceipt();
+    }
+    receipt.status = 'cleared';
+    receipt.clearedDate = new Date();
+    receipt.clearedBy = userId;
+    return receipt.save();
+  }
+
+  async cancelCashReceipt(id, userId, reason = 'Cash receipt cancelled') {
+    const session = await mongoose.startSession();
+    let receipt;
+
+    try {
+      await session.withTransaction(async () => {
+        receipt = await CashReceipt.findById(id).session(session);
+        if (!receipt) {
+          throw new Error('Receipt not found');
+        }
+        if (receipt.status === 'cancelled') {
+          throw new Error('Receipt is already cancelled');
+        }
+
+        await this.reverseReceiptEffects(receipt, userId || receipt.createdBy, reason, { session });
+
+        receipt.status = 'cancelled';
+        receipt.cancellationReason = reason;
+        receipt.cancelledAt = new Date();
+        receipt.cancelledBy = userId;
+        await receipt.save({ session });
+      });
+    } finally {
+      await session.endSession();
+    }
+
+    return receipt;
+  }
+
+  async getPendingReceipts() {
+    return CashReceipt.findPendingReceipts();
+  }
+
+  async getReceiptStatistics(startDate, endDate) {
+    const query = {};
+    if (startDate || endDate) {
+      query.receiptDate = {};
+      if (startDate) query.receiptDate.$gte = startDate;
+      if (endDate) query.receiptDate.$lte = endDate;
+    }
+
+    const byStatus = await CashReceipt.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+          amount: { $sum: '$amount' },
+        },
+      },
+    ]);
+
+    const total = await CashReceipt.countDocuments(query);
+    return { total, byStatus };
+  }
+
   /**
    * Create cash receipt with invoice allocation
    * @param {Object} receiptData - Receipt data
@@ -22,69 +144,85 @@ class CashReceiptService {
       receiptDate,
       amount,
       paymentMethod,
+      bankDetails,
       chequeDetails,
-      invoiceAllocations,
       cashAccountId,
+      cashAccount,
       notes,
+      description,
     } = receiptData;
+    const selectedPaymentMethod = paymentMethod || 'cash';
+    const selectedBankDetails = bankDetails || chequeDetails;
+    const invoiceAllocations = receiptData.invoiceAllocations || receiptData.allocations || [];
 
-    // Validate customer
-    const customer = await Customer.findById(customerId);
-    if (!customer) {
-      throw new Error('Customer not found');
-    }
+    const session = await mongoose.startSession();
+    let receipt;
 
-    // Validate cash account
-    const cashAccount = await Account.findById(cashAccountId);
-    if (!cashAccount) {
-      throw new Error('Cash account not found');
-    }
-
-    // Validate invoice allocations
-    let totalAllocated = 0;
-    if (invoiceAllocations && invoiceAllocations.length > 0) {
-      for (const allocation of invoiceAllocations) {
-        const invoice = await Invoice.findById(allocation.invoiceId);
-        if (!invoice) {
-          throw new Error(`Invoice ${allocation.invoiceId} not found`);
+    try {
+      await session.withTransaction(async () => {
+        const customer = await Customer.findById(customerId).session(session);
+        if (!customer) {
+          throw new Error('Customer not found');
         }
-        if (invoice.customerId.toString() !== customerId.toString()) {
-          throw new Error(`Invoice ${invoice.invoiceNumber} does not belong to selected customer`);
+
+        const cashLedgerAccount = await resolveCashAccount({
+          cashAccountId,
+          cashAccount,
+          paymentMethod: selectedPaymentMethod,
+        }, session);
+
+        let totalAllocated = 0;
+        if (invoiceAllocations && invoiceAllocations.length > 0) {
+          for (const allocation of invoiceAllocations) {
+            const invoice = await Invoice.findById(allocation.invoiceId).session(session);
+            if (!invoice) {
+              throw new Error(`Invoice ${allocation.invoiceId} not found`);
+            }
+            if (invoice.customerId.toString() !== customerId.toString()) {
+              throw new Error(`Invoice ${invoice.invoiceNumber} does not belong to selected customer`);
+            }
+            const allocationAmount = Number(allocation.amount || 0);
+            if (!Number.isFinite(allocationAmount) || allocationAmount <= 0) {
+              throw new Error('Allocation amount must be greater than 0');
+            }
+            totalAllocated += allocationAmount;
+          }
         }
-        totalAllocated += allocation.amount;
-      }
+
+        if (totalAllocated > Number(amount || 0)) {
+          throw new Error('Total allocated amount cannot exceed receipt amount');
+        }
+
+        const difference = amount - totalAllocated;
+        const receiptNumber = await this.generateReceiptNumber();
+
+        [receipt] = await CashReceipt.create([{
+          receiptNumber,
+          customerId,
+          cashAccountId: cashLedgerAccount._id,
+          receiptDate: receiptDate || new Date(),
+          amount,
+          paymentMethod: selectedPaymentMethod,
+          bankDetails: selectedPaymentMethod === 'cheque' ? selectedBankDetails : undefined,
+          invoiceAllocations: invoiceAllocations || [],
+          totalAllocated,
+          difference,
+          notes: notes || description || '',
+          description: description || notes || '',
+          status: selectedPaymentMethod === 'cheque' && (selectedBankDetails?.isPostDated || receiptData.postDatedCheque) ? 'pending' : 'cleared',
+          postDatedCheque: Boolean(receiptData.postDatedCheque || selectedBankDetails?.isPostDated),
+          createdBy: userId,
+        }], { session });
+
+        if (invoiceAllocations && invoiceAllocations.length > 0) {
+          await this.updateInvoicePayments(invoiceAllocations, { session });
+        }
+
+        await this.createLedgerEntries(receipt, userId, { session });
+      });
+    } finally {
+      await session.endSession();
     }
-
-    // Calculate difference (advance/short)
-    const difference = amount - totalAllocated;
-
-    // Generate receipt number
-    const receiptNumber = await this.generateReceiptNumber();
-
-    // Create receipt
-    const receipt = await CashReceipt.create({
-      receiptNumber,
-      customerId,
-      cashAccountId,
-      receiptDate: receiptDate || new Date(),
-      amount,
-      paymentMethod: paymentMethod || 'cash',
-      chequeDetails: paymentMethod === 'cheque' ? chequeDetails : undefined,
-      invoiceAllocations: invoiceAllocations || [],
-      totalAllocated,
-      difference,
-      notes: notes || '',
-      status: paymentMethod === 'cheque' && chequeDetails?.isPostDated ? 'pending' : 'cleared',
-      createdBy: userId,
-    });
-
-    // Update invoice payment status
-    if (invoiceAllocations && invoiceAllocations.length > 0) {
-      await this.updateInvoicePayments(invoiceAllocations);
-    }
-
-    // Create ledger entries
-    await this.createLedgerEntries(receipt, userId);
 
     return receipt;
   }
@@ -101,27 +239,8 @@ class CashReceiptService {
    * Update invoice payment status based on allocations
    * @param {Array} allocations - Invoice allocations
    */
-  async updateInvoicePayments(allocations) {
-    for (const allocation of allocations) {
-      const invoice = await Invoice.findById(allocation.invoiceId);
-      if (!invoice) continue;
-
-      const paidAmount = (invoice.paidAmount || 0) + allocation.amount;
-      const dueAmount = invoice.totals.grandTotal - paidAmount;
-
-      let paymentStatus = 'pending';
-      if (dueAmount <= 0) {
-        paymentStatus = 'paid';
-      } else if (paidAmount > 0) {
-        paymentStatus = 'partial';
-      }
-
-      await Invoice.findByIdAndUpdate(allocation.invoiceId, {
-        paidAmount,
-        dueAmount,
-        paymentStatus,
-      });
-    }
+  async updateInvoicePayments(allocations, options = {}) {
+    await applyInvoiceAllocations(allocations, options);
   }
 
   /**
@@ -129,12 +248,12 @@ class CashReceiptService {
    * @param {Object} receipt - Receipt object
    * @param {string} userId - User ID
    */
-  async createLedgerEntries(receipt, userId) {
+  async createLedgerEntries(receipt, userId, options = {}) {
     const description = `Cash Receipt ${receipt.receiptNumber} - ${receipt.notes || 'Payment received'}`;
 
     // Debit Cash/Bank Account
     const debitAccount = {
-      accountId: receipt.paymentMethod === 'cheque' ? 'BANK_ACCOUNT' : 'CASH_ACCOUNT',
+      accountId: receipt.cashAccountId,
       accountType: 'Account',
     };
 
@@ -152,6 +271,7 @@ class CashReceiptService {
       'cash_receipt',
       receipt._id,
       userId,
+      options,
     );
   }
 
@@ -178,6 +298,7 @@ class CashReceiptService {
     const [receipts, total] = await Promise.all([
       CashReceipt.find(query)
         .populate('customerId', 'name code')
+        .populate('cashAccountId', 'name code balance')
         .populate('createdBy', 'username')
         .sort(sort)
         .skip(skip)
@@ -205,6 +326,7 @@ class CashReceiptService {
   async getReceiptById(id) {
     const receipt = await CashReceipt.findById(id)
       .populate('customerId', 'name code contactPerson phone')
+      .populate('cashAccountId', 'name code balance')
       .populate('invoiceAllocations.invoiceId', 'invoiceNumber invoiceDate totals')
       .populate('createdBy', 'username email');
 
@@ -215,6 +337,30 @@ class CashReceiptService {
     return receipt;
   }
 
+  async recordPostDatedCheque(receiptData) {
+    return this.createReceipt({
+      ...receiptData,
+      paymentMethod: 'cheque',
+      postDatedCheque: true,
+    }, receiptData.createdBy);
+  }
+
+  async clearCheque(id, userId) {
+    return this.clearPDC(id, userId);
+  }
+
+  async bounceCheque(id, reason, userId) {
+    return this.bouncePDC(id, reason, userId);
+  }
+
+  async getPendingPostDatedCheques() {
+    return this.getPendingPDCs();
+  }
+
+  async applyPaymentToInvoices(receiptData) {
+    return this.createReceipt(receiptData, receiptData.createdBy);
+  }
+
   /**
    * Get pending PDCs
    * @returns {Promise<Array>} Pending PDCs
@@ -222,11 +368,12 @@ class CashReceiptService {
   async getPendingPDCs() {
     return await CashReceipt.find({
       paymentMethod: 'cheque',
-      'chequeDetails.isPostDated': true,
+      postDatedCheque: true,
       status: 'pending',
     })
       .populate('customerId', 'name code')
-      .sort({ 'chequeDetails.chequeDate': 1 })
+      .populate('cashAccountId', 'name code balance')
+      .sort({ 'bankDetails.chequeDate': 1 })
       .lean();
   }
 
@@ -247,6 +394,7 @@ class CashReceiptService {
     }
 
     receipt.status = 'cleared';
+    receipt.chequeStatus = 'cleared';
     receipt.clearedDate = new Date();
     receipt.clearedBy = userId;
     await receipt.save();
@@ -262,48 +410,58 @@ class CashReceiptService {
    * @returns {Promise<Object>} Updated receipt
    */
   async bouncePDC(id, reason, userId) {
-    const receipt = await CashReceipt.findById(id);
-    if (!receipt) {
-      throw new Error('Receipt not found');
-    }
+    const session = await mongoose.startSession();
+    let receipt;
 
-    receipt.status = 'bounced';
-    receipt.bounceReason = reason;
-    receipt.bouncedDate = new Date();
-    receipt.bouncedBy = userId;
-    await receipt.save();
+    try {
+      await session.withTransaction(async () => {
+        receipt = await CashReceipt.findById(id).session(session);
+        if (!receipt) {
+          throw new Error('Receipt not found');
+        }
+        if (receipt.status === 'bounced') {
+          throw new Error('Receipt is already bounced');
+        }
+        if (receipt.status === 'cancelled') {
+          throw new Error('Cancelled receipt cannot be bounced');
+        }
 
-    // Reverse invoice payments
-    if (receipt.invoiceAllocations && receipt.invoiceAllocations.length > 0) {
-      await this.reverseInvoicePayments(receipt.invoiceAllocations);
+        await this.reverseReceiptEffects(receipt, userId || receipt.createdBy, reason || 'Cheque bounced', { session });
+
+        receipt.status = 'bounced';
+        receipt.chequeStatus = 'bounced';
+        receipt.bounceReason = reason;
+        receipt.bouncedDate = new Date();
+        receipt.bouncedBy = userId;
+        await receipt.save({ session });
+      });
+    } finally {
+      await session.endSession();
     }
 
     return receipt;
+  }
+
+  async reverseReceiptEffects(receipt, userId, reason, options = {}) {
+    if (receipt.invoiceAllocations && receipt.invoiceAllocations.length > 0) {
+      await this.reverseInvoicePayments(receipt.invoiceAllocations, options);
+    }
+
+    try {
+      await ledgerService.reverseLedgerEntries('cash_receipt', receipt._id, reason, userId, options);
+    } catch (error) {
+      if (!error.message.includes('No ledger entries found')) {
+        throw error;
+      }
+    }
   }
 
   /**
    * Reverse invoice payments
    * @param {Array} allocations - Invoice allocations
    */
-  async reverseInvoicePayments(allocations) {
-    for (const allocation of allocations) {
-      const invoice = await Invoice.findById(allocation.invoiceId);
-      if (!invoice) continue;
-
-      const paidAmount = Math.max(0, (invoice.paidAmount || 0) - allocation.amount);
-      const dueAmount = invoice.totals.grandTotal - paidAmount;
-
-      let paymentStatus = 'pending';
-      if (paidAmount > 0) {
-        paymentStatus = 'partial';
-      }
-
-      await Invoice.findByIdAndUpdate(allocation.invoiceId, {
-        paidAmount,
-        dueAmount,
-        paymentStatus,
-      });
-    }
+  async reverseInvoicePayments(allocations, options = {}) {
+    await reverseInvoiceAllocations(allocations, options);
   }
 
   /**
@@ -318,7 +476,7 @@ class CashReceiptService {
       status: 'confirmed',
       paymentStatus: { $in: ['pending', 'partial'] },
     })
-      .select('invoiceNumber invoiceDate totals paidAmount dueAmount')
+      .select('invoiceNumber invoiceDate totals')
       .sort({ invoiceDate: 1 })
       .lean();
   }

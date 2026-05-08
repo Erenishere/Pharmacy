@@ -88,6 +88,19 @@ class BiltyReceiptService {
     return doc;
   }
 
+  async updateStatus(id, status) {
+    if (!['pending', 'received', 'sent'].includes(status)) {
+      throw new Error('Status must be one of: pending, received, sent');
+    }
+
+    const doc = await BiltyReceipt.findByIdAndUpdate(id, { status }, { new: true, runValidators: true })
+      .populate('partyId', 'name town')
+      .populate('claimAccountId', 'name')
+      .populate('createdBy', 'name username');
+    if (!doc) throw new Error('Bilty receipt not found');
+    return doc;
+  }
+
   async delete(id) {
     const doc = await BiltyReceipt.findByIdAndDelete(id);
     if (!doc) throw new Error('Bilty receipt not found');

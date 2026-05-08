@@ -13,6 +13,8 @@ const eventPublisherService = require('./eventPublisherService');
 const { executeTransactionalOperation } = require('../utils/transactionUtils');
 const AppError = require('../utils/appError');
 
+const getObjectId = (value) => value?._id || value;
+
 /**
  * Sales Invoice Service
  * Core business logic for sales invoice management
@@ -300,19 +302,23 @@ class SalesInvoiceService {
   async processConfirmation(invoice, userId, session) {
     // 1. Create stock movement records
     for (const item of invoice.items) {
-      const totalQuantity = (item.totalUnitQty || 0) + (item.scheme1Qty || 0) + (item.scheme2Qty || 0);
+      const batchNumber = item.batchNumber || item.batchInfo?.batchNumber;
+      const totalQuantity =
+        (item.totalUnitQty || item.quantity || 0) +
+        (item.scheme1Qty || item.scheme1Quantity || 0) +
+        (item.scheme2Qty || item.scheme2Quantity || 0);
 
       if (totalQuantity === 0) continue;
 
       await StockMovement.create([{
-        itemId: item.itemId,
-        warehouse: item.warehouseId,
+        itemId: getObjectId(item.itemId),
+        warehouse: getObjectId(item.warehouseId),
         movementType: 'out',
         quantity: totalQuantity,
         referenceType: 'sales_invoice',
         referenceId: invoice._id,
         batchInfo: {
-          batchNumber: item.batchNumber,
+          batchNumber,
         },
         movementDate: invoice.invoiceDate,
         notes: `Sales Invoice ${invoice.invoiceNumber}`,
@@ -322,11 +328,11 @@ class SalesInvoiceService {
       // 2. Update item stock levels (B02: Using atomic $inc)
       const Inventory = require('../models/Inventory');
       const inventoryQuery = {
-        item: item.itemId,
-        warehouse: item.warehouseId,
+        item: getObjectId(item.itemId),
+        warehouse: getObjectId(item.warehouseId),
       };
-      if (item.batchNumber) {
-        inventoryQuery.batchNumber = item.batchNumber;
+      if (batchNumber) {
+        inventoryQuery.batchNumber = batchNumber;
       }
 
       await Inventory.findOneAndUpdate(
@@ -336,19 +342,15 @@ class SalesInvoiceService {
       );
 
       // 3. Update batch quantities
-      if (item.batchNumber) {
-        await batchService.deductFromBatch(item.batchNumber, totalQuantity, { session });
+      if (batchNumber) {
+        await batchService.deductFromBatch(batchNumber, totalQuantity, { session });
       }
     }
 
-    // 4. Sync Item.inventory.currentStock for all affected items
-    const itemIds = [...new Set(invoice.items.map(i => i.itemId.toString()))];
-    await Promise.all(itemIds.map(id => inventoryService.syncItemCurrentStock(id)));
-
-    // 5. Update customer balance (Atomic $inc)
+    // 4. Update customer balance (Atomic $inc)
     await Customer.findByIdAndUpdate(
-      invoice.customerId,
-      { $inc: { currentBalance: invoice.totals.netBillTotal } },
+      getObjectId(invoice.customerId),
+      { $inc: { currentBalance: invoice.totals?.netBillTotal || invoice.totals?.grandTotal || invoice.totals?.dueAmount || 0 } },
       { session },
     );
   }
@@ -407,11 +409,17 @@ class SalesInvoiceService {
 
     for (const item of items) {
       const {
-        itemId, warehouseId, totalUnitQty, scheme1Qty, scheme2Qty, batchNumber,
+        itemId, warehouseId, totalUnitQty, scheme1Qty, scheme2Qty,
       } = item;
+      const itemObjectId = getObjectId(itemId);
+      const warehouseObjectId = getObjectId(warehouseId);
+      const batchNumber = item.batchNumber || item.batchInfo?.batchNumber;
 
       // Total quantity needed (including scheme units)
-      const totalNeeded = totalUnitQty + scheme1Qty + scheme2Qty;
+      const totalNeeded =
+        (totalUnitQty || item.quantity || 0) +
+        (scheme1Qty || item.scheme1Quantity || 0) +
+        (scheme2Qty || item.scheme2Quantity || 0);
 
       // If batch number is specified, validate batch quantity
       if (batchNumber) {
@@ -432,8 +440,8 @@ class SalesInvoiceService {
         const mongoose = require('mongoose');
         
         const matchStage = {
-          item: new mongoose.Types.ObjectId(itemId),
-          warehouse: new mongoose.Types.ObjectId(warehouseId),
+          item: new mongoose.Types.ObjectId(itemObjectId),
+          warehouse: new mongoose.Types.ObjectId(warehouseObjectId),
           remainingQuantity: { $gt: 0 },
           expiryDate: { $gt: new Date() },
           status: 'active',
@@ -807,20 +815,26 @@ class SalesInvoiceService {
     }
 
     // Execute cancellation within transaction
-    return executeTransactionalOperation(async (session) => {
+    const cancelledInvoice = await executeTransactionalOperation(async (session) => {
       // 1. Reverse all stock movements
       for (const item of invoice.items) {
-        const totalQuantity = item.totalUnitQty + item.scheme1Qty + item.scheme2Qty;
+        const batchNumber = item.batchNumber || item.batchInfo?.batchNumber;
+        const totalQuantity =
+          (item.totalUnitQty || item.quantity || 0) +
+          (item.scheme1Qty || item.scheme1Quantity || 0) +
+          (item.scheme2Qty || item.scheme2Quantity || 0);
 
         // Create reverse stock movement (in)
         await StockMovement.create([{
-          itemId: item.itemId,
+          itemId: getObjectId(item.itemId),
+          warehouse: getObjectId(item.warehouseId),
           movementType: 'in',
           quantity: totalQuantity,
-          toWarehouse: item.warehouseId,
           referenceType: 'sales_invoice_cancellation',
           referenceId: invoice._id,
-          batchNumber: item.batchNumber,
+          batchInfo: {
+            batchNumber,
+          },
           movementDate: new Date(),
           notes: `Cancellation of Sales Invoice ${invoice.invoiceNumber}${reason ? ` - Reason: ${reason}` : ''}`,
           createdBy: userId,
@@ -828,108 +842,52 @@ class SalesInvoiceService {
 
         // 2. Restore item stock levels in warehouse
         const Inventory = require('../models/Inventory');
+        const inventoryQuery = { item: getObjectId(item.itemId), warehouse: getObjectId(item.warehouseId) };
+        if (batchNumber) {
+          inventoryQuery.batchNumber = batchNumber;
+        }
+
         await Inventory.findOneAndUpdate(
-          { item: item.itemId, warehouse: item.warehouseId },
+          inventoryQuery,
           { $inc: { quantity: totalQuantity } },
           { session },
         );
 
         // 3. Restore batch quantities if batch tracking is used
-        if (item.batchNumber) {
-          await batchService.returnToBatch(item.batchNumber, totalQuantity, session);
+        if (batchNumber) {
+          await batchService.returnToBatch(batchNumber, totalQuantity, { session });
         }
       }
 
-      // 4. Sync Item.inventory.currentStock for all restored items
-      const cancelledItemIds = [...new Set(invoice.items.map(i => i.itemId.toString()))];
-      await Promise.all(cancelledItemIds.map(id => inventoryService.syncItemCurrentStock(id)));
-
-      // 5. Reverse customer balance update using atomic $inc
+      // 4. Reverse customer balance update using atomic $inc
       await Customer.findByIdAndUpdate(
-        invoice.customerId,
-        { $inc: { currentBalance: -invoice.totals.netBillTotal } },
+        getObjectId(invoice.customerId),
+        { $inc: { currentBalance: -(invoice.totals?.netBillTotal || invoice.totals?.grandTotal || invoice.totals?.dueAmount || 0) } },
         { session },
       );
 
       // 6. Create all ledger entries for reversal
-      const ledgerEntries = [];
-
-      // Credit Customer Account (reverse the debit)
-      ledgerEntries.push({
-        accountId: invoice.customerId,
+      const ledgerEntries = [{
+        accountId: getObjectId(invoice.customerId),
         accountType: 'Customer',
-        entryType: 'credit',
-        amount: invoice.totals.netBillTotal,
+        transactionType: 'credit',
+        amount: invoice.totals?.netBillTotal || invoice.totals?.grandTotal || invoice.totals?.dueAmount || 0,
         description: `Cancellation of Sales Invoice ${invoice.invoiceNumber}${reason ? ` - ${reason}` : ''}`,
-        referenceType: 'sales_invoice_cancellation',
+        referenceType: 'adjustment',
         referenceId: invoice._id,
         transactionDate: new Date(),
         createdBy: userId,
-      });
-
-      // Debit Sales Account (reverse the credit)
-      ledgerEntries.push({
-        accountType: 'Sales',
-        entryType: 'debit',
-        amount: invoice.totals.grossTotal - invoice.totals.discountTotal,
-        description: `Cancellation of Sales Invoice ${invoice.invoiceNumber} - Sales Revenue Reversal`,
-        referenceType: 'sales_invoice_cancellation',
-        referenceId: invoice._id,
-        transactionDate: new Date(),
-        createdBy: userId,
-      });
-
-      // Debit GST Account (reverse the credit)
-      if (invoice.totals.gstTotal > 0) {
-        ledgerEntries.push({
-          accountType: 'GST_Payable',
-          entryType: 'debit',
-          amount: invoice.totals.gstTotal,
-          description: `Cancellation of Sales Invoice ${invoice.invoiceNumber} - GST Reversal`,
-          referenceType: 'sales_invoice_cancellation',
-          referenceId: invoice._id,
-          transactionDate: new Date(),
-          createdBy: userId,
-        });
-      }
-
-      // Debit Advance Tax Account (reverse the credit)
-      if (invoice.totals.advanceTaxTotal > 0) {
-        ledgerEntries.push({
-          accountType: 'Advance_Tax_Payable',
-          entryType: 'debit',
-          amount: invoice.totals.advanceTaxTotal,
-          description: `Cancellation of Sales Invoice ${invoice.invoiceNumber} - Advance Tax Reversal`,
-          referenceType: 'sales_invoice_cancellation',
-          referenceId: invoice._id,
-          transactionDate: new Date(),
-          createdBy: userId,
-        });
-      }
-
-      // Debit Non-Filer GST Account (reverse the credit)
-      if (invoice.totals.nonFilerGst > 0) {
-        ledgerEntries.push({
-          accountType: 'NonFiler_GST_Payable',
-          entryType: 'debit',
-          amount: invoice.totals.nonFilerGst,
-          description: `Cancellation of Sales Invoice ${invoice.invoiceNumber} - Non-Filer GST Reversal`,
-          referenceType: 'sales_invoice_cancellation',
-          referenceId: invoice._id,
-          transactionDate: new Date(),
-          createdBy: userId,
-        });
-      }
+      }];
 
       // If claim account was used, credit claim account (reverse the debit)
       if (invoice.claimAccountId && invoice.totals.discountTotal > 0) {
         ledgerEntries.push({
-          accountId: invoice.claimAccountId,
-          accountType: 'Claim_Account',
-          entryType: 'credit',
+          accountId: getObjectId(invoice.claimAccountId),
+          accountType: 'Account',
+          transactionType: 'credit',
           amount: invoice.totals.discountTotal,
           description: `Cancellation of Sales Invoice ${invoice.invoiceNumber} - Scheme Discount Reversal`,
-          referenceType: 'sales_invoice_cancellation',
+          referenceType: 'adjustment',
           referenceId: invoice._id,
           transactionDate: new Date(),
           createdBy: userId,
@@ -951,14 +909,20 @@ class SalesInvoiceService {
         { new: true, session },
       );
 
-      // Publish cancellation event
-      await eventPublisherService.publishInvoiceCancelled(invoice);
+      if (typeof eventPublisherService.publishInvoiceCancelled === 'function') {
+        await eventPublisherService.publishInvoiceCancelled(invoice);
+      }
 
       return this.getInvoiceById(cancelledInvoice._id);
     }, {
       maxRetries: 3,
       timeout: 30000,
     });
+
+    const cancelledItemIds = [...new Set(invoice.items.map(i => getObjectId(i.itemId).toString()))];
+    await Promise.all(cancelledItemIds.map(id => inventoryService.syncItemCurrentStock(id)));
+
+    return cancelledInvoice;
   }
 
   /**
@@ -977,7 +941,7 @@ class SalesInvoiceService {
     }
 
     // Execute confirmation within transaction
-    return executeTransactionalOperation(async (session) => {
+    const confirmedInvoice = await executeTransactionalOperation(async (session) => {
       // Validate stock availability for all items within transaction
       await this.validateStockAvailability(invoice.items, session);
 
@@ -1003,6 +967,46 @@ class SalesInvoiceService {
       maxRetries: 3,
       timeout: 30000,
     });
+
+    const itemIds = [...new Set(invoice.items.map(i => getObjectId(i.itemId).toString()))];
+    await Promise.all(itemIds.map(id => inventoryService.syncItemCurrentStock(id)));
+
+    return confirmedInvoice;
+  }
+
+  async confirmSalesInvoice(id, userId) {
+    const invoice = await this.confirmInvoice(id, userId);
+    return { invoice };
+  }
+
+  async cancelSalesInvoice(id, userId, reason = '') {
+    return this.cancelInvoice(id, userId, reason);
+  }
+
+  async getInvoiceStockMovements(invoiceId) {
+    return StockMovement.find({
+      referenceId: invoiceId,
+      referenceType: { $in: ['sales_invoice', 'sales_invoice_cancellation'] },
+    }).sort({ movementDate: 1 });
+  }
+
+  /**
+   * Get confirmed customer invoices that still have an outstanding balance.
+   * Used by cashbook invoice allocation screens.
+   * @param {string} customerId - Customer ID
+   * @returns {Promise<Array>} Pending customer invoices
+   */
+  async getPendingInvoices(customerId) {
+    return Invoice.find({
+      customerId,
+      type: 'sales',
+      status: 'confirmed',
+      paymentStatus: { $in: ['pending', 'partial'] },
+      'totals.dueAmount': { $gt: 0 },
+    })
+      .select('invoiceNumber invoiceDate dueDate totals paymentStatus status createdAt')
+      .sort({ invoiceDate: 1 })
+      .lean();
   }
 }
 

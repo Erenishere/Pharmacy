@@ -3,8 +3,10 @@ const express = require('express');
 const router = express.Router();
 const { body, param, query } = require('express-validator');
 const auth = require('../middleware/auth');
+const { clearCacheMiddleware } = require('../middleware/cacheMiddleware');
 const { validate } = require('../middleware/validation');
 const dimensionController = require('../controllers/dimensionController');
+const clearAccountRegistrationLookupsCache = clearCacheMiddleware(['accounts:registration-lookups']);
 
 // Validation rules
 const createDimensionValidation = [
@@ -93,8 +95,8 @@ router.get('/', dimensionController.getAllDimensions);
 router.get('/types', dimensionController.getDimensionTypes);
 router.get('/roots', dimensionController.getRootDimensions);
 router.get('/:id', [param('id').isMongoId().withMessage('Invalid dimension ID'), validate], dimensionController.getDimensionById);
-router.post('/', auth.authorize(['admin', 'manager']), createDimensionValidation, dimensionController.createDimension);
-router.put('/:id', auth.authorize(['admin', 'manager']), updateDimensionValidation, dimensionController.updateDimension);
-router.delete('/:id', auth.authorize(['admin']), [param('id').isMongoId().withMessage('Invalid dimension ID'), validate], dimensionController.deleteDimension);
+router.post('/', auth.authorize(['admin', 'manager']), createDimensionValidation, clearAccountRegistrationLookupsCache, dimensionController.createDimension);
+router.put('/:id', auth.authorize(['admin', 'manager']), updateDimensionValidation, clearAccountRegistrationLookupsCache, dimensionController.updateDimension);
+router.delete('/:id', auth.authorize(['admin']), [param('id').isMongoId().withMessage('Invalid dimension ID'), validate], clearAccountRegistrationLookupsCache, dimensionController.deleteDimension);
 
 module.exports = router;

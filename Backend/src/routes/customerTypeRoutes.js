@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const CustomerType = require('../models/customertype');
 const Response = require('../utils/response');
+const { clearCacheMiddleware } = require('../middleware/cacheMiddleware');
+
+const clearAccountRegistrationLookupsCache = clearCacheMiddleware(['accounts:registration-lookups']);
 
 // Get all customer types
 router.get('/', async (req, res) => {
@@ -14,7 +17,7 @@ router.get('/', async (req, res) => {
 });
 
 // Create new customer type
-router.post('/', async (req, res) => {
+router.post('/', clearAccountRegistrationLookupsCache, async (req, res) => {
     try {
         const type = new CustomerType(req.body);
         await type.save();
@@ -25,7 +28,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update customer type
-router.put('/:id', async (req, res) => {
+router.put('/:id', clearAccountRegistrationLookupsCache, async (req, res) => {
     try {
         const type = await CustomerType.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!type) return Response.error(res, 'Customer type not found', 404);
@@ -36,7 +39,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete customer type (soft delete)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', clearAccountRegistrationLookupsCache, async (req, res) => {
     try {
         const type = await CustomerType.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
         if (!type) return Response.error(res, 'Customer type not found', 404);

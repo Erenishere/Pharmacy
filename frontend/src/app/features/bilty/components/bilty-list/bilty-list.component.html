@@ -1,8 +1,11 @@
 <div class="list-page-container bilty-list-page">
   <div class="list-page-header">
     <div class="header-content">
-      <h1 class="page-title"><mat-icon>local_shipping</mat-icon> Bilty Management</h1>
-      <p class="page-subtitle">Create and manage shipment receipts</p>
+      <div class="title-with-accent">
+        <div class="header-accent-bar"></div>
+        <h1 class="page-title"><mat-icon>local_shipping</mat-icon> Bilty Management</h1>
+      </div>
+      <p class="page-subtitle">Track and manage outgoing shipments and transport bills (Total: {{ totalItems }})</p>
     </div>
     <div class="header-actions">
       <button mat-raised-button color="primary" class="create-btn" (click)="openCreate()">
@@ -11,8 +14,50 @@
     </div>
   </div>
 
+  <div class="dashboard-stats-grid">
+    <div class="stat-card primary">
+      <div class="stat-icon-wrapper"><mat-icon>local_shipping</mat-icon></div>
+      <div class="stat-data">
+        <span class="value">{{ summary.totalBiltys }}</span>
+        <span class="label">Total Biltys</span>
+      </div>
+    </div>
+
+    <div class="stat-card warning">
+      <div class="stat-icon-wrapper"><mat-icon>schedule</mat-icon></div>
+      <div class="stat-data">
+        <span class="value">{{ summary.pendingBiltys }}</span>
+        <span class="label">Pending</span>
+      </div>
+    </div>
+
+    <div class="stat-card success">
+      <div class="stat-icon-wrapper"><mat-icon>check_circle</mat-icon></div>
+      <div class="stat-data">
+        <span class="value">{{ summary.receivedBiltys }}</span>
+        <span class="label">Received</span>
+      </div>
+    </div>
+
+    <div class="stat-card info">
+      <div class="stat-icon-wrapper"><mat-icon>send</mat-icon></div>
+      <div class="stat-data">
+        <span class="value">{{ summary.sentBiltys }}</span>
+        <span class="label">Sent</span>
+      </div>
+    </div>
+
+    <div class="stat-card primary-alt">
+      <div class="stat-icon-wrapper"><mat-icon>payments</mat-icon></div>
+      <div class="stat-data">
+        <span class="value amount">Rs. {{ formatCurrency(summary.totalAmount) }}</span>
+        <span class="label">Total Amount</span>
+      </div>
+    </div>
+  </div>
+
   <div class="list-page-card">
-    <div class="list-filters-section">
+    <div class="bilty-table-toolbar">
       <div class="filter-group-primary">
         <div class="section-title">
           <mat-icon>list_alt</mat-icon>
@@ -123,12 +168,19 @@
                 <button mat-menu-item (click)="openEdit(row)">
                   <mat-icon>edit</mat-icon> Edit
                 </button>
+                @if (getNextStatus(row); as nextStatus) {
+                  <button mat-menu-item (click)="onStatusTransition(row)">
+                    <mat-icon>{{ nextStatus === 'received' ? 'inventory' : 'send' }}</mat-icon> {{ getTransitionLabel(row) }}
+                  </button>
+                }
                 <button mat-menu-item (click)="onPrint(row)">
                   <mat-icon>print</mat-icon> Print
                 </button>
-                <button mat-menu-item (click)="onDelete(row)">
-                  <mat-icon color="warn">delete</mat-icon> Delete
-                </button>
+                @if (canDelete(row)) {
+                  <button mat-menu-item (click)="onDelete(row)">
+                    <mat-icon color="warn">delete</mat-icon> Delete
+                  </button>
+                }
               </mat-menu>
             </td>
           </ng-container>
@@ -136,23 +188,19 @@
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
-          <tr class="mat-row empty-state-row" *matNoDataRow>
-            <td class="mat-cell" colspan="12">
-              <div class="empty-state-premium">
-                <div class="icon-wrapper">
-                  <mat-icon>inbox</mat-icon>
-                  <div class="icon-bg-glow"></div>
-                </div>
-                <h4>No bilty receipts found</h4>
-                <p>There is no data to display matching the current criteria.</p>
+          <tr class="mat-mdc-no-data-row no-data-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+              <div class="table-empty-state">
+                <mat-icon>local_shipping</mat-icon>
+                <h4>No bilty records found</h4>
+                <p>Try adjusting your filters or create a new bilty entry.</p>
               </div>
             </td>
           </tr>
         </table>
 
-        
-
         <mat-paginator
+          class="standard-purple-footer"
           [length]="totalItems"
           [pageSize]="pageSize"
           [pageIndex]="pageIndex"

@@ -5,6 +5,10 @@ module.exports = {
     '**/__tests__/**/*.js',
     '**/?(*.)+(spec|test).js'
   ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '<rootDir>/src/test/'
+  ],
   collectCoverageFrom: [
     'src/**/*.js',
     '!src/server.js',

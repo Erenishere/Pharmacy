@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { API_CONFIG } from '../../../core/constants/api.constants';
 import {
     Batch,
@@ -74,28 +75,36 @@ export class BatchService {
      * Get batch by ID
      */
     getBatchById(id: string): Observable<Batch> {
-        return this.http.get<Batch>(`${this.apiUrl}/${id}`);
+        return this.http.get<{ success: boolean; data: Batch }>(`${this.apiUrl}/${id}`).pipe(
+            map(response => response.data)
+        );
     }
 
     /**
      * Create new batch
      */
     createBatch(batch: CreateBatchRequest): Observable<Batch> {
-        return this.http.post<Batch>(this.apiUrl, batch);
+        return this.http.post<{ success: boolean; data: Batch }>(this.apiUrl, batch).pipe(
+            map(response => response.data)
+        );
     }
 
     /**
      * Update existing batch
      */
     updateBatch(id: string, batch: UpdateBatchRequest): Observable<Batch> {
-        return this.http.put<Batch>(`${this.apiUrl}/${id}`, batch);
+        return this.http.put<{ success: boolean; data: Batch }>(`${this.apiUrl}/${id}`, batch).pipe(
+            map(response => response.data)
+        );
     }
 
     /**
      * Adjust batch quantity
      */
     adjustQuantity(id: string, adjustment: QuantityAdjustment): Observable<Batch> {
-        return this.http.patch<Batch>(`${this.apiUrl}/${id}/quantity`, adjustment);
+        return this.http.patch<{ success: boolean; data: Batch }>(`${this.apiUrl}/${id}/quantity`, adjustment).pipe(
+            map(response => response.data)
+        );
     }
 
     /**
@@ -113,14 +122,18 @@ export class BatchService {
         if (locationId) {
             params = params.set('locationId', locationId);
         }
-        return this.http.get<Batch[]>(`${this.apiUrl}/expiring-soon`, { params });
+        return this.http.get<{ success: boolean; data: Batch[] }>(`${this.apiUrl}/expiring-soon`, { params }).pipe(
+            map(response => response.data)
+        );
     }
 
     /**
      * Get next batch number for an item
      */
     getNextBatchNumber(itemId: string): Observable<{ batchNumber: string }> {
-        return this.http.get<{ batchNumber: string }>(`${API_CONFIG.BASE_URL}/items/${itemId}/next-batch-number`);
+        return this.http.get<{ success: boolean; data: { batchNumber: string } }>(`${API_CONFIG.BASE_URL}/items/${itemId}/next-batch-number`).pipe(
+            map(response => response.data)
+        );
     }
 
     /**
@@ -148,6 +161,8 @@ export class BatchService {
         if (locationId) {
             params = params.set('locationId', locationId);
         }
-        return this.http.get<Batch[]>(`${this.apiUrl}/expired`, { params });
+        return this.http.get<{ success: boolean; data: Batch[] }>(`${this.apiUrl}/expired`, { params }).pipe(
+            map(response => response.data)
+        );
     }
 }

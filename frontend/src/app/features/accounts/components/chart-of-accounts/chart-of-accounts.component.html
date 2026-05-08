@@ -78,10 +78,6 @@
                   <button mat-menu-item (click)="onAddSubAccount(node)" *ngIf="node.level < 3">
                     <mat-icon>add</mat-icon> Add Sub-Account
                   </button>
-                  <mat-divider></mat-divider>
-                  <button mat-menu-item (click)="onDeleteAccountHead(node)" class="delete-action">
-                    <mat-icon>delete</mat-icon> Delete
-                  </button>
                 </mat-menu>
               </div>
             </div>
@@ -126,10 +122,6 @@
                   </button>
                   <button mat-menu-item (click)="onAddSubAccount(node)" *ngIf="node.level < 3">
                     <mat-icon>add</mat-icon> Add Sub-Account
-                  </button>
-                  <mat-divider></mat-divider>
-                  <button mat-menu-item (click)="onDeleteAccountHead(node)" class="delete-action">
-                    <mat-icon>delete</mat-icon> Delete
                   </button>
                 </mat-menu>
               </div>

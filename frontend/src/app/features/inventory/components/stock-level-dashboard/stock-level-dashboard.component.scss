@@ -6,79 +6,56 @@
 }
 
 .stock-dashboard-page {
-  /* Dashboard Stats Grid - Balanced 4-column layout */
-  .dashboard-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
-    margin-bottom: 24px;
+  /* Header Actions */
+  .list-page-header {
+    @include page-header;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
 
-    @media (max-width: 1200px) {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    @media (max-width: 600px) {
-      grid-template-columns: 1fr;
-    }
-
-    .stat-card {
-      @include layered-glass;
-      padding: 24px;
+    .header-actions {
       display: flex;
       align-items: center;
-      gap: 20px;
-      border: 1px solid $grey-very-light !important;
-      border-radius: 12px;
+      gap: 8px;
+      flex-wrap: wrap;
 
-      .stat-icon-wrapper {
-        width: 54px;
-        height: 54px;
-        border-radius: 12px;
+      button {
         display: flex;
         align-items: center;
-        justify-content: center;
-        
+        gap: 4px;
+        background-color: white;
+        color: $purple;
+        border: 1px solid rgba($purple, 0.3);
+
         mat-icon {
-          font-size: 28px;
-          width: 28px;
-          height: 28px;
-        }
-      }
-
-      .stat-data {
-        display: flex;
-        flex-direction: column;
-
-        .label {
-          color: $grey-dark;
-          font-size: 13px;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+          color: $purple;
         }
 
-        .value {
-          color: $text-card-title;
-          font-size: 24px;
-          font-weight: 700;
-          font-family: 'Outfit', sans-serif;
+        &:hover {
+          background-color: rgba($purple, 0.1);
         }
-      }
 
-      /* Variant colors */
-      &.primary {
-        .stat-icon-wrapper { background: rgba(var(--color-bg-page), 0.1); mat-icon { color: $purple; } }
-      }
-      &.success {
-        .stat-icon-wrapper { background: rgba($success, 0.1); mat-icon { color: $success; } }
-      }
-      &.warning {
-        .stat-icon-wrapper { background: rgba($warning, 0.1); mat-icon { color: $warning; } }
-      }
-      &.danger {
-        .stat-icon-wrapper { background: rgba($danger, 0.1); mat-icon { color: $danger; } }
+        &.active {
+          background-color: $purple;
+          color: white;
+          border-color: $purple;
+
+          mat-icon {
+            color: white;
+          }
+        }
       }
     }
+  }
+
+  .dashboard-stats-grid {
+    @include dashboard-stats-grid;
+    margin-bottom: 24px;
   }
 
   /* Enhanced Filter Alignment */
@@ -164,6 +141,19 @@
       &.low {
         background: rgba($danger, 0.1);
         color: $danger;
+      }
+    }
+
+    .warehouse-chip {
+      background: linear-gradient(135deg, rgba($primary, 0.12) 0%, rgba($primary, 0.08) 100%);
+      border: 1px solid rgba($primary, 0.2);
+      color: darken($primary, 14%);
+      font-weight: 700;
+      letter-spacing: 0.01em;
+
+      ::ng-deep .mdc-evolution-chip__text-label {
+        color: darken($primary, 14%) !important;
+        opacity: 1 !important;
       }
     }
   }

@@ -3,6 +3,7 @@ const inventoryService = require('./inventoryService');
 const stockMovementRepository = require('../repositories/stockMovementRepository');
 const ledgerService = require('./ledgerService');
 const batchCreationService = require('./batchCreationService');
+const { applyReturnCreditToInvoice } = require('./invoicePaymentAllocationService');
 
 /**
  * Purchase Return Service
@@ -262,6 +263,11 @@ class PurchaseReturnService {
    * @returns {Promise<Object>} Created return invoice with debit note
    */
   async createPurchaseReturn(returnData) {
+    const session = typeof Invoice.startSession === 'function' ? await Invoice.startSession() : null;
+    if (session) {
+      session.startTransaction();
+    }
+
     const {
       originalInvoiceId,
       returnItems,
@@ -270,120 +276,141 @@ class PurchaseReturnService {
       createdBy,
     } = returnData;
 
-    const originalInvoice = await Invoice.findById(originalInvoiceId)
-      .populate('supplierId', 'name town isTaxFiler isNonFilerAccount');
+    try {
+      const originalInvoiceQuery = Invoice.findById(originalInvoiceId)
+        .populate('supplierId', 'name town isTaxFiler isNonFilerAccount');
+      const originalInvoice = session && typeof originalInvoiceQuery.session === 'function'
+        ? await originalInvoiceQuery.session(session)
+        : await originalInvoiceQuery;
 
-    if (!originalInvoice) {
-      throw new Error('Original invoice not found');
-    }
-
-    if (originalInvoice.type !== 'purchase') {
-      throw new Error('Can only create returns for purchase invoices');
-    }
-
-    const validation = await this.validateReturnQuantities(originalInvoiceId, returnItems);
-
-    if (!validation.valid) {
-      throw new Error(`Return validation failed: ${validation.errors.join(', ')}`);
-    }
-
-    const returnInvoiceItems = [];
-    let subtotal = 0;
-    let totalDiscount = 0;
-    let gst18Total = 0;
-    let gst4Total = 0;
-
-    for (const returnItem of validation.validatedItems) {
-      const originalItem = originalInvoice.items.find(
-        (item) => item.itemId.toString() === returnItem.itemId,
-      );
-
-      const boxPacking = originalItem.boxPacking || 1;
-      const returnBoxQty = returnItem.boxQuantity || returnItem.boxQty || 0;
-      const returnUnitQty = returnItem.unitQuantity || returnItem.unitQty || 0;
-      const boxTP = originalItem.boxRate || originalItem.boxTP || 0;
-      const unitTP = originalItem.unitRate || originalItem.unitTP || 0;
-      const discount = originalItem.discount1Percent || originalItem.discount || 0;
-
-      const boxAmount = returnBoxQty * boxTP;
-      const unitAmount = returnUnitQty * unitTP;
-      const grossAmount = boxAmount + unitAmount;
-      const discountAmount = (grossAmount * discount) / 100;
-      const netAmount = -(grossAmount - discountAmount);
-      subtotal += netAmount;
-      totalDiscount += -(discountAmount);
-
-      let gstAmount = 0;
-      const gstRate = originalItem.gstRate || 18;
-      const taxableAmount = grossAmount - discountAmount;
-
-      if (gstRate === 18) {
-        gstAmount = (taxableAmount * 18) / 100;
-        gst18Total += gstAmount;
-      } else if (gstRate === 4) {
-        gstAmount = (taxableAmount * 4) / 100;
-        gst4Total += gstAmount;
+      if (!originalInvoice) {
+        throw new Error('Original invoice not found');
       }
 
-      returnInvoiceItems.push({
-        itemId: returnItem.itemId,
-        boxQuantity: -returnBoxQty,
-        unitQuantity: -returnUnitQty,
-        quantity: -(returnBoxQty * boxPacking + returnUnitQty),
-        boxRate: boxTP,
-        unitRate: unitTP,
-        discount,
-        gstRate,
-        gstAmount: -gstAmount,
-        taxAmount: -gstAmount,
-        lineTotal: netAmount - gstAmount,
+      if (originalInvoice.type !== 'purchase') {
+        throw new Error('Can only create returns for purchase invoices');
+      }
+
+      const validation = await this.validateReturnQuantities(originalInvoiceId, returnItems);
+
+      if (!validation.valid) {
+        throw new Error(`Return validation failed: ${validation.errors.join(', ')}`);
+      }
+
+      const returnInvoiceItems = [];
+      let subtotal = 0;
+      let totalDiscount = 0;
+      let gst18Total = 0;
+      let gst4Total = 0;
+
+      for (const returnItem of validation.validatedItems) {
+        const originalItem = originalInvoice.items.find(
+          (item) => item.itemId.toString() === returnItem.itemId,
+        );
+
+        const boxPacking = originalItem.boxPacking || 1;
+        const returnBoxQty = returnItem.boxQuantity || returnItem.boxQty || 0;
+        const returnUnitQty = returnItem.unitQuantity || returnItem.unitQty || 0;
+        const boxTP = originalItem.boxRate || originalItem.boxTP || 0;
+        const unitTP = originalItem.unitRate || originalItem.unitTP || 0;
+        const discount = originalItem.discount1Percent || originalItem.discount || 0;
+
+        const boxAmount = returnBoxQty * boxTP;
+        const unitAmount = returnUnitQty * unitTP;
+        const grossAmount = boxAmount + unitAmount;
+        const discountAmount = (grossAmount * discount) / 100;
+        const netAmount = -(grossAmount - discountAmount);
+        subtotal += netAmount;
+        totalDiscount += -(discountAmount);
+
+        let gstAmount = 0;
+        const gstRate = originalItem.gstRate || 18;
+        const taxableAmount = grossAmount - discountAmount;
+
+        if (gstRate === 18) {
+          gstAmount = (taxableAmount * 18) / 100;
+          gst18Total += gstAmount;
+        } else if (gstRate === 4) {
+          gstAmount = (taxableAmount * 4) / 100;
+          gst4Total += gstAmount;
+        }
+
+        returnInvoiceItems.push({
+          itemId: returnItem.itemId,
+          boxQuantity: -returnBoxQty,
+          unitQuantity: -returnUnitQty,
+          quantity: -(returnBoxQty * boxPacking + returnUnitQty),
+          boxRate: boxTP,
+          unitRate: unitTP,
+          discount,
+          gstRate,
+          gstAmount: -gstAmount,
+          taxAmount: -gstAmount,
+          lineTotal: netAmount - gstAmount,
+        });
+      }
+
+      const totalGST = gst18Total + gst4Total;
+      const grandTotal = subtotal + totalGST;
+
+      const returnInvoice = new Invoice({
+        invoiceNumber: await this.generateReturnInvoiceNumber(),
+        type: 'return_purchase',
+        supplierId: originalInvoice.supplierId._id,
+        supplierName: originalInvoice.supplierId.name,
+        supplierTown: originalInvoice.supplierId.town,
+        supplierBillNo: `${originalInvoice.supplierBillNo}-RET`,
+        originalInvoiceId,
+        invoiceDate: new Date(),
+        dueDate: new Date(),
+        items: returnInvoiceItems,
+        totals: {
+          subtotal,
+          totalDiscount,
+          totalTax: -totalGST,
+          gst18Total: -gst18Total,
+          gst4Total: -gst4Total,
+          grandTotal,
+        },
+        returnMetadata: {
+          returnReason,
+          returnNotes,
+          returnDate: new Date(),
+        },
+        status: 'confirmed',
+        paymentStatus: 'pending',
+        createdBy,
       });
+
+      await returnInvoice.save({ session });
+
+      await this.processReturnInventory(returnInvoice, originalInvoice, { session });
+
+      await this.createReverseLedgerEntries(returnInvoice, originalInvoice, { session });
+
+      // Update original invoice payment state with return credit
+      await applyReturnCreditToInvoice(returnInvoice, { originalInvoice, session });
+
+      if (session) {
+        await session.commitTransaction();
+      }
+
+      const debitNote = this.generateDebitNote(returnInvoice);
+
+      return {
+        returnInvoice,
+        debitNote,
+      };
+    } catch (error) {
+      if (session) {
+        await session.abortTransaction();
+      }
+      throw error;
+    } finally {
+      if (session) {
+        session.endSession();
+      }
     }
-
-    const totalGST = gst18Total + gst4Total;
-    const grandTotal = subtotal + totalGST;
-
-    const returnInvoice = new Invoice({
-      invoiceNumber: await this.generateReturnInvoiceNumber(),
-      type: 'return_purchase',
-      supplierId: originalInvoice.supplierId._id,
-      supplierName: originalInvoice.supplierId.name,
-      supplierTown: originalInvoice.supplierId.town,
-      supplierBillNo: `${originalInvoice.supplierBillNo}-RET`,
-      originalInvoiceId,
-      invoiceDate: new Date(),
-      dueDate: new Date(),
-      items: returnInvoiceItems,
-      totals: {
-        subtotal,
-        totalDiscount,
-        totalTax: -totalGST,
-        gst18Total: -gst18Total,
-        gst4Total: -gst4Total,
-        grandTotal,
-      },
-      returnMetadata: {
-        returnReason,
-        returnNotes,
-        returnDate: new Date(),
-      },
-      status: 'confirmed',
-      paymentStatus: 'pending',
-      createdBy,
-    });
-
-    await returnInvoice.save();
-
-    await this.processReturnInventory(returnInvoice, originalInvoice);
-
-    await this.createReverseLedgerEntries(returnInvoice, originalInvoice);
-
-    const debitNote = this.generateDebitNote(returnInvoice);
-
-    return {
-      returnInvoice,
-      debitNote,
-    };
   }
 
   /**
@@ -405,7 +432,8 @@ class PurchaseReturnService {
    * @param {Object} returnInvoice - Return invoice
    * @param {Object} originalInvoice - Original invoice
    */
-  async processReturnInventory(returnInvoice, originalInvoice) {
+  async processReturnInventory(returnInvoice, originalInvoice, options = {}) {
+    const { session = null } = options;
     for (const item of returnInvoice.items) {
       const quantity = Math.abs(item.quantity);
 
@@ -414,20 +442,28 @@ class PurchaseReturnService {
         quantity,
         'decrease',
         'Purchase return',
+        {
+          session,
+          warehouseId: item.warehouseId || originalInvoice.items.find((i) => i.itemId.toString() === item.itemId.toString())?.warehouseId,
+          userId: returnInvoice.createdBy,
+        },
       );
 
       await stockMovementRepository.create({
         itemId: item.itemId,
-        movementType: 'return_to_supplier',
-        quantity: -quantity,
+        movementType: 'out',
+        quantity,
         referenceType: 'return_purchase',
         referenceId: returnInvoice._id,
         warehouse: item.warehouseId || originalInvoice.items.find((i) => i.itemId.toString() === item.itemId.toString())?.warehouseId,
-        batchInfo: item.batchInfo,
+        batchInfo: item.batchInfo || (item.batchNumber ? {
+          batchNumber: item.batchNumber,
+          expiryDate: item.expiryDate,
+        } : undefined),
         movementDate: returnInvoice.invoiceDate,
         notes: `Return to supplier - ${returnInvoice.returnMetadata?.returnNotes || 'Purchase return'}`,
         createdBy: returnInvoice.createdBy,
-      });
+      }, { session });
     }
   }
 
@@ -437,7 +473,8 @@ class PurchaseReturnService {
    * @param {Object} returnInvoice - Return invoice
    * @param {Object} originalInvoice - Original invoice
    */
-  async createReverseLedgerEntries(returnInvoice, originalInvoice) {
+  async createReverseLedgerEntries(returnInvoice, originalInvoice, options = {}) {
+    const { session = null } = options;
     const amount = Math.abs(returnInvoice.totals.grandTotal);
     const gstAmount = Math.abs(returnInvoice.totals.totalTax || 0);
     const subtotal = Math.abs(returnInvoice.totals.subtotal);
@@ -451,7 +488,7 @@ class PurchaseReturnService {
       referenceType: 'Invoice',
       referenceId: returnInvoice._id,
       createdBy: returnInvoice.createdBy,
-    });
+    }, { session });
 
     await ledgerService.createLedgerEntry({
       accountId: originalInvoice.supplierId._id,
@@ -462,7 +499,7 @@ class PurchaseReturnService {
       referenceType: 'Invoice',
       referenceId: returnInvoice._id,
       createdBy: returnInvoice.createdBy,
-    });
+    }, { session });
 
     if (gstAmount > 0) {
       await ledgerService.createLedgerEntry({
@@ -474,7 +511,7 @@ class PurchaseReturnService {
         referenceType: 'Invoice',
         referenceId: returnInvoice._id,
         createdBy: returnInvoice.createdBy,
-      });
+      }, { session });
     }
   }
 

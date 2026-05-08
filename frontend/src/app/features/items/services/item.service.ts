@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map, shareReplay } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 
 interface ApiResponse<T> {
@@ -107,6 +108,8 @@ interface Item {
 })
 export class ItemService {
     private apiUrl = `${environment.apiUrl}/items`;
+    private companyFilterOptions$: Observable<any[]> | null = null;
+    private categoryFilterOptions$: Observable<any[]> | null = null;
 
     constructor(private http: HttpClient) { }
 
@@ -126,6 +129,36 @@ export class ItemService {
         return this.http.get<ApiResponse<Item[]>>(this.apiUrl, { params });
     }
 
+    getCompanyFilterOptions(forceRefresh = false): Observable<any[]> {
+        if (!forceRefresh && this.companyFilterOptions$) {
+            return this.companyFilterOptions$;
+        }
+
+        this.companyFilterOptions$ = this.http
+            .get<ApiResponse<any[]>>(`${environment.apiUrl}/companies`, { params: { isActive: true, limit: 500 } })
+            .pipe(
+                map((response) => response.data || []),
+                shareReplay(1)
+            );
+
+        return this.companyFilterOptions$;
+    }
+
+    getCategoryFilterOptions(forceRefresh = false): Observable<any[]> {
+        if (!forceRefresh && this.categoryFilterOptions$) {
+            return this.categoryFilterOptions$;
+        }
+
+        this.categoryFilterOptions$ = this.http
+            .get<ApiResponse<any[]>>(`${environment.apiUrl}/categories`, { params: { isActive: true, limit: 500 } })
+            .pipe(
+                map((response) => response.data || []),
+                shareReplay(1)
+            );
+
+        return this.categoryFilterOptions$;
+    }
+
     deleteItem(id: string): Observable<ApiResponse<any>> {
         return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/${id}`);
     }
@@ -138,6 +171,13 @@ export class ItemService {
 
     getLowStockItems(params?: any): Observable<ApiResponse<Item[]>> {
         return this.http.get<ApiResponse<Item[]>>(`${this.apiUrl}/low-stock`, { params });
+    }
+
+    exportItems(format: 'excel' | 'pdf' = 'excel', params?: any): Observable<Blob> {
+        return this.http.get(`${this.apiUrl}/export`, {
+            params: { ...(params || {}), format },
+            responseType: 'blob'
+        });
     }
 
     getItemStock(itemId: string, warehouseId: string): Observable<ApiResponse<{ availableStock: number; totalStock: number; reservedStock: number }>> {

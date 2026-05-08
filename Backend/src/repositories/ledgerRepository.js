@@ -11,9 +11,9 @@ class LedgerRepository {
    * @param {Object} entryData - Ledger entry data
    * @returns {Promise<Object>} Created ledger entry
    */
-  async create(entryData) {
+  async create(entryData, options = {}) {
     const entry = new LedgerEntry(entryData);
-    return entry.save();
+    return entry.save({ session: options.session || null });
   }
 
   /**
@@ -36,12 +36,13 @@ class LedgerRepository {
    * @param {string} createdBy - User ID creating the entry
    * @returns {Promise<Object>} Created entries
    */
-  async createDoubleEntry(debitAccount, creditAccount, amount, description, referenceType, referenceId, createdBy) {
-    const session = await mongoose.startSession();
+  async createDoubleEntry(debitAccount, creditAccount, amount, description, referenceType, referenceId, createdBy, options = {}) {
+    const externalSession = options.session || null;
+    const session = externalSession || await mongoose.startSession();
     let result;
 
     try {
-      await session.withTransaction(async () => {
+      const createEntries = async () => {
         // Create debit entry
         const debitEntry = new LedgerEntry({
           accountId: debitAccount.accountId,
@@ -76,11 +77,19 @@ class LedgerRepository {
         await creditEntry.save({ session });
 
         result = { debitEntry, creditEntry };
-      });
+      };
+
+      if (externalSession) {
+        await createEntries();
+      } else {
+        await session.withTransaction(createEntries);
+      }
 
       return result;
     } finally {
-      await session.endSession();
+      if (!externalSession) {
+        await session.endSession();
+      }
     }
   }
 
@@ -111,8 +120,8 @@ class LedgerRepository {
    * @param {string} referenceId - Reference ID
    * @returns {Promise<Array>} Ledger entries
    */
-  async findByReference(referenceType, referenceId) {
-    return LedgerEntry.findByReference(referenceType, referenceId);
+  async findByReference(referenceType, referenceId, options = {}) {
+    return LedgerEntry.find({ referenceType, referenceId }).session(options.session || null);
   }
 
   /**

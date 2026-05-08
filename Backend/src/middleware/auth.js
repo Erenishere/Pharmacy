@@ -26,6 +26,8 @@ const authenticate = async (req, res, next) => {
       return Response.error(res, 'No token provided', 401, 'UNAUTHORIZED');
     }
 
+    req.authToken = token;
+
     // Validate token and get user
     const user = await authService.validateTokenAndGetUser(token);
 
@@ -33,7 +35,7 @@ const authenticate = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    if (error.message === 'Token has expired') {
+    if (error.message === 'Token has expired' || error.message === 'Session has expired') {
       return Response.error(res, 'Your session has expired. Please login again.', 401, 'TOKEN_EXPIRED');
     }
 

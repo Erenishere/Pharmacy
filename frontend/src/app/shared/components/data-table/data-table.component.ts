@@ -1,4 +1,13 @@
-import { Component, Input, Output, EventEmitter, ViewChild, AfterViewInit } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator, PageEvent } from '@angular/material/paginator';
@@ -10,7 +19,6 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { DataTableColumn, TableActionClickEvent } from '../../models/data-table.model';
-
 
 @Component({
   selector: 'app-data-table',
@@ -27,15 +35,27 @@ import { DataTableColumn, TableActionClickEvent } from '../../models/data-table.
     MatTooltipModule
   ],
   templateUrl: './data-table.component.html',
-  styleUrl: './data-table.component.scss'
+  styleUrl: './data-table.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DataTableComponent implements AfterViewInit {
   @Input() set data(value: any[]) {
     this.dataSource.data = value || [];
+    this.rowCount = this.dataSource.data.length;
+    this.cdr.markForCheck();
   }
-  @Input() columns: DataTableColumn[] = [];
+
+  @Input() set columns(value: DataTableColumn[]) {
+    this._columns = value || [];
+    this.displayedColumnKeys = this._columns.map(col => col.key);
+    this.cdr.markForCheck();
+  }
+
+  get columns(): DataTableColumn[] {
+    return this._columns;
+  }
+
   @Input() getRowClass: (row: any) => string = () => '';
-  
   @Input() totalItems = 0;
   @Input() pageSize = 10;
   @Input() pageIndex = 0;
@@ -48,32 +68,52 @@ export class DataTableComponent implements AfterViewInit {
   @Output() actionClick = new EventEmitter<TableActionClickEvent>();
 
   dataSource = new MatTableDataSource<any>([]);
+  displayedColumnKeys: string[] = [];
+  rowCount = 0;
+
+  private _columns: DataTableColumn[] = [];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  get displayedColumnKeys(): string[] {
-    return this.columns.map(col => col.key);
-  }
+  constructor(private cdr: ChangeDetectorRef) {}
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
+    this.cdr.markForCheck();
   }
 
-  onPageChange(event: PageEvent) {
+  getCellValue(col: DataTableColumn, row: any): any {
+    return col.getValue ? col.getValue(row) : row[col.key];
+  }
+
+  getTextCellValue(col: DataTableColumn, row: any): any {
+    const value = this.getCellValue(col, row);
+    return value ?? '-';
+  }
+
+  getCellClass(col: DataTableColumn, row: any): string {
+    return col.getCellClass ? col.getCellClass(row) : '';
+  }
+
+  onPageChange(event: PageEvent): void {
     this.pageChange.emit(event);
   }
 
-  onSortChange(sortState: Sort) {
+  onSortChange(sortState: Sort): void {
     this.sortChange.emit(sortState);
   }
 
-  onActionClick(actionKey: string, row: any, event: Event) {
+  onActionClick(actionKey: string, row: any, event: Event): void {
     event.stopPropagation();
     this.actionClick.emit({ action: actionKey, row });
   }
 
   trackByRowId(index: number, row: any): string {
     return row._id || row.id || index.toString();
+  }
+
+  trackByColumnKey(index: number, col: DataTableColumn): string {
+    return col.key || index.toString();
   }
 }

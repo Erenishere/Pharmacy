@@ -19,6 +19,11 @@ const cashPaymentSchema = new mongoose.Schema(
       ref: 'Supplier',
       required: [true, 'Supplier ID is required'],
     },
+    cashAccountId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Account',
+      required: [true, 'Cash/bank account is required'],
+    },
     amount: {
       type: Number,
       required: [true, 'Amount is required'],
@@ -62,6 +67,38 @@ const cashPaymentSchema = new mongoose.Schema(
       trim: true,
       maxlength: [500, 'Description cannot exceed 500 characters'],
     },
+    notes: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Notes cannot exceed 500 characters'],
+    },
+    invoiceAllocations: [
+      {
+        invoiceId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Invoice',
+          required: true,
+        },
+        invoiceNumber: {
+          type: String,
+          trim: true,
+        },
+        amount: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+      },
+    ],
+    totalAllocated: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    difference: {
+      type: Number,
+      default: 0,
+    },
     status: {
       type: String,
       required: [true, 'Status is required'],
@@ -73,6 +110,22 @@ const cashPaymentSchema = new mongoose.Schema(
     },
     clearedDate: {
       type: Date,
+    },
+    clearedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    cancelledAt: {
+      type: Date,
+    },
+    cancelledBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    cancellationReason: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Cancellation reason cannot exceed 500 characters'],
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -91,6 +144,7 @@ cashPaymentSchema.index({ supplierId: 1, paymentDate: -1 });
 cashPaymentSchema.index({ status: 1 });
 cashPaymentSchema.index({ paymentMethod: 1 });
 cashPaymentSchema.index({ createdBy: 1 });
+cashPaymentSchema.index({ cashAccountId: 1 });
 
 // Virtual for days since payment
 cashPaymentSchema.virtual('daysSincePayment').get(function () {

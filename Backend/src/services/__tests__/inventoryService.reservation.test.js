@@ -8,6 +8,7 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 const inventoryService = require('../inventoryService');
 const Inventory = require('../../models/Inventory');
 const Reservation = require('../../models/Reservation');
+const StockMovement = require('../../models/StockMovement');
 const Item = require('../../models/Item');
 const Warehouse = require('../../models/Warehouse');
 const User = require('../../models/User');
@@ -46,6 +47,7 @@ beforeEach(async () => {
   // Clear all collections
   await Inventory.deleteMany({});
   await Reservation.deleteMany({});
+  await StockMovement.deleteMany({});
   await Item.deleteMany({});
   await Warehouse.deleteMany({});
   await User.deleteMany({});
@@ -248,6 +250,15 @@ describe('Inventory Service - Reservation Logic', () => {
       const updatedReservation = await Reservation.findById(testReservation._id);
       expect(updatedReservation.status).toBe('cancelled');
       expect(updatedReservation.cancellationReason).toBe('Order cancelled');
+
+      const releaseMovement = await StockMovement.findOne({
+        referenceType: 'sales_invoice',
+        referenceId: testReservation.orderId,
+        movementType: 'in',
+      });
+      expect(releaseMovement).toBeDefined();
+      expect(releaseMovement.quantity).toBe(20);
+      expect(releaseMovement.createdBy.toString()).toBe(testUser._id.toString());
     });
 
     test('should successfully release reservation by item and warehouse', async () => {
@@ -451,6 +462,15 @@ describe('Inventory Service - Reservation Logic', () => {
       // Verify inventory
       const updatedInventory = await Inventory.findById(testInventory._id);
       expect(updatedInventory.reservedQuantity).toBe(0);
+
+      const releaseMovement = await StockMovement.findOne({
+        referenceType: 'sales_invoice',
+        referenceId: expiredReservation.orderId,
+        movementType: 'in',
+      });
+      expect(releaseMovement).toBeDefined();
+      expect(releaseMovement.quantity).toBe(20);
+      expect(releaseMovement.createdBy.toString()).toBe(testUser._id.toString());
     });
 
     test('should not release active non-expired reservations', async () => {

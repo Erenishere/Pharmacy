@@ -137,9 +137,9 @@ $purple: #7367F0;
           color: #fff;
         }
 
-        &.purple {
-          background: linear-gradient(135deg, var(--color-bg-page) 0%, rgba(var(--color-bg-page), 0.7) 100%);
-        }
+         &.purple {
+           background: linear-gradient(118deg, $purple 0%, darken($purple, 5%) 100%);
+         }
 
         &.success {
           background: linear-gradient(135deg, $success 0%, rgba($success, 0.7) 100%);
@@ -314,9 +314,9 @@ $purple: #7367F0;
     }
   }
 
-  .export-btn {
-    background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.8));
-    color: #fff;
+    .export-btn {
+      background: linear-gradient(118deg, $purple 0%, darken($purple, 5%) 80%);
+      color: #fff;
 
     &:hover {
       box-shadow: 0 0 10px 1px rgba($purple, 0.4);

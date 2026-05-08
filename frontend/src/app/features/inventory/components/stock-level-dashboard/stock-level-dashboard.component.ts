@@ -20,6 +20,7 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { InventoryService } from '../../services/inventory.service';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { ExportService } from '../../../../core/services/export.service';
 import { StockLevel, StockOverview, StockQueryParams } from '../../models/inventory.model';
 
 @Component({
@@ -69,6 +70,7 @@ export class StockLevelDashboardComponent implements OnInit, OnDestroy {
   dataSource = new MatTableDataSource<StockLevel>([]);
   loading = false;
   refreshing = false;
+  exporting = false;
 
   // Overview stats
   overview: StockOverview = {
@@ -115,6 +117,7 @@ export class StockLevelDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private inventoryService: InventoryService,
     private toastService: ToastService,
+    private exportService: ExportService,
     private dialog: MatDialog,
     private route: ActivatedRoute
   ) { }
@@ -342,11 +345,82 @@ export class StockLevelDashboardComponent implements OnInit, OnDestroy {
     }).format(amount);
   }
 
+  private buildStockQueryParams(limitOverride?: number): StockQueryParams {
+    return {
+      page: 1,
+      limit: limitOverride || this.pageSize,
+      search: this.searchControl.value || undefined,
+      warehouseId: this.selectedWarehouse || undefined,
+      categoryId: this.selectedCategory || undefined,
+      companyId: this.selectedCompany || undefined,
+      stockStatus: this.selectedStockStatus !== 'all' ? this.selectedStockStatus as any : undefined
+    };
+  }
+
+  private mapExportRows(items: StockLevel[]): Array<Record<string, string | number>> {
+    return items.map((item) => ({
+      'Item Code': item.itemCode || '',
+      'Item Name': item.itemName || '',
+      Category: item.categoryName || '',
+      Company: item.companyName || '',
+      Warehouse: item.warehouseName || '',
+      Quantity: item.quantity ?? 0,
+      Reserved: item.reservedQuantity ?? 0,
+      Available: item.availableQuantity ?? 0,
+      'Minimum Level': item.minimumLevel ?? 0,
+      'Batch Number': item.batchNumber || '',
+      Expiry: item.expiryDate ? this.formatDate(item.expiryDate) : '',
+      Status: this.getStockStatusLabel(item)
+    }));
+  }
+
+  private exportStockLevels(format: 'excel' | 'pdf'): void {
+    if (this.exporting) {
+      return;
+    }
+
+    const exportLimit = Math.max(this.totalItems, this.dataSource.data.length, this.pageSize);
+    if (exportLimit === 0) {
+      this.toastService.info('No stock rows available to export');
+      return;
+    }
+
+    this.exporting = true;
+    this.inventoryService.getStockLevels(this.buildStockQueryParams(exportLimit))
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          const rows = this.mapExportRows(response.data || []);
+          if (rows.length === 0) {
+            this.toastService.info('No stock rows available to export');
+            this.exporting = false;
+            return;
+          }
+
+          const filename = 'stock-level-dashboard';
+          if (format === 'excel') {
+            this.exportService.exportToExcel(rows, filename, 'Stock Levels');
+            this.toastService.success('Stock levels exported to Excel');
+          } else {
+            const columns = Object.keys(rows[0]);
+            this.exportService.exportToPDF(rows, columns, filename, 'Stock Level Dashboard', 'landscape');
+            this.toastService.success('Stock levels exported to PDF');
+          }
+
+          this.exporting = false;
+        },
+        error: () => {
+          this.toastService.error(`Failed to export stock levels to ${format.toUpperCase()}`);
+          this.exporting = false;
+        }
+      });
+  }
+
   exportToExcel(): void {
-    this.toastService.info('Excel export will be implemented');
+    this.exportStockLevels('excel');
   }
 
   exportToPDF(): void {
-    this.toastService.info('PDF export will be implemented');
+    this.exportStockLevels('pdf');
   }
 }

@@ -1,0 +1,272 @@
+@import '../../../../../styles/_vuexy-vars';
+@import '../../../../../styles/_mixins';
+
+.profile-page {
+  padding: 24px;
+  background:
+    radial-gradient(circle at top left, rgba($primary, 0.08), transparent 24%),
+    linear-gradient(180deg, #fbfbff 0%, $bg-page 100%);
+  min-height: 100%;
+}
+
+.profile-hero {
+  @include page-header;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 28px 30px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba($primary, 0.1) 0%, rgba($primary, 0.03) 45%, #ffffff 100%);
+  border: 1px solid rgba($primary, 0.1);
+  box-shadow: 0 18px 38px rgba(47, 43, 61, 0.08);
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+  }
+
+  .page-subtitle {
+    max-width: 620px;
+    margin: 10px 0 0;
+  }
+}
+
+.hero-kicker,
+.card-kicker {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: $primary;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-badge {
+  min-width: 170px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba($primary, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+
+  span {
+    display: block;
+    margin-bottom: 6px;
+    color: $text-muted;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  strong {
+    color: $text-card-title;
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: capitalize;
+  }
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 64px 0;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.profile-sidebar,
+.profile-content {
+  display: grid;
+  gap: 20px;
+}
+
+.profile-summary {
+  padding: 26px 24px;
+  border-radius: 24px;
+  box-shadow: 0 16px 34px rgba(47, 43, 61, 0.08);
+  border: 1px solid rgba($primary, 0.08);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfbff 100%);
+
+  .avatar-shell {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+
+  .avatar {
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, rgba($primary, 0.18) 0%, rgba($primary, 0.08) 100%);
+    color: $primary;
+    box-shadow: inset 0 0 0 1px rgba($primary, 0.08);
+
+    mat-icon {
+      width: 42px;
+      height: 42px;
+      font-size: 42px;
+    }
+  }
+
+  .summary-copy {
+    text-align: center;
+  }
+
+  h2 {
+    margin: 0 0 8px;
+    font-size: 30px;
+    font-weight: 700;
+    color: $text-card-title;
+  }
+
+  p {
+    margin: 0 0 14px;
+    color: $text-body;
+    word-break: break-word;
+    font-size: 16px;
+  }
+
+  .summary-stats {
+    margin-top: 22px;
+    display: grid;
+    gap: 12px;
+  }
+
+  .stat-block {
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: #f8f8ff;
+    border: 1px solid #ebe9f7;
+
+    span {
+      display: block;
+      margin-bottom: 4px;
+      color: $text-muted;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    strong {
+      color: $text-card-title;
+      font-size: 15px;
+      font-weight: 700;
+    }
+  }
+}
+
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba($success, 0.12);
+  color: $success;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.profile-note-card,
+.settings-card {
+  border-radius: 24px;
+  box-shadow: 0 16px 34px rgba(47, 43, 61, 0.08);
+  border: 1px solid rgba($primary, 0.08);
+  background: #ffffff;
+}
+
+.profile-note-card {
+  padding: 22px 24px;
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    font-weight: 700;
+    color: $text-card-title;
+  }
+
+  p {
+    margin: 0;
+    color: $text-body;
+    line-height: 1.65;
+  }
+}
+
+.settings-card {
+  padding: 24px;
+}
+
+.card-head {
+  margin-bottom: 18px;
+
+  h3 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: $text-card-title;
+  }
+}
+
+.form-grid {
+  display: grid;
+  gap: 16px;
+
+  &.two-column {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+
+  button {
+    min-width: 120px;
+
+    mat-icon {
+      margin-right: 6px;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .profile-page {
+    padding: 16px;
+  }
+
+  .profile-hero {
+    padding: 22px 20px;
+    flex-direction: column;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid.two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .span-2 {
+    grid-column: span 1;
+  }
+}

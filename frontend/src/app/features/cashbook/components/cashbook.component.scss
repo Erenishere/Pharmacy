@@ -1,14 +1,84 @@
+@import "../../../../styles/vuexy-vars";
 @import "../../../../styles/shared-list-styles";
 
+$p-bg: #f8f7fa;
+
+:host {
+  display: block;
+  background: $p-bg;
+}
+
 .cashbook-page {
-  @include data-table;
-  @include paginator;
+  @include page-container;
+
+  .list-page-header {
+    @include page-header;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+
+    .header-content {
+      .title-with-accent {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .header-accent-bar {
+          width: 5px;
+          height: 40px;
+          border-radius: 4px;
+          background: $purple;
+        }
+      }
+
+      h1 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+
+        mat-icon {
+          color: $purple;
+        }
+      }
+
+      .page-subtitle {
+        margin: 8px 0 0 17px;
+        color: $grey-dark;
+      }
+    }
+
+    .header-actions {
+      .reset-btn {
+        background: linear-gradient(118deg, $purple, rgba($purple, 0.85)) !important;
+        color: #fff !important;
+        font-weight: 600;
+        height: 42px;
+        padding: 0 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba($purple, 0.35);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.25s ease;
+
+        &:hover {
+          box-shadow: 0 6px 18px rgba($purple, 0.5);
+          transform: translateY(-1px);
+        }
+      }
+    }
+  }
+
+  .dashboard-stats-grid {
+    @include dashboard-stats-grid;
+  }
 
   .form-section-card {
-    @include layered-glass;
-    border-radius: 12px;
-    padding: 24px;
+    @include list-card;
     margin-bottom: 24px;
+    background: #fff;
 
     .form-header {
       display: flex;
@@ -19,12 +89,74 @@
       border-bottom: 1px solid rgba($purple, 0.1);
 
       .section-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
         font-size: 16px;
         font-weight: 700;
         color: $purple;
         margin: 0;
-        border-left: 3px solid $purple;
-        padding-left: 12px;
+        
+        &::before {
+          content: '';
+          width: 3px;
+          height: 20px;
+          background: $purple;
+          border-radius: 4px;
+        }
+      }
+
+      .transaction-type-toggle {
+        ::ng-deep {
+          .mat-button-toggle-group {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba($purple, 0.35);
+            border: none;
+          }
+
+          .mat-button-toggle {
+            background: linear-gradient(118deg, $purple, rgba($purple, 0.85));
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            min-width: 120px;
+            height: 42px;
+            border: none;
+
+            &.mat-button-toggle-checked {
+              background: linear-gradient(118deg, rgba($purple, 0.7), rgba($purple, 0.5));
+              color: #fff;
+
+              .mat-icon {
+                color: #fff;
+              }
+            }
+
+            &:not(.mat-button-toggle-checked) {
+              background: linear-gradient(118deg, $purple, rgba($purple, 0.85));
+              color: #fff;
+              opacity: 0.7;
+            }
+
+            .mat-button-toggle-label-content {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 6px;
+              padding: 0 20px;
+              line-height: 42px;
+              height: 42px;
+            }
+
+            .mat-icon {
+              font-size: 18px;
+              width: 18px;
+              height: 18px;
+              color: #fff;
+            }
+          }
+        }
       }
     }
 
@@ -37,6 +169,177 @@
       @media (max-width: 600px) { grid-template-columns: 1fr; }
 
       .span-2 { grid-column: span 2; @media (max-width: 600px) { grid-column: span 1; } }
+    }
+
+    .form-footer-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba($purple, 0.1);
+
+      @media (max-width: 768px) { flex-direction: column; align-items: stretch; gap: 20px; }
+
+      .bank-info-group {
+        display: flex;
+        gap: 12px;
+        .sm-field { width: 180px; @media (max-width: 600px) { width: 100%; } }
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 12px;
+
+        button.save-btn {
+          background: linear-gradient(118deg, $purple, rgba($purple, 0.85)) !important;
+          color: #fff !important;
+          font-weight: 600;
+          height: 42px;
+          padding: 0 20px;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba($purple, 0.35);
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          transition: all 0.25s ease;
+          border: none;
+
+          &:hover {
+            box-shadow: 0 6px 18px rgba($purple, 0.5);
+            transform: translateY(-1px);
+          }
+
+          mat-icon {
+            color: #fff !important;
+          }
+        }
+
+        button.cancel-btn {
+          background: linear-gradient(118deg, $purple, rgba($purple, 0.85)) !important;
+          color: #fff !important;
+          font-weight: 600;
+          height: 42px;
+          padding: 0 20px;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba($purple, 0.35);
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          transition: all 0.25s ease;
+          border: none;
+
+          &:hover {
+            box-shadow: 0 6px 18px rgba($purple, 0.5);
+            transform: translateY(-1px);
+          }
+        }
+      }
+    }
+  }
+
+  // ─── Filter Section ───────────────────────────────────────────
+  .list-filters-section {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba($purple, 0.08);
+    background: #fff;
+
+    .filter-group-primary {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 12px;
+      align-items: center;
+      width: 100%;
+
+      .filter-field {
+        flex: 0 0 auto;
+        margin-bottom: 0;
+        
+        &.sm { width: 140px; }
+        &.date { width: 160px; }
+      }
+
+      .search-btn {
+        flex: 0 0 auto;
+        background: rgba($purple, 0.1);
+        color: $purple;
+        margin-left: auto;
+        &:hover { background: rgba($purple, 0.2); }
+      }
+    }
+  }
+
+  // ─── Table Styling ────────────────────────────────────────────
+  :host ::ng-deep {
+    .cashbook-page {
+      .table-wrapper {
+        @include data-table;
+        overflow-x: auto;
+        width: 100%;
+      }
+
+      .mat-mdc-paginator {
+        @include paginator;
+        margin-top: 16px;
+        border-radius: 8px;
+        width: 100%;
+      }
+    }
+  }
+
+  .list-page-card {
+    @include list-card;
+
+    // Standardized No Data Content
+    .no-data-content {
+      padding: 60px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: $grey-dark;
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        margin-bottom: 16px;
+        color: rgba($purple, 0.2);
+      }
+
+      h4 {
+        margin: 0 0 8px 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: $purple-dark;
+      }
+
+      p {
+        margin: 0;
+        color: $grey-dark;
+        font-size: 0.95rem;
+      }
+    }
+
+    mat-paginator {
+      background: $purple !important;
+      color: #ffffff !important;
+      border-radius: 8px;
+      margin-top: 16px;
+
+      ::ng-deep {
+        .mat-mdc-paginator-range-label,
+        .mat-mdc-paginator-page-size-label,
+        .mat-mdc-select-value,
+        .mat-mdc-select-arrow,
+        .mat-mdc-icon-button {
+          color: #ffffff !important;
+        }
+      }
     }
   }
 
@@ -56,7 +359,7 @@
   .invoice-allocation-section {
     margin-top: 24px;
     padding: 20px;
-    background: rgba(var(--color-bg-page), 0.02);
+    background: rgba($purple, 0.02);
     border-radius: 8px;
     border: 1px dashed rgba($purple, 0.2);
 
@@ -84,10 +387,9 @@
       th {
         text-align: left;
         padding: 8px 12px;
-        background: #ffffff;
-        color: $grey-dark;
+        background: $purple;
+        color: #fff;
         font-weight: 600;
-        border-bottom: 2px solid $grey-very-light;
       }
 
       td {
@@ -134,34 +436,6 @@
     }
   }
 
-  .form-footer-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid rgba($purple, 0.1);
-
-    @media (max-width: 768px) { flex-direction: column; align-items: stretch; gap: 20px; }
-
-    .bank-info-group {
-      display: flex;
-      gap: 12px;
-      .sm-field { width: 180px; @media (max-width: 600px) { width: 100%; } }
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: 12px;
-      .save-btn {
-        height: 44px;
-        padding: 0 32px;
-        background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.8));
-        box-shadow: 0 4px 12px rgba($purple, 0.3);
-      }
-    }
-  }
-
   /* List Styling */
   .acc-info {
     display: flex;
@@ -182,11 +456,5 @@
   .row-receive { border-left: 4px solid $success !important; }
   .row-payment { border-left: 4px solid $danger !important; }
   .row-cancelled { opacity: 0.5; background: $grey-very-light !important; }
-  @include page-container;
-  @include page-header;
-
-  .dashboard-stats-grid { @include dashboard-stats-grid; }
-
-  .list-page-card { @include list-card; }
 }
 

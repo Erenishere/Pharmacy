@@ -9,7 +9,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { AccountMasterService } from '../../services/account-master.service';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { DataTableColumn } from '../../../../shared/models/data-table.model';
 
@@ -49,6 +52,7 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
   private printSnapshot: Record<string, unknown> | null = null;
   private printRestoreTimer: number | null = null;
   private afterPrintHandler: ((this: Window, ev: Event) => void) | null = null;
+  private routeSub: Subscription | null = null;
 
   // Lookups
   dimensions: LookupOption[] = [];
@@ -58,6 +62,7 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
   heads: LookupOption[] = [];
   towns: LookupOption[] = [];
   areas: LookupOption[] = [];
+  parentAccountsLoaded = false;
 
   // List Configuration
   tableColumns: DataTableColumn[] = [
@@ -103,16 +108,31 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
-    private http: HttpClient
+    private http: HttpClient,
+    private accountMasterService: AccountMasterService,
+    private route: ActivatedRoute,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
     this.initForm();
     this.loadMasterData();
     this.loadAccounts();
+    this.accountForm.get('accountType')?.valueChanges.subscribe((accountType) => {
+      if (accountType === 'sub_account') {
+        this.loadParentAccountOptions();
+      }
+    });
+    this.routeSub = this.route.paramMap.subscribe((params) => {
+      const accountId = params.get('id');
+      if (accountId) {
+        this.loadAccountForEdit(accountId);
+      }
+    });
   }
 
   ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
     this.finishPrint();
   }
 
@@ -229,39 +249,31 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
   }
 
   loadMasterData(): void {
-    // Load dimensions
-    this.http.get<any>(`${environment.apiUrl}/dimensions?isActive=true&limit=500`).subscribe({
-      next: (res) => { this.dimensions = this.extractActiveList(res); }
+    this.accountMasterService.getRegistrationLookups().subscribe({
+      next: (res) => {
+        const lookups = res?.data || {};
+        this.dimensions = this.normalizeLookupList(lookups.dimensions);
+        this.designations = this.normalizeLookupList(lookups.designations);
+        this.customerTypes = this.normalizeLookupList(lookups.customerTypes);
+        this.heads = this.normalizeLookupList(lookups.accountHeads);
+        this.towns = this.normalizeLookupList(lookups.towns);
+      },
+      error: () => {
+        this.snackBar.open('Failed to load account registration lookups', 'Close', { duration: 3000 });
+      }
     });
+  }
 
-    // Load accounts for parent/sub-account selection
-    this.http.get<any>(`${environment.apiUrl}/customers?isActive=true&limit=500`).subscribe({
-      next: (res) => { this.accounts = this.extractDataArray(res); }
-    });
+  loadParentAccountOptions(): void {
+    if (this.parentAccountsLoaded) {
+      return;
+    }
 
-    // Load designations
-    this.http.get<any>(`${environment.apiUrl}/designations?isActive=true`).subscribe({
-      next: (res) => { this.designations = this.extractActiveList(res); }
-    });
-
-    // Load customer types
-    this.http.get<any>(`${environment.apiUrl}/customer-types`).subscribe({
-      next: (res) => { this.customerTypes = this.extractActiveList(res); }
-    });
-
-    // Load account heads
-    this.http.get<any>(`${environment.apiUrl}/account-heads?isActive=true`).subscribe({
-      next: (res) => { this.heads = this.extractActiveList(res); }
-    });
-
-    // Load towns
-    this.http.get<any>(`${environment.apiUrl}/towns?isActive=true`).subscribe({
-      next: (res) => { this.towns = this.extractActiveList(res); }
-    });
-
-    // Load areas
-    this.http.get<any>(`${environment.apiUrl}/areas?isActive=true`).subscribe({
-      next: (res) => { this.areas = this.extractActiveList(res); }
+    this.http.get<any>(`${environment.apiUrl}/accounts?isActive=true&limit=500`).subscribe({
+      next: (res) => {
+        this.accounts = this.extractDataArray(res);
+        this.parentAccountsLoaded = true;
+      }
     });
   }
 
@@ -277,7 +289,7 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
 
   loadAccounts(): void {
     this.loading = true;
-    this.http.get<any>(`${environment.apiUrl}/customers?page=${this.pageIndex + 1}&limit=${this.pageSize}`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/accounts?page=${this.pageIndex + 1}&limit=${this.pageSize}`).subscribe({
       next: (res) => {
         this.loading = false;
         const rawData = this.extractDataArray(res);
@@ -289,7 +301,7 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
           phone: acc.contactInfo?.phone || acc.phone || '-',
           status: acc.isActive ? 'Active' : 'Inactive'
         }));
-        this.totalItems = res.pagination?.total || this.dataSource.data.length || 0;
+        this.totalItems = res.pagination?.totalItems || res.pagination?.total || this.dataSource.data.length || 0;
       },
       error: () => { this.loading = false; }
     });
@@ -310,7 +322,7 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
     const creditDaysLimit = this.toNumber(fv.creditDaysLimit);
     const creditAmountLimit = this.toNumber(fv.creditAmountLimit);
 
-    const accountData = {
+    const accountData: any = {
       // Basic Info
       name: fv.name,
       nameUrdu: fv.nameUrdu,
@@ -320,14 +332,15 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
       type: this.resolvePartyType(accountType),
 
       // Hierarchy
-      dimensionId: fv.dimensionId || null,
-      parentAccountId: fv.parentAccountId || null,
-      townId: fv.townId || null,
-      areaId: fv.areaId || null,
-      routeId: fv.routeId || null,
-      accountHeadId: fv.accountHeadId || null,
-      customerTypeId: fv.customerTypeId || null,
-      linkedAccountId: fv.profitShareAccountId || null,
+      dimensionId: fv.dimensionId || undefined,
+      parentAccountId: fv.parentAccountId || undefined,
+      townId: fv.townId || undefined,
+      areaId: fv.areaId || undefined,
+      routeId: fv.routeId || undefined,
+      accountHeadId: fv.accountHeadId || undefined,
+      customerTypeId: fv.customerTypeId || undefined,
+      linkedAccountId: fv.profitShareAccountId || undefined,
+      assignedSalesmanId: fv.assignedSalesmanId || undefined,
 
       // Contact Info
       contactInfo: {
@@ -370,7 +383,6 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
 
       // Business Details
       businessDetails: {
-        customerType: this.lookupName(this.customerTypes, fv.customerTypeId),
         creditDaysLimit,
         creditAmountLimit,
         openingBalance,
@@ -416,7 +428,7 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
         profitSharePercent: this.toNumber(fv.profitSharePercent),
         creditDays: creditDaysLimit,
         currency: 'PKR',
-        advanceTaxRate: this.toNumber(fv.advanceTaxRate),
+        advanceTaxRate: this.normalizeAdvanceTaxRate(fv.advanceTaxRate),
         isNonFiler: fv.isNonFiler
       },
 
@@ -433,9 +445,13 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
       isActive: fv.isActive
     };
 
+    if (this.editingId) {
+      delete accountData.currentBalance;
+    }
+
     const request$ = this.editingId
-      ? this.http.put(`${environment.apiUrl}/customers/${this.editingId}`, accountData)
-      : this.http.post(`${environment.apiUrl}/customers`, accountData);
+      ? this.http.put(`${environment.apiUrl}/accounts/${this.editingId}`, accountData)
+      : this.http.post(`${environment.apiUrl}/accounts`, accountData);
 
     request$.subscribe({
       next: () => {
@@ -443,6 +459,9 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
         this.snackBar.open(`Account ${this.editingId ? 'updated' : 'created'} successfully`, 'Close', { duration: 3000 });
         this.resetForm();
         this.loadAccounts();
+        if (this.route.snapshot.paramMap.get('id')) {
+          this.router.navigate(['/accounts/registration'], { replaceUrl: true });
+        }
       },
       error: (err) => {
         this.saving = false;
@@ -452,7 +471,11 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
   }
 
   edit(account: any): void {
-    this.editingId = account._id;
+    this.editingId = account._id || account.id;
+
+    if ((account.accountType || '') === 'sub_account' || account.parentAccountId) {
+      this.loadParentAccountOptions();
+    }
 
     this.accountForm.patchValue({
       // Basic
@@ -491,7 +514,7 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
       townId: account.townId?._id || account.townId || '',
       areaId: account.areaId?._id || account.areaId || '',
       routeId: account.routeId?._id || account.routeId || '',
-      assignedSalesmanId: account.businessDetails?.assignedSalesmanId?._id || account.businessDetails?.assignedSalesmanId || '',
+      assignedSalesmanId: account.assignedSalesmanId?._id || account.assignedSalesmanId || account.businessDetails?.assignedSalesmanId?._id || account.businessDetails?.assignedSalesmanId || '',
 
       // Contact
       phone: account.contactInfo?.phone || '',
@@ -560,9 +583,30 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  private loadAccountForEdit(accountId: string): void {
+    this.loading = true;
+    this.http.get<any>(`${environment.apiUrl}/accounts/${accountId}`).subscribe({
+      next: (res) => {
+        this.loading = false;
+        const account = res?.data || res;
+        if (account) {
+          this.edit(account);
+          if (this.route.snapshot.queryParamMap.get('print') === 'filled') {
+            window.setTimeout(() => this.printFilledForm(), 150);
+          }
+        }
+      },
+      error: (err) => {
+        this.loading = false;
+        this.snackBar.open(err?.error?.message || 'Failed to load account for editing', 'Close', { duration: 3000 });
+        this.router.navigate(['/accounts/registration'], { replaceUrl: true });
+      }
+    });
+  }
+
   delete(account: any): void {
     if (!confirm(`Delete account "${account.name}"?`)) return;
-    this.http.delete(`${environment.apiUrl}/customers/${account._id}`).subscribe({
+    this.http.delete(`${environment.apiUrl}/accounts/${account._id}`).subscribe({
       next: () => {
         this.snackBar.open('Account deleted', 'Close', { duration: 2000 });
         this.loadAccounts();
@@ -684,6 +728,11 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
     return Number.isFinite(parsed) ? parsed : 0;
   }
 
+  private normalizeAdvanceTaxRate(value: unknown): 0 | 0.5 | 2.5 {
+    const parsed = this.toNumber(value);
+    return parsed === 0.5 || parsed === 2.5 ? parsed : 0;
+  }
+
   private resolvePartyType(accountType: string): 'customer' | 'supplier' | 'both' {
     if (accountType === 'customer') return 'customer';
     if (accountType === 'supplier') return 'supplier';
@@ -803,6 +852,12 @@ export class AccountRegistrationComponent implements OnInit, OnDestroy {
   private extractActiveList(response: any): LookupOption[] {
     const list = this.extractDataArray(response) as LookupOption[];
     return list.filter((item) => item?.isActive !== false);
+  }
+
+  private normalizeLookupList(list: unknown): LookupOption[] {
+    return Array.isArray(list)
+      ? (list as LookupOption[]).filter((item) => item?.isActive !== false)
+      : [];
   }
 
   onTableAction(event: { action: string, row: any }): void {

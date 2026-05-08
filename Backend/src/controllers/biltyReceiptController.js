@@ -42,6 +42,16 @@ const update = async (req, res) => {
   }
 };
 
+const updateStatus = async (req, res) => {
+  try {
+    const doc = await biltyReceiptService.updateStatus(req.params.id, req.body.status);
+    return res.status(200).json({ success: true, data: doc, message: 'Bilty receipt status updated', timestamp: new Date().toISOString() });
+  } catch (error) {
+    const status = error.message.includes('not found') ? 404 : 400;
+    return res.status(status).json({ success: false, error: { code: 'VALIDATION_ERROR', message: error.message }, timestamp: new Date().toISOString() });
+  }
+};
+
 const remove = async (req, res) => {
   try {
     await biltyReceiptService.delete(req.params.id);
@@ -52,4 +62,4 @@ const remove = async (req, res) => {
   }
 };
 
-module.exports = { create, getAll, getById, update, remove };
+module.exports = { create, getAll, getById, update, updateStatus, remove };

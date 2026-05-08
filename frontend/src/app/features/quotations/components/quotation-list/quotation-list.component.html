@@ -1,8 +1,11 @@
 <div class="list-page-container quotation-list-page">
   <div class="list-page-header">
     <div class="header-content">
-      <h1 class="page-title"><mat-icon>request_quote</mat-icon> Quotations</h1>
-      <p class="page-subtitle">Manage and track customer quotations</p>
+      <div class="title-with-accent">
+        <div class="header-accent-bar"></div>
+        <h1 class="page-title"><mat-icon>request_quote</mat-icon> Quotations</h1>
+      </div>
+      <p class="page-subtitle">Manage and track customer quotations (Total: {{ summary.totalQuotations }})</p>
     </div>
     <div class="header-actions">
       <button mat-raised-button color="primary" (click)="openCreate()" class="create-btn">
@@ -11,64 +14,61 @@
     </div>
   </div>
 
-  <!-- Summary Cards -->
   <div class="dashboard-stats-grid">
     <div class="stat-card primary">
       <div class="stat-icon-wrapper"><mat-icon>description</mat-icon></div>
       <div class="stat-data">
-        <span class="label">Total</span>
         <span class="value">{{ summary.totalQuotations }}</span>
+        <span class="label">Total Quotations</span>
       </div>
     </div>
     <div class="stat-card info">
       <div class="stat-icon-wrapper"><mat-icon>edit</mat-icon></div>
       <div class="stat-data">
-        <span class="label">Draft</span>
         <span class="value">{{ summary.draftQuotations }}</span>
+        <span class="label">Draft</span>
       </div>
     </div>
     <div class="stat-card warning">
       <div class="stat-icon-wrapper"><mat-icon>send</mat-icon></div>
       <div class="stat-data">
-        <span class="label">Sent</span>
         <span class="value">{{ summary.sentQuotations }}</span>
+        <span class="label">Sent</span>
       </div>
     </div>
     <div class="stat-card success">
       <div class="stat-icon-wrapper"><mat-icon>receipt</mat-icon></div>
       <div class="stat-data">
-        <span class="label">Converted</span>
         <span class="value">{{ summary.convertedQuotations }}</span>
+        <span class="label">Converted</span>
       </div>
     </div>
     <div class="stat-card danger">
       <div class="stat-icon-wrapper"><mat-icon>schedule</mat-icon></div>
       <div class="stat-data">
-        <span class="label">Expired</span>
         <span class="value">{{ summary.expiredQuotations }}</span>
+        <span class="label">Expired</span>
       </div>
     </div>
     <div class="stat-card primary-alt">
       <div class="stat-icon-wrapper"><mat-icon>payments</mat-icon></div>
       <div class="stat-data">
+        <span class="value amount">Rs. {{ formatCurrency(summary.totalValue) }}</span>
         <span class="label">Total Value</span>
-        <span class="value amount">PKR {{ formatCurrency(summary.totalValue) }}</span>
       </div>
     </div>
   </div>
 
   <div class="list-page-card">
     <!-- Filters -->
-    <div class="list-filters-section">
+    <div class="list-filters-section advanced quotation-filters">
       <div class="filter-group-primary">
         <mat-form-field appearance="outline" class="search-field">
           <mat-label>Customer Name</mat-label>
           <input matInput [formControl]="customerFilter" placeholder="Search by name...">
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
-      </div>
 
-      <div class="filter-group-secondary">
         <mat-form-field appearance="outline" class="filter-field">
           <mat-label>Status</mat-label>
           <mat-select [formControl]="statusFilter" (selectionChange)="applyFilters()">
@@ -77,19 +77,22 @@
             }
           </mat-select>
         </mat-form-field>
+
         <mat-form-field appearance="outline" class="filter-field">
           <mat-label>From Date</mat-label>
           <input matInput [matDatepicker]="fromPicker" [formControl]="dateFrom" (dateChange)="applyFilters()">
           <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
           <mat-datepicker #fromPicker></mat-datepicker>
         </mat-form-field>
+
         <mat-form-field appearance="outline" class="filter-field">
           <mat-label>To Date</mat-label>
           <input matInput [matDatepicker]="toPicker" [formControl]="dateTo" (dateChange)="applyFilters()">
           <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
           <mat-datepicker #toPicker></mat-datepicker>
         </mat-form-field>
-        <button mat-button class="clear-btn" (click)="statusFilter.setValue(''); customerFilter.setValue(''); applyFilters()">
+
+        <button mat-button type="button" class="clear-btn" (click)="clearFilters()">
           <mat-icon>restart_alt</mat-icon>
           Clear
         </button>
@@ -192,23 +195,17 @@
               [class.row-receive]="row.status === 'converted'"
               (click)="viewDetails(row)"></tr>
 
-            <!-- Premium No Data Row -->
-            <tr class="mat-mdc-no-data-row empty-state-row" *matNoDataRow>
-              <td [attr.colspan]="displayedColumns.length">
-                <div class="empty-state-premium">
-                  <div class="icon-wrapper">
-                    <mat-icon>request_quote</mat-icon>
-                    <div class="icon-bg-glow"></div>
-                  </div>
-                  <h4>No Quotations Found</h4>
-                  <p *ngIf="statusFilter.value || customerFilter.value">Try adjusting your filters to find what you're looking for.</p>
-                  <p *ngIf="!statusFilter.value && !customerFilter.value">Get started by creating your first quotation.</p>
-                  <button mat-flat-button color="primary" class="mt-4" (click)="openCreate()" *ngIf="!statusFilter.value && !customerFilter.value">
-                    <mat-icon>add</mat-icon> Create Quotation
-                  </button>
-                </div>
-              </td>
-            </tr>
+        <!-- Standardized No Data Row -->
+        <tr class="mat-row no-data-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            <div class="no-data-content">
+              <mat-icon>request_quote</mat-icon>
+              <h4>No Quotations Found</h4>
+              <p *ngIf="statusFilter.value || customerFilter.value">Try adjusting your filters to find what you're looking for.</p>
+              <p *ngIf="!statusFilter.value && !customerFilter.value">Get started by creating your first quotation.</p>
+            </div>
+          </td>
+        </tr>
           </table>
 
           <mat-paginator

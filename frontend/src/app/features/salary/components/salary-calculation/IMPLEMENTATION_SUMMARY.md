@@ -25,7 +25,7 @@ All subtasks have been successfully implemented:
 - Created `SalaryCalculationService` with `calculateSalary()` method
 - Integrated API endpoint: `POST /api/v1/salary/calculate`
 - Implemented request/response handling with proper error handling
-- Added mock response for development/testing
+- Removed development mock fallback; the service now resolves the active employee salary package and calls the real calculation API.
 - Integrated with ToastService for user feedback
 
 **Files:**

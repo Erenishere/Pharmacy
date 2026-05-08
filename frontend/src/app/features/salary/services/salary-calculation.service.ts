@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable, map, switchMap, throwError } from 'rxjs';
 import { API_CONFIG } from '../../../core/constants/api.constants';
 import {
   SalaryCalculation,
   SalaryCalculationRequest,
   ApiResponse
 } from '../../../core/models/salary-calculation.model';
+import { SalaryPackage } from '../../../core/models/salary-package.model';
 
 @Injectable({
   providedIn: 'root'
@@ -21,83 +21,57 @@ export class SalaryCalculationService {
    * Calculate salary for employee for a specific month/year
    */
   calculateSalary(request: SalaryCalculationRequest): Observable<ApiResponse<SalaryCalculation>> {
-    return this.http.post<ApiResponse<SalaryCalculation>>(
-      `${this.baseUrl}/salary/calculate`,
-      request
+    if (request.packageId) {
+      return this.postCalculation(request.packageId, request.month, request.year);
+    }
+
+    const params = new HttpParams()
+      .set('employeeId', request.employeeId)
+      .set('status', 'Active')
+      .set('limit', '100');
+
+    return this.http.get<ApiResponse<SalaryPackage[]>>(
+      `${this.baseUrl}/salary-packages`,
+      { params }
     ).pipe(
-      catchError((error) => {
-        console.error('[SalaryCalculationService] Calculate salary failed:', error);
-        // Mock response for development
-        const mockCalculation: SalaryCalculation = {
-          _id: Date.now().toString(),
-          calculationId: `CALC${Date.now()}`,
-          packageId: 'PKG001',
-          employeeId: request.employeeId,
-          employeeName: 'Mock Employee',
-          month: request.month,
-          year: request.year,
-          basicPay: 50000,
-          dailyAllowance: 5000,
-          petrolAllowance: 8000,
-          mobilePackage: 2000,
-          salesIncentive: {
-            target: 500000,
-            achieved: 550000,
-            percentage: 110,
-            amount: 25000
-          },
-          recoveryIncentive: {
-            target: 450000,
-            achieved: 480000,
-            percentage: 106.67,
-            amount: 15000
-          },
-          partyVisitIncentive: {
-            target: 100,
-            achieved: 95,
-            amount: 0
-          },
-          mobileOrderIncentive: {
-            ordersCreated: 45,
-            amount: 4500
-          },
-          mobileCashRecoveryIncentive: {
-            amountRecovered: 250000,
-            amount: 5000
-          },
-          brandIncentives: [
-            {
-              itemName: 'Panadol 500mg',
-              target: 1000,
-              achieved: 1200,
-              amount: 10000
-            }
-          ],
-          bonuses: [
-            {
-              type: 'Eid Fitr',
-              detail: 'Eid ul Fitr Bonus',
-              amount: 20000
-            }
-          ],
-          grossSalary: 144500,
-          deductions: {
-            tax: 7225,
-            advance: 5000,
-            loan: 10000,
-            other: 0
-          },
-          netSalary: 122275,
-          calculatedAt: new Date().toISOString()
-        };
-        
-        return of({
-          success: true,
-          data: mockCalculation,
-          message: 'Salary calculated successfully (mock response)'
-        });
+      switchMap((response) => {
+        const selectedPackage = this.findPackageForPeriod(response.data || [], request.month, request.year);
+        if (!selectedPackage?._id) {
+          return throwError(() => new Error(`No active salary package found for ${request.month} ${request.year}`));
+        }
+        return this.postCalculation(selectedPackage._id, request.month, request.year);
       })
     );
+  }
+
+  private postCalculation(packageId: string, month: string, year: number): Observable<ApiResponse<SalaryCalculation>> {
+    return this.http.post<ApiResponse<SalaryCalculation | { calculation: SalaryCalculation }>>(
+      `${this.baseUrl}/salary/calculate`,
+      { packageId, month, year }
+    ).pipe(
+      map((response) => {
+        const rawData = response.data as SalaryCalculation | { calculation: SalaryCalculation };
+        const calculation = 'calculation' in rawData ? rawData.calculation : rawData;
+        return {
+          ...response,
+          data: calculation
+        };
+      })
+    );
+  }
+
+  private findPackageForPeriod(packages: SalaryPackage[], month: string, year: number): SalaryPackage | undefined {
+    const monthIndex = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ].indexOf(month);
+    const periodDate = new Date(year, Math.max(monthIndex, 0), 1);
+
+    return packages.find((salaryPackage) => {
+      const fromDate = new Date(salaryPackage.duration.fromDate);
+      const toDate = new Date(salaryPackage.duration.toDate);
+      return fromDate <= periodDate && periodDate <= toDate;
+    }) || packages[0];
   }
 
   /**

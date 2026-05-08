@@ -2,6 +2,7 @@ const SalaryPackage = require('../models/SalaryPackage');
 const SalaryCalculation = require('../models/SalaryCalculation');
 const Invoice = require('../models/Invoice');
 const CashReceipt = require('../models/CashReceipt');
+const monthlyPerformanceService = require('./monthlyPerformanceService');
 
 class SalaryCalculationService {
   /**
@@ -16,7 +17,7 @@ class SalaryCalculationService {
     try {
       // Fetch salary package
       const salaryPackage = await SalaryPackage.findById(packageId)
-        .populate('employeeId', 'accountName basicPay');
+        .populate('employeeId', 'name employeeBiodata.basicPay');
 
       if (!salaryPackage) {
         throw new Error('Salary package not found');
@@ -39,12 +40,18 @@ class SalaryCalculationService {
 
       // Calculate fixed components
       const fixedComponents = this.calculateFixedComponents(salaryPackage);
+      const performance = await monthlyPerformanceService.getEmployeeMonthlyPerformance(
+        salaryPackage.employeeId,
+        month,
+        year,
+      );
 
       // Calculate sales incentive
       const salesIncentive = await this.calculateSalesIncentive(
         salaryPackage,
         month,
         year,
+        performance,
       );
 
       // Calculate recovery incentive
@@ -52,6 +59,7 @@ class SalaryCalculationService {
         salaryPackage,
         month,
         year,
+        performance,
       );
 
       // Calculate party visit incentive
@@ -59,6 +67,7 @@ class SalaryCalculationService {
         salaryPackage,
         month,
         year,
+        performance,
       );
 
       // Calculate mobile order incentive
@@ -66,6 +75,7 @@ class SalaryCalculationService {
         salaryPackage,
         month,
         year,
+        performance,
       );
 
       // Calculate mobile cash recovery incentive
@@ -73,6 +83,7 @@ class SalaryCalculationService {
         salaryPackage,
         month,
         year,
+        performance,
       );
 
       // Calculate brand incentives
@@ -197,7 +208,7 @@ class SalaryCalculationService {
    * @param {Number} year - Year
    * @returns {Promise<Object>} Sales incentive details
    */
-  async calculateSalesIncentive(salaryPackage, month, year) {
+  async calculateSalesIncentive(salaryPackage, month, year, performance = null) {
     try {
       const target = salaryPackage.salesTarget.targetAmount || 0;
 
@@ -207,22 +218,13 @@ class SalaryCalculationService {
         };
       }
 
-      // Get month date range
-      const { startDate, endDate } = this._getMonthDateRange(month, year);
-
-      // Query Invoice model for employee's sales
-      const salesInvoices = await Invoice.find({
-        salesmanId: salaryPackage.employeeId,
-        type: 'sales',
-        status: { $ne: 'cancelled' },
-        invoiceDate: { $gte: startDate, $lte: endDate },
-      });
-
-      // Calculate total sales
-      const achieved = salesInvoices.reduce(
-        (sum, invoice) => sum + (invoice.totals.grandTotal || 0),
-        0,
-      );
+      const monthlyPerformance = performance
+        || await monthlyPerformanceService.getEmployeeMonthlyPerformance(
+          salaryPackage.employeeId,
+          month,
+          year,
+        );
+      const achieved = monthlyPerformance.salesAmount;
 
       const percentage = target > 0 ? (achieved / target) * 100 : 0;
 
@@ -261,7 +263,7 @@ class SalaryCalculationService {
    * @param {Number} year - Year
    * @returns {Promise<Object>} Recovery incentive details
    */
-  async calculateRecoveryIncentive(salaryPackage, month, year) {
+  async calculateRecoveryIncentive(salaryPackage, month, year, performance = null) {
     try {
       const target = salaryPackage.recoveryTarget.targetAmount || 0;
 
@@ -271,21 +273,13 @@ class SalaryCalculationService {
         };
       }
 
-      // Get month date range
-      const { startDate, endDate } = this._getMonthDateRange(month, year);
-
-      // Query CashReceipt model for employee's collections
-      const cashReceipts = await CashReceipt.find({
-        salesmanId: salaryPackage.employeeId,
-        status: { $in: ['cleared', 'pending'] },
-        receiptDate: { $gte: startDate, $lte: endDate },
-      });
-
-      // Calculate total recovery
-      const achieved = cashReceipts.reduce(
-        (sum, receipt) => sum + (receipt.amount || 0),
-        0,
-      );
+      const monthlyPerformance = performance
+        || await monthlyPerformanceService.getEmployeeMonthlyPerformance(
+          salaryPackage.employeeId,
+          month,
+          year,
+        );
+      const achieved = monthlyPerformance.recoveryAmount;
 
       const percentage = target > 0 ? (achieved / target) * 100 : 0;
 
@@ -324,7 +318,7 @@ class SalaryCalculationService {
    * @param {Number} year - Year
    * @returns {Promise<Object>} Party visit incentive details
    */
-  async calculatePartyVisitIncentive(salaryPackage, month, year) {
+  async calculatePartyVisitIncentive(salaryPackage, month, year, performance = null) {
     try {
       const target = salaryPackage.partyVisitTarget.numberOfOrders || 0;
 
@@ -332,19 +326,13 @@ class SalaryCalculationService {
         return { target: 0, achieved: 0, amount: 0 };
       }
 
-      // Get month date range
-      const { startDate, endDate } = this._getMonthDateRange(month, year);
-
-      // Query Invoice model for unique customers visited
-      const salesInvoices = await Invoice.find({
-        salesmanId: salaryPackage.employeeId,
-        type: 'sales',
-        status: { $ne: 'cancelled' },
-        invoiceDate: { $gte: startDate, $lte: endDate },
-      }).distinct('customerId');
-
-      // Count unique customers
-      const achieved = salesInvoices.length;
+      const monthlyPerformance = performance
+        || await monthlyPerformanceService.getEmployeeMonthlyPerformance(
+          salaryPackage.employeeId,
+          month,
+          year,
+        );
+      const achieved = monthlyPerformance.visitedParties;
 
       // Calculate incentive based on type
       let amount = 0;
@@ -380,7 +368,7 @@ class SalaryCalculationService {
    * @param {Number} year - Year
    * @returns {Promise<Object>} Mobile order incentive details
    */
-  async calculateMobileOrderIncentive(salaryPackage, month, year) {
+  async calculateMobileOrderIncentive(salaryPackage, month, year, performance = null) {
     try {
       const incentiveValue = salaryPackage.mobileOrderIncentive.value || 0;
 
@@ -388,20 +376,13 @@ class SalaryCalculationService {
         return { ordersCreated: 0, amount: 0 };
       }
 
-      // Get month date range
-      const { startDate, endDate } = this._getMonthDateRange(month, year);
-
-      // Query Invoice model for mobile orders
-      // Assuming there's a field to track mobile orders (e.g., createdVia or similar)
-      // For now, we'll check if there's a mobile-related field in the invoice
-      const mobileOrders = await Invoice.countDocuments({
-        salesmanId: salaryPackage.employeeId,
-        type: 'sales',
-        status: { $ne: 'cancelled' },
-        invoiceDate: { $gte: startDate, $lte: endDate },
-        // Add mobile order filter when field is available
-        // For now, counting all orders as potential mobile orders
-      });
+      const monthlyPerformance = performance
+        || await monthlyPerformanceService.getEmployeeMonthlyPerformance(
+          salaryPackage.employeeId,
+          month,
+          year,
+        );
+      const mobileOrders = monthlyPerformance.mobileOrders;
 
       // Calculate incentive based on type
       let amount = 0;
@@ -435,7 +416,7 @@ class SalaryCalculationService {
    * @param {Number} year - Year
    * @returns {Promise<Object>} Mobile cash recovery incentive details
    */
-  async calculateMobileCashRecoveryIncentive(salaryPackage, month, year) {
+  async calculateMobileCashRecoveryIncentive(salaryPackage, month, year, performance = null) {
     try {
       const incentiveValue = salaryPackage.mobileCashRecoveryIncentive.value || 0;
 
@@ -443,24 +424,13 @@ class SalaryCalculationService {
         return { amountRecovered: 0, amount: 0 };
       }
 
-      // Get month date range
-      const { startDate, endDate } = this._getMonthDateRange(month, year);
-
-      // Query CashReceipt model for mobile cash collections
-      // Assuming there's a field to track mobile collections
-      // For now, we'll sum all cash receipts for the salesman
-      const cashReceipts = await CashReceipt.find({
-        salesmanId: salaryPackage.employeeId,
-        status: { $in: ['cleared', 'pending'] },
-        receiptDate: { $gte: startDate, $lte: endDate },
-        // Add mobile collection filter when field is available
-      });
-
-      // Calculate total mobile cash recovery
-      const amountRecovered = cashReceipts.reduce(
-        (sum, receipt) => sum + (receipt.amount || 0),
-        0,
-      );
+      const monthlyPerformance = performance
+        || await monthlyPerformanceService.getEmployeeMonthlyPerformance(
+          salaryPackage.employeeId,
+          month,
+          year,
+        );
+      const amountRecovered = monthlyPerformance.mobileCashRecoveryAmount;
 
       // Calculate incentive based on type
       let amount = 0;
@@ -666,7 +636,7 @@ class SalaryCalculationService {
   async generateSalarySheet(calculationId) {
     try {
       const calculation = await SalaryCalculation.findById(calculationId)
-        .populate('employeeId', 'accountName basicPay')
+        .populate('employeeId', 'name employeeBiodata.basicPay')
         .populate('packageId');
 
       if (!calculation) {

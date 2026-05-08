@@ -67,10 +67,21 @@
 
   <!-- Accounts Table Area -->
   <div class="list-page-card">
+    <div class="table-toolbar">
+      <div>
+        <h2>Accounts</h2>
+        <p>Search, filter, and manage customer, supplier, employee, and investor accounts.</p>
+      </div>
+
+      <button mat-raised-button class="btn-create table-create" (click)="onCreateAccount()">
+        <mat-icon>add</mat-icon> New Account
+      </button>
+    </div>
+
     <div class="list-filters-section">
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
         <mat-label>Search Accounts</mat-label>
-        <input matInput [formControl]="searchControl" placeholder="Search by name, code...">
+        <input matInput [formControl]="searchControl">
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
 
@@ -117,7 +128,6 @@
       <div class="list-empty-state" *ngIf="!loading && dataSource.data.length === 0">
         <mat-icon>account_balance_wallet</mat-icon>
         <p>No accounts found</p>
-        <button mat-button color="primary" (click)="onCreateAccount()">Create New Account</button>
       </div>
     </div>
   </div>

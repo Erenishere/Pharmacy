@@ -25,15 +25,20 @@ import { Letter } from '../../models/letter.model';
     MatSnackBarModule, MatProgressSpinnerModule
   ],
   template: `
-    <div class="dialog-container">
-      <div class="dialog-header">
-        <h2 mat-dialog-title>{{ mode === 'create' ? 'New Letter' : 'Edit Letter' }}</h2>
-        <button mat-icon-button (click)="dialogRef.close()"><mat-icon>close</mat-icon></button>
-      </div>
+    <div class="letter-dialog">
+      <h2 mat-dialog-title class="dialog-title">
+        <span class="title-content">
+          <mat-icon>mail</mat-icon>
+          <span>{{ mode === 'create' ? 'New Letter' : 'Edit Letter' }}</span>
+        </span>
+        <button mat-icon-button type="button" class="close-btn" aria-label="Close letter dialog" (click)="dialogRef.close()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </h2>
 
-      <mat-dialog-content>
-        <form [formGroup]="form">
-          <div class="form-row two-col">
+      <mat-dialog-content class="dialog-content">
+        <form [formGroup]="form" class="letter-form">
+          <div class="form-grid two-column">
             <mat-form-field appearance="outline">
               <mat-label>Date</mat-label>
               <input matInput [matDatepicker]="picker" formControlName="date">
@@ -51,7 +56,7 @@ import { Letter } from '../../models/letter.model';
             </mat-form-field>
           </div>
 
-          <div class="form-row two-col">
+          <div class="form-grid two-column">
             <mat-form-field appearance="outline">
               <mat-label>Account (Optional)</mat-label>
               <mat-select formControlName="accountId">
@@ -70,21 +75,21 @@ import { Letter } from '../../models/letter.model';
             </mat-form-field>
           </div>
 
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field appearance="outline" class="full-width-field">
             <mat-label>Subject</mat-label>
             <input matInput formControlName="subject">
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field appearance="outline" class="full-width-field">
             <mat-label>Content</mat-label>
             <textarea matInput formControlName="content" rows="10"></textarea>
           </mat-form-field>
         </form>
       </mat-dialog-content>
 
-      <mat-dialog-actions align="end">
-        <button mat-stroked-button (click)="dialogRef.close()" [disabled]="loading">Cancel</button>
-        <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="loading || form.invalid">
+      <mat-dialog-actions align="end" class="dialog-actions">
+        <button mat-stroked-button type="button" (click)="dialogRef.close()" [disabled]="loading">Cancel</button>
+        <button mat-raised-button color="primary" type="button" (click)="onSubmit()" [disabled]="loading || form.invalid">
           @if (loading) { <mat-spinner diameter="20"></mat-spinner> }
           @else { <ng-container><mat-icon>{{ mode === 'create' ? 'add' : 'save' }}</mat-icon> {{ mode === 'create' ? 'Create' : 'Update' }}</ng-container> }
         </button>

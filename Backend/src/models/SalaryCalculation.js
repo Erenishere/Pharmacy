@@ -17,7 +17,7 @@ const salaryCalculationSchema = new mongoose.Schema(
     // Employee Information
     employeeId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Account',
+      ref: 'Customer',
       required: true,
     },
     employeeName: {
@@ -228,8 +228,8 @@ const salaryCalculationSchema = new mongoose.Schema(
   },
 );
 
-// Pre-save hook: Generate calculationId
-salaryCalculationSchema.pre('save', async function (next) {
+// Pre-validate hook: Generate calculationId before required validation runs.
+salaryCalculationSchema.pre('validate', async function (next) {
   if (!this.calculationId) {
     const count = await this.constructor.countDocuments();
     const year = new Date().getFullYear();

@@ -6,6 +6,29 @@
     </div>
   </div>
 
+  <div class="metadata-nav-card">
+    <div class="metadata-nav-header">
+      <div>
+        <h2><mat-icon>tune</mat-icon> Metadata Modules</h2>
+        <p>Select a reference table to view, add, or edit records.</p>
+      </div>
+    </div>
+
+    <div class="metadata-tab-grid" role="tablist" aria-label="Supporting master data modules">
+      <button
+        type="button"
+        class="metadata-tab"
+        role="tab"
+        *ngFor="let tab of metadataTabs"
+        [class.active]="currentTab === tab.key"
+        [attr.aria-selected]="currentTab === tab.key"
+        (click)="selectTab(tab.key)">
+        <mat-icon>{{ tab.icon }}</mat-icon>
+        <span>{{ tab.label }}</span>
+      </button>
+    </div>
+  </div>
+
   <div [ngSwitch]="currentTab">
     <!-- 1. Transporters -->
     <div class="list-page-card" *ngSwitchCase="'transporters'">

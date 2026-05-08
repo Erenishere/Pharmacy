@@ -196,6 +196,7 @@ export class WarehouseListComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open(WarehouseFormDialogComponent, {
       width: '900px',
       maxWidth: '95vw',
+      panelClass: 'standard-form-dialog-panel',
       data: {}
     });
 

@@ -1,63 +1,197 @@
+@import "../../../../../styles/vuexy-vars";
 @import "../../../../../styles/shared-list-styles";
+
+// ─── Design Tokens ────────────────────────────────────────────
+$p-bg: #f8f7fa;
+$p-border: #ebe9f1;
+
+:host {
+  display: block;
+  background: $p-bg;
+}
 
 .user-list-page {
   @include page-container;
-  @include page-header;
-  @include data-table;
-  @include paginator;
 
-  .user-count-bar {
-    padding: 12px 24px;
-    background: rgba(var(--color-bg-page), 0.04);
-    border-bottom: 1px solid rgba($purple, 0.1);
+  .list-page-header {
+    @include page-header;
     display: flex;
-    align-items: center;
-    gap: 8px;
-    color: $grey-dark;
-    font-size: 13px;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
 
-    mat-icon {
-      color: $purple;
-      font-size: 18px;
+    .header-content {
+      .title-with-accent {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .header-accent-bar {
+          width: 5px;
+          height: 40px;
+          border-radius: 4px;
+          background: $purple;
+        }
+      }
+
+      h1 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+
+        mat-icon {
+          color: $purple;
+        }
+      }
+
+      .page-description {
+        margin: 8px 0 0 17px;
+        color: $grey-dark;
+      }
     }
 
-    strong { color: $purple; }
-  }
+    .header-actions {
+      .create-btn {
+        background: linear-gradient(118deg, $purple, rgba($purple, 0.85)) !important;
+        color: #fff !important;
+        font-weight: 600;
+        height: 42px;
+        padding: 0 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba($purple, 0.35);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.25s ease;
 
-  .user-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    .username {
-      font-weight: 600;
-      color: $purple;
-      font-size: 14px;
+        &:hover {
+          box-shadow: 0 6px 18px rgba($purple, 0.5);
+          transform: translateY(-1px);
+        }
+      }
     }
-  }
-
-  .role-badge {
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    
-    &.admin { background: rgba($danger, 0.1); color: $danger; }
-    &.user { background: rgba($success, 0.1); color: $success; }
-    &.manager { background: rgba($warning, 0.1); color: $warning; }
-  }
-
-  .deleted-badge {
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    
-    &.badge-danger { background: rgba($danger, 0.1); color: $danger; }
   }
 }
 
-.list-page-card { @include list-card; }
+.list-page-card {
+  @include list-card;
+  border: 1px solid $p-border;
+  overflow: hidden;
+}
+
+.list-filters-section {
+  padding: 20px 24px !important;
+  border-bottom: 1px solid $p-border;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+
+  mat-form-field {
+    flex: 1;
+    min-width: 160px;
+    &:first-child { flex: 2; min-width: 260px; }
+  }
+}
+
+.user-count-bar {
+  padding: 12px 24px;
+  background: rgba(var(--color-bg-page), 0.04);
+  border-bottom: 1px solid rgba($purple, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: $grey-dark;
+  font-size: 13px;
+
+  mat-icon {
+    color: $purple;
+    font-size: 18px;
+  }
+
+  strong { color: $purple; }
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .username {
+    font-weight: 600;
+    color: $purple;
+    font-size: 14px;
+  }
+}
+
+.role-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.admin { background: rgba($danger, 0.1); color: $danger; }
+  &.user { background: rgba($success, 0.1); color: $success; }
+  &.manager { background: rgba($warning, 0.1); color: $warning; }
+}
+
+.deleted-badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  &.badge-danger { background: rgba($danger, 0.1); color: $danger; }
+}
+
+// ─── Table Styling (Uses Global Styles) ──────────────────────
+:host ::ng-deep {
+  .user-list-page {
+    app-data-table {
+      @include data-table;
+
+      .data-table {
+        min-width: 1400px;
+      }
+
+      .mat-mdc-table, .mat-table {
+        background-color: #ffffff !important;
+      }
+
+      .mat-mdc-header-row, .mat-header-row {
+        background-color: #7367f0 !important;
+      }
+
+      .mat-mdc-header-cell, .mat-header-cell {
+        background-color: #7367f0 !important;
+        color: #ffffff !important;
+      }
+
+      .mat-mdc-row, .mat-row {
+        background-color: #ffffff !important;
+      }
+
+      .mat-mdc-cell, .mat-cell {
+        background-color: transparent !important;
+        color: #6E6B7B !important;
+      }
+    }
+
+    .mat-mdc-paginator {
+      @include paginator;
+      background-color: #7367f0 !important;
+      color: #ffffff !important;
+      
+      .mat-mdc-paginator-page-size-label,
+      .mat-mdc-paginator-range-label,
+      .mat-mdc-select-value,
+      .mat-mdc-icon-button {
+        color: #ffffff !important;
+      }
+    }
+  }
+}

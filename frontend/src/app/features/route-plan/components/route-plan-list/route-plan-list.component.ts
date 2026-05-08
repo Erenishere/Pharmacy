@@ -54,7 +54,11 @@ export class RoutePlanListComponent implements OnInit {
 
   ngOnInit(): void {
     this.http.get<any>(`${environment.apiUrl}/salesmen`).subscribe({
-      next: (res) => { if (res.success) this.salesmen = res.data; }
+      next: (res) => {
+        if (res.success) {
+          this.salesmen = this.normalizeSalesmanOptions(this.arrayFromResponse(res, ['salesmen']));
+        }
+      }
     });
     this.loadPlans();
   }
@@ -68,19 +72,32 @@ export class RoutePlanListComponent implements OnInit {
     this.routePlanService.getRoutePlans(filters).subscribe({
       next: (res) => {
         this.loading = false;
-        if (res.success) { this.dataSource.data = res.data; this.dataSource.paginator = this.paginator; }
+        if (res.success) {
+          this.dataSource.data = this.arrayFromResponse<RoutePlan>(res, ['routePlans', 'plans', 'items']);
+          this.dataSource.paginator = this.paginator;
+        }
       },
       error: () => { this.loading = false; }
     });
   }
 
   openCreateDialog(): void {
-    const ref = this.dialog.open(RoutePlanFormComponent, { width: '700px', maxHeight: '90vh', data: { mode: 'create', salesmen: this.salesmen } });
+    const ref = this.dialog.open(RoutePlanFormComponent, {
+      width: '700px',
+      maxHeight: '90vh',
+      panelClass: 'standard-form-dialog-panel',
+      data: { mode: 'create', salesmen: this.salesmen }
+    });
     ref.afterClosed().subscribe(r => { if (r) this.loadPlans(); });
   }
 
   openEditDialog(plan: RoutePlan): void {
-    const ref = this.dialog.open(RoutePlanFormComponent, { width: '700px', maxHeight: '90vh', data: { mode: 'edit', plan, salesmen: this.salesmen } });
+    const ref = this.dialog.open(RoutePlanFormComponent, {
+      width: '700px',
+      maxHeight: '90vh',
+      panelClass: 'standard-form-dialog-panel',
+      data: { mode: 'edit', plan, salesmen: this.salesmen }
+    });
     ref.afterClosed().subscribe(r => { if (r) this.loadPlans(); });
   }
 
@@ -94,5 +111,39 @@ export class RoutePlanListComponent implements OnInit {
 
   formatCurrency(value: number): string {
     return new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', minimumFractionDigits: 0 }).format(value || 0);
+  }
+
+  get summary() {
+    return {
+      totalPlans: this.dataSource.data.length,
+      pendingPlans: this.dataSource.data.filter(p => !p.visitTarget || p.visitTarget === 0).length, // Simplified logic for pending
+      completedPlans: this.dataSource.data.filter(p => p.visitTarget > 0).length,
+      activeSalesmen: new Set(this.dataSource.data.map(p => p.salesmanId)).size
+    };
+  }
+
+  private arrayFromResponse<T = any>(res: any, keys: string[] = []): T[] {
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res?.data)) return res.data;
+    if (Array.isArray(res?.data?.items)) return res.data.items;
+    for (const key of keys) {
+      if (Array.isArray(res?.[key])) return res[key];
+      if (Array.isArray(res?.data?.[key])) return res.data[key];
+    }
+    return [];
+  }
+
+  private normalizeSalesmanOptions(rawSalesmen: any[]): any[] {
+    return (rawSalesmen || [])
+      .map((salesman) => {
+        const linkedUserId = typeof salesman?.userId === 'object' ? salesman.userId?._id : salesman?.userId;
+        return {
+          ...salesman,
+          _id: linkedUserId || salesman?._id,
+          displayName: salesman?.name || salesman?.fullName || salesman?.username || salesman?.email || 'Unnamed salesman',
+          routePlanUserId: linkedUserId || salesman?._id,
+        };
+      })
+      .filter((salesman) => !!salesman.routePlanUserId);
   }
 }

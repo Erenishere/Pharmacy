@@ -27,7 +27,10 @@ class AuthController {
 
       // Authenticate user
       console.log('[AuthController] Authenticating user...');
-      const result = await authService.authenticate(identifier, password);
+      const result = await authService.authenticate(identifier, password, {
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent') || null,
+      });
 
       console.log('[AuthController] Login successful for:', identifier);
       return Response.success(res, {
@@ -66,11 +69,15 @@ class AuthController {
       }
 
       // Refresh access token
-      const result = await authService.refreshAccessToken(refreshToken);
+      const result = await authService.refreshAccessToken(refreshToken, {
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent') || null,
+      });
 
       return Response.success(res, {
         user: result.user,
         accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
       }, 'Token refreshed successfully');
     } catch (error) {
       if (error.message === 'Refresh token has expired') {
@@ -100,6 +107,10 @@ class AuthController {
    */
   async logout(req, res) {
     try {
+      await authService.logoutSession(req.authToken, req.body?.refreshToken, {
+        reason: 'logout',
+      });
+
       return Response.success(res, null, 'Logout successful');
     } catch (error) {
       throw error;

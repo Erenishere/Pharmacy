@@ -108,6 +108,7 @@ export class DashboardComponent implements OnInit {
       },
       y: {
         beginAtZero: true,
+        suggestedMax: 1,
         grid: { color: 'rgba(115, 103, 240, 0.08)' },
         ticks: {
           color: '#6E6B7B',
@@ -161,6 +162,7 @@ export class DashboardComponent implements OnInit {
       },
       y: {
         beginAtZero: true,
+        suggestedMax: 1,
         grid: { color: 'rgba(115, 103, 240, 0.08)' },
         ticks: {
           color: '#6E6B7B',
@@ -169,6 +171,51 @@ export class DashboardComponent implements OnInit {
       },
     },
   };
+
+  financialMixData: ChartData<'doughnut'> = {
+    labels: ['No activity yet'],
+    datasets: [
+      {
+        data: [1],
+        backgroundColor: ['#E9E7FD'],
+        borderColor: ['#ffffff'],
+        borderWidth: 4,
+        hoverOffset: 0,
+      },
+    ],
+  };
+
+  financialMixOptions: ChartConfiguration<'doughnut'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '68%',
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: '#6E6B7B',
+          usePointStyle: true,
+          pointStyle: 'circle',
+          padding: 18,
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const value = Number(context.parsed || 0);
+
+            if (!this.financialMixHasActivity) {
+              return 'No activity recorded for this window';
+            }
+
+            return `${context.label}: ${this.formatCurrency(value)}`;
+          },
+        },
+      },
+    },
+  };
+
+  financialMixHasActivity = false;
 
   constructor(
     private readonly authService: AuthService,
@@ -411,6 +458,42 @@ export class DashboardComponent implements OnInit {
         },
       ],
     };
+
+    const { summary, finance } = this.overview;
+    const financialMixValues = [
+      summary.netSales.value,
+      summary.collections.value,
+      finance.expenseByCategory.reduce((total, row) => total + (row.amount || 0), 0),
+      summary.receivablesDue.value,
+    ].map((value) => Math.max(0, value || 0));
+
+    this.financialMixHasActivity = financialMixValues.some((value) => value > 0);
+
+    this.financialMixData = this.financialMixHasActivity
+      ? {
+          labels: ['Net Sales', 'Collections', 'Expenses', 'Receivables'],
+          datasets: [
+            {
+              data: financialMixValues,
+              backgroundColor: ['#7367F0', '#28C76F', '#FF9F43', '#00CFE8'],
+              borderColor: ['#ffffff', '#ffffff', '#ffffff', '#ffffff'],
+              borderWidth: 4,
+              hoverOffset: 8,
+            },
+          ],
+        }
+      : {
+          labels: ['No activity yet'],
+          datasets: [
+            {
+              data: [1],
+              backgroundColor: ['#E9E7FD'],
+              borderColor: ['#ffffff'],
+              borderWidth: 4,
+              hoverOffset: 0,
+            },
+          ],
+        };
   }
 
   trackByIndex(index: number): number {

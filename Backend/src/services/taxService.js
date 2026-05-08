@@ -491,6 +491,28 @@ class TaxService {
     return taxConfig;
   }
 
+  validateTaxConfig(taxData) {
+    const errors = [];
+    const validTypes = ['GST', 'WHT', 'SALES_TAX', 'CUSTOM'];
+
+    if (!taxData.name) errors.push('Tax name is required');
+    if (!taxData.code) errors.push('Tax code is required');
+    if (!taxData.type) errors.push('Tax type is required');
+    if (taxData.type && !validTypes.includes(String(taxData.type).toUpperCase())) {
+      errors.push(`Tax type must be one of: ${validTypes.join(', ')}`);
+    }
+    if (taxData.rate === undefined || taxData.rate === null || Number.isNaN(Number(taxData.rate))) {
+      errors.push('Tax rate is required');
+    } else if (Number(taxData.rate) < 0 || Number(taxData.rate) > 1) {
+      errors.push('Tax rate must be between 0 and 1');
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
+  }
+
   /**
    * Update tax configuration
    * @param {string} id - Tax configuration ID

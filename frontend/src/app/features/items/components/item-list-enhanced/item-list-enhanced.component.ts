@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
+import { Sort } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -16,8 +17,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { forkJoin } from 'rxjs';
 import { ItemService } from '../../services/item.service';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { ItemRegistrationFormComponent } from '../item-form-dialog/item-registration-form.component';
@@ -74,7 +74,7 @@ interface ItemDisplay {
 export class ItemListEnhancedComponent implements OnInit {
   tableColumns: DataTableColumn[] = [
     { key: 'serial', label: 'S#', getValue: (row: any) => this.getItemSerial(row) },
-    { key: 'companyName', label: 'Company', sortable: true },
+    { key: 'companyName', label: 'Company' },
     { key: 'name', label: 'Item Name', sortable: true, getValue: (row: any) => row.name + (row.code ? ` (${row.code})` : '') },
     { 
       key: 'currentStock', 
@@ -86,7 +86,7 @@ export class ItemListEnhancedComponent implements OnInit {
     { key: 'unitPurchaseTP', label: 'P.Price', type: 'currency', sortable: true },
     { key: 'totalCost', label: 'Total Cost', type: 'currency', getValue: (row: any) => row.currentStock * row.unitPurchaseTP },
     { key: 'unitRetailPrice', label: 'Sale Rate', type: 'currency', sortable: true },
-    { key: 'categoryName', label: 'Category', sortable: true },
+    { key: 'categoryName', label: 'Category' },
     { key: 'actions', label: 'Actions', type: 'action', actions: [
       { icon: 'visibility', label: 'View', actionKey: 'view' },
       { icon: 'edit', label: 'Edit', actionKey: 'edit' },
@@ -110,6 +110,8 @@ export class ItemListEnhancedComponent implements OnInit {
   selectedSupplier = '';
   selectedStatus = '';
   showLowStockOnly = false;
+  sortBy = 'name';
+  sortOrder: 'asc' | 'desc' = 'asc';
 
   // Dropdown data
   companies: any[] = [];
@@ -124,8 +126,7 @@ export class ItemListEnhancedComponent implements OnInit {
   constructor(
     private itemService: ItemService,
     private toastService: ToastService,
-    private dialog: MatDialog,
-    private http: HttpClient
+    private dialog: MatDialog
   ) { }
 
   ngOnInit(): void {
@@ -134,22 +135,18 @@ export class ItemListEnhancedComponent implements OnInit {
   }
 
   loadFilterOptions(): void {
-    // Load companies
-    this.http.get<any>(`${environment.apiUrl}/companies?isActive=true`).subscribe({
-      next: (res: any) => this.companies = res.data || [],
-      error: () => this.companies = []
-    });
-
-    // Load categories
-    this.http.get<any>(`${environment.apiUrl}/categories?isActive=true`).subscribe({
-      next: (res: any) => this.categories = res.data || [],
-      error: () => this.categories = []
-    });
-
-    // Load suppliers
-    this.http.get<any>(`${environment.apiUrl}/account-heads?type=supplier&isActive=true`).subscribe({
-      next: (res: any) => this.suppliers = res.data || [],
-      error: () => this.suppliers = []
+    forkJoin({
+      companies: this.itemService.getCompanyFilterOptions(),
+      categories: this.itemService.getCategoryFilterOptions(),
+    }).subscribe({
+      next: ({ companies, categories }) => {
+        this.companies = companies;
+        this.categories = categories;
+      },
+      error: () => {
+        this.companies = [];
+        this.categories = [];
+      }
     });
   }
 
@@ -159,7 +156,9 @@ export class ItemListEnhancedComponent implements OnInit {
     // Build query parameters
     const params: any = {
       page: this.pageIndex + 1,
-      limit: this.pageSize
+      limit: this.pageSize,
+      sortBy: this.sortBy,
+      sortOrder: this.sortOrder,
     };
 
     if (this.searchQuery) {
@@ -249,8 +248,15 @@ export class ItemListEnhancedComponent implements OnInit {
     this.loadItems();
   }
 
-  onSortChange(event: any): void {
-    // Implement sort if needed by API
+  onSortChange(event: Sort): void {
+    if (!event.direction) {
+      this.sortBy = 'name';
+      this.sortOrder = 'asc';
+    } else {
+      this.sortBy = event.active;
+      this.sortOrder = event.direction === 'desc' ? 'desc' : 'asc';
+    }
+    this.pageIndex = 0;
     this.loadItems();
   }
 
@@ -304,9 +310,33 @@ export class ItemListEnhancedComponent implements OnInit {
   }
 
   onExport(): void {
-    console.log('Export functionality triggered');
-    // Implement actual export logic here
-    // For example, downloading CSV or Excel of the current items
+    const exportFilters: any = {};
+
+    if (this.selectedCompany) {
+      exportFilters.companyId = this.selectedCompany;
+    }
+    if (this.selectedCategory) {
+      exportFilters.categoryId = this.selectedCategory;
+    }
+    if (this.selectedStatus) {
+      exportFilters.isActive = this.selectedStatus === 'active';
+    }
+
+    this.itemService.exportItems('excel', exportFilters).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `items_${new Date().toISOString().split('T')[0]}.xlsx`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.toastService.success('Items exported successfully');
+      },
+      error: (error: any) => {
+        console.error('Failed to export items:', error);
+        this.toastService.error('Failed to export items');
+      }
+    });
   }
 
   viewItem(item: ItemDisplay): void {

@@ -105,7 +105,6 @@ import { DataTableColumn } from '../../../../shared/models/data-table.model';
           <div class="list-empty-state" *ngIf="!loading && items.length === 0">
             <mat-icon>inventory_2</mat-icon>
             <p>No products found in the catalog</p>
-            <button mat-button color="primary" (click)="addItem()">Register New Item</button>
           </div>
         </div>
       </div>
@@ -240,6 +239,7 @@ export class ItemListComponent implements OnInit, OnDestroy {
       height: '90vh',
       maxHeight: '800px',
       disableClose: true,
+      panelClass: 'standard-form-dialog-panel',
       data: {}
     });
 
@@ -268,6 +268,7 @@ export class ItemListComponent implements OnInit, OnDestroy {
       height: '90vh',
       maxHeight: '800px',
       disableClose: true,
+      panelClass: 'standard-form-dialog-panel',
       data: { item }
     });
 

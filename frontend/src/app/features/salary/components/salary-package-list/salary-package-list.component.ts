@@ -8,11 +8,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SalaryPackageService } from '../../services/salary-package.service';
+import { TargetTrackingService } from '../../services/target-tracking.service';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { SalaryPackage } from '../../../../core/models/salary-package.model';
+import { EmployeeTargetData } from '../../../../core/models/target-tracking.model';
 
 @Component({
   selector: 'app-salary-package-list',
@@ -27,6 +30,7 @@ import { SalaryPackage } from '../../../../core/models/salary-package.model';
     MatProgressSpinnerModule,
     MatSelectModule,
     MatFormFieldModule,
+    MatPaginatorModule,
     MatTooltipModule
   ],
   templateUrl: './salary-package-list.component.html',
@@ -35,6 +39,9 @@ import { SalaryPackage } from '../../../../core/models/salary-package.model';
 export class SalaryPackageListComponent implements OnInit {
   packages: SalaryPackage[] = [];
   loading = false;
+  currentPage = 0;
+  pageSize = 10;
+  pageSizeOptions = [10, 25, 50];
   
   displayedColumns: string[] = [
     'serial',
@@ -54,13 +61,21 @@ export class SalaryPackageListComponent implements OnInit {
   
   statusOptions = ['Active', 'Inactive', 'All'];
   yearOptions: number[] = [];
+  monthFilter = new FormControl('');
+  months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  performanceByEmployee: Record<string, EmployeeTargetData> = {};
 
   constructor(
     private salaryPackageService: SalaryPackageService,
+    private targetTrackingService: TargetTrackingService,
     private toastService: ToastService,
     private router: Router
   ) {
     this.initializeYearOptions();
+    this.initializeCurrentMonth();
   }
 
   ngOnInit(): void {
@@ -75,6 +90,11 @@ export class SalaryPackageListComponent implements OnInit {
     }
   }
 
+  private initializeCurrentMonth(): void {
+    const currentDate = new Date();
+    this.monthFilter.setValue(this.months[currentDate.getMonth()]);
+  }
+
   private setupFilterListeners(): void {
     this.statusFilter.valueChanges.subscribe(() => {
       this.loadPackages();
@@ -83,10 +103,15 @@ export class SalaryPackageListComponent implements OnInit {
     this.yearFilter.valueChanges.subscribe(() => {
       this.loadPackages();
     });
+
+    this.monthFilter.valueChanges.subscribe(() => {
+      this.loadPerformanceSnapshots();
+    });
   }
 
   loadPackages(): void {
     this.loading = true;
+    this.currentPage = 0;
     
     const filters: any = {};
     
@@ -102,13 +127,41 @@ export class SalaryPackageListComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.packages = response.data;
+          this.loadPerformanceSnapshots();
+        } else {
+          this.performanceByEmployee = {};
         }
         this.loading = false;
       },
       error: (error) => {
         this.toastService.error('Failed to load salary packages');
         console.error('Error loading packages:', error);
+        this.performanceByEmployee = {};
         this.loading = false;
+      }
+    });
+  }
+
+  private loadPerformanceSnapshots(): void {
+    const month = this.monthFilter.value;
+    const year = this.yearFilter.value;
+
+    if (!month || !year) {
+      this.performanceByEmployee = {};
+      return;
+    }
+
+    this.targetTrackingService.getTargetDashboard(month, year, 1, 200).subscribe({
+      next: (response) => {
+        const employees = response.data?.employees || [];
+        this.performanceByEmployee = employees.reduce<Record<string, EmployeeTargetData>>((acc, employee) => {
+          acc[employee.employeeId] = employee;
+          return acc;
+        }, {});
+      },
+      error: (error) => {
+        console.error('Error loading salary target snapshots:', error);
+        this.performanceByEmployee = {};
       }
     });
   }
@@ -337,9 +390,24 @@ export class SalaryPackageListComponent implements OnInit {
     this.router.navigate(['/salary-packages/new']);
   }
 
-  // Placeholder methods for visited parties (will be implemented with target tracking)
+  onPageChange(event: PageEvent): void {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+  }
+
+  get pagedPackages(): SalaryPackage[] {
+    const start = this.currentPage * this.pageSize;
+    return this.packages.slice(start, start + this.pageSize);
+  }
+
+  getSerialNumber(index: number): number {
+    return this.currentPage * this.pageSize + index + 1;
+  }
+
   getVisitedParties(packageItem: SalaryPackage): number {
-    // TODO: Fetch from target tracking service
-    return 0;
+    const employeeId = typeof packageItem.employeeId === 'string'
+      ? packageItem.employeeId
+      : (packageItem.employeeId as any)?._id;
+    return employeeId ? (this.performanceByEmployee[employeeId]?.partyVisitTarget?.achieved || 0) : 0;
   }
 }

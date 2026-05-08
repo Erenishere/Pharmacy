@@ -77,6 +77,7 @@ export interface BonusCalculation {
 
 export interface SalaryCalculationRequest {
   employeeId: string;
+  packageId?: string;
   month: string;
   year: number;
 }

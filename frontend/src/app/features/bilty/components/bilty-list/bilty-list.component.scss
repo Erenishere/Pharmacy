@@ -1,12 +1,197 @@
+@import "../../../../../styles/vuexy-vars";
 @import "../../../../../styles/shared-list-styles";
+
+$p-bg: #f8f7fa;
+
+:host {
+  display: block;
+  background: $p-bg;
+}
 
 .bilty-list-page {
   @include page-container;
-  @include page-header;
-  @include data-table;
-  @include paginator;
 
-  .dashboard-stats-grid { @include dashboard-stats-grid; }
+  .list-page-header {
+    @include page-header;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+
+    .header-content {
+      .title-with-accent {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .header-accent-bar {
+          width: 5px;
+          height: 40px;
+          border-radius: 4px;
+          background: $purple;
+        }
+      }
+
+      h1 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+
+        mat-icon {
+          color: $purple;
+        }
+      }
+
+      .page-subtitle {
+        margin: 8px 0 0 17px;
+        color: $grey-dark;
+      }
+    }
+
+    .header-actions {
+      .create-btn {
+        background: linear-gradient(118deg, #7367f0, #867cf0) !important;
+        color: #fff !important;
+        font-weight: 600;
+        height: 42px;
+        padding: 0 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(115, 103, 240, 0.35);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.25s ease;
+
+        &:hover {
+          box-shadow: 0 6px 18px rgba(115, 103, 240, 0.5);
+          transform: translateY(-1px);
+        }
+
+        mat-icon {
+          color: #fff !important;
+        }
+      }
+    }
+  }
+
+  .dashboard-stats-grid {
+    @include dashboard-stats-grid;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 900px) {
+    .list-page-header {
+      flex-direction: column;
+      gap: 16px;
+
+      .header-actions {
+        width: 100%;
+
+        .create-btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    }
+  }
+
+  // Table styling
+  .list-page-card {
+    @include list-card;
+
+    .bilty-table-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 22px 24px;
+      border-bottom: 1px solid var(--indus-border, #ebe9f1);
+      background: var(--indus-surface, #fff);
+
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        color: var(--indus-text, #5e5873);
+        font-size: 18px;
+        font-weight: 800;
+
+        mat-icon {
+          color: var(--indus-primary, #7367f0);
+        }
+      }
+
+      .filter-group-primary,
+      .filter-group-secondary {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+      }
+
+      .refresh-btn {
+        color: var(--indus-primary, #7367f0) !important;
+      }
+    }
+
+    .list-loading-overlay {
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--indus-text-soft, #6e6b7b);
+
+      p {
+        margin: 12px 0 0;
+        font-weight: 600;
+      }
+    }
+
+    .table-wrapper {
+      background: var(--indus-surface, #fff);
+      overflow-x: auto;
+
+      .data-table {
+        min-width: 1320px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .bilty-table-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+
+        .filter-group-secondary,
+        .refresh-btn {
+          width: 100%;
+        }
+
+        .refresh-btn {
+          justify-content: center;
+        }
+      }
+    }
+
+    mat-paginator {
+      background: $purple !important;
+      color: #ffffff !important;
+      border-radius: 8px;
+      margin-top: 16px;
+
+      ::ng-deep {
+        .mat-mdc-paginator-range-label,
+        .mat-mdc-paginator-page-size-label,
+        .mat-mdc-select-value,
+        .mat-mdc-select-arrow,
+        .mat-mdc-icon-button {
+          color: #ffffff !important;
+        }
+      }
+    }
+  }
 
   .party-info {
     display: flex;
@@ -43,4 +228,3 @@
     &.send { border-color: $purple; color: $purple; }
   }
 }
-

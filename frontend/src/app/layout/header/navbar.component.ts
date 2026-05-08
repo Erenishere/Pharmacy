@@ -12,6 +12,16 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { AuthService } from '../../core/services/auth.service';
 import { User } from '../../core/models/user.model';
 
+interface NavbarNotification {
+  id: string;
+  icon: string;
+  type: 'warning' | 'danger' | 'info';
+  message: string;
+  time: string;
+  route: string;
+  unread: boolean;
+}
+
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -80,10 +90,10 @@ import { User } from '../../core/models/user.model';
       </div>
 
       <!-- Notifications Menu -->
-      <mat-menu #notifMenu="matMenu" class="notifications-menu">
+      <mat-menu #notifMenu="matMenu" class="notifications-menu navbar-menu-panel" xPosition="before">
         <div class="menu-header">
           <span class="title">Notifications</span>
-          <button mat-button class="mark-read" *ngIf="notificationCount > 0">Mark all read</button>
+          <button mat-button class="mark-read" *ngIf="notificationCount > 0" (click)="$event.stopPropagation(); markAllNotificationsRead()">Mark all read</button>
         </div>
         <mat-divider></mat-divider>
         <div class="notification-list">
@@ -91,18 +101,19 @@ import { User } from '../../core/models/user.model';
             <mat-icon class="empty-icon">notifications_none</mat-icon>
             <span>No new notifications</span>
           </div>
-          <button mat-menu-item class="notification-item" *ngFor="let notif of notifications">
+          <button mat-menu-item class="notification-item" *ngFor="let notif of notifications" (click)="openNotification(notif)">
             <mat-icon [class]="notif.type">{{ notif.icon }}</mat-icon>
             <div class="notif-content">
               <span class="notif-text">{{ notif.message }}</span>
               <span class="notif-time">{{ notif.time }}</span>
             </div>
+            <span class="notif-dot" *ngIf="notif.unread"></span>
           </button>
         </div>
       </mat-menu>
 
       <!-- User Menu -->
-      <mat-menu #userMenu="matMenu" class="user-menu">
+      <mat-menu #userMenu="matMenu" class="user-menu navbar-menu-panel" xPosition="before">
         <div class="menu-user-header">
           <div class="avatar-large">
             <mat-icon>person</mat-icon>
@@ -132,16 +143,16 @@ import { User } from '../../core/models/user.model';
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent implements OnInit {
+  private readonly notificationStorageKeyPrefix = 'navbar-notifications';
   @Output() toggleSidebar = new EventEmitter<void>();
   currentUser: User | null = null;
   searchQuery = '';
-  notificationCount = 3;
-
-  notifications = [
-    { icon: 'warning', type: 'warning', message: '5 items are running low on stock', time: '2 hours ago' },
-    { icon: 'schedule', type: 'danger', message: '3 batches expiring this month', time: '5 hours ago' },
-    { icon: 'receipt', type: 'info', message: 'New order received from ABC Pharmacy', time: '1 day ago' }
+  private readonly defaultNotifications: NavbarNotification[] = [
+    { id: 'low-stock', icon: 'warning', type: 'warning', message: '5 items are running low on stock', time: '2 hours ago', route: '/inventory/stock-levels', unread: true },
+    { id: 'batch-expiry', icon: 'schedule', type: 'danger', message: '3 batches expiring this month', time: '5 hours ago', route: '/batches/expiring', unread: true },
+    { id: 'new-order', icon: 'receipt', type: 'info', message: 'New order received from ABC Pharmacy', time: '1 day ago', route: '/e-orders', unread: true }
   ];
+  notifications: NavbarNotification[] = [];
 
   constructor(
     private authService: AuthService,
@@ -149,7 +160,14 @@ export class NavbarComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.authService.currentUser$.subscribe(user => this.currentUser = user);
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+      this.loadNotifications();
+    });
+  }
+
+  get notificationCount(): number {
+    return this.notifications.filter((notification) => notification.unread).length;
   }
 
   get isSalesman(): boolean {
@@ -167,10 +185,64 @@ export class NavbarComponent implements OnInit {
     this.searchQuery = '';
   }
 
+  markAllNotificationsRead(): void {
+    this.notifications = this.notifications.map((notification) => ({
+      ...notification,
+      unread: false,
+    }));
+    this.persistNotificationState();
+  }
+
+  openNotification(notification: NavbarNotification): void {
+    this.notifications = this.notifications.map((item) => (
+      item.id === notification.id ? { ...item, unread: false } : item
+    ));
+    this.persistNotificationState();
+    this.router.navigate([notification.route]);
+  }
+
   logout(): void {
     this.authService.logout().subscribe({
       next: () => this.router.navigate(['/login']),
       error: () => this.router.navigate(['/login'])
     });
+  }
+
+  private loadNotifications(): void {
+    const storedState = this.getStoredNotificationState();
+    this.notifications = this.defaultNotifications.map((notification) => ({
+      ...notification,
+      unread: storedState[notification.id] ?? notification.unread
+    }));
+  }
+
+  private persistNotificationState(): void {
+    try {
+      const unreadState = this.notifications.reduce<Record<string, boolean>>((accumulator, notification) => {
+        accumulator[notification.id] = notification.unread;
+        return accumulator;
+      }, {});
+      localStorage.setItem(this.getNotificationStorageKey(), JSON.stringify(unreadState));
+    } catch {
+      // Ignore storage errors so navbar interactions still work.
+    }
+  }
+
+  private getStoredNotificationState(): Record<string, boolean> {
+    try {
+      const rawState = localStorage.getItem(this.getNotificationStorageKey());
+      if (!rawState) {
+        return {};
+      }
+
+      const parsedState = JSON.parse(rawState);
+      return parsedState && typeof parsedState === 'object' ? parsedState : {};
+    } catch {
+      return {};
+    }
+  }
+
+  private getNotificationStorageKey(): string {
+    return `${this.notificationStorageKeyPrefix}:${this.currentUser?._id || 'guest'}`;
   }
 }

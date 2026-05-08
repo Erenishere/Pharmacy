@@ -1,3 +1,4 @@
+@import '../../../../../styles/vuexy-vars';
 @import '../../../../../styles/shared-list-styles';
 
 // ─── Standard Premium Theme (True Application Standard) ────────
@@ -24,7 +25,7 @@ $p-border: #ebe9f1;
 
   .header-actions {
     .btn-create {
-      background: linear-gradient(118deg, var(--color-bg-page), rgba(var(--color-bg-page), 0.82)) !important;
+      background: linear-gradient(118deg, $purple, rgba($purple, 0.85)) !important;
       color: #fff !important;
       font-weight: 600;
       font-size: 14px;
@@ -72,7 +73,7 @@ $p-border: #ebe9f1;
       color: $purple;
     }
     &.active {
-      background: var(--color-bg-page);
+      background: $purple;
       color: #fff;
       border-color: $purple;
       box-shadow: 0 4px 14px rgba($purple, 0.35);

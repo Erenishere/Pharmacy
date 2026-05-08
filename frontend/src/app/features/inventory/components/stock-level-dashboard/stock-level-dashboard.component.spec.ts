@@ -4,6 +4,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StockLevelDashboardComponent } from './stock-level-dashboard.component';
 import { InventoryService } from '../../services/inventory.service';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { ExportService } from '../../../../core/services/export.service';
 import { of } from 'rxjs';
 
 describe('StockLevelDashboardComponent', () => {
@@ -11,6 +12,7 @@ describe('StockLevelDashboardComponent', () => {
   let fixture: ComponentFixture<StockLevelDashboardComponent>;
   let inventoryService: jasmine.SpyObj<InventoryService>;
   let toastService: jasmine.SpyObj<ToastService>;
+  let exportService: jasmine.SpyObj<ExportService>;
 
   beforeEach(async () => {
     const inventoryServiceSpy = jasmine.createSpyObj('InventoryService', [
@@ -22,6 +24,10 @@ describe('StockLevelDashboardComponent', () => {
       'error',
       'info'
     ]);
+    const exportServiceSpy = jasmine.createSpyObj('ExportService', [
+      'exportToExcel',
+      'exportToPDF'
+    ]);
 
     await TestBed.configureTestingModule({
       imports: [
@@ -31,12 +37,14 @@ describe('StockLevelDashboardComponent', () => {
       ],
       providers: [
         { provide: InventoryService, useValue: inventoryServiceSpy },
-        { provide: ToastService, useValue: toastServiceSpy }
+        { provide: ToastService, useValue: toastServiceSpy },
+        { provide: ExportService, useValue: exportServiceSpy }
       ]
     }).compileComponents();
 
     inventoryService = TestBed.inject(InventoryService) as jasmine.SpyObj<InventoryService>;
     toastService = TestBed.inject(ToastService) as jasmine.SpyObj<ToastService>;
+    exportService = TestBed.inject(ExportService) as jasmine.SpyObj<ExportService>;
 
     // Setup default mock responses
     inventoryService.getStockOverview.and.returnValue(of({
@@ -170,5 +178,98 @@ describe('StockLevelDashboardComponent', () => {
     component.ngOnDestroy();
     
     expect(component.autoRefreshInterval).toBeDefined();
+  });
+
+  it('should export stock levels to excel', () => {
+    inventoryService.getStockLevels.and.returnValue(of({
+      success: true,
+      data: [{
+        _id: '1',
+        itemId: 'item-1',
+        itemCode: 'ITM-001',
+        itemName: 'Paracetamol',
+        categoryName: 'Medicine',
+        companyName: 'ABC Pharma',
+        warehouseId: 'wh-1',
+        warehouseName: 'Main Warehouse',
+        quantity: 100,
+        reservedQuantity: 5,
+        availableQuantity: 95,
+        minimumLevel: 10,
+        batchNumber: 'B-001',
+        expiryDate: '2027-01-01T00:00:00.000Z',
+        lastUpdated: '2026-05-07T00:00:00.000Z'
+      }],
+      pagination: {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 1,
+        itemsPerPage: 25
+      }
+    }));
+
+    component.totalItems = 1;
+    component.dataSource.data = [{
+      _id: '1',
+      itemId: 'item-1',
+      itemCode: 'ITM-001',
+      itemName: 'Paracetamol',
+      warehouseId: 'wh-1',
+      warehouseName: 'Main Warehouse',
+      quantity: 100,
+      reservedQuantity: 5,
+      availableQuantity: 95,
+      lastUpdated: '2026-05-07T00:00:00.000Z'
+    } as any];
+
+    component.exportToExcel();
+
+    expect(inventoryService.getStockLevels).toHaveBeenCalled();
+    expect(exportService.exportToExcel).toHaveBeenCalled();
+    expect(toastService.success).toHaveBeenCalledWith('Stock levels exported to Excel');
+  });
+
+  it('should export stock levels to pdf', () => {
+    inventoryService.getStockLevels.and.returnValue(of({
+      success: true,
+      data: [{
+        _id: '1',
+        itemId: 'item-1',
+        itemCode: 'ITM-001',
+        itemName: 'Paracetamol',
+        warehouseId: 'wh-1',
+        warehouseName: 'Main Warehouse',
+        quantity: 100,
+        reservedQuantity: 5,
+        availableQuantity: 95,
+        lastUpdated: '2026-05-07T00:00:00.000Z'
+      }],
+      pagination: {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 1,
+        itemsPerPage: 25
+      }
+    }));
+
+    component.totalItems = 1;
+    component.dataSource.data = [{
+      _id: '1',
+      itemId: 'item-1',
+      itemCode: 'ITM-001',
+      itemName: 'Paracetamol',
+      warehouseId: 'wh-1',
+      warehouseName: 'Main Warehouse',
+      quantity: 100,
+      reservedQuantity: 5,
+      availableQuantity: 95,
+      lastUpdated: '2026-05-07T00:00:00.000Z'
+    } as any];
+
+    component.exportToPDF();
+
+    expect(inventoryService.getStockLevels).toHaveBeenCalled();
+    expect(exportService.exportToPDF).toHaveBeenCalled();
+    expect(toastService.success).toHaveBeenCalledWith('Stock levels exported to PDF');
   });
 });

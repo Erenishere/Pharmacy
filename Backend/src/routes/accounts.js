@@ -2,9 +2,38 @@ const express = require('express');
 const { body, param, query } = require('express-validator');
 const accountController = require('../controllers/accountController');
 const { authenticate, requireRoles } = require('../middleware/auth');
+const { cacheMiddleware } = require('../middleware/cacheMiddleware');
 const { validate, isValidObjectId } = require('../middleware/validation');
 
 const router = express.Router();
+const ACCOUNT_TYPE_VALUES = ['customer', 'supplier', 'employee', 'investor', 'both', 'account_manager', 'sub_account'];
+const READ_ACCOUNT_TYPE_VALUES = [
+  ...ACCOUNT_TYPE_VALUES,
+  'asset',
+  'liability',
+  'equity',
+  'revenue',
+  'expense',
+  'adjustment',
+  'claim',
+];
+const accountRegistrationLookupsCache = cacheMiddleware({
+  duration: 'short',
+  ttl: 120,
+  keyGenerator: () => 'accounts:registration-lookups',
+});
+
+/**
+ * @route   GET /api/v1/accounts/registration-lookups
+ * @desc    Get cached account-registration lookup bundle
+ * @access  Private
+ */
+router.get(
+  '/registration-lookups',
+  authenticate,
+  accountRegistrationLookupsCache,
+  accountController.getAccountRegistrationLookups,
+);
 
 /**
  * @route   GET /api/v1/accounts/credit-limit-exceeded
@@ -51,7 +80,7 @@ router.get(
       .withMessage('Sort order must be asc or desc'),
     query('accountType')
       .optional()
-      .isIn(['customer', 'supplier', 'employee', 'investor', 'both'])
+      .isIn(READ_ACCOUNT_TYPE_VALUES)
       .withMessage('Invalid account type'),
     query('townId')
       .optional()
@@ -123,8 +152,8 @@ router.get(
   authenticate,
   [
     param('type')
-      .isIn(['customer', 'supplier', 'employee', 'investor', 'both'])
-      .withMessage('Invalid account type. Must be one of: customer, supplier, employee, investor, both'),
+      .isIn(READ_ACCOUNT_TYPE_VALUES)
+      .withMessage(`Invalid account type. Must be one of: ${READ_ACCOUNT_TYPE_VALUES.join(', ')}`),
     validate,
   ],
   accountController.getAccountsByType,
@@ -149,7 +178,7 @@ router.get(
       .withMessage('Limit must be between 1 and 1000'),
     query('accountType')
       .optional()
-      .isIn(['customer', 'supplier', 'employee', 'investor', 'both'])
+      .isIn(READ_ACCOUNT_TYPE_VALUES)
       .withMessage('Invalid account type'),
     query('isActive')
       .optional()
@@ -191,26 +220,50 @@ router.post(
     body('accountType')
       .notEmpty()
       .withMessage('Account type is required')
-      .isIn(['customer', 'supplier', 'employee', 'investor', 'both'])
-      .withMessage('Invalid account type'),
+      .isIn(ACCOUNT_TYPE_VALUES)
+      .withMessage(`Invalid account type. Must be one of: ${ACCOUNT_TYPE_VALUES.join(', ')}`),
     body('parentAccountId')
-      .optional()
+      .optional({ checkFalsy: true })
       .custom(isValidObjectId)
       .withMessage('Invalid parent account ID format'),
     body('dimensionId')
-      .optional()
+      .optional({ checkFalsy: true })
       .custom(isValidObjectId)
       .withMessage('Invalid dimension ID format'),
     body('townId')
-      .optional()
+      .optional({ checkFalsy: true })
       .custom(isValidObjectId)
       .withMessage('Invalid town ID format'),
     body('areaId')
-      .optional()
+      .optional({ checkFalsy: true })
       .custom(isValidObjectId)
       .withMessage('Invalid area ID format'),
+    body('accountHeadId')
+      .optional({ checkFalsy: true })
+      .custom(isValidObjectId)
+      .withMessage('Invalid account head ID format'),
+    body('customerTypeId')
+      .optional({ checkFalsy: true })
+      .custom(isValidObjectId)
+      .withMessage('Invalid customer type ID format'),
+    body('routeId')
+      .optional({ checkFalsy: true })
+      .custom(isValidObjectId)
+      .withMessage('Invalid route ID format'),
+    body('linkedAccountId')
+      .optional({ checkFalsy: true })
+      .custom(isValidObjectId)
+      .withMessage('Invalid linked account ID format'),
+    body('assignedSalesmanId')
+      .optional({ checkFalsy: true })
+      .custom(isValidObjectId)
+      .withMessage('Invalid assigned salesman ID format'),
+    body('employeeBiodata.designationId')
+      .optional({ checkFalsy: true })
+      .custom(isValidObjectId)
+      .withMessage('Invalid designation ID format'),
     body('contactInfo.email')
-      .optional()
+      .optional({ checkFalsy: true })
       .trim()
       .isEmail()
       .withMessage('Invalid email format')
@@ -225,7 +278,7 @@ router.post(
       .isFloat({ min: 0 })
       .withMessage('Basic pay must be a positive number'),
     body('employeeBiodata.bloodGroup')
-      .optional()
+      .optional({ checkFalsy: true })
       .isIn(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])
       .withMessage('Invalid blood group'),
     body('businessDetails.creditAmountLimit')
@@ -237,9 +290,9 @@ router.post(
       .isInt({ min: 0, max: 365 })
       .withMessage('Credit days limit must be between 0 and 365'),
     body('businessDetails.customerType')
-      .optional()
-      .isIn(['retailer', 'wholesaler', 'distributor', 'hospital', 'pharmacy'])
-      .withMessage('Invalid customer type'),
+      .optional({ checkFalsy: true })
+      .isString()
+      .withMessage('Customer type must be a string'),
     body('businessDetails.balanceType')
       .optional()
       .isIn(['debit', 'credit'])
@@ -295,26 +348,50 @@ router.put(
       .withMessage('Account name must be between 2 and 200 characters'),
     body('accountType')
       .optional()
-      .isIn(['customer', 'supplier', 'employee', 'investor', 'both'])
-      .withMessage('Invalid account type'),
+      .isIn(ACCOUNT_TYPE_VALUES)
+      .withMessage(`Invalid account type. Must be one of: ${ACCOUNT_TYPE_VALUES.join(', ')}`),
     body('parentAccountId')
-      .optional()
+      .optional({ checkFalsy: true })
       .custom(isValidObjectId)
       .withMessage('Invalid parent account ID format'),
     body('dimensionId')
-      .optional()
+      .optional({ checkFalsy: true })
       .custom(isValidObjectId)
       .withMessage('Invalid dimension ID format'),
     body('townId')
-      .optional()
+      .optional({ checkFalsy: true })
       .custom(isValidObjectId)
       .withMessage('Invalid town ID format'),
     body('areaId')
-      .optional()
+      .optional({ checkFalsy: true })
       .custom(isValidObjectId)
       .withMessage('Invalid area ID format'),
+    body('accountHeadId')
+      .optional({ checkFalsy: true })
+      .custom(isValidObjectId)
+      .withMessage('Invalid account head ID format'),
+    body('customerTypeId')
+      .optional({ checkFalsy: true })
+      .custom(isValidObjectId)
+      .withMessage('Invalid customer type ID format'),
+    body('routeId')
+      .optional({ checkFalsy: true })
+      .custom(isValidObjectId)
+      .withMessage('Invalid route ID format'),
+    body('linkedAccountId')
+      .optional({ checkFalsy: true })
+      .custom(isValidObjectId)
+      .withMessage('Invalid linked account ID format'),
+    body('assignedSalesmanId')
+      .optional({ checkFalsy: true })
+      .custom(isValidObjectId)
+      .withMessage('Invalid assigned salesman ID format'),
+    body('employeeBiodata.designationId')
+      .optional({ checkFalsy: true })
+      .custom(isValidObjectId)
+      .withMessage('Invalid designation ID format'),
     body('contactInfo.email')
-      .optional()
+      .optional({ checkFalsy: true })
       .trim()
       .isEmail()
       .withMessage('Invalid email format')
@@ -324,7 +401,7 @@ router.put(
       .isFloat({ min: 0 })
       .withMessage('Basic pay must be a positive number'),
     body('employeeBiodata.bloodGroup')
-      .optional()
+      .optional({ checkFalsy: true })
       .isIn(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])
       .withMessage('Invalid blood group'),
     body('businessDetails.creditAmountLimit')
@@ -336,9 +413,9 @@ router.put(
       .isInt({ min: 0, max: 365 })
       .withMessage('Credit days limit must be between 0 and 365'),
     body('businessDetails.customerType')
-      .optional()
-      .isIn(['retailer', 'wholesaler', 'distributor', 'hospital', 'pharmacy'])
-      .withMessage('Invalid customer type'),
+      .optional({ checkFalsy: true })
+      .isString()
+      .withMessage('Customer type must be a string'),
     body('isActive')
       .optional()
       .isBoolean()

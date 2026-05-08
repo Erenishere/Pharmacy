@@ -47,7 +47,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
           <div class="form-row">
             <mat-form-field appearance="outline" class="customer-field">
               <mat-label>Customer *</mat-label>
-              <input matInput [matAutocomplete]="custAuto" formControlName="customerSearch" placeholder="Search customer...">
+              <input matInput [matAutocomplete]="custAuto" formControlName="customerSearch">
               <mat-icon matPrefix>search</mat-icon>
               <mat-autocomplete #custAuto="matAutocomplete" [displayWith]="displayCustomer"
                 (optionSelected)="onCustomerSelect($event.option.value)">
@@ -432,7 +432,21 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
     }
 
     ::ng-deep .e-order-dialog .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+      min-height: 56px !important;
       background-color: #fcfcfd !important;
+      overflow: visible !important;
+    }
+
+    ::ng-deep .e-order-dialog .mat-mdc-form-field-infix {
+      min-height: 56px !important;
+      padding-top: 18px !important;
+      padding-bottom: 8px !important;
+    }
+
+    ::ng-deep .e-order-dialog .mdc-text-field--outlined .mdc-floating-label--float-above {
+      transform: translateY(-34px) scale(0.75) !important;
+      background: #fcfcfd !important;
+      padding: 0 4px !important;
     }
 
     ::ng-deep .e-order-dialog .mdc-notched-outline__leading,

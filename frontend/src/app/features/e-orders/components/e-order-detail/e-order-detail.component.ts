@@ -21,6 +21,7 @@ import {
   EOrderCancelReasonDialogComponent,
   EOrderCancelReasonDialogResult
 } from '../e-order-cancel-reason-dialog/e-order-cancel-reason-dialog.component';
+import { EOrderFormDialogComponent } from '../e-order-form-dialog/e-order-form-dialog.component';
 
 @Component({
   selector: 'app-e-order-detail',
@@ -208,7 +209,20 @@ export class EOrderDetailComponent implements OnInit {
 
   onEdit(): void {
     if (!this.eOrder) return;
-    this.router.navigate(['/e-orders/edit', this.eOrder._id]);
+    const ref = this.dialog.open(EOrderFormDialogComponent, {
+      width: '1280px',
+      maxWidth: '96vw',
+      height: '92vh',
+      panelClass: ['standard-form-dialog-panel', 'e-order-dialog-panel'],
+      autoFocus: false,
+      data: { order: this.eOrder }
+    });
+
+    ref.afterClosed().subscribe(result => {
+      if (result && this.eOrder) {
+        this.loadEOrder(this.eOrder._id);
+      }
+    });
   }
 
   onPrint(): void {

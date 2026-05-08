@@ -53,15 +53,25 @@ const getAllItems = async (req, res) => {
       ...otherFilters,
     };
 
+    const allowedSortFields = {
+      name: 'name',
+      currentStock: 'inventory.currentStock',
+      unitPurchaseTP: 'pricing.purchasePrice',
+      unitRetailPrice: 'pricing.retailPrice',
+      code: 'code',
+    };
+
     // Build sort options
     const sortOptions = {};
     if (sort) {
       // Handle sort parameter in format: 'field:asc' or 'field:desc'
       const [field, order] = sort.split(':');
-      sortOptions[field] = order === 'desc' ? -1 : 1;
+      const resolvedField = allowedSortFields[field] || allowedSortFields.name;
+      sortOptions[resolvedField] = order === 'desc' ? -1 : 1;
     } else if (sortBy) {
       // Fallback to sortBy and sortOrder if sort is not provided
-      sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1;
+      const resolvedField = allowedSortFields[sortBy] || allowedSortFields.name;
+      sortOptions[resolvedField] = sortOrder === 'desc' ? -1 : 1;
     }
 
     // Get paginated items with filters

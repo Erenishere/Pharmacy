@@ -13,8 +13,8 @@ export const routes: Routes = [
     { path: 'reset-password', component: ResetPasswordComponent },
     {
         path: 'account-registration',
-        canActivate: [authGuard],
-        loadComponent: () => import('./features/master-data/components/account-registration/account-registration.component').then(m => m.AccountRegistrationComponent)
+        redirectTo: 'accounts/registration',
+        pathMatch: 'full'
     },
     {
         path: '',
@@ -24,6 +24,10 @@ export const routes: Routes = [
             {
                 path: 'dashboard',
                 loadComponent: () => import('./features/dashboard/components/dashboard.component').then(m => m.DashboardComponent)
+            },
+            {
+                path: 'profile',
+                loadComponent: () => import('./features/users/components/my-profile/my-profile.component').then(m => m.MyProfileComponent)
             },
             {
                 path: 'users',
@@ -61,12 +65,36 @@ export const routes: Routes = [
                         loadComponent: () => import('./features/batches/components/batch-list/batch-list.component').then(m => m.BatchListComponent)
                     },
                     {
+                        path: 'list',
+                        loadComponent: () => import('./features/batches/components/batch-list/batch-list.component').then(m => m.BatchListComponent)
+                    },
+                    {
                         path: 'create',
-                        loadComponent: () => import('./features/inventory/components/batch-management/batch-management.component').then(m => m.BatchManagementComponent)
+                        loadComponent: () => import('./features/batches/components/batch-form/batch-form.component').then(m => m.BatchFormComponent)
+                    },
+                    {
+                        path: 'expiring',
+                        loadComponent: () => import('./features/batches/components/expiry-tracker/expiry-tracker.component').then(m => m.ExpiryTrackerComponent)
+                    },
+                    {
+                        path: 'statistics',
+                        loadComponent: () => import('./features/batches/components/batch-statistics/batch-statistics.component').then(m => m.BatchStatisticsComponent)
+                    },
+                    {
+                        path: 'detail/:id',
+                        loadComponent: () => import('./features/batches/components/batch-detail/batch-detail.component').then(m => m.BatchDetailComponent)
+                    },
+                    {
+                        path: 'edit/:id',
+                        loadComponent: () => import('./features/batches/components/batch-form/batch-form.component').then(m => m.BatchFormComponent)
                     },
                     {
                         path: ':id/edit',
-                        loadComponent: () => import('./features/inventory/components/batch-management/batch-management.component').then(m => m.BatchManagementComponent)
+                        loadComponent: () => import('./features/batches/components/batch-form/batch-form.component').then(m => m.BatchFormComponent)
+                    },
+                    {
+                        path: ':id',
+                        loadComponent: () => import('./features/batches/components/batch-detail/batch-detail.component').then(m => m.BatchDetailComponent)
                     }
                 ]
             },
@@ -142,11 +170,20 @@ export const routes: Routes = [
                     },
                     {
                         path: 'create',
-                        loadComponent: () => import('./features/accounts/components/account-form/account-form.component').then(m => m.AccountFormComponent)
+                        redirectTo: 'registration',
+                        pathMatch: 'full'
+                    },
+                    {
+                        path: 'registration',
+                        loadComponent: () => import('./features/master-data/components/account-registration/account-registration.component').then(m => m.AccountRegistrationComponent)
+                    },
+                    {
+                        path: 'registration/:id',
+                        loadComponent: () => import('./features/master-data/components/account-registration/account-registration.component').then(m => m.AccountRegistrationComponent)
                     },
                     {
                         path: 'edit/:id',
-                        loadComponent: () => import('./features/accounts/components/account-form/account-form.component').then(m => m.AccountFormComponent)
+                        redirectTo: 'registration/:id'
                     }
                 ]
             },
@@ -264,65 +301,6 @@ export const routes: Routes = [
                     {
                         path: 'physical-count',
                         loadComponent: () => import('./features/inventory/components/physical-count/physical-count.component').then(m => m.PhysicalCountComponent)
-                    },
-                    {
-                        path: 'reports',
-                        loadComponent: () => import('./features/inventory/components/inventory-reports/inventory-reports.component').then(m => m.InventoryReportsComponent)
-                    }
-                ]
-            },
-            {
-                path: 'reports',
-                children: [
-                    {
-                        path: 'inventory',
-                        children: [
-                            {
-                                path: 'stock-level',
-                                loadComponent: () => import('./features/reports/components/inventory-reports/stock-level/stock-level-report.component').then(m => m.StockLevelReportComponent)
-                            },
-                            {
-                                path: 'stock-movement',
-                                loadComponent: () => import('./features/reports/components/inventory-reports/stock-movement/stock-movement-report.component').then(m => m.StockMovementReportComponent)
-                            },
-                            {
-                                path: 'batch-expiry',
-                                loadComponent: () => import('./features/reports/components/inventory-reports/batch-expiry/batch-expiry-report.component').then(m => m.BatchExpiryReportComponent)
-                            },
-                            {
-                                path: 'stock-valuation',
-                                loadComponent: () => import('./features/reports/components/inventory-reports/stock-valuation/stock-valuation-report.component').then(m => m.StockValuationReportComponent)
-                            },
-                            {
-                                path: 'abc-analysis',
-                                loadComponent: () => import('./features/reports/components/inventory-reports/abc-analysis/abc-analysis-report.component').then(m => m.ABCAnalysisReportComponent)
-                            },
-                            {
-                                path: 'slow-moving',
-                                loadComponent: () => import('./features/reports/components/inventory-reports/slow-moving/slow-moving-report.component').then(m => m.SlowMovingReportComponent)
-                            }
-                        ]
-                    },
-                    {
-                        path: 'tax',
-                        children: [
-                            {
-                                path: 'gst-sales',
-                                loadComponent: () => import('./features/reports/components/tax-reports/gst-sales/gst-sales-report.component').then(m => m.GSTSalesReportComponent)
-                            },
-                            {
-                                path: 'gst-purchases',
-                                loadComponent: () => import('./features/reports/components/tax-reports/gst-purchases/gst-purchases-report.component').then(m => m.GSTPurchasesReportComponent)
-                            },
-                            {
-                                path: 'withholding-tax',
-                                loadComponent: () => import('./features/reports/components/tax-reports/withholding-tax/withholding-tax-report.component').then(m => m.WithholdingTaxReportComponent)
-                            },
-                            {
-                                path: 'compliance-summary',
-                                loadComponent: () => import('./features/reports/components/tax-reports/compliance-summary/compliance-summary-report.component').then(m => m.ComplianceSummaryReportComponent)
-                            }
-                        ]
                     }
                 ]
             },
@@ -376,6 +354,11 @@ export const routes: Routes = [
                         loadComponent: () => import('./features/e-orders/components/e-order-list/e-order-list.component').then(m => m.EOrderListComponent)
                     },
                     {
+                        path: 'edit/:id',
+                        redirectTo: ':id',
+                        pathMatch: 'full'
+                    },
+                    {
                         path: ':id',
                         loadComponent: () => import('./features/e-orders/components/e-order-detail/e-order-detail.component').then(m => m.EOrderDetailComponent)
                     }
@@ -389,12 +372,13 @@ export const routes: Routes = [
                         loadComponent: () => import('./features/quotations/components/quotation-list/quotation-list.component').then(m => m.QuotationListComponent)
                     },
                     {
-                        path: ':id',
-                        loadComponent: () => import('./features/quotations/components/quotation-detail/quotation-detail.component').then(m => m.QuotationDetailComponent)
+                        path: 'edit/:id',
+                        redirectTo: ':id',
+                        pathMatch: 'full'
                     },
                     {
-                        path: 'edit/:id',
-                        loadComponent: () => import('./features/quotations/components/quotation-form-dialog/quotation-form-dialog.component').then(m => m.QuotationFormDialogComponent)
+                        path: ':id',
+                        loadComponent: () => import('./features/quotations/components/quotation-detail/quotation-detail.component').then(m => m.QuotationDetailComponent)
                     }
                 ]
             },

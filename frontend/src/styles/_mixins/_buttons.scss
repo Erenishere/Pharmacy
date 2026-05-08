@@ -45,7 +45,7 @@
 // ============================================
 @mixin button-primary {
   @include button-base;
-  background: linear-gradient(135deg, var(--color-bg-page) 0%, var(--color-bg-page) 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   color: var(--color-text-inverse);
   box-shadow: var(--shadow-button);
   
@@ -215,7 +215,8 @@
   
   // Primary raised button
   .mat-mdc-raised-button.mat-primary {
-    background: linear-gradient(135deg, var(--color-bg-page) 0%, var(--color-bg-page) 100%) !important;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%) !important;
+    color: var(--color-text-inverse) !important;
     box-shadow: var(--shadow-button) !important;
     
     &:hover {

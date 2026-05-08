@@ -60,6 +60,11 @@ export class AuthService {
         return this.http.get<ApiResponse<User>>(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.PROFILE}`);
     }
 
+    setCurrentUser(user: User): void {
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+        this.currentUserSubject.next(user);
+    }
+
     verifyToken(): Observable<ApiResponse<any>> {
         return this.http.get<ApiResponse<any>>(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.VERIFY}`);
     }

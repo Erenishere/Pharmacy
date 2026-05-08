@@ -1,0 +1,142 @@
+{
+  "startedAt": "2026-04-27T17:20:07.331Z",
+  "sourceQa": {
+    "id": "20260427171812",
+    "accountName": "QA Customer 20260427171812",
+    "categoryName": "QA Category 20260427171812",
+    "businessTypeName": "QA Business 20260427171812",
+    "itemName": "QA Test Item 20260427171812",
+    "itemCode": "QAITEM20260427171812",
+    "batchNumber": "QAB20260427171812",
+    "taxName": "QA Tax 20260427171812"
+  },
+  "item": {
+    "_id": "69ef9a7989bee6fd4fbda6aa",
+    "code": "QAFB0427171812",
+    "name": "QA Test Item 20260427171812 API Fallback",
+    "companyId": {
+      "_id": "69a2d5cbd49f9a68103b9232",
+      "name": "abc",
+      "code": "1",
+      "groupType": "B"
+    },
+    "sellingGroup": null,
+    "companyGroupId": null,
+    "businessTypeId": {
+      "_id": "69ef978389bee6fd4fbda3a6",
+      "name": "General Items"
+    },
+    "categoryId": {
+      "_id": "69ef9a5a89bee6fd4fbda67c",
+      "name": "QA Category 20260427171812"
+    },
+    "unit": "piece",
+    "pricing": {
+      "purchasePrice": 10,
+      "costPrice": 10,
+      "salePrice": 15,
+      "retailPrice": 16,
+      "wholesalePrice": 14,
+      "distributorPrice": 13,
+      "mrp": 18,
+      "boxPurchasePrice": 0,
+      "cartonPurchasePrice": 0,
+      "boxSalePrice": 0,
+      "cartonSalePrice": 0,
+      "tradePrice": 0,
+      "boxRetailPrice": 0,
+      "currency": "PKR",
+      "goodsChargesOnUnit": 0
+    },
+    "tax": {
+      "taxType": "GST",
+      "gstRate": 18,
+      "gstRateNonFilter": 0,
+      "whtRate": 0,
+      "taxCategory": "standard"
+    },
+    "regulatory": {
+      "complianceStatus": "Not Applicable",
+      "licenseNumbers": []
+    },
+    "inventory": {
+      "openingStock": 50,
+      "currentStock": 50,
+      "reorderPoint": 10,
+      "leadTime": 0,
+      "batches": [],
+      "minimumStock": 0,
+      "maximumStock": 1000,
+      "alertNoSalesDays": 0
+    },
+    "packSize": 1,
+    "carton": {
+      "size": {
+        "length": 0,
+        "width": 0,
+        "height": 0
+      },
+      "unitsInCarton": 0,
+      "boxInCarton": 0,
+      "weight": 0
+    },
+    "box": {
+      "unitsInBox": 0,
+      "weight": 0
+    },
+    "unitWeight": 0,
+    "batchTrackingEnabled": true,
+    "expiryTrackingEnabled": true,
+    "supplier": {
+      "leadTimeFromSupplier": 0,
+      "alternativeSuppliers": []
+    },
+    "defaultWarrantyMonths": 0,
+    "isActive": true,
+    "createdAt": "2026-04-27T17:18:49.673Z",
+    "updatedAt": "2026-04-27T17:18:49.673Z",
+    "__v": 0
+  },
+  "steps": [
+    {
+      "name": "Fresh-context purchase invoice UI save",
+      "status": "failed",
+      "evidence": {},
+      "error": "Error: Purchase invoice not found after save at [stdin]:44:20 at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async step ([stdin]:10:123) at async [stdin]:26:2"
+    },
+    {
+      "name": "Fresh-context purchase invoice API confirm for stock",
+      "status": "failed",
+      "evidence": {},
+      "error": "Error: No purchase invoice to confirm at [stdin]:49:41 at step ([stdin]:10:129) at [stdin]:48:8 at process.processTicksAndRejections (node:internal/process/task_queues:105:5)"
+    },
+    {
+      "name": "Fresh-context sales invoice UI save",
+      "status": "failed",
+      "evidence": {},
+      "error": "Error: Sales invoice not found after save at [stdin]:72:20 at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async step ([stdin]:10:123) at async [stdin]:55:2"
+    }
+  ],
+  "failedRequests": [
+    {
+      "route": "http://127.0.0.1:4200/purchase-invoices/create",
+      "url": "http://localhost:3001/api/v1/invoices/purchase",
+      "status": 400
+    },
+    {
+      "route": "http://127.0.0.1:4200/sales-invoices/create",
+      "url": "http://localhost:3001/api/v1/invoices/sales",
+      "status": 400
+    }
+  ],
+  "seed": {
+    "warehouse": "Adeel Umer",
+    "customer": "ahmeed"
+  },
+  "finishedAt": "2026-04-27T17:20:32.225Z",
+  "summary": {
+    "passed": 0,
+    "failed": 3,
+    "failedRequestCount": 2
+  }
+}

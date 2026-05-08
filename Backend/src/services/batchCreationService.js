@@ -1,6 +1,8 @@
 const Batch = require('../models/Batch');
 const inventoryService = require('./inventoryService');
 
+const getObjectId = (value) => value?._id || value;
+
 /**
  * Batch Creation Service
  * Requirement 2: Batch Creation on Purchase
@@ -22,14 +24,14 @@ class BatchCreationService {
 
     for (const item of itemsWithBatches) {
       const batch = await this.createOrUpdateBatch({
-        itemId: item.itemId,
+        itemId: getObjectId(item.itemId),
         batchNumber: item.batchInfo.batchNumber,
         manufacturingDate: item.batchInfo.manufacturingDate,
         expiryDate: item.batchInfo.expiryDate,
         quantity: this.calculateTotalQuantity(item),
         unitCost: this.calculateUnitCost(item),
-        warehouseId: item.warehouseId || invoice.warehouseId,
-        supplierId: invoice.supplierId,
+        warehouseId: getObjectId(item.warehouseId || invoice.warehouseId),
+        supplierId: getObjectId(invoice.supplierId),
         invoiceId: invoice._id,
         userId,
       });
@@ -244,7 +246,7 @@ class BatchCreationService {
     const boxPacking = item.boxPacking || 1;
     const boxQty = item.boxQuantity || item.boxQty || 0;
     const unitQty = item.unitQuantity || item.unitQty || 0;
-    return boxQty * boxPacking + unitQty;
+    return (boxQty * boxPacking + unitQty) || item.quantity || 0;
   }
 
   /**
@@ -261,7 +263,7 @@ class BatchCreationService {
     if (boxPackingValue > 0) {
       return boxPackingValue / boxPacking;
     }
-    return unitTP;
+    return unitTP || item.unitPrice || 0;
   }
 
   /**
@@ -280,7 +282,8 @@ class BatchCreationService {
     for (const item of itemsWithBatches) {
       const existingBatch = await Batch.findOne({
         batchNumber: new RegExp(`^${item.batchInfo.batchNumber}$`, 'i'),
-        item: item.itemId,
+        item: getObjectId(item.itemId),
+        warehouse: getObjectId(item.warehouseId || invoice.warehouseId),
       });
 
       if (existingBatch) {

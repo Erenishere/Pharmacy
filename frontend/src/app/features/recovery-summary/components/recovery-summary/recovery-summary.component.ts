@@ -1,44 +1,104 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormControl } from '@angular/forms';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { HttpClient } from '@angular/common/http';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
+import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { MatCardModule } from '@angular/material/card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { HttpClient } from '@angular/common/http';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { forkJoin } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
-import { RecoverySummaryService, RecoverySummary } from '../../services/recovery-summary.service';
+import {
+  RecoveryCustomerDetail,
+  RecoverySummaryRow,
+  RecoverySummaryService,
+  RecoverySummaryStats
+} from '../../services/recovery-summary.service';
 
 @Component({
   selector: 'app-recovery-summary',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, MatTableModule, MatButtonModule, MatIconModule,
-    MatFormFieldModule, MatSelectModule, MatInputModule, MatDatepickerModule, MatNativeDateModule,
-    MatCardModule, MatProgressSpinnerModule, MatTooltipModule
+    CommonModule,
+    ReactiveFormsModule,
+    MatTableModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatCardModule,
+    MatProgressSpinnerModule,
+    MatPaginatorModule
   ],
   templateUrl: './recovery-summary.component.html',
   styleUrl: './recovery-summary.component.scss'
 })
 export class RecoverySummaryComponent implements OnInit {
-  displayedColumns = ['salesmanName', 'totalSales', 'totalRecovery', 'totalOutstanding', 'recoveryPercentage', 'actions'];
-  dataSource = new MatTableDataSource<RecoverySummary>([]);
-  loading = false;
+  private paginator?: MatPaginator;
 
-  // Enhanced recovery data
-  recoveryDetails = {
+  @ViewChild(MatPaginator)
+  set matPaginator(paginator: MatPaginator | undefined) {
+    if (!paginator) {
+      return;
+    }
+
+    this.paginator = paginator;
+    this.dataSource.paginator = paginator;
+  }
+
+  readonly displayedColumns = [
+    'salesmanName',
+    'invoiceCount',
+    'customerCount',
+    'totalSales',
+    'totalRecovery',
+    'totalOutstanding',
+    'recoveryPercentage'
+  ];
+  readonly detailColumns = [
+    'customerName',
+    'dimensionName',
+    'invoiceCount',
+    'totalSales',
+    'totalRecovery',
+    'totalOutstanding',
+    'overdueAmount',
+    'recoveryPercentage'
+  ];
+
+  readonly dataSource = new MatTableDataSource<RecoverySummaryRow>([]);
+
+  readonly fromDate = new FormControl<Date | null>(null);
+  readonly toDate = new FormControl<Date | null>(null);
+  readonly salesmanFilter = new FormControl('');
+  readonly dimensionFilter = new FormControl('');
+  readonly customerFilter = new FormControl('');
+  readonly agingFilter = new FormControl('');
+
+  loading = false;
+  pageSize = 20;
+  salesmen: any[] = [];
+  dimensions: any[] = [];
+  selectedSummary: RecoverySummaryRow | null = null;
+  detailsDataSource = new MatTableDataSource<RecoveryCustomerDetail>([]);
+  stats: RecoverySummaryStats = {
+    totalSales: 0,
+    totalRecovery: 0,
     totalOutstanding: 0,
     totalOverdue: 0,
     recoveryRate: 0,
-    customerWiseRecovery: [] as any[],
-    paymentTrends: [] as any[],
+    activeSalesmen: 0,
+    totalCustomers: 0,
     agingAnalysis: {
       '0-30': { count: 0, amount: 0 },
       '31-60': { count: 0, amount: 0 },
@@ -47,104 +107,141 @@ export class RecoverySummaryComponent implements OnInit {
     }
   };
 
-  // Filters with additional options
-  fromDate = new FormControl<Date | null>(null);
-  toDate = new FormControl<Date | null>(null);
-  salesmanFilter = new FormControl('');
-  dimensionFilter = new FormControl('');
-  customerFilter = new FormControl('');
-  agingFilter = new FormControl('');
-
-  salesmen: any[] = [];
-  dimensions: any[] = [];
-
-  constructor(private recoverySummaryService: RecoverySummaryService, private http: HttpClient) {}
+  constructor(
+    private recoverySummaryService: RecoverySummaryService,
+    private http: HttpClient
+  ) {}
 
   ngOnInit(): void {
-    this.http.get<any>(`${environment.apiUrl}/salesmen`).subscribe({
-      next: (res) => { if (res.success) this.salesmen = res.data; }
-    });
-    this.http.get<any>(`${environment.apiUrl}/dimensions`).subscribe({
-      next: (res) => { if (res.success) this.dimensions = res.data; }
+    this.loadLookups();
+  }
+
+  loadLookups(): void {
+    forkJoin({
+      salesmen: this.http.get<any>(`${environment.apiUrl}/salesmen`),
+      dimensions: this.http.get<any>(`${environment.apiUrl}/dimensions`)
+    }).subscribe({
+      next: ({ salesmen, dimensions }) => {
+        this.salesmen = this.arrayFromResponse(salesmen, ['salesmen']);
+        this.dimensions = this.arrayFromResponse(dimensions, ['dimensions']);
+      }
     });
   }
 
   loadReport(): void {
     this.loading = true;
-    const filters: any = {};
-    if (this.fromDate.value) filters.fromDate = this.fromDate.value.toISOString();
-    if (this.toDate.value) filters.toDate = this.toDate.value.toISOString();
-    if (this.salesmanFilter.value) filters.salesmanId = this.salesmanFilter.value;
-    if (this.dimensionFilter.value) filters.dimensionId = this.dimensionFilter.value;
-    if (this.customerFilter.value) filters.customerId = this.customerFilter.value;
-    if (this.agingFilter.value) filters.agingBucket = this.agingFilter.value;
+    const filters = this.buildFilters();
 
-    this.recoverySummaryService.getRecoverySummary(filters).subscribe({
-      next: (res) => {
+    forkJoin({
+      summary: this.recoverySummaryService.getRecoverySummary(filters),
+      stats: this.recoverySummaryService.getRecoveryStatistics(filters)
+    }).subscribe({
+      next: ({ summary, stats }) => {
         this.loading = false;
-        if (res.success) {
-          this.dataSource.data = res.data;
-          this.calculateRecoveryAnalytics(res.data);
+        const rows = this.arrayFromResponse<RecoverySummaryRow>(summary, ['items']);
+        this.dataSource.data = rows;
+        this.stats = stats?.data || this.stats;
+
+        if (rows.length > 0) {
+          this.selectSummary(rows[0]);
+        } else {
+          this.selectedSummary = null;
+          this.detailsDataSource.data = [];
         }
+
+        this.paginator?.firstPage();
       },
-      error: () => { this.loading = false; }
+      error: () => {
+        this.loading = false;
+      }
     });
   }
 
-  calculateRecoveryAnalytics(data: any[]): void {
-    // Calculate enhanced recovery metrics
-    this.recoveryDetails.totalOutstanding = data.reduce((sum, item) => sum + item.totalOutstanding, 0);
-    this.recoveryDetails.totalOverdue = data.reduce((sum, item) => sum + (item.totalOutstanding * 0.3), 0); // Simplified overdue calculation
-    this.recoveryDetails.recoveryRate = data.length > 0
-      ? data.reduce((sum, item) => sum + item.recoveryPercentage, 0) / data.length
-      : 0;
-
-    // Aging analysis (simplified)
-    this.recoveryDetails.agingAnalysis = {
-      '0-30': { count: Math.floor(data.length * 0.4), amount: this.recoveryDetails.totalOutstanding * 0.4 },
-      '31-60': { count: Math.floor(data.length * 0.3), amount: this.recoveryDetails.totalOutstanding * 0.3 },
-      '61-90': { count: Math.floor(data.length * 0.2), amount: this.recoveryDetails.totalOutstanding * 0.2 },
-      '90+': { count: Math.floor(data.length * 0.1), amount: this.recoveryDetails.totalOutstanding * 0.1 }
-    };
-  }
-
-  viewCustomerDetails(row: any): void {
-    // Implement customer details view
-    console.log('View customer details for:', row);
-    // Could navigate to customer detail page or open dialog
-  }
-
-  sendPaymentReminder(row: any): void {
-    // Implement payment reminder functionality
-    console.log('Send payment reminder for:', row);
-    // Could open dialog to compose and send reminder
+  selectSummary(row: RecoverySummaryRow): void {
+    this.selectedSummary = row;
+    this.detailsDataSource.data = row.details || [];
   }
 
   exportReport(): void {
-    // Implement export functionality
     const data = this.dataSource.data;
     const csvContent = this.convertToCSV(data);
     this.downloadCSV(csvContent, 'recovery-summary.csv');
   }
 
-  convertToCSV(data: any[]): string {
-    if (data.length === 0) return '';
+  formatCurrency(value: number): string {
+    return new Intl.NumberFormat('en-PK', {
+      style: 'currency',
+      currency: 'PKR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value || 0);
+  }
 
-    const headers = ['Salesman', 'Total Sales', 'Total Recovery', 'Outstanding', 'Recovery %'];
-    const rows = data.map(row => [
+  formatAmount(value: number): string {
+    return new Intl.NumberFormat('en-PK', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value || 0);
+  }
+
+  private buildFilters(): Record<string, string> {
+    const filters: Record<string, string> = {};
+
+    if (this.fromDate.value) {
+      filters['startDate'] = this.fromDate.value.toISOString();
+    }
+    if (this.toDate.value) {
+      filters['endDate'] = this.toDate.value.toISOString();
+    }
+    if (this.salesmanFilter.value) {
+      filters['salesmanId'] = this.salesmanFilter.value;
+    }
+    if (this.dimensionFilter.value) {
+      filters['dimensionId'] = this.dimensionFilter.value;
+    }
+    if (this.customerFilter.value) {
+      filters['customerId'] = this.customerFilter.value;
+    }
+    if (this.agingFilter.value) {
+      filters['agingBucket'] = this.agingFilter.value;
+    }
+
+    return filters;
+  }
+
+  private convertToCSV(data: RecoverySummaryRow[]): string {
+    if (data.length === 0) {
+      return '';
+    }
+
+    const headers = [
+      'Salesman',
+      'Invoices',
+      'Customers',
+      'Total Sales',
+      'Total Recovery',
+      'Outstanding',
+      'Overdue',
+      'Recovery %'
+    ];
+
+    const rows = data.map((row) => [
       row.salesmanName,
+      row.invoiceCount,
+      row.customerCount,
       row.totalSales,
       row.totalRecovery,
       row.totalOutstanding,
-      row.recoveryPercentage?.toFixed(1) + '%'
+      row.overdueAmount,
+      `${row.recoveryPercentage.toFixed(2)}%`
     ]);
 
     return [headers, ...rows]
-      .map(row => row.map(cell => `"${cell}"`).join(','))
+      .map((row) => row.map((cell) => `"${cell}"`).join(','))
       .join('\n');
   }
 
-  downloadCSV(content: string, filename: string): void {
+  private downloadCSV(content: string, filename: string): void {
     const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -156,7 +253,24 @@ export class RecoverySummaryComponent implements OnInit {
     document.body.removeChild(link);
   }
 
-  formatCurrency(value: number): string {
-    return new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', minimumFractionDigits: 0 }).format(value || 0);
+  private arrayFromResponse<T = any>(res: any, keys: string[] = []): T[] {
+    if (Array.isArray(res)) {
+      return res;
+    }
+    if (Array.isArray(res?.data)) {
+      return res.data;
+    }
+    if (Array.isArray(res?.data?.items)) {
+      return res.data.items;
+    }
+    for (const key of keys) {
+      if (Array.isArray(res?.[key])) {
+        return res[key];
+      }
+      if (Array.isArray(res?.data?.[key])) {
+        return res.data[key];
+      }
+    }
+    return [];
   }
 }

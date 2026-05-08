@@ -8,11 +8,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { ViewChild } from '@angular/core';
 import { PdcService, PDCRecord } from '../../pdc.service';
 import { BounceReasonDialogComponent } from '../bounce-reason-dialog/bounce-reason-dialog.component';
 
@@ -23,7 +25,8 @@ import { BounceReasonDialogComponent } from '../bounce-reason-dialog/bounce-reas
     CommonModule, ReactiveFormsModule,
     MatTableModule, MatButtonModule, MatIconModule, MatFormFieldModule,
     MatSelectModule, MatInputModule, MatCardModule, MatProgressSpinnerModule,
-    MatDialogModule, MatTooltipModule, MatChipsModule, MatSnackBarModule
+    MatDialogModule, MatTooltipModule, MatChipsModule, MatSnackBarModule,
+    MatPaginatorModule
   ],
   templateUrl: './pdc-list.component.html',
   styleUrl: './pdc-list.component.scss'
@@ -34,19 +37,18 @@ export class PDCListComponent implements OnInit {
   loading = false;
   processingId: string | null = null;
 
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
   // Summary
   totalPending = 0;
   totalPendingAmount = 0;
-  totalCleared = 0;
-  totalBounced = 0;
+  totalDueToday = 0;
+  totalOverdue = 0;
 
   statusFilter = new FormControl('pending');
 
   statusOptions = [
-    { value: 'pending', label: 'Pending' },
-    { value: 'cleared', label: 'Cleared' },
-    { value: 'bounced', label: 'Bounced' },
-    { value: '', label: 'All' },
+    { value: 'pending', label: 'Pending only' },
   ];
 
   constructor(
@@ -64,10 +66,13 @@ export class PDCListComponent implements OnInit {
     this.pdcService.getPendingPDCs().subscribe({
       next: (res) => {
         this.loading = false;
-        const all: PDCRecord[] = res.data || res.pdcs || [];
+        const all: PDCRecord[] = Array.isArray(res.data)
+          ? res.data
+          : (res.data?.cheques || res.cheques || res.pdcs || []);
         // Apply client-side filter since backend only returns pending
         const filterVal = this.statusFilter.value;
-        this.dataSource.data = filterVal ? all.filter(r => r.chequeStatus === filterVal) : all;
+        this.dataSource.data = filterVal ? all.filter(r => (r.chequeStatus || r.status) === filterVal) : all;
+        this.dataSource.paginator = this.paginator;
         this.calculateSummary(all);
       },
       error: () => {
@@ -78,10 +83,11 @@ export class PDCListComponent implements OnInit {
   }
 
   private calculateSummary(records: PDCRecord[]): void {
-    this.totalPending = records.filter(r => r.chequeStatus === 'pending').length;
-    this.totalPendingAmount = records.filter(r => r.chequeStatus === 'pending').reduce((s, r) => s + r.amount, 0);
-    this.totalCleared = records.filter(r => r.chequeStatus === 'cleared').length;
-    this.totalBounced = records.filter(r => r.chequeStatus === 'bounced').length;
+    const pendingRecords = records.filter(r => (r.chequeStatus || r.status) === 'pending');
+    this.totalPending = pendingRecords.length;
+    this.totalPendingAmount = pendingRecords.reduce((sum, record) => sum + record.amount, 0);
+    this.totalDueToday = pendingRecords.filter(record => this.isDueToday(record.bankDetails?.chequeDate)).length;
+    this.totalOverdue = pendingRecords.filter(record => this.isOverdue(record.bankDetails?.chequeDate)).length;
   }
 
   clearPDC(record: PDCRecord): void {
@@ -137,5 +143,14 @@ export class PDCListComponent implements OnInit {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return checkDate < today;
+  }
+
+  isDueToday(date: string | Date | undefined): boolean {
+    if (!date) return false;
+    const checkDate = new Date(date);
+    const today = new Date();
+    return checkDate.getFullYear() === today.getFullYear()
+      && checkDate.getMonth() === today.getMonth()
+      && checkDate.getDate() === today.getDate();
   }
 }

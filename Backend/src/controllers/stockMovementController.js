@@ -215,11 +215,12 @@ class StockMovementController {
   async getStockBalance(req, res, next) {
     try {
       const { itemId } = req.params;
-      const { asOfDate } = req.query;
+      const { asOfDate, warehouseId } = req.query;
 
       const balance = await stockMovementService.getStockBalance(
         itemId,
         asOfDate ? new Date(asOfDate) : new Date(),
+        warehouseId || null,
       );
 
       res.status(200).json({

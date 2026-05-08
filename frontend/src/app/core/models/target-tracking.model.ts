@@ -45,6 +45,9 @@ export interface DashboardSummary {
   salesTargetAchievers: number;
   recoveryTargetAchievers: number;
   partyVisitTargetAchievers: number;
+  totalTarget: number;
+  totalAchieved: number;
+  avgAchievement: number;
 }
 
 export interface TargetDashboardData {

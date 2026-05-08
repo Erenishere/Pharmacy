@@ -388,9 +388,28 @@ describe('SalaryPackageListComponent', () => {
   });
 
   describe('Visited Parties', () => {
-    it('should return 0 for visited parties (placeholder)', () => {
+    it('should return 0 when no monthly performance snapshot is loaded', () => {
       const visitedParties = component.getVisitedParties(mockPackages[0]);
       expect(visitedParties).toBe(0);
+    });
+
+    it('should return the loaded monthly visit count for the package employee', () => {
+      component.performanceByEmployee = {
+        emp1: {
+          employeeId: 'emp1',
+          employeeName: 'John Doe',
+          packageId: 'pkg1',
+          salesTarget: { target: 500000, achieved: 450000, percentage: 90, status: 'pending' },
+          recoveryTarget: { target: 450000, achieved: 420000, percentage: 93.3, status: 'pending' },
+          partyVisitTarget: { target: 100, achieved: 42, percentage: 42, status: 'pending' },
+          mobileOrders: { ordersCreated: 3, incentiveConfigured: true, incentiveType: 'Fix Amount', incentiveValue: 500 },
+          mobileCashRecovery: { amountRecovered: 120000, incentiveConfigured: true, incentiveType: 'Fix Amount', incentiveValue: 500 },
+          brandIncentives: []
+        }
+      };
+
+      const visitedParties = component.getVisitedParties(mockPackages[0]);
+      expect(visitedParties).toBe(42);
     });
   });
 });

@@ -140,11 +140,11 @@ class InvoiceRepository {
   /**
    * Update invoice
    */
-  async update(id, updateData) {
+  async update(id, updateData, options = {}) {
     return Invoice.findByIdAndUpdate(
       id,
       { $set: updateData },
-      { new: true, runValidators: true },
+      { new: true, runValidators: true, ...options },
     ).populate('customerId', 'code name')
       .populate('supplierId', 'code name')
       .populate('items.itemId', 'code name unit pricing')

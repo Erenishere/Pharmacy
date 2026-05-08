@@ -36,9 +36,12 @@ class RecoverySummaryController {
   async getRecoverySummaries(req, res, next) {
     try {
       const filters = {
-        startDate: req.query.startDate,
-        endDate: req.query.endDate,
+        startDate: req.query.startDate || req.query.fromDate,
+        endDate: req.query.endDate || req.query.toDate,
         salesmanId: req.query.salesmanId,
+        dimensionId: req.query.dimensionId,
+        customerId: req.query.customerId,
+        agingBucket: req.query.agingBucket,
         town: req.query.town,
         page: parseInt(req.query.page) || 1,
         limit: parseInt(req.query.limit) || 50,
@@ -118,9 +121,12 @@ class RecoverySummaryController {
   async getRecoveryStatistics(req, res, next) {
     try {
       const filters = {
-        startDate: req.query.startDate,
-        endDate: req.query.endDate,
+        startDate: req.query.startDate || req.query.fromDate,
+        endDate: req.query.endDate || req.query.toDate,
         salesmanId: req.query.salesmanId,
+        dimensionId: req.query.dimensionId,
+        customerId: req.query.customerId,
+        agingBucket: req.query.agingBucket,
         town: req.query.town,
       };
 

@@ -1,7 +1,10 @@
 <div class="list-page-container schemes-page">
   <div class="list-page-header">
     <div class="header-content">
-      <h1 class="page-title"><mat-icon>percent</mat-icon> Schemes & Discounts</h1>
+      <div class="title-with-accent">
+        <div class="header-accent-bar"></div>
+        <h1 class="page-title"><mat-icon>percent</mat-icon> Schemes & Discounts</h1>
+      </div>
       <p class="page-subtitle">Configure claim accounts and discount systems</p>
     </div>
   </div>
@@ -86,7 +89,9 @@
           {{ editingSchemeId ? 'Update Claim' : 'Save Claim' }}
         </button>
         @if (editingSchemeId) {
-          <button mat-stroked-button (click)="editingSchemeId = null; claimForm.reset()">Cancel</button>
+          <button mat-stroked-button class="cancel-btn" (click)="editingSchemeId = null; claimForm.reset()">
+            <mat-icon>close</mat-icon> Cancel
+          </button>
         }
       </div>
     </div>

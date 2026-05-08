@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 
 // Financial Report Interfaces
@@ -111,7 +112,7 @@ export interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class FinancialReportsService {
-  private baseUrl = `${environment.apiUrl}/financial-reports`;
+  private baseUrl = `${environment.apiUrl}/reports/financial`;
 
   constructor(private http: HttpClient) {}
 
@@ -167,7 +168,12 @@ export class FinancialReportsService {
         httpParams = httpParams.set(key, value);
       }
     });
-    return this.http.get<ApiResponse<FinancialSummary>>(`${this.baseUrl}/summary`, { params: httpParams });
+    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/summary`, { params: httpParams }).pipe(
+      map(response => ({
+        ...response,
+        data: this.normalizeFinancialSummary(response.data)
+      }))
+    );
   }
 
   // Export reports
@@ -178,7 +184,8 @@ export class FinancialReportsService {
         httpParams = httpParams.set(key, value);
       }
     });
-    return this.http.get(`${this.baseUrl}/profit-loss/export`, {
+    httpParams = httpParams.set('format', 'excel');
+    return this.http.get(`${this.baseUrl}/profit-loss`, {
       params: httpParams,
       responseType: 'blob'
     });
@@ -191,7 +198,11 @@ export class FinancialReportsService {
         httpParams = httpParams.set(key, value);
       }
     });
-    return this.http.get(`${this.baseUrl}/balance-sheet/export`, {
+    if (params.endDate && !httpParams.has('asOfDate')) {
+      httpParams = httpParams.set('asOfDate', params.endDate);
+    }
+    httpParams = httpParams.set('format', 'excel');
+    return this.http.get(`${this.baseUrl}/balance-sheet`, {
       params: httpParams,
       responseType: 'blob'
     });
@@ -204,9 +215,45 @@ export class FinancialReportsService {
         httpParams = httpParams.set(key, value);
       }
     });
-    return this.http.get(`${this.baseUrl}/cash-flow/export`, {
+    httpParams = httpParams.set('format', 'excel');
+    return this.http.get(`${this.baseUrl}/cash-flow`, {
       params: httpParams,
       responseType: 'blob'
     });
+  }
+
+  private normalizeFinancialSummary(data: any): FinancialSummary {
+    if (!data) {
+      return {
+        totalRevenue: 0,
+        totalExpenses: 0,
+        netProfit: 0,
+        totalAssets: 0,
+        totalLiabilities: 0,
+        totalEquity: 0,
+        cashPosition: 0,
+        accountsReceivable: 0,
+        accountsPayable: 0,
+        profitMargin: 0,
+        returnOnAssets: 0
+      };
+    }
+
+    const netProfit = data.netProfit ?? data.profitability?.netProfit ?? 0;
+    const totalAssets = data.totalAssets ?? data.financialPosition?.totalAssets ?? 0;
+
+    return {
+      totalRevenue: data.totalRevenue ?? data.profitability?.revenue ?? 0,
+      totalExpenses: data.totalExpenses ?? data.profitability?.expenses ?? 0,
+      netProfit,
+      totalAssets,
+      totalLiabilities: data.totalLiabilities ?? data.financialPosition?.totalLiabilities ?? 0,
+      totalEquity: data.totalEquity ?? data.financialPosition?.equity ?? 0,
+      cashPosition: data.cashPosition ?? data.liquidity?.cash ?? 0,
+      accountsReceivable: data.accountsReceivable ?? data.liquidity?.receivables ?? 0,
+      accountsPayable: data.accountsPayable ?? data.liquidity?.payables ?? 0,
+      profitMargin: data.profitMargin ?? data.profitability?.profitMargin ?? 0,
+      returnOnAssets: data.returnOnAssets ?? (totalAssets > 0 ? (netProfit / totalAssets) * 100 : 0)
+    };
   }
 }

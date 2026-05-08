@@ -1,6 +1,9 @@
 const Customer = require('../models/Customer');
+const Account = require('../models/Account');
 const LedgerEntry = require('../models/LedgerEntry');
 const customerRepository = require('../repositories/customerRepository');
+
+const GL_ACCOUNT_TYPES = ['asset', 'liability', 'equity', 'revenue', 'expense', 'adjustment', 'claim'];
 
 /**
  * Account Service
@@ -112,12 +115,69 @@ class AccountService {
 
     // Handle account type filter
     if (filters.accountType) {
+      if (GL_ACCOUNT_TYPES.includes(filters.accountType)) {
+        const query = {
+          accountType: filters.accountType,
+          ...(typeof filters.isActive === 'boolean' ? { isActive: filters.isActive } : {}),
+        };
+
+        if (filters.keyword) {
+          query.$or = [
+            { name: { $regex: filters.keyword, $options: 'i' } },
+            { code: { $regex: filters.keyword, $options: 'i' } },
+          ];
+        }
+
+        if (filters.parentAccountId) {
+          query.parentAccountId = filters.parentAccountId;
+        }
+
+        const [accounts, total] = await Promise.all([
+          Account.find(query)
+            .sort(sort || { name: 1 })
+            .skip(skip)
+            .limit(limit)
+            .lean(),
+          Account.countDocuments(query),
+        ]);
+
+        const totalPages = Math.ceil(total / limit);
+        const hasNextPage = page < totalPages;
+        const hasPreviousPage = page > 1;
+
+        return {
+          accounts,
+          pagination: {
+            totalItems: total,
+            totalPages,
+            currentPage: page,
+            itemsPerPage: limit,
+            hasNextPage,
+            hasPreviousPage,
+            nextPage: hasNextPage ? page + 1 : null,
+            previousPage: hasPreviousPage ? page - 1 : null,
+          },
+        };
+      }
+
       this.validateAccountType(filters.accountType);
     }
 
     const [accounts, total] = await Promise.all([
       customerRepository.search(accountFilters, {
-        ...otherOptions, limit, skip, sort,
+        ...otherOptions,
+        limit,
+        skip,
+        sort,
+        populate: [
+          { path: 'dimensionId', select: 'name dimensionName code' },
+          { path: 'townId', select: 'name code' },
+          { path: 'areaId', select: 'name code' },
+          { path: 'accountHeadId', select: 'name code' },
+          { path: 'customerTypeId', select: 'name code' },
+          { path: 'assignedSalesmanId', select: 'name code' },
+          { path: 'routeId', select: 'name routeName code' },
+        ],
       }),
       customerRepository.count(accountFilters),
     ]);
@@ -151,6 +211,11 @@ class AccountService {
       .populate('dimensionId', 'name')
       .populate('townId', 'name')
       .populate('areaId', 'name')
+      .populate('accountHeadId', 'name code')
+      .populate('customerTypeId', 'name code')
+      .populate('assignedSalesmanId', 'name code')
+      .populate('routeId', 'name routeName code')
+      .populate('linkedAccountId', 'name code accountType')
       .populate('employeeBiodata.designationId', 'name')
       .populate('businessDetails.assignedSalesmanId', 'name')
       .lean();
@@ -469,6 +534,12 @@ class AccountService {
    * Requirements: 3.1
    */
   async getAccountsByType(accountType) {
+    if (GL_ACCOUNT_TYPES.includes(accountType)) {
+      return Account.find({ accountType, isActive: true })
+        .sort({ name: 1 })
+        .lean();
+    }
+
     this.validateAccountType(accountType);
     return Customer.find({ accountType, isActive: true })
       .sort({ name: 1 })
@@ -494,7 +565,7 @@ class AccountService {
    * Validate account type
    */
   validateAccountType(accountType) {
-    const validTypes = ['customer', 'supplier', 'employee', 'investor', 'both'];
+    const validTypes = ['customer', 'supplier', 'employee', 'investor', 'both', 'account_manager', 'sub_account'];
     if (!validTypes.includes(accountType)) {
       throw new Error(`Invalid account type. Must be one of: ${validTypes.join(', ')}`);
     }
@@ -543,14 +614,6 @@ class AccountService {
     }
 
     const { businessDetails } = accountData;
-
-    // Validate customer type if provided
-    if (businessDetails.customerType) {
-      const validCustomerTypes = ['retailer', 'wholesaler', 'distributor', 'hospital', 'pharmacy'];
-      if (!validCustomerTypes.includes(businessDetails.customerType)) {
-        throw new Error(`Invalid customer type. Must be one of: ${validCustomerTypes.join(', ')}`);
-      }
-    }
 
     // Validate balance type if provided
     if (businessDetails.balanceType) {
