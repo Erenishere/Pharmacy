@@ -14,6 +14,8 @@ jest.setTimeout(120000);
 describe('item list API contracts', () => {
   let mongoServer;
   let token;
+  let companyA;
+  let categoryA;
 
   const authHeaders = () => ({ Authorization: `Bearer ${token}` });
 
@@ -41,7 +43,7 @@ describe('item list API contracts', () => {
     });
     token = authService.generateAccessToken({ userId: adminUser._id, role: 'admin' });
 
-    const companyA = await Company.create({
+    companyA = await Company.create({
       name: 'Alpha Pharma',
       code: 'ALPHA',
       groupType: 'A',
@@ -53,7 +55,7 @@ describe('item list API contracts', () => {
       groupType: 'B',
       isActive: true,
     });
-    const categoryA = await Category.create({
+    categoryA = await Category.create({
       name: 'Antibiotics',
       code: 'ANTI',
       isActive: true,
@@ -160,5 +162,55 @@ describe('item list API contracts', () => {
       'ITEM-C',
       'ITEM-A',
     ]);
+  });
+
+  it('treats keyword searches as literal text and keeps pagination bounded', async () => {
+    await Item.create({
+      code: 'ITEM-SPECIAL',
+      name: 'Pain+Relief (500)',
+      companyId: companyA._id,
+      categoryId: categoryA._id,
+      businessTypeId: new mongoose.Types.ObjectId(),
+      unit: 'piece',
+      pricing: {
+        costPrice: 11,
+        purchasePrice: 12,
+        salePrice: 16,
+        retailPrice: 18,
+      },
+      inventory: {
+        currentStock: 8,
+        minimumStock: 2,
+      },
+      isActive: true,
+    });
+
+    const response = await request(app)
+      .get('/api/v1/items')
+      .query({
+        keyword: 'Pain+Relief (',
+        page: '0',
+        limit: '500',
+      })
+      .set(authHeaders());
+
+    expect(response.status).toBe(200);
+    expect(response.body.pagination).toMatchObject({
+      currentPage: 1,
+      itemsPerPage: 100,
+      totalItems: 1,
+    });
+    expect(response.body.data.map((item) => item.code)).toEqual(['ITEM-SPECIAL']);
+  });
+
+  it('declares compound indexes for the common item list filter and sort paths', () => {
+    const indexFields = Item.schema.indexes().map(([fields]) => fields);
+
+    expect(indexFields).toContainEqual({ isActive: 1, name: 1, _id: 1 });
+    expect(indexFields).toContainEqual({ isActive: 1, code: 1, _id: 1 });
+    expect(indexFields).toContainEqual({ isActive: 1, 'inventory.currentStock': -1, _id: 1 });
+    expect(indexFields).toContainEqual({ isActive: 1, 'pricing.retailPrice': 1, _id: 1 });
+    expect(indexFields).toContainEqual({ companyId: 1, isActive: 1, name: 1 });
+    expect(indexFields).toContainEqual({ categoryId: 1, isActive: 1, name: 1 });
   });
 });

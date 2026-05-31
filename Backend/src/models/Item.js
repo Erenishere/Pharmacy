@@ -470,6 +470,12 @@ itemSchema.index({
 itemSchema.index({ code: 1 }, { unique: true });
 itemSchema.index({ barcode: 1 }, { unique: true, sparse: true });
 itemSchema.index({ sku: 1 }, { unique: true, sparse: true });
+itemSchema.index({ isActive: 1, name: 1, _id: 1 });
+itemSchema.index({ isActive: 1, code: 1, _id: 1 });
+itemSchema.index({ isActive: 1, 'inventory.currentStock': -1, _id: 1 });
+itemSchema.index({ isActive: 1, 'pricing.retailPrice': 1, _id: 1 });
+itemSchema.index({ companyId: 1, isActive: 1, name: 1 });
+itemSchema.index({ categoryId: 1, isActive: 1, name: 1 });
 
 // Virtual for profit margin
 itemSchema.virtual('profitMargin').get(function () {

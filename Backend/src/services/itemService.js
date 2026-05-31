@@ -7,12 +7,53 @@ const Business = require('../models/business');
 const Formula = require('../models/formula');
 const FormulaSize = require('../models/formulasize');
 
+const MAX_ITEM_LIST_LIMIT = 100;
+
+function toPositiveInteger(value, fallback, max = Number.MAX_SAFE_INTEGER) {
+  const parsed = parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return fallback;
+  }
+  return Math.min(parsed, max);
+}
+
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 /**
  * Item Service
  * Handles business logic for item management
  * Requirements: 1.1-1.20
  */
 class ItemService {
+  static ITEM_LIST_PROJECTION = [
+    'code',
+    'name',
+    'companyId',
+    'sellingGroup',
+    'formulaId',
+    'formulaSizeId',
+    'businessTypeId',
+    'categoryId',
+    'subCategoryId',
+    'unit',
+    'pricing',
+    'tax',
+    'inventory',
+    'barcode',
+    'sku',
+    'supplier',
+    'productImage',
+    'manufacturer',
+    'carton',
+    'box',
+    'unitWeight',
+    'isActive',
+    'createdAt',
+    'updatedAt',
+  ].join(' ');
+
   /**
    * Generate unique item code
    * @returns {Promise<string>} Generated item code
@@ -253,23 +294,30 @@ class ItemService {
    */
   async getItems(filters = {}, options = {}) {
     const {
-      page = 1, limit = 10, sort, ...otherOptions
+      page = 1, limit = 10, sort,
     } = options;
-    const skip = (page - 1) * limit;
+    const currentPage = toPositiveInteger(page, 1);
+    const itemsPerPage = toPositiveInteger(limit, 10, MAX_ITEM_LIST_LIMIT);
+    const skip = (currentPage - 1) * itemsPerPage;
 
     // Build query with filters
     const query = {};
 
     // Text search across multiple fields
-    const keyword = filters.keyword || filters.search || filters.itemSearch;
+    const keyword = String(filters.keyword || filters.search || filters.itemSearch || '').trim();
     if (keyword) {
-      const searchRegex = new RegExp(keyword, 'i');
+      const escapedKeyword = escapeRegex(keyword);
+      const upperKeyword = keyword.toUpperCase();
+      const escapedUpperKeyword = escapeRegex(upperKeyword);
       query.$or = [
-        { code: searchRegex },
-        { name: searchRegex },
-        { description: searchRegex },
-        { barcode: searchRegex },
-        { sku: searchRegex },
+        { code: upperKeyword },
+        { barcode: keyword },
+        { sku: keyword },
+        { code: { $regex: `^${escapedUpperKeyword}` } },
+        { barcode: { $regex: `^${escapedKeyword}`, $options: 'i' } },
+        { sku: { $regex: `^${escapedKeyword}`, $options: 'i' } },
+        { name: { $regex: escapedKeyword, $options: 'i' } },
+        { description: { $regex: escapedKeyword, $options: 'i' } },
       ];
     }
 
@@ -298,6 +346,7 @@ class ItemService {
 
     const [items, total] = await Promise.all([
       Item.find(query)
+        .select(ItemService.ITEM_LIST_PROJECTION)
         .populate('companyId', 'name code groupType')
         .populate('formulaId', 'name')
         .populate('formulaSizeId', 'size strength')
@@ -306,26 +355,26 @@ class ItemService {
         .populate('businessTypeId', 'name')
         .sort(sort || { name: 1 })
         .skip(skip)
-        .limit(limit)
+        .limit(itemsPerPage)
         .lean(),
       Item.countDocuments(query),
     ]);
 
-    const totalPages = Math.ceil(total / limit);
-    const hasNextPage = page < totalPages;
-    const hasPreviousPage = page > 1;
+    const totalPages = Math.ceil(total / itemsPerPage);
+    const hasNextPage = currentPage < totalPages;
+    const hasPreviousPage = currentPage > 1;
 
     return {
       items,
       pagination: {
         totalItems: total,
         totalPages,
-        currentPage: page,
-        itemsPerPage: limit,
+        currentPage,
+        itemsPerPage,
         hasNextPage,
         hasPreviousPage,
-        nextPage: hasNextPage ? page + 1 : null,
-        previousPage: hasPreviousPage ? page - 1 : null,
+        nextPage: hasNextPage ? currentPage + 1 : null,
+        previousPage: hasPreviousPage ? currentPage - 1 : null,
       },
     };
   }

@@ -57,16 +57,22 @@ async function handlePagination(
     query = query.select(additionalOptions.select);
   }
 
-  // Get total count for pagination metadata
-  const totalItems = await Model.countDocuments(filter).session(additionalOptions.session || null);
+  let countQuery = Model.countDocuments(filter);
+  if (additionalOptions.session) {
+    countQuery = countQuery.session(additionalOptions.session);
+  }
+
+  // Execute the count and page retrieval together so list endpoints do not wait
+  // for two independent database round trips in sequence.
+  const [totalItems, items] = await Promise.all([
+    countQuery,
+    query.skip(skip).limit(itemsPerPage),
+  ]);
 
   // Calculate pagination metadata
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const hasNextPage = currentPage < totalPages;
   const hasPrevPage = currentPage > 1;
-
-  // Execute query with pagination
-  const items = await query.skip(skip).limit(itemsPerPage);
 
   return {
     items,
@@ -79,7 +85,7 @@ async function handlePagination(
       hasPrevPage,
       nextPage: hasNextPage ? currentPage + 1 : null,
       prevPage: hasPrevPage ? currentPage - 1 : null,
-      from: skip + 1,
+      from: totalItems > 0 ? skip + 1 : 0,
       to: Math.min(skip + itemsPerPage, totalItems),
     },
   };
