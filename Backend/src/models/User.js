@@ -86,6 +86,19 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    // New OTP fields for password reset
+    passwordResetOTP: {
+      type: String,
+      default: null,
+    },
+    passwordResetOTPExpires: {
+      type: Date,
+      default: null,
+    },
+    isOTPVerified: {
+      type: Boolean,
+      default: false,
+    },
     // Master Data Management - Requirement 10.1: Created by tracking
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -195,10 +208,35 @@ userSchema.methods.generatePasswordResetToken = function () {
   return resetToken; // Return unhashed token to send via email
 };
 
+// Generate 6-digit OTP for password reset
+userSchema.methods.generatePasswordResetOTP = function () {
+  const crypto = require('crypto');
+  const otp = crypto.randomInt(100000, 1000000).toString();
+
+  // Hash OTP before storing
+  this.passwordResetOTP = crypto
+    .createHash('sha256')
+    .update(otp)
+    .digest('hex');
+
+  // Set expiry to 10 minutes from now
+  this.passwordResetOTPExpires = Date.now() + 10 * 60 * 1000;
+  this.isOTPVerified = false;
+
+  return otp; // Return unhashed OTP to send via email
+};
+
 // Master Data Management - Requirement 10.12: Clear password reset fields
 userSchema.methods.clearPasswordResetToken = function () {
   this.passwordResetToken = null;
   this.passwordResetExpires = null;
+  this.isOTPVerified = false;
+};
+
+// Clear OTP fields
+userSchema.methods.clearPasswordResetOTP = function () {
+  this.passwordResetOTP = null;
+  this.passwordResetOTPExpires = null;
 };
 
 // Static method to find active users by role
@@ -227,6 +265,23 @@ userSchema.statics.findByPasswordResetToken = function (token) {
   return this.findOne({
     passwordResetToken: hashedToken,
     passwordResetExpires: { $gt: Date.now() },
+    isOTPVerified: true, // MUST be verified via OTP first
+    isActive: true,
+  });
+};
+
+// Find user by OTP
+userSchema.statics.findByPasswordResetOTP = function (email, otp) {
+  const crypto = require('crypto');
+  const hashedOTP = crypto
+    .createHash('sha256')
+    .update(otp)
+    .digest('hex');
+
+  return this.findOne({
+    email: email.toLowerCase().trim(),
+    passwordResetOTP: hashedOTP,
+    passwordResetOTPExpires: { $gt: Date.now() },
     isActive: true,
   });
 };

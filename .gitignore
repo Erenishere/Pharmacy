@@ -48,6 +48,8 @@ Thumbs.db
 dist/
 build/
 .next/
+.vercel/
+**/.vercel/
 
 # Large files and archives
 *.zip
@@ -81,3 +83,4 @@ temp/
 
 # Test data with real credentials
 **/test-data-real.json
+.vercel

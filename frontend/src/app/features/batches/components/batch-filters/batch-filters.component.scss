@@ -48,19 +48,19 @@ $purple: #7367F0; // Standardize to premium purple
 // Standardized Filters Section Layout
 .filters-section {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     gap: 16px;
     width: 100%;
 
     .search-filters {
-        width: 100%;
+        flex: 1;
         display: flex;
         gap: 16px;
 
         .search-field {
             width: 100%;
-            display: block; // Ensures it stretches correctly if it's a mat-form-field
+            display: block;
         }
     }
 
@@ -68,7 +68,8 @@ $purple: #7367F0; // Standardize to premium purple
         display: flex;
         gap: 12px;
         align-items: center;
-        width: 100%;
+        width: auto;
+        white-space: nowrap;
 
         button {
             height: 48px;
@@ -423,6 +424,21 @@ $purple: #7367F0; // Standardize to premium purple
 
         .mat-mdc-button,
         .mat-mdc-raised-button {
+            width: 100%;
+        }
+    }
+
+    .filters-section {
+        flex-direction: column;
+        align-items: stretch;
+
+        .search-filters,
+        .action-buttons {
+            width: 100%;
+            flex-direction: column;
+        }
+
+        .action-buttons button {
             width: 100%;
         }
     }

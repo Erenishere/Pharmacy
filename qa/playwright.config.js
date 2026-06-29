@@ -5,6 +5,10 @@ const backendPort = process.env.PORT || '3001';
 const backendUrl = process.env.BACKEND_URL || `http://127.0.0.1:${backendPort}`;
 const startServers = process.env.QA_START_SERVERS !== '0';
 
+if (!process.env.LOGIN_RATE_LIMIT_MAX) {
+  process.env.LOGIN_RATE_LIMIT_MAX = '1000';
+}
+
 module.exports = defineConfig({
   testDir: './tests',
   timeout: 45_000,

@@ -19,9 +19,12 @@ class BatchRepository {
    */
   async findById(id, options = {}) {
     const query = Batch.findById(id)
-      .populate('item', 'name code')
+      .populate('item', 'name code unit category categoryId description')
       .populate('supplier', 'name code')
-      .populate('location', 'name code')
+      .populate('location', 'name code type')
+      .populate('warehouse', 'name code type')
+      .populate('createdBy', 'username email')
+      .populate('updatedBy', 'username email')
       .lean();
 
     return options.session ? query.session(options.session) : query;
@@ -35,9 +38,12 @@ class BatchRepository {
    */
   async findByBatchNumber(batchNumber, itemId, options = {}) {
     const query = Batch.findOne({ batchNumber, item: itemId })
-      .populate('item', 'name code')
+      .populate('item', 'name code unit category categoryId description')
       .populate('supplier', 'name code')
-      .populate('location', 'name code')
+      .populate('location', 'name code type')
+      .populate('warehouse', 'name code type')
+      .populate('createdBy', 'username email')
+      .populate('updatedBy', 'username email')
       .lean();
 
     return options.session ? query.session(options.session) : query;

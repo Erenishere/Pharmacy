@@ -3,6 +3,11 @@ const stockTransferService = require('../services/stockTransferService');
 const importExportService = require('../services/importExportService');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const Company = require('../models/Company');
+const Category = require('../models/category');
+const Formula = require('../models/formula');
+const Business = require('../models/business');
+const AccountHead = require('../models/accounthead');
 
 /**
  * Item Controller
@@ -639,6 +644,60 @@ const getItemCategories = async (req, res) => {
       error: {
         code: 'INTERNAL_ERROR',
         message: error.message || 'Failed to retrieve item categories',
+      },
+      timestamp: new Date().toISOString(),
+    });
+  }
+};
+
+/**
+ * Get bundled item-registration lookups
+ * @route GET /api/v1/items/registration-lookups
+ */
+const getItemRegistrationLookups = async (req, res) => {
+  try {
+    const [companies, categories, formulas, businessTypes, suppliers] = await Promise.all([
+      Company.find({ isActive: true })
+        .select('_id name code groupType isActive')
+        .sort({ name: 1 })
+        .lean(),
+      Category.find({ isActive: true })
+        .select('_id name isActive')
+        .sort({ name: 1 })
+        .lean(),
+      Formula.find({ isActive: true })
+        .select('_id name composition isActive')
+        .sort({ name: 1 })
+        .lean(),
+      Business.find({ isActive: true })
+        .select('_id name description isActive')
+        .sort({ name: 1 })
+        .lean(),
+      AccountHead.find({ type: 'supplier', isActive: true })
+        .select('_id name code type isActive')
+        .sort({ name: 1 })
+        .lean(),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        companies,
+        categories,
+        formulas,
+        businessTypes,
+        suppliers,
+      },
+      message: 'Item registration lookups retrieved successfully',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Get item registration lookups error:', error);
+    return res.status(500).json({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: error.message || 'Failed to retrieve item registration lookups',
       },
       timestamp: new Date().toISOString(),
     });
@@ -1342,6 +1401,7 @@ module.exports = {
   getLowStockItems,
   getExpiringItems,
   getItemCategories,
+  getItemRegistrationLookups,
   scanBarcode,
   transferStock,
   searchItems,

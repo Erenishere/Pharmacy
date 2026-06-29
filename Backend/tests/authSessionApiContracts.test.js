@@ -2,9 +2,18 @@ const request = require('supertest');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
+jest.mock('../src/services/emailService', () => ({
+  getTransporter: jest.fn(),
+  isEmailConfigured: jest.fn(() => true),
+  sendEmail: jest.fn(),
+  sendPasswordResetEmail: jest.fn(),
+  sendPasswordResetOTP: jest.fn().mockResolvedValue(undefined),
+}));
+
 const app = require('../src/app');
 const User = require('../src/models/User');
 const authSessionStore = require('../src/services/authSessionStore');
+const emailService = require('../src/services/emailService');
 
 jest.setTimeout(120000);
 
@@ -30,6 +39,7 @@ describe('auth session API contracts', () => {
   beforeEach(async () => {
     await mongoose.connection.db.dropDatabase();
     await authSessionStore.clearAll();
+    emailService.sendPasswordResetOTP.mockClear();
 
     await User.create({
       username: 'smoke.admin',
@@ -110,5 +120,37 @@ describe('auth session API contracts', () => {
       .expect(401);
 
     expect(reusedRefreshResponse.body.error.code).toBe('INVALID_TOKEN');
+  });
+
+  it('requires verified OTP before issuing a reset token and changing password', async () => {
+    await request(app)
+      .post('/api/v1/auth/forgot-password')
+      .send({ email: 'smoke.admin@example.com' })
+      .expect(200);
+
+    expect(emailService.sendPasswordResetOTP).toHaveBeenCalledTimes(1);
+    const [, otp] = emailService.sendPasswordResetOTP.mock.calls[0];
+    expect(otp).toMatch(/^\d{6}$/);
+
+    const otpResponse = await request(app)
+      .post('/api/v1/auth/verify-otp')
+      .send({ email: 'smoke.admin@example.com', otp })
+      .expect(200);
+
+    const resetToken = otpResponse.body.data.token;
+    expect(resetToken).toBeTruthy();
+
+    await request(app)
+      .post('/api/v1/auth/reset-password')
+      .send({ token: resetToken, password: 'NewSmokePass123' })
+      .expect(200);
+
+    await request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        identifier: 'smoke.admin',
+        password: 'NewSmokePass123',
+      })
+      .expect(200);
   });
 });

@@ -12,6 +12,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSelectModule } from '@angular/material/select';
 import { TaxConfigService, TaxConfig } from '../../services/tax-config.service';
 
 @Component({
@@ -20,7 +21,8 @@ import { TaxConfigService, TaxConfig } from '../../services/tax-config.service';
   imports: [
     CommonModule, ReactiveFormsModule, MatTableModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatSnackBarModule, MatCardModule,
-    MatProgressSpinnerModule, MatTooltipModule, MatSlideToggleModule, MatPaginatorModule
+    MatProgressSpinnerModule, MatTooltipModule, MatSlideToggleModule, MatPaginatorModule,
+    MatSelectModule
   ],
   template: `
     <div class="page-container">
@@ -37,7 +39,11 @@ import { TaxConfigService, TaxConfig } from '../../services/tax-config.service';
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Tax Type</mat-label>
-            <input matInput formControlName="taxType" placeholder="GST, WHT, SALES_TAX, CUSTOM">
+            <mat-select formControlName="taxType">
+              @for (option of taxTypeOptions; track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Rate (%)</mat-label>
@@ -118,6 +124,12 @@ export class TaxConfigListComponent implements OnInit {
 
   displayedColumns = ['taxName', 'taxType', 'rate', 'isActive', 'actions'];
   dataSource = new MatTableDataSource<TaxConfig>([]);
+  taxTypeOptions = [
+    { value: 'GST', label: 'GST' },
+    { value: 'WHT', label: 'WHT' },
+    { value: 'SALES_TAX', label: 'Sales Tax' },
+    { value: 'CUSTOM', label: 'Custom' },
+  ];
   pageSize = 10;
   pageSizeOptions = [10, 25, 50];
   loading = false;
@@ -131,7 +143,7 @@ export class TaxConfigListComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       taxName: ['', Validators.required],
-      taxType: ['', Validators.required],
+      taxType: ['GST', Validators.required],
       rate: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
     });
   }
@@ -152,15 +164,30 @@ export class TaxConfigListComponent implements OnInit {
     this.taxConfigService.createTaxConfig(this.form.value).subscribe({
       next: (res) => {
         this.saving = false;
-        if (res.success) { this.form.reset(); this.loadTaxConfigs(); this.snackBar.open('Tax config added', 'Close', { duration: 3000 }); }
+        if (res.success) {
+          this.form.reset({ taxName: '', taxType: 'GST', rate: 0 });
+          this.loadTaxConfigs();
+          this.snackBar.open('Tax config added', 'Close', { duration: 3000 });
+        }
       },
-      error: () => { this.saving = false; this.snackBar.open('Failed', 'Close', { duration: 3000 }); }
+      error: (error) => {
+        this.saving = false;
+        this.snackBar.open(this.getErrorMessage(error, 'Failed to add tax config'), 'Close', { duration: 5000 });
+      }
     });
   }
 
   toggleActive(tax: TaxConfig): void {
-    this.taxConfigService.updateTaxConfig(tax._id, { isActive: !tax.isActive } as any).subscribe({
+    const request = tax.isActive
+      ? this.taxConfigService.deactivateTaxConfig(tax._id)
+      : this.taxConfigService.activateTaxConfig(tax._id);
+
+    request.subscribe({
       next: () => this.loadTaxConfigs(),
+      error: (error) => {
+        this.snackBar.open(this.getErrorMessage(error, 'Failed to update tax status'), 'Close', { duration: 5000 });
+        this.loadTaxConfigs();
+      }
     });
   }
 
@@ -168,7 +195,11 @@ export class TaxConfigListComponent implements OnInit {
     if (!confirm(`Delete "${tax.taxName}"?`)) return;
     this.taxConfigService.deleteTaxConfig(tax._id).subscribe({
       next: () => { this.loadTaxConfigs(); this.snackBar.open('Deleted', 'Close', { duration: 3000 }); },
-      error: () => this.snackBar.open('Failed to delete', 'Close', { duration: 3000 })
+      error: (error) => this.snackBar.open(this.getErrorMessage(error, 'Failed to delete tax config'), 'Close', { duration: 5000 })
     });
+  }
+
+  private getErrorMessage(error: any, fallback: string): string {
+    return error?.error?.error?.message || error?.error?.message || error?.message || fallback;
   }
 }

@@ -109,6 +109,17 @@ export class DataTableComponent implements AfterViewInit {
     this.actionClick.emit({ action: actionKey, row });
   }
 
+  getStatusClass(value: any): string {
+    if (value === undefined || value === null) return '';
+    const v = String(value).toLowerCase();
+    
+    if (['active', 'instock', 'positive', 'success', 'available'].some(s => v.includes(s))) return 'status-active';
+    if (['expired', 'depleted', 'negative', 'danger', 'outstock', 'red'].some(s => v.includes(s))) return 'status-expired';
+    if (['warning', 'soon', 'pending', 'quarantined'].some(s => v.includes(s))) return 'status-warning';
+    
+    return 'status-primary'; // Default for things like Warehouse names
+  }
+
   trackByRowId(index: number, row: any): string {
     return row._id || row.id || index.toString();
   }

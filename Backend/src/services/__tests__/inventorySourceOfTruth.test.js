@@ -37,6 +37,7 @@ jest.mock('../itemService', () => ({
 const Inventory = require('../../models/Inventory');
 const Item = require('../../models/Item');
 const StockMovement = require('../../models/StockMovement');
+const inventoryRepository = require('../../repositories/inventoryRepository');
 const inventoryService = require('../inventoryService');
 
 describe('InventoryService source-of-truth stock mutations', () => {
@@ -146,6 +147,33 @@ describe('InventoryService source-of-truth stock mutations', () => {
     expect(Item.findByIdAndUpdate).toHaveBeenCalledWith(itemId, {
       'inventory.currentStock': 42,
     });
+  });
+
+  it('rejects removal when the selected warehouse and batch do not have enough stock', async () => {
+    inventoryRepository.findByItemAndLocation.mockResolvedValue({
+      _id: 'inventory-1',
+      item: itemId,
+      warehouse: warehouseId,
+      batchNumber: 'BATCH-SALE-2',
+      quantity: 4,
+    });
+
+    await expect(inventoryService.removeStock(itemId, warehouseId, 6, {
+      batchNumber: 'BATCH-SALE-2',
+      referenceId,
+      userId,
+      session: 'existing-session',
+    })).rejects.toThrow('Insufficient stock available in selected warehouse/batch');
+
+    expect(inventoryRepository.findByItemAndLocation).toHaveBeenCalledWith(
+      itemId,
+      warehouseId,
+      'BATCH-SALE-2',
+      'existing-session',
+    );
+    expect(inventoryRepository.updateQuantity).not.toHaveBeenCalled();
+    expect(StockMovement.create).not.toHaveBeenCalled();
+    expect(Item.findByIdAndUpdate).not.toHaveBeenCalled();
   });
 
   it('decrements reservation and stock together when fulfilling reserved sales stock', async () => {

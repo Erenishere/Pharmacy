@@ -129,18 +129,52 @@ export class BatchDetailComponent implements OnInit, OnDestroy {
   }
 
   formatDate(date: Date | string): string {
-    return new Date(date).toLocaleDateString();
+    if (!date) return 'N/A';
+
+    const parsedDate = new Date(date);
+    return Number.isNaN(parsedDate.getTime()) ? 'N/A' : parsedDate.toLocaleDateString();
   }
 
   formatCurrency(amount: number): string {
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount)) {
+      return '$0.00';
+    }
+
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD'
-    }).format(amount);
+    }).format(numericAmount);
   }
 
   calculateTotalValue(): number {
     return this.batch ? this.batch.remainingQuantity * this.batch.unitCost : 0;
+  }
+
+  displayValue(value: unknown): string {
+    if (value === null || value === undefined || value === '') {
+      return 'N/A';
+    }
+
+    if (typeof value === 'object') {
+      const ref = value as { name?: unknown; username?: unknown; code?: unknown; _id?: unknown; id?: unknown };
+      return String(ref.name || ref.username || ref.code || ref._id || ref.id || 'N/A');
+    }
+
+    return String(value);
+  }
+
+  displayUser(value: unknown): string {
+    if (!value) {
+      return 'N/A';
+    }
+
+    if (typeof value === 'object') {
+      const user = value as { username?: unknown; email?: unknown; _id?: unknown; id?: unknown };
+      return String(user.username || user.email || user._id || user.id || 'N/A');
+    }
+
+    return String(value);
   }
 
   onEditBatch(): void {

@@ -71,7 +71,7 @@ interface NavbarNotification {
       <div class="actions-group">
         <!-- Notifications -->
         <button mat-icon-button class="action-btn notification-btn" [matMenuTriggerFor]="notifMenu">
-          <mat-icon [matBadge]="notificationCount > 0 ? notificationCount : null" matBadgeColor="warn" matBadgeSize="small">
+          <mat-icon aria-hidden="false" [matBadge]="notificationCount > 0 ? notificationCount : null" matBadgeColor="warn" matBadgeSize="small">
             notifications
           </mat-icon>
         </button>
@@ -128,10 +128,6 @@ interface NavbarNotification {
           <mat-icon>account_circle</mat-icon>
           <span>My Profile</span>
         </button>
-        <button mat-menu-item routerLink="/master-data" *ngIf="!isSalesman">
-          <mat-icon>settings</mat-icon>
-          <span>Settings</span>
-        </button>
         <mat-divider></mat-divider>
         <button mat-menu-item class="logout-btn" (click)="logout()">
           <mat-icon>logout</mat-icon>
@@ -177,7 +173,6 @@ export class NavbarComponent implements OnInit {
   onSearch(): void {
     if (this.searchQuery.trim()) {
       // Navigate to search results or filter current view
-      console.log('Searching for:', this.searchQuery);
     }
   }
 

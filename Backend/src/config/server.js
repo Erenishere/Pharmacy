@@ -37,10 +37,33 @@ class ServerConfig {
       .split(',')
       .map((origin) => origin.trim())
       .filter(Boolean);
-    const defaultDevOrigins = ['http://localhost:4200', 'http://127.0.0.1:4200', 'http://localhost:3000', 'http://127.0.0.1:3000'];
+    const loopbackConfiguredOrigins = configuredOrigins.flatMap((origin) => {
+      try {
+        const url = new URL(origin);
+        if (url.hostname === 'localhost') {
+          url.hostname = '127.0.0.1';
+          return [origin, url.toString().replace(/\/$/, '')];
+        }
+        if (url.hostname === '127.0.0.1') {
+          url.hostname = 'localhost';
+          return [origin, url.toString().replace(/\/$/, '')];
+        }
+      } catch {
+        return [origin];
+      }
+      return [origin];
+    });
+    const defaultDevOrigins = [
+      'http://localhost:4200',
+      'http://127.0.0.1:4200',
+      'http://localhost:4201',
+      'http://127.0.0.1:4201',
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+    ];
     const allowedOrigins = process.env.NODE_ENV === 'production'
       ? configuredOrigins
-      : [...new Set([...configuredOrigins, ...defaultDevOrigins])];
+      : [...new Set([...loopbackConfiguredOrigins, ...defaultDevOrigins])];
 
     const corsOptions = {
       origin(origin, callback) {
@@ -101,19 +124,6 @@ class ServerConfig {
     this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-    // Debug middleware for tests
-    if (process.env.NODE_ENV === 'test') {
-      this.app.use((req, res, next) => {
-        const originalSend = res.send;
-        res.send = function (body) {
-          if (res.statusCode >= 400) {
-            // console.log(`DEBUG: ${req.method} ${req.url} -> ${res.statusCode}`, body);
-          }
-          return originalSend.apply(res, arguments);
-        };
-        next();
-      });
-    }
   }
 
   setupRoutes() {

@@ -124,19 +124,4 @@
     </div>
   </div>
 
-  <!-- Summary Footer -->
-  <div class="summary-footer" *ngIf="dataSource.data.length > 0">
-    <div class="summary-item">
-      <span class="label">Total Invoices:</span>
-      <span class="value">{{ totalInvoices }}</span>
-    </div>
-    <div class="summary-item">
-      <span class="label">Total Amount:</span>
-      <span class="value">{{ formatCurrency(calculateTotalAmount(dataSource.data)) }}</span>
-    </div>
-    <div class="summary-item">
-      <span class="label">Total GST (18% + 4%):</span>
-      <span class="value">{{ formatCurrency(calculateTotalGST(dataSource.data)) }}</span>
-    </div>
-  </div>
 </div>

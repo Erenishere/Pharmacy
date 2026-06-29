@@ -142,7 +142,6 @@ const optionalAuth = async (req, res, next) => {
           req.user = user;
         } catch (error) {
           // Ignore authentication errors in optional auth
-          console.log('Optional auth failed:', error.message);
         }
       }
     }
@@ -279,7 +278,7 @@ const validateDimensionId = async (req, res, next) => {
     }
 
     // Validate dimension exists
-    const DimensionBranch = require('../models/DimensionBranch');
+    const DimensionBranch = require('../models/dimensionbranch');
     const dimension = await DimensionBranch.findById(dimensionId);
 
     if (!dimension) {

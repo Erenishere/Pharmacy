@@ -26,6 +26,9 @@
             <mat-error *ngIf="batchForm.get('itemSearch')?.hasError('required')">
               Item selection is required
             </mat-error>
+            <mat-error *ngIf="batchForm.get('itemSearch')?.hasError('selectionRequired')">
+              Select an item from the search results
+            </mat-error>
           </mat-form-field>
         </div>
 
@@ -127,6 +130,7 @@
                 <span class="supplier-name">{{ supplier.name }}</span>
               </mat-option>
             </mat-autocomplete>
+            <mat-hint>Optional. Leave blank if this batch is not tied to a supplier.</mat-hint>
           </mat-form-field>
         </div>
 
@@ -144,7 +148,7 @@
           <button mat-button type="button" (click)="onCancel()" [disabled]="isLoading">
             Cancel
           </button>
-          <button mat-raised-button color="primary" type="submit" [disabled]="!isFormValid || isLoading">
+          <button mat-raised-button color="primary" type="submit" [disabled]="isLoading">
             <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
             <mat-icon *ngIf="!isLoading">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
             {{ isEditMode ? 'Update Batch' : 'Create Batch' }}

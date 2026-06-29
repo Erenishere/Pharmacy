@@ -1,0 +1,1 @@
+{"success":true,"message":"Sales statistics retrieved successfully","data":{"totalInvoices":4,"totalAmount":0,"totalGST":0,"totalDiscount":0,"grossTotal":0},"metadata":{"requestId":"98282bff-64b7-4867-a862-c369da9df622","timestamp":"2026-05-20T20:14:52.290Z","path":"/api/v1/invoices/sales/statistics","method":"GET","duration":"717.64ms"}}

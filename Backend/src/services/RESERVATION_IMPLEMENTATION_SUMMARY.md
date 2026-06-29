@@ -265,7 +265,7 @@ const reservations = await inventoryService.getActiveReservations(
 ```javascript
 const reservationScheduler = require('./services/reservationSchedulerService');
 const result = await reservationScheduler.triggerCheck();
-console.log(`Released ${result.releasedCount} expired reservations`);
+return result.releasedCount;
 ```
 
 ## Database Indexes

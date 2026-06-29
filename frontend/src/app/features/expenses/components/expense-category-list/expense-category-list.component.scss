@@ -1,18 +1,100 @@
-@import 'styles/shared-list-styles';
+@import 'styles/form-dialog-shell';
+@import 'styles/vuexy-vars';
 
 :host {
-  @include dialog-container;
+  display: block;
 }
 
-.category-table {
-  @include data-table;
-  margin-top: 16px;
+@include standard-form-dialog;
+
+.expense-category-dialog {
+  width: min(620px, 100%);
 }
 
-.action-buttons {
-  @include action-buttons;
+.category-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 20px;
+}
+
+.category-form .submit-btn {
+  min-width: 120px;
+  height: 48px;
+  margin-top: 4px;
+}
+
+.category-list {
+  display: block;
+  max-height: 360px;
+  overflow: auto;
+  padding: 0;
+  border: 1px solid #ebe9f1;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.category-row {
+  min-height: 64px !important;
+  border-bottom: 1px solid #f0eef7;
+}
+
+.category-row:last-child {
+  border-bottom: 0;
+}
+
+.category-title {
+  color: $text-card-title;
+  font-weight: 700;
+}
+
+.category-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 mat-chip {
-  @include status-chip-base;
+  min-height: 26px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.chip-active {
+  background: rgba($success, 0.12) !important;
+  color: $success !important;
+}
+
+.chip-inactive {
+  background: rgba($secondary, 0.14) !important;
+  color: $grey-dark !important;
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  padding: 32px 16px;
+  color: $text-body;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+@media (max-width: 640px) {
+  .category-form {
+    grid-template-columns: 1fr;
+  }
+
+  .category-form .submit-btn {
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .category-actions {
+    gap: 4px;
+  }
 }

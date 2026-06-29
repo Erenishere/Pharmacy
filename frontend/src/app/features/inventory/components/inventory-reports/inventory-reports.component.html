@@ -206,9 +206,10 @@
                 <td class="text-right">{{ formatNumber(item.minimumLevel || item.minLevel || 0) }}</td>
                 <td class="text-right">{{ formatNumber(item.reorderLevel || item.reorderPoint || 0) }}</td>
                 <td>
-                  <mat-chip [class]="(item.currentStock || item.quantity || 0) === 0 ? 'status-out' : 'status-low'">
+                  <span class="premium-status-indicator" 
+                        [ngClass]="(item.currentStock || item.quantity || 0) === 0 ? 'status-expired' : 'status-warning'">
                     {{ (item.currentStock || item.quantity || 0) === 0 ? 'Out of Stock' : 'Low Stock' }}
-                  </mat-chip>
+                  </span>
                 </td>
               </tr>
             </tbody>

@@ -1,4 +1,7 @@
 const Item = require('../models/Item');
+const Category = require('../models/Category');
+const Business = require('../models/Business');
+const Company = require('../models/Company');
 
 const items = [
   {
@@ -121,7 +124,28 @@ const items = [
 module.exports = {
   async seed() {
     await Item.deleteMany({});
-    await Item.insertMany(items);
+
+    let category = await Category.findOne();
+    if (!category) category = await Category.create({ name: 'General', isActive: true });
+
+    let business = await Business.findOne();
+    if (!business) business = await Business.create({ name: 'General', isActive: true });
+
+    let company = await Company.findOne();
+    if (!company) company = await Company.create({ name: 'General Company', code: 'GEN', isActive: true });
+
+    const fixedItems = items.map(item => ({
+      ...item,
+      categoryId: category._id,
+      businessTypeId: business._id,
+      companyId: company._id,
+      tax: {
+        ...item.tax,
+        gstRate: [0, 4, 18].includes(item.tax.gstRate) ? item.tax.gstRate : 18
+      }
+    }));
+
+    await Item.insertMany(fixedItems);
     console.log(`  - Created ${items.length} items`);
   },
 

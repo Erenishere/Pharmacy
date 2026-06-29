@@ -2,6 +2,10 @@
 
 $p-bg: #f8f7fa;
 $p-border: #ebe9f1;
+@import "../../../../../styles/shared-list-styles";
+
+$p-bg: #f8f7fa;
+$p-border: #ebe9f1;
 
 :host {
   display: block;
@@ -37,6 +41,8 @@ $p-border: #ebe9f1;
         align-items: center;
         gap: 12px;
         margin: 0;
+        font-family: var(--font-family-heading, 'Playfair Display', Georgia, serif);
+        font-weight: 700;
 
         mat-icon {
           color: $purple;
@@ -68,10 +74,11 @@ $p-border: #ebe9f1;
     }
 
     .section-title {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 700;
       color: $purple;
       margin: 0 0 6px;
+      font-family: var(--font-family-heading, 'Playfair Display', Georgia, serif);
     }
 
     .statement-description {
@@ -98,43 +105,29 @@ $p-border: #ebe9f1;
       min-height: 72px;
     }
 
-    .statement-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      margin-bottom: 20px;
+    .dashboard-stats-grid {
+      @include dashboard-stats-grid;
+      margin-bottom: 24px;
+      
+      .stat-card {
+        background: #ffffff;
+        border: 1px solid rgba($purple, 0.08);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        
+        .value {
+          font-family: var(--font-family-heading, 'Playfair Display', Georgia, serif);
+          font-weight: 700;
+          color: $purple-dark;
+          font-size: 22px;
+        }
 
-      @media (max-width: 1000px) {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        .label {
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+        }
       }
-
-      @media (max-width: 640px) {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .metric-card {
-      border: 1px solid rgba($purple, 0.1);
-      border-radius: 14px;
-      background: linear-gradient(180deg, #ffffff 0%, #f9f8ff 100%);
-      padding: 16px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-
-      strong {
-        color: $purple-dark;
-        font-size: 22px;
-        line-height: 1.1;
-      }
-    }
-
-    .metric-label {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: $grey-dark;
     }
 
     .statement-tables {
@@ -164,7 +157,9 @@ $p-border: #ebe9f1;
       h4 {
         margin: 0;
         color: $purple-dark;
-        font-size: 15px;
+        font-size: 16px;
+        font-family: var(--font-family-heading, 'Playfair Display', Georgia, serif);
+        font-weight: 700;
       }
 
       span {
@@ -223,12 +218,13 @@ $p-border: #ebe9f1;
     .card-header {
       margin-bottom: 20px;
       .section-title {
-        font-size: 16px;
+        font-size: 18px;
         font-weight: 700;
         color: $purple;
         margin: 0;
         border-left: 3px solid $purple;
         padding-left: 12px;
+        font-family: var(--font-family-heading, 'Playfair Display', Georgia, serif);
       }
 
       .edit-contract-note {

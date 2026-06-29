@@ -19,14 +19,12 @@ class ReservationSchedulerService {
    */
   start(intervalMinutes = 5) {
     if (this.isRunning) {
-      console.log('Reservation scheduler is already running');
       return;
     }
 
     this.checkIntervalMinutes = intervalMinutes;
     const intervalMs = intervalMinutes * 60 * 1000;
 
-    console.log(`Starting reservation scheduler (checking every ${intervalMinutes} minutes)...`);
 
     // Run immediately on start
     this.checkAndReleaseExpiredReservations();
@@ -37,7 +35,6 @@ class ReservationSchedulerService {
     }, intervalMs);
 
     this.isRunning = true;
-    console.log('Reservation scheduler started successfully');
   }
 
   /**
@@ -45,7 +42,6 @@ class ReservationSchedulerService {
    */
   stop() {
     if (!this.isRunning) {
-      console.log('Reservation scheduler is not running');
       return;
     }
 
@@ -55,7 +51,6 @@ class ReservationSchedulerService {
     }
 
     this.isRunning = false;
-    console.log('Reservation scheduler stopped');
   }
 
   /**
@@ -63,14 +58,12 @@ class ReservationSchedulerService {
    */
   async checkAndReleaseExpiredReservations() {
     try {
-      console.log('[Reservation Scheduler] Checking for expired reservations...');
 
       const result = await inventoryService.autoReleaseExpiredReservations({
         limit: 100, // Process up to 100 expired reservations per run
       });
 
       if (result.releasedCount > 0) {
-        console.log(`[Reservation Scheduler] Released ${result.releasedCount} expired reservations`);
       }
 
       if (result.failedCount > 0) {
@@ -81,7 +74,6 @@ class ReservationSchedulerService {
       }
 
       if (result.releasedCount === 0 && result.failedCount === 0) {
-        console.log('[Reservation Scheduler] No expired reservations found');
       }
 
       return result;
@@ -112,7 +104,6 @@ class ReservationSchedulerService {
    * Manually trigger a check (useful for testing)
    */
   async triggerCheck() {
-    console.log('[Reservation Scheduler] Manual check triggered');
     return await this.checkAndReleaseExpiredReservations();
   }
 }

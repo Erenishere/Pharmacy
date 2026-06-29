@@ -1,28 +1,19 @@
 {
-    "version": 2,
-    "builds": [
-        {
-            "src": "api/index.js",
-            "use": "@vercel/node"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/(.*)",
-            "methods": [
-                "OPTIONS",
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "PATCH"
-            ],
-            "dest": "api/index.js"
-        }
-    ],
-    "env": {
-        "NODE_ENV": "production"
-    },
-    "buildCommand": "echo 'Building Pharam Backend API'",
-    "outputDirectory": "./"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.js"
+    }
+  ]
 }

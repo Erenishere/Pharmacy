@@ -39,7 +39,6 @@ class WebSocketService {
     this.setupMiddleware();
     this.setupEventHandlers();
 
-    console.log('[WebSocket] Server initialized');
   }
 
   /**
@@ -98,7 +97,6 @@ class WebSocketService {
     const userId = socket.userId;
     const role = socket.userRole;
 
-    console.log(`[WebSocket] User ${userId} (${socket.userName}) connected`);
 
     // Check max connections per user
     const existingSockets = this.getUserSockets(userId);
@@ -106,7 +104,6 @@ class WebSocketService {
       // Disconnect oldest connection
       const oldest = existingSockets[0];
       oldest.disconnect(true);
-      console.log(`[WebSocket] Disconnected oldest connection for user ${userId}`);
     }
 
     // Register connection
@@ -177,7 +174,6 @@ class WebSocketService {
         socketData.rooms.add(room);
       }
       
-      console.log(`[WebSocket] User ${socket.userId} subscribed to ${room}`);
     });
 
     // Unsubscribe
@@ -211,7 +207,6 @@ class WebSocketService {
   handleDisconnect(socket, reason) {
     const userId = socket.userId;
     
-    console.log(`[WebSocket] User ${userId} disconnected: ${reason}`);
 
     // Cleanup
     this.connectedUsers.delete(socket.id);
@@ -477,14 +472,12 @@ class WebSocketService {
     sockets.forEach(socket => {
       socket.disconnect(true);
     });
-    console.log(`[WebSocket] Disconnected ${sockets.length} sockets for user ${userId}`);
   }
 
   /**
    * Graceful shutdown
    */
   async shutdown() {
-    console.log('[WebSocket] Shutting down...');
     
     // Notify all clients
     this.broadcast('system:shutdown', {
@@ -495,7 +488,6 @@ class WebSocketService {
     // Close all connections
     this.io.close();
     
-    console.log('[WebSocket] Shutdown complete');
   }
 }
 

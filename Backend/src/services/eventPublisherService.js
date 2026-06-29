@@ -356,10 +356,6 @@ class EventPublisherService {
     }
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[EventPublisher] Event published: ${type}`, {
-        correlationId: eventData.correlationId,
-        timestamp: eventData.timestamp,
-      });
     }
   }
 

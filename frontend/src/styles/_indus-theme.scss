@@ -66,7 +66,41 @@ body {
 
 body {
   color: var(--indus-text-soft);
-  font-family: "Montserrat", "Outfit", sans-serif;
+  font-family: var(--font-family, "Moderne Sans", "Modern Sans", sans-serif);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.mat-typography,
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-menu-item,
+.mat-mdc-option,
+.mat-mdc-select,
+.mat-mdc-form-field,
+.mat-mdc-table,
+.mat-mdc-paginator,
+.mat-mdc-dialog-container {
+  font-family: var(--font-family, "Moderne Sans", "Modern Sans", sans-serif) !important;
+}
+
+mat-icon,
+.mat-icon,
+.material-icons {
+  font-family: "Material Icons" !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+  line-height: 1 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  white-space: nowrap !important;
+  word-wrap: normal !important;
+  direction: ltr !important;
+  -webkit-font-feature-settings: "liga" !important;
+  font-feature-settings: "liga" !important;
+  font-variant-ligatures: normal !important;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -179,10 +213,10 @@ app-sidebar .sidebar-nav {
     padding-left: 18px !important;
     border-left: 6px solid var(--indus-primary) !important;
     color: var(--indus-text) !important;
-    font-family: "Outfit", "Montserrat", sans-serif !important;
+    font-family: var(--font-family-heading, "Playfair Display", Georgia, serif) !important;
     font-size: clamp(28px, 2.2vw, 36px) !important;
     font-weight: 800 !important;
-    letter-spacing: -0.04em !important;
+    letter-spacing: 0 !important;
     line-height: 1.15 !important;
 
     mat-icon {
@@ -230,7 +264,7 @@ button[mat-flat-button].mat-primary,
   box-shadow: var(--indus-shadow-button) !important;
   font-size: 15px !important;
   font-weight: 800 !important;
-  letter-spacing: 0.01em !important;
+  letter-spacing: 0 !important;
   text-transform: none !important;
 
   .mdc-button__label,
@@ -435,10 +469,10 @@ button[mat-flat-button].mat-primary,
   .stat-value {
     margin: 0 !important;
     color: var(--indus-text) !important;
-    font-family: "Outfit", "Montserrat", sans-serif !important;
+    font-family: var(--font-family, "Moderne Sans", "Modern Sans", sans-serif) !important;
     font-size: 20px !important;
     font-weight: 800 !important;
-    letter-spacing: -0.03em !important;
+    letter-spacing: 0 !important;
     line-height: 1.1 !important;
     white-space: nowrap;
   }
@@ -450,7 +484,7 @@ button[mat-flat-button].mat-primary,
     color: var(--indus-text-muted) !important;
     font-size: 10.5px !important;
     font-weight: 800 !important;
-    letter-spacing: 0.03em !important;
+    letter-spacing: 0 !important;
     line-height: 1.2 !important;
     text-transform: uppercase !important;
   }
@@ -695,6 +729,49 @@ html body .cdk-overlay-pane .mat-mdc-select-panel .mat-mdc-option.mdc-list-item-
 html body .mat-mdc-select-panel .mat-mdc-option:hover,
 html body .mat-mdc-select-panel .mat-mdc-option.mat-mdc-option-active,
 html body .mat-mdc-select-panel .mat-mdc-option.mdc-list-item--selected {
+  background: var(--indus-primary-softer) !important;
+  color: var(--indus-primary-dark) !important;
+}
+
+// Autocomplete overlays also live outside feature component scopes. Keep their
+// MDC menu surface light so the dropdown never shows dark top/bottom bands.
+html body .cdk-overlay-container .mat-mdc-autocomplete-panel,
+html body .cdk-overlay-pane .mat-mdc-autocomplete-panel,
+html body .mat-mdc-autocomplete-panel {
+  --mat-autocomplete-background-color: var(--indus-surface);
+  --mat-option-selected-state-layer-color: var(--indus-primary-softer);
+  background: var(--indus-surface) !important;
+  color: var(--indus-text) !important;
+  padding: 0 !important;
+  border: 1px solid rgba(115, 103, 240, 0.22) !important;
+  border-radius: 0 0 var(--indus-radius-sm) var(--indus-radius-sm) !important;
+  box-shadow: 0 12px 24px rgba(115, 103, 240, 0.14) !important;
+  overflow: hidden auto !important;
+}
+
+html body .cdk-overlay-container .mat-mdc-autocomplete-panel .mat-mdc-option,
+html body .cdk-overlay-pane .mat-mdc-autocomplete-panel .mat-mdc-option,
+html body .mat-mdc-autocomplete-panel .mat-mdc-option {
+  min-height: 56px !important;
+  background: var(--indus-surface) !important;
+  color: var(--indus-primary) !important;
+}
+
+html body .cdk-overlay-container .mat-mdc-autocomplete-panel .mat-mdc-option .mdc-list-item__primary-text,
+html body .cdk-overlay-pane .mat-mdc-autocomplete-panel .mat-mdc-option .mdc-list-item__primary-text,
+html body .mat-mdc-autocomplete-panel .mat-mdc-option .mdc-list-item__primary-text {
+  color: inherit !important;
+}
+
+html body .cdk-overlay-container .mat-mdc-autocomplete-panel .mat-mdc-option:hover,
+html body .cdk-overlay-container .mat-mdc-autocomplete-panel .mat-mdc-option.mat-mdc-option-active,
+html body .cdk-overlay-container .mat-mdc-autocomplete-panel .mat-mdc-option.mdc-list-item--selected,
+html body .cdk-overlay-pane .mat-mdc-autocomplete-panel .mat-mdc-option:hover,
+html body .cdk-overlay-pane .mat-mdc-autocomplete-panel .mat-mdc-option.mat-mdc-option-active,
+html body .cdk-overlay-pane .mat-mdc-autocomplete-panel .mat-mdc-option.mdc-list-item--selected,
+html body .mat-mdc-autocomplete-panel .mat-mdc-option:hover,
+html body .mat-mdc-autocomplete-panel .mat-mdc-option.mat-mdc-option-active,
+html body .mat-mdc-autocomplete-panel .mat-mdc-option.mdc-list-item--selected {
   background: var(--indus-primary-softer) !important;
   color: var(--indus-primary-dark) !important;
 }
@@ -944,7 +1021,7 @@ thead th {
   border: 0 !important;
   font-size: 13px !important;
   font-weight: 800 !important;
-  letter-spacing: 0.03em !important;
+  letter-spacing: 0 !important;
   text-transform: uppercase !important;
 }
 
@@ -1428,18 +1505,7 @@ html body app-data-table .mat-mdc-row:hover .mat-mdc-icon-button {
   color: var(--indus-primary) !important;
 }
 
-html body .list-page-card .mat-mdc-row:hover .mat-mdc-chip,
-html body .list-page-card .mat-row:hover .mat-chip,
-html body .list-page-card tbody tr:hover .status-chip,
-html body .table-card .mat-mdc-row:hover .mat-mdc-chip,
-html body .table-card .mat-row:hover .mat-chip,
-html body .table-card tbody tr:hover .status-chip,
-html body app-data-table .mat-mdc-row:hover .mat-mdc-chip,
-html body app-data-table .mat-row:hover .mat-chip,
-html body app-data-table tbody tr:hover .status-chip {
-  background: var(--indus-primary-soft) !important;
-  color: var(--indus-primary) !important;
-}
+/* Hover behavior for chips removed to maintain persistent visibility */
 
 html body .mat-mdc-list-item:not(.active):hover,
 html body .menu-section .section-header:not(.active):hover,
@@ -1574,6 +1640,67 @@ html body .list-page-card .filter-section .filter-checkbox {
   display: flex !important;
   align-items: center !important;
   white-space: nowrap !important;
+}
+
+html body .list-page-card .list-filters-section.table-toolbar,
+html body .list-page-card .filters-section.table-toolbar,
+html body .list-page-card .filter-section.table-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  min-height: 76px !important;
+  padding: 20px 24px !important;
+}
+
+html body .list-page-card .list-filters-section.table-toolbar .filter-group-primary,
+html body .list-page-card .filters-section.table-toolbar .filter-group-primary,
+html body .list-page-card .filter-section.table-toolbar .filter-group-primary {
+  display: flex !important;
+  align-items: center !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+html body .list-page-card .list-filters-section.table-toolbar .filter-group-secondary,
+html body .list-page-card .filters-section.table-toolbar .filter-group-secondary,
+html body .list-page-card .filter-section.table-toolbar .filter-group-secondary {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex: 0 0 auto !important;
+  margin-left: auto !important;
+}
+
+html body .list-page-card .list-filters-section.table-toolbar .refresh-btn,
+html body .list-page-card .filters-section.table-toolbar .refresh-btn,
+html body .list-page-card .filter-section.table-toolbar .refresh-btn {
+  margin-left: auto !important;
+}
+
+@media (max-width: 768px) {
+  html body .list-page-card .list-filters-section.table-toolbar,
+  html body .list-page-card .filters-section.table-toolbar,
+  html body .list-page-card .filter-section.table-toolbar {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    padding: 18px 20px !important;
+  }
+
+  html body .list-page-card .list-filters-section.table-toolbar .filter-group-primary,
+  html body .list-page-card .list-filters-section.table-toolbar .filter-group-secondary,
+  html body .list-page-card .filters-section.table-toolbar .filter-group-primary,
+  html body .list-page-card .filters-section.table-toolbar .filter-group-secondary,
+  html body .list-page-card .filter-section.table-toolbar .filter-group-primary,
+  html body .list-page-card .filter-section.table-toolbar .filter-group-secondary {
+    width: 100% !important;
+  }
+
+  html body .list-page-card .list-filters-section.table-toolbar .filter-group-secondary,
+  html body .list-page-card .filters-section.table-toolbar .filter-group-secondary,
+  html body .list-page-card .filter-section.table-toolbar .filter-group-secondary {
+    justify-content: flex-end !important;
+  }
 }
 
 html body .header-actions .btn-export.mat-mdc-outlined-button,
@@ -1741,4 +1868,88 @@ html body .quotation-dialog-panel .mat-mdc-dialog-surface,
 html body .e-order-dialog-panel .mat-mdc-dialog-surface {
   border-radius: 12px !important;
   background: var(--indus-surface) !important;
+}
+
+// --- GLOBAL PREMIUM TABLE STYLES (WAREHOUSE STYLE) ---
+
+html body .mat-mdc-table {
+  background: var(--indus-surface) !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid var(--indus-border) !important;
+
+  .mat-mdc-header-row {
+    background: #7367f0 !important; // Premium Purple Header
+    min-height: 48px !important;
+    
+    .mat-mdc-header-cell {
+      color: #FFFFFF !important;
+      font-weight: 700 !important;
+      text-transform: uppercase !important;
+      font-size: 12px !important;
+      letter-spacing: 0.5px !important;
+      border-bottom: none !important;
+    }
+  }
+
+  .mat-mdc-row {
+    transition: all 0.2s ease !important;
+    min-height: 52px !important;
+    border-bottom: 1px solid var(--indus-border-light) !important;
+
+    &:hover {
+      background-color: #F8F7FF !important; // Subtle Purple Hover
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 8px rgba(115, 103, 240, 0.08) !important;
+      cursor: pointer !important;
+    }
+
+    .mat-mdc-cell {
+      color: #5d596c !important;
+      font-size: 14px !important;
+    }
+  }
+}
+
+// --- GLOBAL STATUS CHIP SYSTEM ---
+
+@mixin status-chip-premium($bg, $color) {
+  background-color: $bg !important;
+  color: $color !important;
+  font-weight: 700 !important;
+  padding: 4px 10px !important;
+  border-radius: 4px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 45px;
+  font-size: 12px;
+  line-height: 1;
+  border: none !important;
+  box-shadow: none !important;
+  text-transform: none !important;
+}
+
+// Global Mappings (Apply to common status keywords)
+html body {
+  // Positive / In Stock / Active
+  .status-active, .status-instock, .status-positive, .status-success, .status-available {
+    @include status-chip-premium(#E8F5E9, #2E7D32);
+  }
+
+  // Negative / Expired / Depleted / Red
+  .status-expired, .status-depleted, .status-negative, .status-danger, .status-outstock {
+    @include status-chip-premium(#FFEBEE, #C62828);
+  }
+
+  // Warning / Soon / Pending
+  .status-warning, .status-soon, .status-pending, .status-quarantined {
+    @include status-chip-premium(#FFF3E0, #E65100);
+  }
+
+  // Info / Draft / Warehouse
+  .status-info, .status-draft, .status-warehouse, .status-primary {
+    @include status-chip-premium(#F3E5F5, #7367f0); // Soft purple
+  }
 }

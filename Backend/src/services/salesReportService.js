@@ -4,7 +4,7 @@ const Customer = require('../models/Customer');
 const Item = require('../models/Item');
 const Salesman = require('../models/Salesman');
 const Route = require('../models/Route');
-const Category = require('../models/Category');
+const Category = require('../models/category');
 
 class SalesReportService {
   /**

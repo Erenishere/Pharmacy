@@ -10,7 +10,7 @@ const FormulaSize = require('../models/formulasize');
 const Business = require('../models/business');
 const Town = require('../models/town');
 const Area = require('../models/area');
-const Salesman = require('../models/salesman');
+const Salesman = require('../models/Salesman');
 
 /**
  * Import/Export Service for Master Data Management

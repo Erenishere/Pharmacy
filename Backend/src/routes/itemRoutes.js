@@ -5,6 +5,8 @@ const multer = require('multer');
 const itemController = require('../controllers/itemController');
 const batchController = require('../controllers/batchController');
 const { authenticate, authorize } = require('../middleware/auth');
+const { cacheMiddleware, clearCacheMiddleware } = require('../middleware/cacheMiddleware');
+const { CacheManager } = require('../utils/cache');
 const {
   createItemValidation,
   updateItemValidation,
@@ -16,6 +18,45 @@ const {
   scanBarcodeValidation,
   transferStockValidation,
 } = require('../utils/validators/itemValidators');
+
+const itemListCache = cacheMiddleware({
+  duration: 'short',
+  keyGenerator: (req) => CacheManager.generateKey('items:list', {
+    page: req.query.page,
+    limit: req.query.limit,
+    sort: req.query.sort,
+    sortBy: req.query.sortBy,
+    sortOrder: req.query.sortOrder,
+    keyword: req.query.keyword,
+    companyId: req.query.companyId,
+    categoryId: req.query.categoryId,
+    subCategoryId: req.query.subCategoryId,
+    businessTypeId: req.query.businessTypeId,
+    sellingGroup: req.query.sellingGroup,
+    formulaId: req.query.formulaId,
+    mainSupplierId: req.query.mainSupplierId,
+    supplierId: req.query.supplierId,
+    minPrice: req.query.minPrice,
+    maxPrice: req.query.maxPrice,
+    lowStock: req.query.lowStock,
+    isActive: req.query.isActive,
+  }),
+});
+
+const itemDetailCache = cacheMiddleware({
+  duration: 'medium',
+  keyGenerator: (req) => `item:${req.params.id}`,
+});
+
+const itemRegistrationLookupsCache = cacheMiddleware({
+  duration: 'long',
+  keyGenerator: () => 'items:registration-lookups',
+});
+
+const clearItemReadCaches = clearCacheMiddleware([
+  'items:list',
+  'item:',
+]);
 
 // Configure multer for file uploads
 const upload = multer({
@@ -315,6 +356,8 @@ router.get('/search', authenticate, itemController.searchItems);
  *         description: Internal server error
  */
 router.get('/expiring-soon', authenticate, getExpiringItemsValidation, itemController.getExpiringItems);
+
+router.get('/registration-lookups', authenticate, itemRegistrationLookupsCache, itemController.getItemRegistrationLookups);
 
 /**
  * @swagger
@@ -626,7 +669,7 @@ router.post('/:itemId/sync-stock', authenticate, authorize(['admin', 'inventory'
  *       500:
  *         description: Internal server error
  */
-router.get('/', authenticate, itemController.getAllItems);
+router.get('/', authenticate, itemListCache, itemController.getAllItems);
 
 /**
  * @swagger
@@ -651,7 +694,7 @@ router.get('/', authenticate, itemController.getAllItems);
  *       500:
  *         description: Internal server error
  */
-router.get('/:id', authenticate, getItemByIdValidation, itemController.getItemById);
+router.get('/:id', authenticate, itemDetailCache, getItemByIdValidation, itemController.getItemById);
 
 /**
  * @swagger
@@ -772,7 +815,7 @@ router.get('/:id', authenticate, getItemByIdValidation, itemController.getItemBy
  *       500:
  *         description: Internal server error
  */
-router.post('/', authenticate, authorize(['admin', 'inventory', 'data_entry']), createItemValidation, itemController.createItem);
+router.post('/', authenticate, authorize(['admin', 'inventory', 'data_entry']), clearItemReadCaches, createItemValidation, itemController.createItem);
 
 /**
  * @swagger
@@ -839,7 +882,7 @@ router.post('/', authenticate, authorize(['admin', 'inventory', 'data_entry']), 
  *       500:
  *         description: Internal server error
  */
-router.put('/:id', authenticate, authorize(['admin', 'inventory', 'data_entry']), updateItemValidation, itemController.updateItem);
+router.put('/:id', authenticate, authorize(['admin', 'inventory', 'data_entry']), clearItemReadCaches, updateItemValidation, itemController.updateItem);
 
 /**
  * @swagger
@@ -868,7 +911,7 @@ router.put('/:id', authenticate, authorize(['admin', 'inventory', 'data_entry'])
  *       500:
  *         description: Internal server error
  */
-router.delete('/:id', authenticate, authorize(['admin', 'inventory']), getItemByIdValidation, itemController.deleteItem);
+router.delete('/:id', authenticate, authorize(['admin', 'inventory']), clearItemReadCaches, getItemByIdValidation, itemController.deleteItem);
 
 /**
  * @swagger
@@ -897,7 +940,7 @@ router.delete('/:id', authenticate, authorize(['admin', 'inventory']), getItemBy
  *       500:
  *         description: Internal server error
  */
-router.patch('/:id/toggle-status', authenticate, authorize(['admin', 'inventory']), getItemByIdValidation, itemController.toggleItemStatus);
+router.patch('/:id/toggle-status', authenticate, authorize(['admin', 'inventory']), clearItemReadCaches, getItemByIdValidation, itemController.toggleItemStatus);
 
 /**
  * @swagger
@@ -946,7 +989,7 @@ router.patch('/:id/toggle-status', authenticate, authorize(['admin', 'inventory'
  *       500:
  *         description: Internal server error
  */
-router.patch('/:id/stock', authenticate, authorize(['admin', 'inventory']), updateItemStockValidation, itemController.updateItemStock);
+router.patch('/:id/stock', authenticate, authorize(['admin', 'inventory']), clearItemReadCaches, updateItemStockValidation, itemController.updateItemStock);
 
 /**
  * @swagger

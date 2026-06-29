@@ -277,9 +277,9 @@ export class ItemListEnhancedComponent implements OnInit {
 
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(ItemRegistrationFormComponent, {
-      width: '95vw',
-      maxWidth: '1400px',
-      height: '90vh',
+      width: '96vw',
+      maxWidth: '1580px',
+      height: '94vh',
       disableClose: true,
       panelClass: 'item-registration-dialog-panel',
       data: { item: null }
@@ -294,9 +294,9 @@ export class ItemListEnhancedComponent implements OnInit {
 
   openEditDialog(item: ItemDisplay): void {
     const dialogRef = this.dialog.open(ItemRegistrationFormComponent, {
-      width: '95vw',
-      maxWidth: '1400px',
-      height: '90vh',
+      width: '96vw',
+      maxWidth: '1580px',
+      height: '94vh',
       disableClose: true,
       panelClass: 'item-registration-dialog-panel',
       data: { item: item.rawItem || item }

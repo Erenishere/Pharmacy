@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
-import { debounceTime, distinctUntilChanged, catchError, tap, map } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, catchError, tap, map, switchMap } from 'rxjs/operators';
 import { API_CONFIG } from '../../../core/constants/api.constants';
 import {
     Customer,
@@ -10,8 +10,7 @@ import {
     CustomerListResponse,
     CustomerStatistics,
     CustomerFilters,
-    ApiResponse,
-    AccountType
+    ApiResponse
 } from '../../../core/models/customer.model';
 
 @Injectable({
@@ -21,21 +20,7 @@ export class CustomerService {
     private statisticsCache$ = new BehaviorSubject<CustomerStatistics | null>(null);
     private readonly baseUrl = API_CONFIG.BASE_URL;
 
-    // Static array to store created customers for mock functionality
-    private static createdCustomers: Customer[] = [];
-
-    // Clear any existing invalid data on service initialization
-    static {
-        CustomerService.createdCustomers = CustomerService.createdCustomers.filter(customer =>
-            ['retail', 'wholesale', 'distributor', 'regular'].includes(customer.type as string)
-        );
-    }
-
-    constructor(private http: HttpClient) {
-        // Completely clear any invalid customer data on service initialization
-        CustomerService.createdCustomers = [];
-        console.log('[CustomerService] Cleared all created customers data');
-    }
+    constructor(private http: HttpClient) {}
 
     /**
      * 1. GET /customers - Get paginated, filtered, searchable customer list
@@ -48,220 +33,15 @@ export class CustomerService {
             if (filters.limit) params = params.set('limit', filters.limit.toString());
             if (filters.type) params = params.set('type', filters.type);
             if (filters.isActive !== undefined) params = params.set('isActive', filters.isActive.toString());
-            if (filters.search) params = params.set('keyword', filters.search); // Backend expects 'keyword' not 'search'
+            if (filters.search) params = params.set('keyword', filters.search);
             if (filters.includeDeleted) params = params.set('includeDeleted', filters.includeDeleted.toString());
         }
 
-        const url = `${this.baseUrl}${API_CONFIG.ENDPOINTS.CUSTOMERS.BASE}`;
-        console.log('[CustomerService] Making request to:', url, 'with params:', params.toString());
-
-        return this.http.get<CustomerListResponse>(url, { params }).pipe(
-            catchError((error) => {
-                console.error('[CustomerService] API call failed:', error);
-                console.log('[CustomerService] Falling back to mock data for testing...');
-
-                // Mock data array - using frontend types
-                let mockData = [
-                    {
-                        _id: '1',
-                        code: 'CUST001',
-                        name: 'ABC Pharmacy',
-                        email: 'contact@abcpharmacy.com',
-                        phone: '+1234567890',
-                        address: '123 Main St, City',
-                        type: 'retail',
-                        accountType: AccountType.CUSTOMER,
-                        isActive: true,
-                        creditLimit: 10000,
-                        currentBalance: 2500,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    },
-                    {
-                        _id: '2',
-                        code: 'CUST002',
-                        name: 'XYZ Medical Store',
-                        email: 'info@xyzmedical.com',
-                        phone: '+1234567891',
-                        address: '456 Oak Ave, Town',
-                        type: 'wholesale',
-                        accountType: AccountType.CUSTOMER,
-                        isActive: true,
-                        creditLimit: 25000,
-                        currentBalance: 5000,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    },
-                    {
-                        _id: '3',
-                        code: 'CUST003',
-                        name: 'Health Plus Distributors',
-                        email: 'sales@healthplus.com',
-                        phone: '+1234567892',
-                        address: '789 Pine St, Village',
-                        type: 'distributor',
-                        accountType: AccountType.CUSTOMER,
-                        isActive: false,
-                        creditLimit: 50000,
-                        currentBalance: 0,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    },
-                    {
-                        _id: '4',
-                        code: 'CUST004',
-                        name: 'Quick Care Pharmacy',
-                        email: 'orders@quickcare.com',
-                        phone: '+1234567893',
-                        address: '321 Elm St, City',
-                        type: 'regular',
-                        accountType: AccountType.CUSTOMER,
-                        isActive: true,
-                        creditLimit: 5000,
-                        currentBalance: 1200,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    },
-                    {
-                        _id: '5',
-                        code: 'CUST005',
-                        name: 'Deleted Customer Example',
-                        email: 'deleted@example.com',
-                        phone: '+1234567894',
-                        address: '999 Deleted Ave',
-                        type: 'retail',
-                        accountType: AccountType.CUSTOMER,
-                        isActive: false,
-                        creditLimit: 0,
-                        currentBalance: 0,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    },
-                    {
-                        _id: '6',
-                        code: 'CUST006',
-                        name: 'Metro Wholesale Hub',
-                        email: 'bulk@metro.com',
-                        phone: '+1234567895',
-                        address: '555 Commerce Blvd',
-                        type: 'wholesale',
-                        accountType: AccountType.CUSTOMER,
-                        isActive: true,
-                        creditLimit: 75000,
-                        currentBalance: 12000,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    },
-                    {
-                        _id: '7',
-                        code: 'CUST007',
-                        name: 'City Distributors Inc',
-                        email: 'orders@citydist.com',
-                        phone: '+1234567896',
-                        address: '777 Industrial Way',
-                        type: 'distributor',
-                        accountType: AccountType.CUSTOMER,
-                        isActive: true,
-                        creditLimit: 100000,
-                        currentBalance: 25000,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    },
-                    {
-                        _id: '8',
-                        code: 'CUST008',
-                        name: 'Family Care Regular',
-                        email: 'info@familycare.com',
-                        phone: '+1234567897',
-                        address: '888 Family St',
-                        type: 'regular',
-                        accountType: AccountType.CUSTOMER,
-                        isActive: true,
-                        creditLimit: 3000,
-                        currentBalance: 800,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    }
-                ];
-
-                // Add created customers to the mock data (filter out invalid types)
-                const validTypes = ['retail', 'wholesale', 'distributor', 'regular'];
-                const validCreatedCustomers = CustomerService.createdCustomers.filter(customer =>
-                    validTypes.includes(customer.type as string)
-                );
-
-                mockData = [...mockData, ...validCreatedCustomers.map(customer => ({
-                    _id: customer._id,
-                    code: customer.code,
-                    name: customer.name,
-                    email: customer.email || '',
-                    phone: customer.phone || '',
-                    address: customer.address || '',
-                    type: customer.type,
-                    accountType: customer.accountType as AccountType,
-                    isActive: customer.isActive,
-                    creditLimit: customer.creditLimit || 0,
-                    currentBalance: customer.currentBalance || 0,
-                    createdAt: customer.createdAt || new Date().toISOString(),
-                    updatedAt: customer.updatedAt || new Date().toISOString()
-                }))];
-
-                // Apply filters to mock data
-                let filteredData = mockData;
-
-                console.log('[CustomerService] Original mock data:', mockData.map(c => ({ name: c.name, type: c.type })));
-
-                // First, filter out any customers with invalid types
-                filteredData = filteredData.filter(customer => validTypes.includes(customer.type));
-
-                console.log('[CustomerService] After type validation filter:', filteredData.map(c => ({ name: c.name, type: c.type })));
-
-                // Filter by isActive (for show deleted functionality)
-                if (filters?.isActive !== undefined) {
-                    filteredData = filteredData.filter(customer => customer.isActive === filters.isActive);
-                    console.log('[CustomerService] After isActive filter:', filteredData.map(c => ({ name: c.name, type: c.type, isActive: c.isActive })));
-                }
-
-                // Filter by type (only filter if type is not empty)
-                if (filters?.type && filters.type.trim() !== '') {
-                    filteredData = filteredData.filter(customer => customer.type === filters.type);
-                    console.log('[CustomerService] After specific type filter:', filteredData.map(c => ({ name: c.name, type: c.type })));
-                }
-
-                // Filter by search (name, code, or email)
-                if (filters?.search) {
-                    const searchTerm = filters.search.toLowerCase();
-                    filteredData = filteredData.filter(customer =>
-                        customer.name.toLowerCase().includes(searchTerm) ||
-                        customer.code.toLowerCase().includes(searchTerm) ||
-                        (customer.email && customer.email.toLowerCase().includes(searchTerm))
-                    );
-                    console.log('[CustomerService] After search filter:', filteredData.map(c => ({ name: c.name, type: c.type })));
-                }
-
-                // Apply pagination
-                const page = filters?.page || 1;
-                const limit = filters?.limit || 10;
-                const startIndex = (page - 1) * limit;
-                const endIndex = startIndex + limit;
-                const paginatedData = filteredData.slice(startIndex, endIndex);
-
-                // Return mock data for testing purposes
-                const mockResponse: CustomerListResponse = {
-                    success: true,
-                    data: paginatedData,
-                    pagination: {
-                        total: filteredData.length,
-                        page: page,
-                        limit: limit,
-                        pages: Math.ceil(filteredData.length / limit)
-                    },
-                    message: 'Mock data loaded (API not available)',
-                    timestamp: new Date().toISOString()
-                };
-
-                return of(mockResponse);
-            })
+        return this.http.get<CustomerListResponse>(
+            `${this.baseUrl}${API_CONFIG.ENDPOINTS.CUSTOMERS.BASE}`,
+            { params }
+        ).pipe(
+            catchError((error) => throwError(() => error))
         );
     }
 
@@ -286,31 +66,7 @@ export class CustomerService {
         return this.http.post<ApiResponse<Customer>>(`${this.baseUrl}${API_CONFIG.ENDPOINTS.CUSTOMERS.BASE}`, customerData)
             .pipe(
                 tap(() => this.invalidateStatisticsCache()),
-                catchError((error) => {
-                    console.error('[CustomerService] Create customer failed:', error);
-
-                    // Keep offline mock behavior only for connectivity failures.
-                    if (error?.status === 0) {
-                        const mockCustomer: Customer = {
-                            _id: Date.now().toString(),
-                            ...customerData,
-                            isActive: customerData.isActive ?? true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        };
-
-                        CustomerService.createdCustomers.push(mockCustomer);
-
-                        const mockResponse: ApiResponse<Customer> = {
-                            success: true,
-                            data: mockCustomer,
-                            message: 'Customer created (mock response)'
-                        };
-                        return of(mockResponse);
-                    }
-
-                    return throwError(() => error);
-                })
+                catchError((error) => throwError(() => error))
             );
     }
 
@@ -363,37 +119,7 @@ export class CustomerService {
         return this.http.patch<ApiResponse<Customer>>(`${this.baseUrl}${API_CONFIG.ENDPOINTS.CUSTOMERS.TOGGLE_STATUS(id)}`, {})
             .pipe(
                 tap(() => this.invalidateStatisticsCache()),
-                catchError((error) => {
-                    console.error('[CustomerService] Toggle status failed:', error);
-
-                    // Find and update the customer in created customers array
-                    const customerIndex = CustomerService.createdCustomers.findIndex(c => c._id === id);
-                    if (customerIndex !== -1) {
-                        CustomerService.createdCustomers[customerIndex].isActive = !CustomerService.createdCustomers[customerIndex].isActive;
-                        CustomerService.createdCustomers[customerIndex].updatedAt = new Date().toISOString();
-
-                        const mockResponse: ApiResponse<Customer> = {
-                            success: true,
-                            data: CustomerService.createdCustomers[customerIndex],
-                            message: 'Status toggled (mock response)'
-                        };
-                        return of(mockResponse);
-                    }
-
-                    // Return mock success response for default customers
-                    const mockResponse: ApiResponse<Customer> = {
-                        success: true,
-                        data: {
-                            _id: id,
-                            code: 'MOCK',
-                            name: 'Mock Customer',
-                            type: 'retail',
-                            isActive: true
-                        } as Customer,
-                        message: 'Status toggled (mock response)'
-                    };
-                    return of(mockResponse);
-                })
+                catchError((error) => throwError(() => error))
             );
     }
 
@@ -415,9 +141,8 @@ export class CustomerService {
             debounceTime(300),
             distinctUntilChanged(),
             map(term => ({ ...filters, search: term } as CustomerFilters)),
-            map(finalFilters => this.getCustomers(finalFilters)),
-            map(obs => obs)
-        ) as any;
+            switchMap(finalFilters => this.getCustomers(finalFilters))
+        );
     }
 
     /**

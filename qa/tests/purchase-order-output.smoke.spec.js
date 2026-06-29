@@ -1,25 +1,6 @@
 const { test, expect } = require('@playwright/test');
+const { loginAsSmokeAdmin } = require('./support/auth');
 const fs = require('fs');
-
-async function loginAsSmokeAdmin(page) {
-  await page.goto('/login');
-
-  for (let attempt = 0; attempt < 2; attempt++) {
-    await page.locator('#identifier').fill(process.env.SMOKE_ADMIN_USERNAME || 'smoke.admin');
-    await page.locator('#password').fill(process.env.SMOKE_ADMIN_PASSWORD || 'SmokePass123');
-    await page.getByRole('button', { name: /sign in/i }).click();
-
-    try {
-      await page.waitForURL(/\/dashboard/, { timeout: 30_000 });
-      return;
-    } catch (error) {
-      const loginFailed = await page.locator('text=Login failed').isVisible().catch(() => false);
-      if (!loginFailed || attempt === 1) {
-        throw error;
-      }
-    }
-  }
-}
 
 test.describe('purchase order print and export smoke workflow', () => {
   test.beforeEach(async ({ page }) => {

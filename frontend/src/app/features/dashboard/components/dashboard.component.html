@@ -1,431 +1,397 @@
 <div class="dashboard-shell">
   <section class="dashboard-header">
     <div class="header-copy">
-      <div class="eyebrow">
-        <mat-icon>insights</mat-icon>
-        Operational Pulse
-      </div>
-
       <h1>Executive Overview</h1>
-      <p>
-        Real-time performance metrics and risk signals across sales, inventory, and finance.
-      </p>
+      <p>Live commercial, inventory, and finance signals for the selected operating window.</p>
     </div>
 
-    @if (overview) {
-    } @else {
-    <section class="state-card loading-state">
-      <mat-spinner diameter="46"></mat-spinner>
-      <h2>Syncing business intelligence</h2>
-      <p>Your performance matrix is being compiled from real-time operational data.</p>
-    </section>
-    }
-  </section>
-
-  <section class="toolbar-card">
-    <div class="toolbar-block">
-      <span class="toolbar-label">Analysis Window</span>
-      <div class="period-pills">
-        @for (option of periodOptions; track option.value) {
-        <button mat-button type="button" class="period-pill" [class.active]="selectedPeriod === option.value"
-          (click)="onPeriodChange(option.value)">
-          {{ option.label }}
-        </button>
-        }
-      </div>
-    </div>
-
-    <div class="toolbar-actions">
+    <div class="header-actions">
       @if (overview) {
-      <div class="toolbar-meta">
-        <div class="meta-chip">
-          <div class="meta-icon">
-            <mat-icon>calendar_today</mat-icon>
-          </div>
-          <div>
-            <span class="meta-label">Range</span>
-            <strong>{{ overview.scope.startDate }} — {{ overview.scope.endDate }}</strong>
-          </div>
-        </div>
-
-        <div class="meta-chip">
-          <div class="meta-icon">
-            <mat-icon>show_chart</mat-icon>
-          </div>
-          <div>
-            <span class="meta-label">Granularity</span>
-            <strong>{{ granularityLabel }}</strong>
-          </div>
-        </div>
+      <div class="sync-chip">
+        <mat-icon>schedule</mat-icon>
+        <span>Updated {{ generatedAtLabel }}</span>
       </div>
       }
 
-      <button mat-button type="button" class="refresh-btn" (click)="refreshOverview()"
-        [disabled]="loading || refreshing">
+      <button mat-button type="button" class="refresh-btn" (click)="refreshOverview()" [disabled]="loading || refreshing">
         <mat-icon>refresh</mat-icon>
-        {{ refreshing ? 'Syncing...' : 'Sync Data' }}
+        {{ refreshing ? 'Syncing' : 'Sync Data' }}
       </button>
     </div>
   </section>
 
+  <section class="dashboard-toolbar" aria-label="Dashboard controls">
+    <div class="period-selector" role="group" aria-label="Analysis window">
+      @for (option of periodOptions; track option.value) {
+      <button
+        mat-button
+        type="button"
+        class="period-pill"
+        [class.active]="selectedPeriod === option.value"
+        (click)="onPeriodChange(option.value)">
+        {{ option.label }}
+      </button>
+      }
+    </div>
+
+    @if (overview) {
+    <div class="toolbar-meta">
+      <div>
+        <span>Range</span>
+        <strong>{{ dateRangeLabel }}</strong>
+      </div>
+      <div>
+        <span>View</span>
+        <strong>{{ granularityLabel }}</strong>
+      </div>
+    </div>
+    }
+  </section>
+
   @if (loading && !overview) {
-  <!-- Show nothing here as header has spinner -->
+  <section class="state-card loading-state">
+    <mat-spinner diameter="46"></mat-spinner>
+    <h2>Syncing business intelligence</h2>
+    <p>Your performance matrix is being compiled from real-time operational data.</p>
+  </section>
   } @else if (error) {
   <section class="state-card error-state">
     <mat-icon>wifi_off</mat-icon>
     <h2>Connection Interrupt</h2>
     <p>{{ error }}</p>
-    <button mat-raised-button color="primary" type="button" (click)="loadOverview(true)">
-      Retry Sync
-    </button>
+    <button mat-raised-button color="primary" type="button" (click)="loadOverview(true)">Retry Sync</button>
   </section>
   } @else if (overview) {
-  <section class="chart-first-grid">
-    <mat-card class="panel-card chart-card wide">
-      <mat-card-header>
-        <mat-card-title>Sales Graph</mat-card-title>
-        <mat-card-subtitle>{{ selectedPeriodLabel }} net revenue trend</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="chart-shell first-line-chart">
-          <canvas baseChart [data]="salesTrendData" [options]="salesTrendOptions" type="line"></canvas>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="panel-card chart-card">
-      <mat-card-header>
-        <mat-card-title>Business Mix</mat-card-title>
-        <mat-card-subtitle>Sales, cash, expense, and credit position</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="donut-wrap">
-          <div class="chart-shell donut-chart">
-            <canvas baseChart [data]="financialMixData" [options]="financialMixOptions" type="doughnut"></canvas>
-          </div>
-          <div class="donut-center">
-            <strong>{{ financialMixHasActivity ? formatCompactCurrency(overview.summary.netSales.value) : 'No data' }}</strong>
-            <span>{{ financialMixHasActivity ? 'net sales' : 'this period' }}</span>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="panel-card chart-card">
-      <mat-card-header>
-        <mat-card-title>Cash Flow</mat-card-title>
-        <mat-card-subtitle>Receipts vs payments</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="chart-shell first-bar-chart">
-          <canvas baseChart [data]="cashFlowData" [options]="cashFlowOptions" type="bar"></canvas>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </section>
-
-  <section class="kpi-grid">
-    @for (card of summaryCards; track card.label) {
-    <a class="kpi-card" [attr.data-tone]="card.tone" [routerLink]="card.route">
-      <div class="kpi-top">
-        <div class="kpi-icon">
-          <mat-icon>{{ card.icon }}</mat-icon>
-        </div>
-        <div class="kpi-delta" [class]="toneClass(card.delta)">
-          {{ formatChange(card.delta) }}
-        </div>
+  <section class="metric-strip" aria-label="Executive metrics">
+    @for (highlight of heroHighlights; track highlight.label) {
+    <div class="metric-tile" [attr.data-tone]="highlight.tone">
+      <div class="metric-icon">
+        <mat-icon>{{ highlight.icon }}</mat-icon>
       </div>
-
-      <div class="kpi-value">{{ formatCurrency(card.value) }}</div>
-      <div class="kpi-label">{{ card.label }}</div>
-      <div class="kpi-meta">{{ card.meta }}</div>
-    </a>
+      <div class="metric-copy">
+        <span>{{ highlight.label }}</span>
+        <strong>{{ highlight.value }}</strong>
+        <small>{{ highlight.hint }}</small>
+      </div>
+    </div>
     }
   </section>
 
-  <section class="top-grid">
-    <mat-card class="panel-card action-card">
-      <mat-card-header>
-        <mat-card-title>Risk Watch</mat-card-title>
-        <mat-card-subtitle>{{ formatNumber(overview.alerts.length) }} critical operational signals</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        @if (overview.alerts.length === 0) {
-        <div class="panel-empty compact">
-          <mat-icon>check_circle</mat-icon>
-          <p>All operations are within safe parameters.</p>
+  <section class="pulse-grid">
+    <article class="surface-panel revenue-panel">
+      <div class="panel-heading">
+        <div>
+          <span class="panel-label">Revenue motion</span>
+          <h2>Sales performance</h2>
         </div>
-        } @else {
-        <div class="alert-list">
-          @for (alert of overview.alerts; track alert.id) {
-          <a class="alert-row" [routerLink]="alert.route">
-            <div class="alert-icon" [class]="alert.severity">
-              <mat-icon>{{ alertIcon(alert.severity) }}</mat-icon>
-            </div>
-            <div class="alert-copy">
-              <strong>{{ alert.title }}</strong>
-              <p>{{ alert.description }}</p>
-            </div>
-            <div class="alert-value">{{ formatAlertValue(alert) }}</div>
-          </a>
-          }
+        <a class="panel-action" [routerLink]="overview.summary.netSales.route">
+          Sales report
+          <mat-icon>arrow_forward</mat-icon>
+        </a>
+      </div>
+
+      <div class="revenue-stats">
+        <a class="stat-line" [routerLink]="overview.summary.netSales.route">
+          <span>Net Sales</span>
+          <strong>{{ formatCurrency(overview.summary.netSales.value) }}</strong>
+          <small>{{ formatChange(overview.summary.netSales.deltaPercent) }}</small>
+        </a>
+        <a class="stat-line" [routerLink]="overview.summary.grossMargin.route">
+          <span>Gross Margin</span>
+          <strong>{{ formatPercent(overview.summary.grossMargin.meta?.['marginPercent'] || 0) }}</strong>
+          <small>{{ formatCurrency(overview.summary.grossMargin.value) }}</small>
+        </a>
+        <a class="stat-line" [routerLink]="overview.summary.collections.route">
+          <span>Collections</span>
+          <strong>{{ formatCurrency(overview.summary.collections.value) }}</strong>
+          <small>{{ overview.summary.collections.meta?.['receiptCount'] || 0 }} receipts</small>
+        </a>
+      </div>
+
+      <div class="chart-shell revenue-chart">
+        <canvas baseChart [data]="salesTrendData" [options]="salesTrendOptions" type="line"></canvas>
+      </div>
+    </article>
+
+    <aside class="surface-panel mix-panel">
+      <div class="panel-heading compact">
+        <div>
+          <span class="panel-label">Business mix</span>
+          <h2>Operating balance</h2>
         </div>
+      </div>
+
+      <div class="donut-wrap">
+        <div class="chart-shell donut-chart">
+          <canvas baseChart [data]="financialMixData" [options]="financialMixOptions" type="doughnut"></canvas>
+        </div>
+        <div class="donut-center">
+          <strong>{{ financialMixHasActivity ? formatCompactCurrency(overview.summary.netSales.value) : 'No data' }}</strong>
+          <span>{{ financialMixHasActivity ? 'net sales' : 'this period' }}</span>
+        </div>
+      </div>
+
+      <div class="vital-list">
+        @for (vital of operationalVitals; track vital.label) {
+        <a class="vital-row" [attr.data-tone]="vital.tone" [routerLink]="vital.route">
+          <span class="vital-icon">
+            <mat-icon>{{ vital.icon }}</mat-icon>
+          </span>
+          <span class="vital-copy">
+            <small>{{ vital.label }}</small>
+            <strong>{{ vital.value }}</strong>
+            <em>{{ vital.hint }}</em>
+          </span>
+        </a>
         }
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </aside>
   </section>
 
-  <section class="content-grid two-up">
-    <mat-card class="panel-card">
-      <mat-card-header>
-        <mat-card-title>Flow Velocity</mat-card-title>
-        <mat-card-subtitle>Conversion cycles from quotation to realized cash</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="funnel-strip">
-          @for (stage of overview.commercial.funnel; track stage.key) {
-          <a class="funnel-stage" [routerLink]="stage.route">
-            <span class="stage-label">{{ stage.label }}</span>
-            <strong>{{ formatNumber(stage.count) }}</strong>
-            <span class="stage-value">{{ formatCompactCurrency(stage.value) }}</span>
-          </a>
-          }
+  <section class="chart-deck" aria-label="Operational charts">
+    <article class="surface-panel chart-panel">
+      <div class="panel-heading compact">
+        <div>
+          <span class="panel-label">Cash movement</span>
+          <h2>Receipts vs payments</h2>
         </div>
+        <strong class="panel-number" [class.negative]="cashFlowNet < 0">{{ formatCompactCurrency(cashFlowNet) }}</strong>
+      </div>
+      <div class="chart-shell compact-chart">
+        <canvas baseChart [data]="cashFlowData" [options]="cashFlowOptions" type="bar"></canvas>
+      </div>
+    </article>
 
-        <div class="subsection">
-          <div class="subsection-header">
-            <h3>Sales Force Performance</h3>
-            <a class="inline-link" routerLink="/targets/dashboard">Detailed Analysis</a>
-          </div>
+    <article class="surface-panel chart-panel">
+      <div class="panel-heading compact">
+        <div>
+          <span class="panel-label">Inventory allocation</span>
+          <h2>Warehouse value</h2>
+        </div>
+        <a class="panel-action subtle" [routerLink]="overview.summary.inventoryValue.route">Open stock</a>
+      </div>
+      <div class="chart-shell compact-chart">
+        <canvas baseChart [data]="warehouseValueData" [options]="warehouseValueOptions" type="bar"></canvas>
+      </div>
+    </article>
 
-          @if (overview.commercial.salesmen.length === 0) {
-          <div class="panel-empty compact">
-            <mat-icon>groups</mat-icon>
-            <p>Telemetry pending for sales force.</p>
+    <article class="surface-panel chart-panel">
+      <div class="panel-heading compact">
+        <div>
+          <span class="panel-label">Expense burn</span>
+          <h2>Category pressure</h2>
+        </div>
+        <a class="panel-action subtle" routerLink="/expenses">Expenses</a>
+      </div>
+      <div class="chart-shell compact-chart">
+        <canvas baseChart [data]="expenseBreakdownData" [options]="expenseBreakdownOptions" type="bar"></canvas>
+      </div>
+    </article>
+  </section>
+
+  <section class="surface-panel flow-panel">
+    <div class="panel-heading">
+      <div>
+        <span class="panel-label">Order velocity</span>
+        <h2>Commercial flow</h2>
+      </div>
+      <a class="panel-action" routerLink="/quotations">
+        Open pipeline
+        <mat-icon>arrow_forward</mat-icon>
+      </a>
+    </div>
+
+    <div class="funnel-track">
+      @for (stage of overview.commercial.funnel; track stage.key) {
+      <a class="funnel-node" [routerLink]="stage.route">
+        <span>{{ stage.label }}</span>
+        <strong>{{ formatNumber(stage.count) }}</strong>
+        <small>{{ formatCompactCurrency(stage.value) }}</small>
+      </a>
+      }
+    </div>
+  </section>
+
+  <section class="insight-grid">
+    <article class="surface-panel signal-panel">
+      <div class="panel-heading compact">
+        <div>
+          <span class="panel-label">Priority signals</span>
+          <h2>Risk watch</h2>
+        </div>
+        <strong class="panel-number danger">{{ formatNumber(overview.alerts.length) }}</strong>
+      </div>
+
+      @if (visibleAlerts.length === 0) {
+      <div class="panel-empty compact">
+        <mat-icon>check_circle</mat-icon>
+        <p>All operations are within safe parameters.</p>
+      </div>
+      } @else {
+      <div class="signal-list">
+        @for (alert of visibleAlerts; track alert.id) {
+        <a class="alert-row" [routerLink]="alert.route" [attr.data-severity]="alert.severity">
+          <span class="row-icon">
+            <mat-icon>{{ alertIcon(alert.severity) }}</mat-icon>
+          </span>
+          <span class="row-copy">
+            <strong>{{ alert.title }}</strong>
+            <small>{{ alert.description }}</small>
+          </span>
+          <span class="row-value">{{ formatAlertValue(alert) }}</span>
+        </a>
+        }
+      </div>
+      }
+    </article>
+
+    <article class="surface-panel signal-panel">
+      <div class="panel-heading compact">
+        <div>
+          <span class="panel-label">Field performance</span>
+          <h2>Sales force</h2>
+        </div>
+        <a class="panel-action subtle" routerLink="/targets/dashboard">Targets</a>
+      </div>
+
+      @if (visibleSalesmen.length === 0) {
+      <div class="panel-empty compact">
+        <mat-icon>groups</mat-icon>
+        <p>Sales force telemetry is pending.</p>
+      </div>
+      } @else {
+      <div class="signal-list">
+        @for (salesman of visibleSalesmen; track salesman.salesmanId) {
+        <a class="leader-row" [routerLink]="salesman.route">
+          <span class="row-copy">
+            <strong>{{ salesman.name }}</strong>
+            <small>{{ salesman.invoiceCount }} transactions | {{ formatCurrency(salesman.recovery) }} recovery</small>
+          </span>
+          <span class="row-value stacked">
+            <strong>{{ formatCurrency(salesman.totalSales) }}</strong>
+            <small>{{ salesman.achievementPercent === null ? 'No target' : formatPercent(salesman.achievementPercent) }}</small>
+          </span>
+        </a>
+        }
+      </div>
+      }
+    </article>
+  </section>
+
+  <section class="insight-grid">
+    <article class="surface-panel signal-panel wide-list">
+      <div class="panel-heading compact">
+        <div>
+          <span class="panel-label">Commercial leaders</span>
+          <h2>Customers and products</h2>
+        </div>
+      </div>
+
+      <div class="split-list">
+        <div>
+          <h3>Top customers</h3>
+          @if (visibleTopCustomers.length === 0) {
+          <div class="panel-empty mini">
+            <mat-icon>face</mat-icon>
+            <p>No customer data in this window.</p>
           </div>
           } @else {
-          <div class="leaderboard-list">
-            @for (salesman of overview.commercial.salesmen; track salesman.salesmanId) {
-            <a class="leaderboard-row" [routerLink]="salesman.route">
-              <div>
-                <strong>{{ salesman.name }}</strong>
-                <p>{{ salesman.invoiceCount }} transactions | {{ formatCurrency(salesman.recovery) }} recovery</p>
-              </div>
-              <div class="leaderboard-metrics">
-                <span>{{ formatCurrency(salesman.totalSales) }}</span>
-                <small>{{ salesman.achievementPercent === null ? 'No Target' :
-                  formatPercent(salesman.achievementPercent) }}</small>
-              </div>
-            </a>
-            }
-          </div>
-          }
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="panel-card">
-      <mat-card-header>
-        <mat-card-title>Inventory Stress</mat-card-title>
-        <mat-card-subtitle>Replenishment bottlenecks and stock-out risks</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        @if (overview.inventory.lowStock.length === 0) {
-        <div class="panel-empty compact">
-          <mat-icon>inventory_2</mat-icon>
-          <p>Inventory levels are optimal across all nodes.</p>
-        </div>
-        } @else {
-        <div class="stock-list">
-          @for (item of overview.inventory.lowStock; track trackLowStock($index, item)) {
-          <a class="stock-row" [routerLink]="item.route">
-            <div class="stock-copy">
-              <strong>{{ item.name }}</strong>
-              <p>{{ item.code }} | {{ item.warehouseName }}</p>
-            </div>
-            <div class="stock-metrics">
-              <span>{{ formatNumber(item.currentStock) }} / {{ formatNumber(item.reorderLevel) }}</span>
-              <div class="stock-bar">
-                <div class="stock-fill" [class]="item.severity" [style.width.%]="stockFillPercent(item)"></div>
-              </div>
-            </div>
-          </a>
-          }
-        </div>
-        }
-      </mat-card-content>
-    </mat-card>
-  </section>
-
-  <section class="content-grid two-up">
-    <mat-card class="panel-card">
-      <mat-card-header>
-        <mat-card-title>Customer Concentration</mat-card-title>
-        <mat-card-subtitle>Top revenue contributors and credit exposure</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        @if (overview.commercial.topCustomers.length === 0) {
-        <div class="panel-empty compact">
-          <mat-icon>face</mat-icon>
-          <p>No customer data for the selected analysis window.</p>
-        </div>
-        } @else {
-        <div class="rank-list">
-          @for (customer of overview.commercial.topCustomers; track customer.customerId) {
-          <a class="rank-row" [routerLink]="customer.route">
-            <div class="rank-copy">
+          @for (customer of visibleTopCustomers; track customer.customerId) {
+          <a class="leader-row" [routerLink]="customer.route">
+            <span class="row-copy">
               <strong>{{ customer.name }}</strong>
-              <p>{{ customer.code || 'NO_ID' }} | {{ customer.invoiceCount }} invoices</p>
-            </div>
-            <div class="rank-metrics">
-              <span>{{ formatCurrency(customer.revenue) }}</span>
-              <small>Exposure: {{ formatCompactCurrency(customer.overdueExposure) }}</small>
-            </div>
+              <small>{{ customer.code || 'NO_ID' }} | {{ customer.invoiceCount }} invoices</small>
+            </span>
+            <span class="row-value stacked">
+              <strong>{{ formatCurrency(customer.revenue) }}</strong>
+              <small>{{ formatCompactCurrency(customer.overdueExposure) }} exposure</small>
+            </span>
           </a>
           }
-        </div>
-        }
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="panel-card">
-      <mat-card-header>
-        <mat-card-title>Product Leaderboard</mat-card-title>
-        <mat-card-subtitle>Dominant revenue drivers by item contribution</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        @if (overview.commercial.topItems.length === 0) {
-        <div class="panel-empty compact">
-          <mat-icon>category</mat-icon>
-          <p>No product performance signals detected.</p>
-        </div>
-        } @else {
-        <div class="rank-list">
-          @for (item of overview.commercial.topItems; track item.itemId) {
-          <a class="rank-row" [routerLink]="item.route">
-            <div class="rank-copy">
-              <strong>{{ item.name }}</strong>
-              <p>{{ item.code || 'NO_SKU' }} | {{ formatNumber(item.quantity) }} units</p>
-            </div>
-            <div class="rank-metrics">
-              <span>{{ formatCurrency(item.revenue) }}</span>
-              <small>Demand Leader</small>
-            </div>
-          </a>
           }
         </div>
-        }
-      </mat-card-content>
-    </mat-card>
-  </section>
 
-  <section class="content-grid finance-grid">
-    <mat-card class="panel-card expense-card">
-      <mat-card-header>
-        <mat-card-title>Expense Burn</mat-card-title>
-        <mat-card-subtitle>Operational spend breakdown by category</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        @if (overview.finance.expenseByCategory.length === 0) {
-        <div class="panel-empty compact">
-          <mat-icon>receipt_long</mat-icon>
-          <p>No operational expenses recorded.</p>
-        </div>
-        } @else {
-        <div class="expense-list">
-          @for (expense of overview.finance.expenseByCategory; track expense.categoryId) {
-          <a class="expense-row" [routerLink]="expense.route">
-            <span>{{ expense.name || 'UNDOCUMENTED' }}</span>
-            <strong>{{ formatCurrency(expense.amount) }}</strong>
-          </a>
-          }
-        </div>
-        }
-
-        <div class="finance-mini-grid">
-          <a class="mini-stat" [routerLink]="overview.finance.pdc.route">
-            <span class="mini-label">PDC Risk</span>
-            <strong>{{ formatNumber(overview.finance.pdc.overdue) }}</strong>
-            <small>{{ formatCompactCurrency(overview.finance.pdc.totalPendingAmount) }} pending</small>
-          </a>
-
-          <a class="mini-stat" [routerLink]="overview.finance.investors.route">
-            <span class="mini-label">Capital Base</span>
-            <strong>{{ formatCompactCurrency(overview.finance.investors.totalCapital) }}</strong>
-            <small>{{ overview.finance.investors.activeInvestors }} active partners</small>
-          </a>
-
-          <a class="mini-stat" routerLink="/tax-config">
-            <span class="mini-label">Fiscal Position</span>
-            <strong>{{ formatCompactCurrency(overview.finance.tax.gstSales - overview.finance.tax.gstPurchases)
-              }}</strong>
-            <small>GST Net</small>
-          </a>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </section>
-
-  <section class="content-grid two-up">
-    <mat-card class="panel-card">
-      <mat-card-header>
-        <mat-card-title>Expiry Radar</mat-card-title>
-        <mat-card-subtitle>Batches approaching terminal shelf-life</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        @if (overview.inventory.expiry.length === 0) {
-        <div class="panel-empty compact">
-          <mat-icon>timer_off</mat-icon>
-          <p>No batches are currently flagged for expiry.</p>
-        </div>
-        } @else {
-        <div class="rank-list">
-          @for (batch of overview.inventory.expiry; track batch._id) {
-          <a class="rank-row" [routerLink]="batch.route">
-            <div class="rank-copy">
-              <strong>{{ batch.itemName }}</strong>
-              <p>{{ batch.batchNumber }} | {{ batch.warehouseName }}</p>
-            </div>
-            <div class="rank-metrics">
-              <span>{{ batch.daysLeft }} DAYS</span>
-              <small>{{ formatCurrency(batch.value) }} VALUE</small>
-            </div>
-          </a>
-          }
-        </div>
-        }
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="panel-card">
-      <mat-card-header>
-        <mat-card-title>Logic-Node Balance</mat-card-title>
-        <mat-card-subtitle>Assets distributed across fulfillment centres</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        @if (overview.inventory.warehouseDistribution.length === 0) {
-        <div class="panel-empty compact">
-          <mat-icon>hub</mat-icon>
-          <p>Node distribution data unavailable.</p>
-        </div>
-        } @else {
-        <div class="warehouse-list">
-          @for (warehouse of overview.inventory.warehouseDistribution; track warehouse.warehouseId) {
-          <div class="warehouse-row">
-            <div>
-              <strong>{{ warehouse.warehouseName }}</strong>
-              <p>{{ formatNumber(warehouse.itemCount) }} active rows</p>
-            </div>
-            <div class="rank-metrics">
-              <span>{{ formatCurrency(warehouse.totalValue) }}</span>
-              <small>{{ formatNumber(warehouse.totalQuantity) }} units</small>
-            </div>
+        <div>
+          <h3>Product leaders</h3>
+          @if (visibleTopItems.length === 0) {
+          <div class="panel-empty mini">
+            <mat-icon>category</mat-icon>
+            <p>No product performance signals detected.</p>
           </div>
+          } @else {
+          @for (item of visibleTopItems; track item.itemId) {
+          <a class="leader-row" [routerLink]="item.route">
+            <span class="row-copy">
+              <strong>{{ item.name }}</strong>
+              <small>{{ item.code || 'NO_SKU' }} | {{ formatNumber(item.quantity) }} units</small>
+            </span>
+            <span class="row-value">{{ formatCurrency(item.revenue) }}</span>
+          </a>
+          }
           }
         </div>
+      </div>
+    </article>
+
+    <article class="surface-panel signal-panel">
+      <div class="panel-heading compact">
+        <div>
+          <span class="panel-label">Inventory watch</span>
+          <h2>Stock and expiry</h2>
+        </div>
+        <a class="panel-action subtle" [routerLink]="overview.summary.expiryExposure.route">Batches</a>
+      </div>
+
+      <div class="inventory-snapshot">
+        <a class="inventory-stat" [routerLink]="overview.summary.inventoryValue.route">
+          <span>Inventory Value</span>
+          <strong>{{ formatCompactCurrency(overview.summary.inventoryValue.value) }}</strong>
+          <small>{{ overview.summary.inventoryValue.totalItems || 0 }} active items</small>
+        </a>
+        <a class="inventory-stat warning" [routerLink]="overview.summary.expiryExposure.route">
+          <span>Expiry Exposure</span>
+          <strong>{{ formatCompactCurrency(overview.summary.expiryExposure.value) }}</strong>
+          <small>{{ overview.summary.expiryExposure.count || 0 }} batch alerts</small>
+        </a>
+      </div>
+
+      @if (visibleLowStock.length === 0 && visibleExpiry.length === 0) {
+      <div class="panel-empty compact">
+        <mat-icon>inventory_2</mat-icon>
+        <p>Inventory levels are optimal across all nodes.</p>
+      </div>
+      } @else {
+      <div class="stock-list">
+        @for (item of visibleLowStock; track trackLowStock($index, item)) {
+        <a class="stock-row" [routerLink]="item.route">
+          <span class="row-copy">
+            <strong>{{ item.name }}</strong>
+            <small>{{ item.code }} | {{ item.warehouseName }}</small>
+          </span>
+          <span class="stock-meter">
+            <small>{{ formatNumber(item.currentStock) }} / {{ formatNumber(item.reorderLevel) }}</small>
+            <span class="stock-bar">
+              <span class="stock-fill" [attr.data-severity]="item.severity" [style.width.%]="stockFillPercent(item)"></span>
+            </span>
+          </span>
+        </a>
         }
-      </mat-card-content>
-    </mat-card>
+
+        @for (batch of visibleExpiry; track batch._id) {
+        <a class="stock-row expiry" [routerLink]="batch.route">
+          <span class="row-copy">
+            <strong>{{ batch.itemName }}</strong>
+            <small>{{ batch.batchNumber }} | {{ batch.warehouseName }}</small>
+          </span>
+          <span class="row-value stacked">
+            <strong>{{ batch.daysLeft }} days</strong>
+            <small>{{ formatCompactCurrency(batch.value) }}</small>
+          </span>
+        </a>
+        }
+      </div>
+      }
+    </article>
   </section>
   }
 </div>

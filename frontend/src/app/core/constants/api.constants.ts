@@ -10,6 +10,7 @@ export const API_CONFIG = {
             PROFILE: '/auth/profile',
             VERIFY: '/auth/verify',
             FORGOT_PASSWORD: '/auth/forgot-password',
+            VERIFY_OTP: '/auth/verify-otp',
             RESET_PASSWORD: '/auth/reset-password'
         },
         USERS: {

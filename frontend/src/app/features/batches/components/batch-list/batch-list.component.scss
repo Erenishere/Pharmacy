@@ -166,13 +166,40 @@
 
 
 
-  /* Chips */
+  /* Chips - High Contrast Styles */
   ::ng-deep .mat-mdc-chip {
     @include status-chip-base;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px;
+    border-radius: 6px !important;
+    opacity: 1 !important;
     
-    &.status-active { background-color: rgba($success, 0.1); color: $success; }
-    &.status-expired { background-color: rgba($danger, 0.1); color: $danger; }
-    &.status-depleted { background-color: rgba($grey-dark, 0.1); color: $grey-dark; }
+    &.status-active { 
+      background: linear-gradient(135deg, rgba($success, 0.15) 0%, rgba($success, 0.1) 100%) !important;
+      border: 1px solid rgba($success, 0.3) !important;
+      color: darken($success, 10%) !important;
+    }
+    &.status-expired { 
+      background: linear-gradient(135deg, rgba($danger, 0.15) 0%, rgba($danger, 0.1) 100%) !important;
+      border: 1px solid rgba($danger, 0.3) !important;
+      color: darken($danger, 10%) !important;
+    }
+    &.status-depleted { 
+      background: linear-gradient(135deg, rgba($grey-dark, 0.15) 0%, rgba($grey-dark, 0.1) 100%) !important;
+      border: 1px solid rgba($grey-dark, 0.3) !important;
+      color: darken($grey-dark, 15%) !important;
+    }
+    &.status-warning, &.status-quarantined {
+      background: linear-gradient(135deg, rgba($warning, 0.15) 0%, rgba($warning, 0.1) 100%) !important;
+      border: 1px solid rgba($warning, 0.3) !important;
+      color: darken($warning, 20%) !important;
+    }
+    &.status-pending {
+      background: linear-gradient(135deg, rgba($primary, 0.15) 0%, rgba($primary, 0.1) 100%) !important;
+      border: 1px solid rgba($primary, 0.3) !important;
+      color: darken($primary, 15%) !important;
+    }
   }
 }
 

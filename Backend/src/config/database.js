@@ -23,7 +23,6 @@ class Database {
 
       this.connection = await mongoose.connect(mongoUri, options);
 
-      console.log(`MongoDB connected: ${this.connection.connection.host}`);
 
       // Handle connection events
       mongoose.connection.on('error', (err) => {
@@ -31,7 +30,6 @@ class Database {
       });
 
       mongoose.connection.on('disconnected', () => {
-        console.log('MongoDB disconnected');
       });
 
       return this.connection;
@@ -45,7 +43,6 @@ class Database {
     try {
       if (this.connection) {
         await mongoose.connection.close();
-        console.log('MongoDB connection closed');
       }
     } catch (error) {
       console.error('Error closing database connection:', error.message);

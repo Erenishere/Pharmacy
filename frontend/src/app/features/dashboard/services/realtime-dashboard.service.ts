@@ -53,11 +53,11 @@ export class RealtimeDashboardService implements OnDestroy {
 
   private readonly API_ENDPOINTS = {
     ENHANCED_DASHBOARD: `${environment.apiUrl}/dashboard/enhanced`,
-    SALES_ANALYTICS: `${environment.apiUrl}/reports/analytics/sales-trends`,
-    INVENTORY_PERFORMANCE: `${environment.apiUrl}/reports/analytics/inventory-turnover`,
-    CUSTOMER_BEHAVIOR: `${environment.apiUrl}/reports/analytics/top-customers`,
-    OPERATIONAL_METRICS: `${environment.apiUrl}/reports/analytics/dashboard`,
-    FINANCIAL_HEALTH: `${environment.apiUrl}/reports/financial/summary`
+    SALES_ANALYTICS: `${environment.apiUrl}/dashboard/sales-analytics`,
+    INVENTORY_PERFORMANCE: `${environment.apiUrl}/dashboard/inventory-performance`,
+    CUSTOMER_BEHAVIOR: `${environment.apiUrl}/dashboard/customer-behavior`,
+    OPERATIONAL_METRICS: `${environment.apiUrl}/dashboard/operational-metrics`,
+    FINANCIAL_HEALTH: `${environment.apiUrl}/dashboard/financial-health`
   };
 
   constructor(private http: HttpClient) {}
@@ -80,7 +80,6 @@ export class RealtimeDashboardService implements OnDestroy {
 
   connect(): void {
     if (this.isPolling) {
-      console.log('Dashboard polling already active');
       return;
     }
 
@@ -212,7 +211,6 @@ export class RealtimeDashboardService implements OnDestroy {
   refreshDashboard(filters?: any): void {
     this.getEnhancedDashboard(filters).subscribe({
       next: (data) => {
-        console.log('Dashboard refreshed successfully');
       },
       error: (error: Error) => {
         console.error('Failed to refresh dashboard:', error);

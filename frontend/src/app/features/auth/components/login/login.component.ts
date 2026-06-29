@@ -38,13 +38,10 @@ export class LoginComponent {
             this.isLoading = true;
             this.errorMessage = '';
 
-            console.log('[LoginComponent] Submitting login form');
             this.authService.login(this.loginForm.value).subscribe({
                 next: (response: LoginResponse) => {
-                    console.log('[LoginComponent] Login response received:', response);
                     this.isLoading = false;
                     if (response.success) {
-                        console.log('[LoginComponent] Login successful, navigating to dashboard');
                         const user = response.data.user;
                         if (user.role === 'sales') {
                             this.router.navigate(['/salesman/pos']);

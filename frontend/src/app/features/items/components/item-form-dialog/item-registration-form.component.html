@@ -14,9 +14,28 @@
 
   <mat-dialog-content class="dense-content">
     <form [formGroup]="itemForm" class="workspace-form">
+      <nav class="quick-nav" aria-label="Item registration sections">
+        <button mat-button type="button" class="nav-pill" (click)="scrollToSection('catalog-section')">
+          <mat-icon>inventory_2</mat-icon>
+          Catalog
+        </button>
+        <button mat-button type="button" class="nav-pill" (click)="scrollToSection('pricing-section')">
+          <mat-icon>payments</mat-icon>
+          Pricing
+        </button>
+        <button mat-button type="button" class="nav-pill" (click)="scrollToSection('packaging-section')">
+          <mat-icon>inventory</mat-icon>
+          Packaging
+        </button>
+        <button mat-button type="button" class="nav-pill" (click)="scrollToSection('controls-section')">
+          <mat-icon>tune</mat-icon>
+          Controls
+        </button>
+      </nav>
+
       <div class="workspace-grid">
         <div class="editor-shell">
-          <section class="editor-panel profile-panel">
+          <section class="editor-panel profile-panel" id="catalog-section">
             <div class="panel-heading">
               <div>
                 <span class="panel-step">Step 1</span>
@@ -36,7 +55,6 @@
                   <mat-form-field appearance="outline">
                     <mat-label>Item Code</mat-label>
                     <input matInput formControlName="code" placeholder="MED-001">
-                    <mat-icon matIconPrefix>qr_code</mat-icon>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline">
@@ -46,13 +64,11 @@
                       <mat-option [value]="unitOption.value">{{ unitOption.label }}</mat-option>
                       }
                     </mat-select>
-                    <mat-icon matIconPrefix>straighten</mat-icon>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="span-2">
                     <mat-label>Product Name</mat-label>
                     <input matInput formControlName="name" placeholder="e.g. Paracetamol 500mg">
-                    <mat-icon matIconPrefix>medication</mat-icon>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="qty-field">
@@ -63,7 +79,6 @@
                       formControlName="currentStock"
                       min="0"
                       [readonly]="isEditMode">
-                    <mat-icon matIconPrefix>inventory_2</mat-icon>
                   </mat-form-field>
                 </div>
 
@@ -87,7 +102,6 @@
                       <mat-option [value]="company._id">{{ company.name || company.companyName }}</mat-option>
                       }
                     </mat-select>
-                    <mat-icon matIconPrefix>store</mat-icon>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline">
@@ -97,7 +111,6 @@
                       <mat-option [value]="cat._id">{{ cat.name }}</mat-option>
                       }
                     </mat-select>
-                    <mat-icon matIconPrefix>category</mat-icon>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline">
@@ -107,7 +120,6 @@
                       <mat-option [value]="sub._id">{{ sub.name }}</mat-option>
                       }
                     </mat-select>
-                    <mat-icon matIconPrefix>dynamic_feed</mat-icon>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline">
@@ -117,7 +129,6 @@
                       <mat-option [value]="type._id">{{ type.name || type.label }}</mat-option>
                       }
                     </mat-select>
-                    <mat-icon matIconPrefix>work</mat-icon>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline">
@@ -127,7 +138,6 @@
                       <mat-option [value]="group.value">{{ group.label }}</mat-option>
                       }
                     </mat-select>
-                    <mat-icon matIconPrefix>groups</mat-icon>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline">
@@ -137,7 +147,6 @@
                       <mat-option [value]="supplier._id">{{ supplier.name || supplier.accountName || supplier.title }}</mat-option>
                       }
                     </mat-select>
-                    <mat-icon matIconPrefix>local_shipping</mat-icon>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline">
@@ -147,7 +156,6 @@
                       <mat-option [value]="formula._id">{{ formula.name }}</mat-option>
                       }
                     </mat-select>
-                    <mat-icon matIconPrefix>biotech</mat-icon>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline">
@@ -157,14 +165,13 @@
                       <mat-option [value]="size._id">{{ size.size || size.name || size.label }}</mat-option>
                       }
                     </mat-select>
-                    <mat-icon matIconPrefix>straighten</mat-icon>
                   </mat-form-field>
                 </div>
               </div>
             </div>
           </section>
 
-          <section class="editor-panel pricing-panel">
+          <section class="editor-panel pricing-panel" id="pricing-section">
             <div class="panel-heading">
               <div>
                 <span class="panel-step">Step 2</span>
@@ -248,7 +255,7 @@
             </div>
           </section>
 
-          <section class="editor-panel logistics-panel">
+          <section class="editor-panel logistics-panel" id="packaging-section">
             <div class="split-panels">
               <div class="panel-card">
                 <div class="card-heading">
@@ -344,30 +351,30 @@
           </section>
         </div>
 
-        <aside class="insight-rail">
+        <aside class="insight-rail" id="controls-section">
           <section class="rail-card snapshot-card">
             <div class="snapshot-topline">
               <span class="summary-label">Item Snapshot</span>
-              <span class="status-pill" [class.inactive]="!itemForm.get('isActive')?.value">
-                {{ itemForm.get('isActive')?.value ? 'Active' : 'Inactive' }}
+              <span class="status-pill" [class.inactive]="!snapshot.isActive">
+                {{ snapshot.isActive ? 'Active' : 'Inactive' }}
               </span>
             </div>
 
-            <h3>{{ itemForm.get('name')?.value || 'New Item' }}</h3>
-            <p>{{ itemForm.get('code')?.value || 'Code will appear here once entered.' }}</p>
+            <h3>{{ snapshot.name || 'New Item' }}</h3>
+            <p>{{ snapshot.code || 'Code will appear here once entered.' }}</p>
 
             <div class="snapshot-grid">
               <div class="snapshot-metric snapshot-metric-primary">
                 <span>{{ isEditMode ? 'Current Qty' : 'Opening Qty' }}</span>
-                <strong>{{ itemForm.get('currentStock')?.value || 0 }}</strong>
+                <strong>{{ snapshot.currentStock }}</strong>
               </div>
               <div class="snapshot-metric">
                 <span>Unit</span>
-                <strong>{{ itemForm.get('unit')?.value || '-' }}</strong>
+                <strong>{{ snapshot.unit || '-' }}</strong>
               </div>
               <div class="snapshot-metric">
                 <span>Supplier</span>
-                <strong>{{ itemForm.get('mainSupplierId')?.value ? 'Linked' : 'Pending' }}</strong>
+                <strong>{{ snapshot.hasSupplier ? 'Linked' : 'Pending' }}</strong>
               </div>
             </div>
           </section>
@@ -416,9 +423,9 @@
               <mat-icon matSuffix>barcode_scanner</mat-icon>
             </mat-form-field>
 
-            @if (itemForm.get('barcode')?.value) {
+            @if (snapshot.barcode) {
             <div class="barcode-preview">
-              <div class="barcode-display">{{ itemForm.get('barcode')?.value }}</div>
+              <div class="barcode-display">{{ snapshot.barcode }}</div>
             </div>
             }
           </section>
@@ -431,7 +438,7 @@
               @if (imagePreview) {
               <div class="image-preview">
                 <img [src]="imagePreview" alt="Item Preview">
-                <button mat-icon-button class="remove-image" type="button" (click)="imagePreview = null; itemForm.patchValue({image: null})">
+                <button mat-icon-button class="remove-image" type="button" (click)="removeImage()">
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>
@@ -453,15 +460,15 @@
             <div class="price-summary">
               <div class="price-item">
                 <span>Net Landing</span>
-                <strong>Rs {{ netPrices.netPurchase.toFixed(2) }}</strong>
+                <strong>Rs {{ pricePreview.netPurchase }}</strong>
               </div>
               <div class="price-item">
                 <span>Net Sale</span>
-                <strong>Rs {{ netPrices.netSale.toFixed(2) }}</strong>
+                <strong>Rs {{ pricePreview.netSale }}</strong>
               </div>
               <div class="price-item">
                 <span>MRP + Tax</span>
-                <strong>Rs {{ netPrices.retailWithGST.toFixed(2) }}</strong>
+                <strong>Rs {{ pricePreview.retailWithGST }}</strong>
               </div>
             </div>
           </section>

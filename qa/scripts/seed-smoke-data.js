@@ -108,8 +108,8 @@ async function seedSmokeData() {
   const currentMonthName = monthNames[currentMonthIndex];
   const currentMonthYear = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}`;
   const monthDay = (day) => new Date(currentYear, currentMonthIndex, day);
-  const periodStart = new Date(currentYear, 0, 1);
-  const periodEnd = new Date(currentYear, 11, 31, 23, 59, 59, 999);
+  const periodStart = new Date(Date.UTC(currentYear, 0, 1, 12));
+  const periodEnd = new Date(Date.UTC(currentYear, 11, 31, 12));
 
   const user = await upsertBySave(
     User,

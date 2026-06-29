@@ -36,7 +36,7 @@ export class CapitalListComponent implements OnInit {
   cashAccounts: any[] = [];
   investorAccounts: any[] = [];
 
-  displayedColumns = ['sno', 'capitalAssetName', 'cashAccount', 'inAmount', 'outAmount', 'status', 'investorAccount', 'capitalDate', 'transactionType', 'actions'];
+  displayedColumns = ['sno', 'capitalAssetName', 'cashAccount', 'inAmount', 'outAmount', 'investorAccount', 'capitalDate', 'transactionType', 'actions'];
   dataSource = new MatTableDataSource<any>([]);
   loading = false;
   totalItems = 0;

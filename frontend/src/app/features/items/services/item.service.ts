@@ -16,6 +16,14 @@ interface ApiResponse<T> {
     };
 }
 
+interface ItemRegistrationLookups {
+    companies: any[];
+    categories: any[];
+    formulas: any[];
+    businessTypes: any[];
+    suppliers: any[];
+}
+
 interface Item {
     _id: string;
     code: string;
@@ -110,6 +118,7 @@ export class ItemService {
     private apiUrl = `${environment.apiUrl}/items`;
     private companyFilterOptions$: Observable<any[]> | null = null;
     private categoryFilterOptions$: Observable<any[]> | null = null;
+    private itemRegistrationLookups$: Observable<ItemRegistrationLookups> | null = null;
 
     constructor(private http: HttpClient) { }
 
@@ -157,6 +166,27 @@ export class ItemService {
             );
 
         return this.categoryFilterOptions$;
+    }
+
+    getItemRegistrationLookups(forceRefresh = false): Observable<ItemRegistrationLookups> {
+        if (!forceRefresh && this.itemRegistrationLookups$) {
+            return this.itemRegistrationLookups$;
+        }
+
+        this.itemRegistrationLookups$ = this.http
+            .get<ApiResponse<ItemRegistrationLookups>>(`${this.apiUrl}/registration-lookups`)
+            .pipe(
+                map((response) => response.data || {
+                    companies: [],
+                    categories: [],
+                    formulas: [],
+                    businessTypes: [],
+                    suppliers: [],
+                }),
+                shareReplay(1)
+            );
+
+        return this.itemRegistrationLookups$;
     }
 
     deleteItem(id: string): Observable<ApiResponse<any>> {

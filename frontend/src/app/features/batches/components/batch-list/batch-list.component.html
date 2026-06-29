@@ -5,7 +5,7 @@
       <p class="page-description">Detailed batch tracking and management</p>
     </div>
     <div class="header-actions">
-      <button mat-raised-button color="primary" routerLink="/batches/create">
+      <button mat-raised-button color="primary" type="button" (click)="goToCreateBatch()">
         <mat-icon>add</mat-icon> Add New Batch
       </button>
     </div>
@@ -83,7 +83,7 @@
                 <div class="batch-row" [routerLink]="['/batches', batch._id]">
                   <div class="batch-main">
                     <span class="batch-number">{{ batch.batchNumber }}</span>
-                    <mat-chip [class]="'status-' + batch.status" class="status-chip">{{ batch.status }}</mat-chip>
+                    <span class="premium-status-indicator" [ngClass]="'status-' + (batch.status || 'active').toLowerCase()">{{ batch.status }}</span>
                   </div>
                   <div class="batch-meta">
                     <span class="qty">Qty: {{ batch.remainingQuantity }}</span>

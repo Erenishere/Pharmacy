@@ -266,13 +266,11 @@ export class BatchManagementComponent implements OnInit, OnDestroy {
 
   viewBatchDetails(batch: Batch): void {
     // Navigate to batch details or open dialog
-    console.log('View batch details:', batch);
     this.toastService.info('Batch details view will be implemented');
   }
 
   viewBatchHistory(batch: Batch): void {
     // Open batch movement history dialog
-    console.log('View batch history:', batch);
     this.toastService.info('Batch history view will be implemented');
   }
 

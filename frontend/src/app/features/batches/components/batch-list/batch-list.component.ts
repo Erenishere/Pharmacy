@@ -84,6 +84,7 @@ export class BatchListComponent implements OnInit, OnDestroy, AfterViewInit {
   groupedBatches: BatchGroup[] = [];
 
   private destroy$ = new Subject<void>();
+  private isSyncingUrl = false;
   currentFilters: BatchFilter = {};
   private currentSort: Sort = { active: 'expiryDate', direction: 'asc' };
 
@@ -96,9 +97,17 @@ export class BatchListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.initTableColumns();
-    this.loadFiltersFromUrl();
-    this.loadViewModeFromUrl();
-    this.loadBatches();
+    
+    // Subscribe to query params to handle navigation events
+    // We only load data here, we NEVER call updateUrlParams() inside this subscription
+    // to avoid an infinite navigation loop.
+    this.route.queryParamMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.loadFiltersFromUrl();
+        this.loadViewModeFromUrl();
+        this.loadBatches();
+      });
   }
 
   ngAfterViewInit(): void {
@@ -136,6 +145,10 @@ export class BatchListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.currentPage = 0;
     this.updateUrlParams();
     this.loadBatches();
+  }
+
+  goToCreateBatch(): void {
+    this.router.navigate(['/batches/create']);
   }
 
   onTableAction(event: TableActionClickEvent): void {
@@ -187,10 +200,11 @@ export class BatchListComponent implements OnInit, OnDestroy, AfterViewInit {
         label: 'Status', 
         type: 'status',
         classMap: {
-          'active': 'chip-success',
-          'expired': 'chip-danger',
-          'depleted': 'chip-warning',
-          'quarantined': 'chip-info'
+          'active': 'status-active',
+          'expired': 'status-expired',
+          'depleted': 'status-depleted',
+          'quarantined': 'status-warning',
+          'pending': 'status-pending'
         }
       },
       {
@@ -308,63 +322,69 @@ export class BatchListComponent implements OnInit, OnDestroy, AfterViewInit {
    * Load filters from URL query parameters
    */
   private loadFiltersFromUrl(): void {
-    const params = this.route.snapshot.queryParams;
+    this.isSyncingUrl = true;
+    try {
+      const params = this.route.snapshot.queryParams;
 
-    this.currentFilters = {};
+      this.currentFilters = {};
 
-    if (params['itemSearch']) {
-      this.currentFilters.itemSearch = params['itemSearch'];
-    }
+      if (params['itemSearch']) {
+        this.currentFilters.itemSearch = params['itemSearch'];
+      }
 
-    if (params['locationIds']) {
-      this.currentFilters.locationIds = params['locationIds'].split(',');
-    }
+      if (params['locationIds']) {
+        this.currentFilters.locationIds = params['locationIds'].split(',');
+      }
 
-    if (params['supplierIds']) {
-      this.currentFilters.supplierIds = params['supplierIds'].split(',');
-    }
+      if (params['supplierIds']) {
+        this.currentFilters.supplierIds = params['supplierIds'].split(',');
+      }
 
-    if (params['statuses']) {
-      this.currentFilters.statuses = params['statuses'].split(',') as BatchStatus[];
-    }
+      if (params['statuses']) {
+        this.currentFilters.statuses = params['statuses'].split(',') as BatchStatus[];
+      }
 
-    if (params['expiryStart'] || params['expiryEnd']) {
-      this.currentFilters.expiryDateRange = {
-        start: params['expiryStart'] ? new Date(params['expiryStart']) : undefined,
-        end: params['expiryEnd'] ? new Date(params['expiryEnd']) : undefined
-      };
-    }
+      if (params['expiryStart'] || params['expiryEnd']) {
+        this.currentFilters.expiryDateRange = {
+          start: params['expiryStart'] ? new Date(params['expiryStart']) : undefined,
+          end: params['expiryEnd'] ? new Date(params['expiryEnd']) : undefined
+        };
+      }
 
-    if (params['quantityMin'] || params['quantityMax']) {
-      this.currentFilters.quantityRange = {
-        min: params['quantityMin'] ? parseInt(params['quantityMin']) : undefined,
-        max: params['quantityMax'] ? parseInt(params['quantityMax']) : undefined
-      };
-    }
+      if (params['quantityMin'] || params['quantityMax']) {
+        this.currentFilters.quantityRange = {
+          min: params['quantityMin'] ? parseInt(params['quantityMin']) : undefined,
+          max: params['quantityMax'] ? parseInt(params['quantityMax']) : undefined
+        };
+      }
 
-    if (params['includeExpired']) {
-      this.currentFilters.includeExpired = params['includeExpired'] === 'true';
-    }
+      if (params['includeExpired']) {
+        this.currentFilters.includeExpired = params['includeExpired'] === 'true';
+      }
 
-    if (params['includeDepleted']) {
-      this.currentFilters.includeDepleted = params['includeDepleted'] === 'true';
-    }
+      if (params['includeDepleted']) {
+        this.currentFilters.includeDepleted = params['includeDepleted'] === 'true';
+      }
 
-    // Load pagination and sorting from URL
-    if (params['page']) {
-      this.currentPage = parseInt(params['page']) - 1; // Convert to 0-based
-    }
+      // Load pagination and sorting from URL
+      if (params['page']) {
+        this.currentPage = parseInt(params['page']) - 1; // Convert to 0-based
+      }
 
-    if (params['pageSize']) {
-      this.pageSize = parseInt(params['pageSize']);
-    }
+      if (params['pageSize']) {
+        this.pageSize = parseInt(params['pageSize']);
+      }
 
-    if (params['sortBy']) {
-      this.currentSort.active = params['sortBy'];
-    }
+      if (params['sortBy']) {
+        this.currentSort.active = params['sortBy'];
+      }
 
-    if (params['sortOrder']) {
-      this.currentSort.direction = params['sortOrder'] as 'asc' | 'desc';
+      if (params['sortOrder']) {
+        this.currentSort.direction = params['sortOrder'] as 'asc' | 'desc';
+      }
+    } finally {
+      // Small delay to ensure all UI events have settled
+      setTimeout(() => this.isSyncingUrl = false, 100);
     }
   }
 
@@ -436,6 +456,8 @@ export class BatchListComponent implements OnInit, OnDestroy, AfterViewInit {
    * Update URL parameters with current filter, pagination, and sort state
    */
   private updateUrlParams(): void {
+    if (this.isSyncingUrl) return;
+
     const queryParams: any = {};
 
     // Add filter parameters
@@ -481,24 +503,24 @@ export class BatchListComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Add pagination parameters
     if (this.currentPage > 0) {
-      queryParams['page'] = (this.currentPage + 1).toString(); // Convert to 1-based
+      queryParams['page'] = (this.currentPage + 1).toString();
     }
 
-    if (this.pageSize !== 25) { // Only add if different from default
+    if (this.pageSize !== 25) {
       queryParams['pageSize'] = this.pageSize.toString();
     }
 
     // Add sorting parameters
-    if (this.currentSort.active !== 'expiryDate') { // Only add if different from default
+    if (this.currentSort.active !== 'expiryDate') {
       queryParams['sortBy'] = this.currentSort.active;
     }
 
-    if (this.currentSort.direction !== 'asc') { // Only add if different from default
+    if (this.currentSort.direction !== 'asc') {
       queryParams['sortOrder'] = this.currentSort.direction;
     }
 
     // Add view mode parameter
-    if (this.currentViewMode !== ViewMode.TABLE) { // Only add if different from default
+    if (this.currentViewMode !== ViewMode.TABLE) {
       queryParams['viewMode'] = this.currentViewMode;
     }
 
@@ -506,7 +528,8 @@ export class BatchListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams,
-      queryParamsHandling: 'replace'
+      queryParamsHandling: 'merge',
+      replaceUrl: true
     });
   }
 

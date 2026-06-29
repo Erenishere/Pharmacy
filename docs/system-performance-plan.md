@@ -363,6 +363,7 @@ Proof:
 Status update:
 
 - Completed 2026-05-07 initial list-contract slice: the mounted `/api/v1/items` list now resolves sort keys through an allowed backend field map for the supported live table columns, the enhanced Angular item list now sends real `sortBy` and `sortOrder` parameters through the shared data-table sort events, and company/category filter option requests are cached in `ItemService` instead of being refetched on every page visit. Verified with `Backend/tests/itemListApiContracts.test.js` and `npm run build` in `frontend`.
+- Follow-up retrieval hardening 2026-05-31: the `/api/v1/items` list now treats keyword searches as literal text instead of raw regular expressions, clamps invalid/oversized pagination input inside the service, and declares compound indexes for the common active item name/code/stock/retail price plus company/category list paths. The shared Mongo pagination helper now retrieves page rows and count metadata concurrently instead of sequencing independent database round trips. Verified with `Backend/tests/itemListApiContracts.test.js` and `Backend/tests/paginationHelper.test.js`.
 
 ### P1: Monitoring-driven index pass
 

@@ -69,11 +69,9 @@ function createClient() {
 
   redisClient.on('connect', () => {
     isConnected = true;
-    console.log('[Redis] Connected to Redis Cloud');
   });
 
   redisClient.on('ready', () => {
-    console.log('[Redis] Client ready');
   });
 
   redisClient.on('error', (err) => {
@@ -87,7 +85,6 @@ function createClient() {
   });
 
   redisClient.on('reconnecting', () => {
-    console.log('[Redis] Reconnecting...');
   });
 
   return redisClient;
@@ -109,7 +106,6 @@ async function disconnect() {
     await client.quit();
     client = null;
     isConnected = false;
-    console.log('[Redis] Disconnected');
   }
 }
 

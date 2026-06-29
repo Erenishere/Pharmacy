@@ -206,7 +206,9 @@ export class ExpenseListComponent implements OnInit {
 
   openCategoryDialog(): void {
     const dialogRef = this.dialog.open(ExpenseCategoryListComponent, {
-      width: '500px', maxHeight: '80vh'
+      width: '620px',
+      maxWidth: '96vw',
+      maxHeight: '92vh'
     });
     dialogRef.afterClosed().subscribe(() => this.loadCategories());
   }

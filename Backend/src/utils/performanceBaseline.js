@@ -21,6 +21,13 @@ const DEFAULT_PERFORMANCE_ROUTES = [
     category: 'list',
   },
   {
+    name: 'item-registration-lookups',
+    method: 'GET',
+    path: '/items/registration-lookups',
+    budgetMs: 250,
+    category: 'lookup',
+  },
+  {
     name: 'items-list-stock-sort',
     method: 'GET',
     path: '/items?page=1&limit=20&sortBy=currentStock&sortOrder=desc',

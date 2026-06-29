@@ -13,8 +13,8 @@
       <div class="filters-section">
         <div class="search-filters">
           <mat-form-field appearance="outline" class="search-field">
-            <input matInput formControlName="itemSearch" [matAutocomplete]="itemAuto" #searchInput
-              placeholder="Search batches...">
+            <input matInput class="batch-filter-search-input" formControlName="itemSearch" [matAutocomplete]="itemAuto" #searchInput
+              placeholder="Search by item name or code">
             <mat-icon matPrefix>search</mat-icon>
 
             <button mat-icon-button matSuffix *ngIf="filterForm.get('itemSearch')?.value"

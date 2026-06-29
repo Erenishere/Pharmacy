@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, shareReplay, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 export type DashboardPeriod = 'today' | '7d' | '30d' | 'mtd' | 'qtd' | 'ytd' | 'custom';
@@ -221,6 +221,7 @@ export interface DashboardOverview {
 })
 export class DashboardOverviewService {
   private readonly baseUrl = `${environment.apiUrl}/dashboard`;
+  private readonly overviewCache = new Map<string, Observable<ApiResponse<DashboardOverview>>>();
 
   constructor(private readonly http: HttpClient) {}
 
@@ -230,6 +231,16 @@ export class DashboardOverviewService {
     salesmanId?: string | null;
     refresh?: boolean;
   }): Observable<ApiResponse<DashboardOverview>> {
+    const cacheKey = this.getOverviewCacheKey(params);
+
+    if (params.refresh) {
+      this.overviewCache.delete(cacheKey);
+    }
+
+    if (!params.refresh && this.overviewCache.has(cacheKey)) {
+      return this.overviewCache.get(cacheKey)!;
+    }
+
     let httpParams = new HttpParams().set('period', params.period);
 
     if (params.warehouseId) {
@@ -244,8 +255,33 @@ export class DashboardOverviewService {
       httpParams = httpParams.set('refresh', 'true');
     }
 
-    return this.http.get<ApiResponse<DashboardOverview>>(`${this.baseUrl}/overview`, {
+    const request$ = this.http.get<ApiResponse<DashboardOverview>>(`${this.baseUrl}/overview`, {
       params: httpParams,
-    });
+    }).pipe(
+      catchError((error) => {
+        this.overviewCache.delete(cacheKey);
+        return throwError(() => error);
+      }),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+
+    this.overviewCache.set(cacheKey, request$);
+    return request$;
+  }
+
+  invalidateOverviewCache(): void {
+    this.overviewCache.clear();
+  }
+
+  private getOverviewCacheKey(params: {
+    period: DashboardPeriod;
+    warehouseId?: string | null;
+    salesmanId?: string | null;
+  }): string {
+    return [
+      params.period,
+      params.warehouseId || 'all-warehouses',
+      params.salesmanId || 'all-salesmen',
+    ].join(':');
   }
 }

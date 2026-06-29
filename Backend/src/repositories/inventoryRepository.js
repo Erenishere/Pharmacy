@@ -53,14 +53,16 @@ class InventoryRepository {
    * @param {string} [batchNumber] - Optional batch number
    * @returns {Promise<Object|null>} Inventory record or null if not found
    */
-  async findByItemAndLocation(itemId, warehouseId, batchNumber = null) {
+  async findByItemAndLocation(itemId, warehouseId, batchNumber = null, session = null) {
     const query = { item: itemId, warehouse: warehouseId };
     if (batchNumber) {
       query.batchNumber = batchNumber;
     }
-    return Inventory.findOne(query)
+    const request = Inventory.findOne(query)
       .populate('item', 'name code')
       .populate('warehouse', 'name code');
+
+    return session ? request.session(session) : request;
   }
 
   /**
@@ -78,6 +80,10 @@ class InventoryRepository {
       query.batchNumber = batchNumber;
     }
 
+    if (quantity < 0) {
+      query.quantity = { $gte: Math.abs(quantity) };
+    }
+
     // Use findOneAndUpdate with $inc for atomic update
     // This prevents race conditions where multiple requests try to update the same stock
     const update = {
@@ -90,7 +96,7 @@ class InventoryRepository {
 
     const options = {
       new: true, // Return the modified document
-      upsert: true, // Create if doesn't exist
+      upsert: quantity > 0, // Removal must never create or hide a stock record
       setDefaultsOnInsert: true,
       session,
     };
@@ -98,10 +104,8 @@ class InventoryRepository {
     try {
       const inventory = await Inventory.findOneAndUpdate(query, update, options);
 
-      // Post-update safety check (though atomic $inc is already safe)
-      if (inventory.quantity < 0) {
-        inventory.quantity = 0;
-        await inventory.save({ session });
+      if (!inventory && quantity < 0) {
+        throw new Error('Insufficient stock available in selected warehouse/batch');
       }
 
       return inventory;

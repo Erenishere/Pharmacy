@@ -45,12 +45,9 @@
         </ng-container>
 
         <span *ngIf="col.type === 'status'">
-          <mat-chip
-            [color]="col.colorMap ? col.colorMap[row[col.key]] : 'primary'"
-            [ngClass]="col.classMap ? col.classMap[row[col.key]] : ''"
-            class="status-chip-sm">
+          <span [ngClass]="getStatusClass(getCellValue(col, row))" class="premium-status-indicator">
             {{ getCellValue(col, row) | titlecase }}
-          </mat-chip>
+          </span>
         </span>
 
         <span *ngIf="col.type === 'custom'">

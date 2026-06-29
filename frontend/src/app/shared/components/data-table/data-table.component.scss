@@ -29,14 +29,14 @@
   align-items: center;
 }
 
-/* 
+/*
    The main table logic is now unified with the global design system.
-   This ensures that the "Perfect Hover" and row spacing are consistent 
+   This ensures that the "Perfect Hover" and row spacing are consistent
    across ALL modules using this shared component.
 */
 .data-table {
   @include data-table;
-  
+
   /* Reset some internal material-table constraints */
   width: 100%;
 }
@@ -50,53 +50,20 @@
   font-weight: 500;
 }
 
-.status-chip-sm {
-  @include status-chip-base;
-  display: inline-flex !important;
-  align-items: center !important;
-  min-width: 96px !important;
-  min-height: 34px !important;
-  justify-content: center !important;
-  border: 1px solid rgba(var(--color-primary-rgb, 115, 103, 240), 0.14) !important;
-  background: rgba(var(--color-primary-rgb, 115, 103, 240), 0.12) !important;
-  color: var(--color-primary, #7367f0) !important;
-  box-shadow: none !important;
-  opacity: 1 !important;
-
-  .mdc-evolution-chip__cell,
-  .mdc-evolution-chip__action,
-  .mdc-evolution-chip__text-label,
-  .mat-mdc-chip-action-label {
-    color: inherit !important;
-    opacity: 1 !important;
-    font-weight: 800 !important;
-  }
-
-  &.chip-active,
-  &.chip-success {
-    border-color: rgba(40, 199, 111, 0.22) !important;
-    background: rgba(40, 199, 111, 0.13) !important;
-    color: #159456 !important;
-  }
-
-  &.chip-inactive,
-  &.chip-warning {
-    border-color: rgba(255, 159, 67, 0.24) !important;
-    background: rgba(255, 159, 67, 0.14) !important;
-    color: #b56a14 !important;
-  }
-
-  &.chip-danger {
-    border-color: rgba(234, 84, 85, 0.22) !important;
-    background: rgba(234, 84, 85, 0.12) !important;
-    color: #c23b3c !important;
-  }
-
-  &.chip-info {
-    border-color: rgba(0, 184, 217, 0.22) !important;
-    background: rgba(0, 184, 217, 0.12) !important;
-    color: #008fa8 !important;
-  }
+.premium-status-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 12px;
+  min-width: 45px;
+  line-height: 1.2;
+  white-space: nowrap;
+  
+  // Base light shadows for extra depth (optional, matching warehouse style)
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 /* Base Loader */
@@ -109,9 +76,9 @@
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin { 
-  0% { transform: rotate(0deg); } 
-  100% { transform: rotate(360deg); } 
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Paginator Standardization */

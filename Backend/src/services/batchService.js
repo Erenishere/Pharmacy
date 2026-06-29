@@ -15,6 +15,7 @@ class BatchService {
       quantity,
       unitCost,
       locationId,
+      supplierId,
       ...rest
     } = batchData;
 
@@ -43,6 +44,7 @@ class BatchService {
       totalCost: quantity * unitCost,
       location: locationId,
       warehouse: locationId,
+      ...(supplierId ? { supplier: supplierId } : {}),
       status: 'active',
     });
 
@@ -107,8 +109,17 @@ class BatchService {
 
     // Prevent certain fields from being updated
     const {
-      quantity, remainingQuantity, totalCost, ...safeUpdates
+      quantity, remainingQuantity, totalCost, itemId, locationId, supplierId, ...safeUpdates
     } = updateData;
+
+    if (locationId) {
+      safeUpdates.location = locationId;
+      safeUpdates.warehouse = locationId;
+    }
+
+    if (supplierId) {
+      safeUpdates.supplier = supplierId;
+    }
 
     // If unitCost is being updated, recalculate totalCost
     if (safeUpdates.unitCost !== undefined) {
@@ -145,17 +156,18 @@ class BatchService {
     const updatedBatch = await batchRepository.update(id, safeUpdates);
 
     // If location is being updated, adjust inventory
-    if (safeUpdates.locationId && safeUpdates.locationId !== batch.location?.toString()) {
+    const currentLocationId = batch.location?._id?.toString?.() || batch.location?.toString?.();
+    if (locationId && locationId !== currentLocationId) {
       // Remove from old location
       if (batch.location) {
         await inventoryService.removeStock(
           batch.item._id,
-          batch.location,
+          currentLocationId,
           batch.remainingQuantity,
           {
             batchId: batch._id,
             referenceId: `BATCH_UPDATE_${batch._id}`,
-            notes: `Location change from ${batch.location} to ${safeUpdates.locationId}`,
+            notes: `Location change from ${currentLocationId} to ${locationId}`,
             userId: safeUpdates.updatedBy,
           },
         );
@@ -164,12 +176,12 @@ class BatchService {
       // Add to new location
       await inventoryService.addStock(
         batch.item._id,
-        safeUpdates.locationId,
+        locationId,
         batch.remainingQuantity,
         {
           batchId: batch._id,
           referenceId: `BATCH_UPDATE_${batch._id}`,
-          notes: `Location change from ${batch.location || 'none'} to ${safeUpdates.locationId}`,
+          notes: `Location change from ${currentLocationId || 'none'} to ${locationId}`,
           userId: safeUpdates.updatedBy,
         },
       );

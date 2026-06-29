@@ -68,7 +68,12 @@ export class BatchService {
             }
         }
 
-        return this.http.get<BatchResponse>(this.apiUrl, { params });
+        return this.http.get<BatchResponse>(this.apiUrl, { params }).pipe(
+            map(response => ({
+                ...response,
+                data: (response.data || []).map(batch => this.normalizeBatch(batch))
+            }))
+        );
     }
 
     /**
@@ -76,7 +81,7 @@ export class BatchService {
      */
     getBatchById(id: string): Observable<Batch> {
         return this.http.get<{ success: boolean; data: Batch }>(`${this.apiUrl}/${id}`).pipe(
-            map(response => response.data)
+            map(response => this.normalizeBatch(response.data))
         );
     }
 
@@ -85,7 +90,7 @@ export class BatchService {
      */
     createBatch(batch: CreateBatchRequest): Observable<Batch> {
         return this.http.post<{ success: boolean; data: Batch }>(this.apiUrl, batch).pipe(
-            map(response => response.data)
+            map(response => this.normalizeBatch(response.data))
         );
     }
 
@@ -94,7 +99,7 @@ export class BatchService {
      */
     updateBatch(id: string, batch: UpdateBatchRequest): Observable<Batch> {
         return this.http.put<{ success: boolean; data: Batch }>(`${this.apiUrl}/${id}`, batch).pipe(
-            map(response => response.data)
+            map(response => this.normalizeBatch(response.data))
         );
     }
 
@@ -103,7 +108,7 @@ export class BatchService {
      */
     adjustQuantity(id: string, adjustment: QuantityAdjustment): Observable<Batch> {
         return this.http.patch<{ success: boolean; data: Batch }>(`${this.apiUrl}/${id}/quantity`, adjustment).pipe(
-            map(response => response.data)
+            map(response => this.normalizeBatch(response.data))
         );
     }
 
@@ -123,7 +128,7 @@ export class BatchService {
             params = params.set('locationId', locationId);
         }
         return this.http.get<{ success: boolean; data: Batch[] }>(`${this.apiUrl}/expiring-soon`, { params }).pipe(
-            map(response => response.data)
+            map(response => (response.data || []).map(batch => this.normalizeBatch(batch)))
         );
     }
 
@@ -162,7 +167,60 @@ export class BatchService {
             params = params.set('locationId', locationId);
         }
         return this.http.get<{ success: boolean; data: Batch[] }>(`${this.apiUrl}/expired`, { params }).pipe(
-            map(response => response.data)
+            map(response => (response.data || []).map(batch => this.normalizeBatch(batch)))
         );
+    }
+
+    private normalizeBatch(batch: Batch): Batch {
+        const raw = batch as any;
+        const location = raw.location || raw.warehouse || null;
+        const item = raw.item ? {
+            ...raw.item,
+            category: this.displayName(raw.item.category) || this.displayName(raw.item.categoryId) || raw.item.category
+        } : raw.item;
+
+        return {
+            ...raw,
+            item,
+            itemId: this.referenceId(raw.itemId || raw.item),
+            location,
+            warehouse: raw.warehouse || location || undefined,
+            locationId: this.referenceId(raw.locationId || raw.location || raw.warehouse),
+            supplierId: this.referenceId(raw.supplierId || raw.supplier) || undefined,
+            quantity: this.numberOrZero(raw.quantity),
+            remainingQuantity: this.numberOrZero(raw.remainingQuantity),
+            unitCost: this.numberOrZero(raw.unitCost)
+        };
+    }
+
+    private referenceId(value: unknown): string {
+        if (!value) {
+            return '';
+        }
+
+        if (typeof value === 'string') {
+            return value;
+        }
+
+        const ref = value as { _id?: unknown; id?: unknown };
+        return String(ref._id || ref.id || '');
+    }
+
+    private displayName(value: unknown): string {
+        if (!value) {
+            return '';
+        }
+
+        if (typeof value === 'string') {
+            return value;
+        }
+
+        const ref = value as { name?: unknown; title?: unknown; code?: unknown };
+        return String(ref.name || ref.title || ref.code || '');
+    }
+
+    private numberOrZero(value: unknown): number {
+        const numberValue = Number(value);
+        return Number.isFinite(numberValue) ? numberValue : 0;
     }
 }

@@ -99,6 +99,7 @@ $p-bg: #f8f7fa;
   // Table styling
   .list-page-card {
     @include list-card;
+    overflow: hidden;
 
     .bilty-table-toolbar {
       display: flex;
@@ -151,10 +152,12 @@ $p-bg: #f8f7fa;
     }
 
     .table-wrapper {
+      width: 100%;
       background: var(--indus-surface, #fff);
       overflow-x: auto;
 
       .data-table {
+        width: 100%;
         min-width: 1320px;
       }
     }
@@ -175,13 +178,20 @@ $p-bg: #f8f7fa;
       }
     }
 
-    mat-paginator {
-      background: $purple !important;
+    mat-paginator.standard-purple-footer {
+      display: block;
+      width: 100%;
+      background: linear-gradient(135deg, var(--indus-primary, #7367f0) 0%, var(--indus-primary-dark, #5e50ee) 100%) !important;
       color: #ffffff !important;
-      border-radius: 8px;
-      margin-top: 16px;
+      border-radius: 0 0 var(--indus-radius-lg, 8px) var(--indus-radius-lg, 8px) !important;
+      margin: 0 !important;
 
       ::ng-deep {
+        .mat-mdc-paginator-container {
+          justify-content: flex-end;
+          min-height: 58px;
+        }
+
         .mat-mdc-paginator-range-label,
         .mat-mdc-paginator-page-size-label,
         .mat-mdc-select-value,

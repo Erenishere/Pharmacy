@@ -29,11 +29,6 @@ class POSController {
       salesmanName: salesman ? salesman.name : req.user.username,
     };
 
-    console.log('[POSController] Salesman Context resolved:', {
-      userId: req.user._id,
-      salesmanId: context.salesmanId,
-      warehouseId: context.warehouseId,
-    });
 
     if (!context.warehouseId) {
       throw new AppError('No warehouse assigned to this salesman. Please contact admin to assign a warehouse.', 403);

@@ -9,7 +9,6 @@ export const batchAccessGuard: CanActivateFn = (route, state) => {
 
     // Check if user is authenticated
     if (!authService.isAuthenticated()) {
-        console.log('[BatchAccessGuard] User not authenticated, redirecting to login');
         router.navigate(['/login']);
         return false;
     }
@@ -17,23 +16,19 @@ export const batchAccessGuard: CanActivateFn = (route, state) => {
     // Get user from localStorage synchronously
     const userStr = localStorage.getItem(STORAGE_KEYS.USER);
     if (!userStr) {
-        console.log('[BatchAccessGuard] No user in localStorage, redirecting to login');
         router.navigate(['/login']);
         return false;
     }
 
     try {
         const user = JSON.parse(userStr);
-        console.log('[BatchAccessGuard] User role:', user.role);
 
         // Allow access for admin and inventory manager roles
         const role = user?.role?.toLowerCase();
         if (role === 'admin' || role === 'inventory') {
-            console.log('[BatchAccessGuard] Access granted for batch management');
             return true;
         }
 
-        console.log('[BatchAccessGuard] User does not have batch management permissions, redirecting to dashboard');
         router.navigate(['/dashboard']);
         return false;
     } catch (error) {

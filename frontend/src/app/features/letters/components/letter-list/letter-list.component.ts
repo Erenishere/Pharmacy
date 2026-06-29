@@ -119,6 +119,8 @@ export class LetterListComponent implements OnInit {
     if (printWindow) {
       const accountName = letter.accountId?.name || 'General';
       const printableContent = this.escapeHtml(letter.content).replace(/\n/g, '<br>');
+      const refNo = `EL-${letter._id ? letter._id.substring(letter._id.length - 6).toUpperCase() : 'NEW'}`;
+      
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
@@ -126,83 +128,192 @@ export class LetterListComponent implements OnInit {
             <title>${this.escapeHtml(letter.subject)}</title>
             <style>
               body {
-                font-family: Arial, sans-serif;
-                margin: 32px;
-                color: #2f2f37;
-                line-height: 1.6;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                margin: 0;
+                padding: 0;
+                color: #1a1a24;
+                line-height: 1.65;
+                background-color: #f3f3f6;
               }
               .letter-shell {
-                max-width: 840px;
-                margin: 0 auto;
+                max-width: 800px;
+                margin: 40px auto;
+                padding: 1in;
+                background: #ffffff;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+                box-sizing: border-box;
               }
-              .letter-header {
-                border-bottom: 2px solid #7367f0;
-                padding-bottom: 16px;
-                margin-bottom: 24px;
+              .formal-letterhead {
+                text-align: center;
+                margin-bottom: 40px;
               }
-              .letter-title {
+              .company-name {
+                font-family: 'Playfair Display', Georgia, serif;
                 font-size: 28px;
-                margin: 0 0 8px;
-                color: #5b50d6;
-              }
-              .letter-meta {
-                display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 8px 20px;
-                font-size: 14px;
-              }
-              .meta-label {
                 font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                color: #111111;
+                margin: 0 0 4px 0;
+              }
+              .company-subtitle {
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 3px;
+                color: #7367f0;
+                font-weight: 600;
+                margin: 0 0 10px 0;
+              }
+              .company-contact {
+                font-size: 11px;
+                color: #555566;
+                font-family: Arial, sans-serif;
+                margin: 0;
+              }
+              .letterhead-divider {
+                margin-top: 18px;
+                height: 2px;
+                background: linear-gradient(to right, rgba(115, 103, 240, 0), rgba(115, 103, 240, 0.6), rgba(115, 103, 240, 0));
+              }
+              .letter-info-bar {
+                display: flex;
+                justify-content: space-between;
+                border-bottom: 1px solid #eef0f3;
+                padding-bottom: 12px;
+                margin-bottom: 30px;
+                font-size: 13px;
+                font-family: Arial, sans-serif;
+                color: #4a4a5a;
+              }
+              .letter-subject {
+                font-size: 20px;
+                font-weight: 700;
+                margin: 0 0 35px 0;
+                color: #111111;
+                text-align: left;
+                border-left: 4px solid #7367f0;
+                padding-left: 14px;
+                font-family: Georgia, 'Times New Roman', Times, serif;
               }
               .letter-content {
                 font-size: 15px;
                 white-space: normal;
+                text-align: justify;
+                margin-bottom: 60px;
+                min-height: 280px;
+              }
+              .signature-section {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 60px;
+                font-family: Arial, sans-serif;
+              }
+              .sig-block {
+                text-align: center;
+                width: 220px;
+              }
+              .sig-line {
+                border-top: 1px dashed #a0a0b0;
+                margin-bottom: 8px;
+                padding-top: 8px;
+                font-size: 13px;
+                color: #333344;
+              }
+              .sig-title {
+                font-size: 12px;
+                font-weight: bold;
+                color: #555566;
+              }
+              .sig-company {
+                font-size: 11px;
+                color: #777788;
               }
               .print-actions {
-                margin-top: 24px;
+                margin-top: 30px;
                 display: flex;
                 gap: 12px;
+                justify-content: center;
+                font-family: Arial, sans-serif;
               }
               .print-actions button {
                 border: none;
                 border-radius: 6px;
-                padding: 10px 16px;
+                padding: 10px 22px;
                 cursor: pointer;
                 font-size: 14px;
+                font-weight: 600;
+                transition: all 0.2s ease;
               }
               .print-btn {
                 background: #7367f0;
                 color: #fff;
+                box-shadow: 0 4px 12px rgba(115, 103, 240, 0.3);
+              }
+              .print-btn:hover {
+                background: #5b50d6;
               }
               .close-btn {
                 background: #ececf6;
                 color: #383845;
               }
+              .close-btn:hover {
+                background: #dedee9;
+              }
               @media print {
-                .print-actions {
-                  display: none;
+                @page {
+                  margin: 1in;
                 }
                 body {
+                  background: #ffffff;
                   margin: 0;
+                }
+                .letter-shell {
+                  margin: 0;
+                  padding: 0;
+                  box-shadow: none;
+                  max-width: 100%;
+                }
+                .print-actions {
+                  display: none;
                 }
               }
             </style>
           </head>
           <body>
             <div class="letter-shell">
-              <div class="letter-header">
-                <h1 class="letter-title">${this.escapeHtml(letter.subject)}</h1>
-                <div class="letter-meta">
-                  <div><span class="meta-label">Date:</span> ${new Date(letter.date).toLocaleDateString()}</div>
-                  <div><span class="meta-label">Type:</span> ${this.escapeHtml(this.formatLetterType(letter.letterType))}</div>
-                  <div><span class="meta-label">Status:</span> ${this.escapeHtml(letter.status)}</div>
-                  <div><span class="meta-label">Account:</span> ${this.escapeHtml(accountName)}</div>
+              <div class="formal-letterhead">
+                <div class="company-name">Erenishere Pharmacy & Co.</div>
+                <div class="company-subtitle">Premium Pharmaceutical Distributors & Retailers</div>
+                <div class="company-contact">12-B Mall Road, Lahore | Tel: +92-42-35550192 | Email: contact@erenishere.com</div>
+                <div class="letterhead-divider"></div>
+              </div>
+              
+              <div class="letter-info-bar">
+                <div><strong>Ref:</strong> ${this.escapeHtml(refNo)}</div>
+                <div><strong>Date:</strong> ${new Date(letter.date).toLocaleDateString()}</div>
+                <div><strong>To:</strong> ${this.escapeHtml(accountName)}</div>
+              </div>
+              
+              <h2 class="letter-subject">Subject: ${this.escapeHtml(letter.subject)}</h2>
+              
+              <div class="letter-content">${printableContent}</div>
+              
+              <div class="signature-section">
+                <div class="sig-block">
+                  <div class="sig-line">Prepared By</div>
+                  <div class="sig-title">${this.escapeHtml(letter.status)}</div>
+                  <div class="sig-company">Staff Officer</div>
+                </div>
+                <div class="sig-block">
+                  <div class="sig-line">Authorized Signatory</div>
+                  <div class="sig-title">Erenishere Pharmacy & Co.</div>
+                  <div class="sig-company">Executive Management</div>
                 </div>
               </div>
-              <div class="letter-content">${printableContent}</div>
+              
               <div class="print-actions">
-                <button class="print-btn" onclick="window.print()">Print</button>
-                <button class="close-btn" onclick="window.close()">Close</button>
+                <button class="print-btn" onclick="window.print()">Print Document</button>
+                <button class="close-btn" onclick="window.close()">Close Window</button>
               </div>
             </div>
           </body>

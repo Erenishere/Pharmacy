@@ -248,7 +248,6 @@ export class PosComponent implements OnInit, AfterViewInit {
             next: (res) => {
                 if (res.success) {
                     this.currentSalesman = res.data;
-                    console.log('[POS] Salesman profile loaded:', this.currentSalesman?._id);
                 } else {
                     console.warn('[POS] Failed to load salesman profile:', res.message);
                     this.toastService.error('Failed to load salesman profile. Please contact support.');
@@ -484,11 +483,9 @@ export class PosComponent implements OnInit, AfterViewInit {
 
         const invoiceData = this.getInvoiceData(paymentData);
 
-        console.log('[POS] Submitting invoice data:', JSON.stringify(invoiceData, null, 2));
 
         this.posService.createInvoice(invoiceData).subscribe({
             next: (response) => {
-                console.log('[POS] Invoice created successfully:', response);
                 if (response.success) {
                     this.toastService.success('Invoice created successfully');
 

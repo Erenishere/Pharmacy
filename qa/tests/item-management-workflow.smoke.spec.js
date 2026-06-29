@@ -1,25 +1,6 @@
 const { test, expect } = require('@playwright/test');
+const { loginAsSmokeAdmin } = require('./support/auth');
 const fs = require('fs');
-
-async function loginAsSmokeAdmin(page) {
-  await page.goto('/login');
-
-  for (let attempt = 0; attempt < 2; attempt++) {
-    await page.locator('#identifier').fill(process.env.SMOKE_ADMIN_USERNAME || 'smoke.admin');
-    await page.locator('#password').fill(process.env.SMOKE_ADMIN_PASSWORD || 'SmokePass123');
-    await page.getByRole('button', { name: /sign in/i }).click();
-
-    try {
-      await page.waitForURL(/\/dashboard/, { timeout: 30_000 });
-      return;
-    } catch (error) {
-      const loginFailed = await page.locator('text=Login failed').isVisible().catch(() => false);
-      if (!loginFailed || attempt === 1) {
-        throw error;
-      }
-    }
-  }
-}
 
 async function selectMatOption(page, selector, optionPattern) {
   await page.locator(selector).click();
@@ -65,10 +46,10 @@ test.describe('item management create and export workflow', () => {
     await expect(dialog).toContainText('New Item Registration');
     await expect(dialog).toContainText('Classification');
     await expect(dialog).toContainText('Pricing');
-    await expect(dialog).toContainText('Product Identity');
+    await expect(dialog).toContainText('Catalog Profile');
     await expect(dialog).toContainText('Tax & Charges');
     await expect(dialog).toContainText('Packaging');
-    await expect(dialog).toContainText('Inventory & Barcode');
+    await expect(dialog).toContainText('Inventory Controls');
 
     await selectFirstMatOption(page, 'mat-select[formcontrolname="companyId"]');
     await selectFirstMatOption(page, 'mat-select[formcontrolname="categoryId"]');

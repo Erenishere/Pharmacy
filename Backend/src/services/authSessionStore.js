@@ -16,6 +16,14 @@ class AuthSessionStore {
     });
   }
 
+  hasPersistentStoreConfigured() {
+    return Boolean(process.env.REDIS_URL || process.env.REDIS_HOST);
+  }
+
+  isStatelessFallbackMode() {
+    return !this.hasPersistentStoreConfigured() && !isReady();
+  }
+
   getSessionKey(sessionId) {
     return `${SESSION_PREFIX}${sessionId}`;
   }
@@ -105,6 +113,18 @@ class AuthSessionStore {
   }
 
   async validateRefreshToken(refreshToken) {
+    if (this.isStatelessFallbackMode()) {
+      const decoded = this.decodeToken(refreshToken);
+      return decoded?.sid ? {
+        sessionId: decoded.sid,
+        userId: decoded.userId?.toString?.() || decoded.userId,
+        refreshTokenHash: this.hashToken(refreshToken),
+        refreshExpiresAt: this.getExpiryDate(refreshToken, DEFAULT_REFRESH_TTL_SECONDS),
+        revokedAt: null,
+        revokedReason: null,
+      } : null;
+    }
+
     const decoded = this.decodeToken(refreshToken);
     const sessionId = decoded?.sid;
     if (!sessionId) {
@@ -124,6 +144,20 @@ class AuthSessionStore {
   }
 
   async rotateSession({ sessionId, userId, refreshToken, userAgent = null, ipAddress = null }) {
+    if (this.isStatelessFallbackMode()) {
+      return {
+        sessionId,
+        userId: (userId || '').toString(),
+        refreshTokenHash: this.hashToken(refreshToken),
+        userAgent,
+        ipAddress,
+        lastRotatedAt: new Date().toISOString(),
+        refreshExpiresAt: this.getExpiryDate(refreshToken, DEFAULT_REFRESH_TTL_SECONDS),
+        revokedAt: null,
+        revokedReason: null,
+      };
+    }
+
     const existing = await this.getSession(sessionId);
     if (!existing || existing.revokedAt) {
       return null;
@@ -149,6 +183,10 @@ class AuthSessionStore {
   }
 
   async revokeSession(sessionId, reason = 'logout') {
+    if (this.isStatelessFallbackMode()) {
+      return true;
+    }
+
     const existing = await this.getSession(sessionId);
     if (!existing) {
       return false;
@@ -170,6 +208,10 @@ class AuthSessionStore {
   }
 
   async isSessionRevoked(sessionId) {
+    if (this.isStatelessFallbackMode()) {
+      return false;
+    }
+
     const session = await this.getSession(sessionId);
     return !session || Boolean(session.revokedAt);
   }

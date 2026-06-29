@@ -5,6 +5,9 @@ const { body, param, query } = require('express-validator');
 const companyController = require('../controllers/companyController');
 const { authenticate } = require('../middleware/auth');
 const { validate } = require('../middleware/validation');
+const { clearCacheMiddleware } = require('../middleware/cacheMiddleware');
+
+const clearItemRegistrationLookupsCache = clearCacheMiddleware(['items:registration-lookups']);
 
 /**
  * Company Routes
@@ -182,6 +185,7 @@ router.get(
 router.post(
   '/',
   authenticate,
+  clearItemRegistrationLookupsCache,
   createCompanyValidation,
   validate,
   companyController.createCompany,
@@ -197,6 +201,7 @@ router.put(
   '/:id',
   authenticate,
   idParamValidation,
+  clearItemRegistrationLookupsCache,
   updateCompanyValidation,
   validate,
   companyController.updateCompany,
@@ -211,6 +216,7 @@ router.put(
 router.patch(
   '/:id/status',
   authenticate,
+  clearItemRegistrationLookupsCache,
   idParamValidation,
   validate,
   companyController.toggleCompanyStatus,
@@ -225,6 +231,7 @@ router.patch(
 router.delete(
   '/:id',
   authenticate,
+  clearItemRegistrationLookupsCache,
   idParamValidation,
   validate,
   companyController.deleteCompany,

@@ -1,5 +1,5 @@
 const accountService = require('../services/accountService');
-const AccountHead = require('../models/accountHead');
+const AccountHead = require('../models/accounthead');
 const CustomerType = require('../models/customertype');
 const Designation = require('../models/designation');
 const DimensionBranch = require('../models/dimensionbranch');

@@ -104,8 +104,6 @@ export class UserListComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     loadUsers(): void {
-        console.log('[UserListComponent] Loading users...');
-        console.log('[UserListComponent] showDeleted:', this.showDeleted);
         this.loading = true;
 
         const filters: UserFilters = {
@@ -118,13 +116,11 @@ export class UserListComponent implements OnInit, OnDestroy, AfterViewInit {
             ...(this.showDeleted ? { isActive: false } : {})
         };
 
-        console.log('[UserListComponent] Filters:', filters);
 
         this.userService.getUsers(filters)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
                 next: (response) => {
-                    console.log('[UserListComponent] Users loaded successfully:', response);
                     if (response.success) {
                         this.dataSource.data = response.data || [];
 
@@ -140,14 +136,6 @@ export class UserListComponent implements OnInit, OnDestroy, AfterViewInit {
                         // Update paginator properties manually for server-side pagination
                         this.updatePaginatorState();
 
-                        console.log('[UserListComponent] Pagination info:', {
-                            total: this.totalUsers,
-                            currentPage: this.pageIndex,
-                            pageSize: this.pageSize,
-                            loadedUsers: this.dataSource.data.length,
-                            backendPagination: response.pagination,
-                            fullResponse: response
-                        });
                     } else {
                         console.error('[UserListComponent] Response success=false');
                         this.toastService.error('Failed to load users');
@@ -171,7 +159,6 @@ export class UserListComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     onPageChange(event: any): void {
-        console.log('[UserListComponent] Page change event:', event);
 
         // If page size changed, reset to first page
         if (this.pageSize !== event.pageSize) {
@@ -380,7 +367,6 @@ export class UserListComponent implements OnInit, OnDestroy, AfterViewInit {
 
         dialogRef.afterClosed().subscribe(result => {
             if (result) {
-                console.log('[UserListComponent] User created:', result);
                 this.toastService.success(`User "${result.username}" created successfully!`);
                 this.loadUsers();
             }
@@ -405,7 +391,6 @@ export class UserListComponent implements OnInit, OnDestroy, AfterViewInit {
 
         dialogRef.afterClosed().subscribe(result => {
             if (result) {
-                console.log('[UserListComponent] User updated:', result);
                 this.toastService.success(`User "${result.username}" updated successfully!`);
                 this.loadUsers();
             }

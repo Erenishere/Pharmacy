@@ -38,33 +38,36 @@ class InventoryService {
       throw new Error('Quantity must be greater than zero');
     }
 
-    // Verify item exists
-    await itemService.getItemById(itemId);
+    return executeTransactionalOperation(async (session) => {
+      // Verify item exists
+      await itemService.getItemById(itemId);
 
-    // Update inventory
-    const inventory = await inventoryRepository.updateQuantity(
-      itemId,
-      locationId,
-      quantity,
-      options.batchId,
-    );
+      // Update inventory
+      const inventory = await inventoryRepository.updateQuantity(
+        itemId,
+        locationId,
+        quantity,
+        options.batchId,
+        session
+      );
 
-    // Log the transaction
-    await this.logTransaction({
-      itemId,
-      locationId,
-      batchId: options.batchId,
-      referenceId: options.referenceId,
-      quantity,
-      transactionType: 'STOCK_IN',
-      notes: options.notes || `Added ${quantity} units to inventory`,
-      createdBy: options.userId,
+      // Log the transaction
+      await this.logTransaction({
+        itemId,
+        locationId,
+        batchId: options.batchId,
+        referenceId: options.referenceId,
+        quantity,
+        transactionType: 'STOCK_IN',
+        notes: options.notes || `Added ${quantity} units to inventory`,
+        createdBy: options.userId,
+      }, session);
+
+      // Sync Item.inventory.currentStock
+      await this.syncItemCurrentStock(itemId, session);
+
+      return inventory;
     });
-
-    // Sync Item.inventory.currentStock
-    await this.syncItemCurrentStock(itemId);
-
-    return inventory;
   }
 
   /**
@@ -83,39 +86,52 @@ class InventoryService {
       throw new Error('Quantity must be greater than zero');
     }
 
-    const { session } = options;
+    const performRemoval = async (session) => {
+      const batchNumber = options.batchId || options.batchNumber || null;
+      const currentInventory = await inventoryRepository.findByItemAndLocation(
+        itemId,
+        locationId,
+        batchNumber,
+        session,
+      );
 
-    // Verify item exists and has sufficient stock
-    const currentStock = await this.getItemStock(itemId);
-    if (currentStock < quantity) {
-      throw new Error('Insufficient stock available');
+      const currentStock = currentInventory?.quantity || 0;
+      if (currentStock < quantity) {
+        throw new Error('Insufficient stock available in selected warehouse/batch');
+      }
+
+      // Update inventory (quantity is negative for removal)
+      const inventory = await inventoryRepository.updateQuantity(
+        itemId,
+        locationId,
+        -quantity,
+        batchNumber,
+        session,
+      );
+
+      // Log the transaction
+      await this.logTransaction({
+        itemId,
+        warehouseId: locationId,
+        batchNumber,
+        referenceId: options.referenceId,
+        quantity: -quantity,
+        transactionType: 'STOCK_OUT',
+        notes: options.notes || `Removed ${quantity} units from inventory`,
+        createdBy: options.userId,
+      }, session);
+
+      // Sync Item.inventory.currentStock
+      await this.syncItemCurrentStock(itemId, session);
+
+      return inventory;
+    };
+
+    if (options.session) {
+      return performRemoval(options.session);
+    } else {
+      return executeTransactionalOperation(performRemoval);
     }
-
-    // Update inventory (quantity is negative for removal)
-    const inventory = await inventoryRepository.updateQuantity(
-      itemId,
-      locationId,
-      -quantity,
-      options.batchId || options.batchNumber,
-      session,
-    );
-
-    // Log the transaction
-    await this.logTransaction({
-      itemId,
-      warehouseId: locationId,
-      batchNumber: options.batchId || options.batchNumber,
-      referenceId: options.referenceId,
-      quantity: -quantity,
-      transactionType: 'STOCK_OUT',
-      notes: options.notes || `Removed ${quantity} units from inventory`,
-      createdBy: options.userId,
-    }, session);
-
-    // Sync Item.inventory.currentStock
-    await this.syncItemCurrentStock(itemId, session);
-
-    return inventory;
   }
 
   /**
@@ -221,44 +237,47 @@ class InventoryService {
       throw new Error('Quantity cannot be negative');
     }
 
-    // Get current inventory
-    const currentInventory = await inventoryRepository.findByItemAndLocation(
-      itemId,
-      locationId,
-      options.batchId,
-    );
+    return executeTransactionalOperation(async (session) => {
+      // Get current inventory
+      const currentInventory = await inventoryRepository.findByItemAndLocation(
+        itemId,
+        locationId,
+        options.batchId,
+      );
 
-    const currentQuantity = currentInventory ? currentInventory.quantity : 0;
-    const quantityDifference = newQuantity - currentQuantity;
+      const currentQuantity = currentInventory ? currentInventory.quantity : 0;
+      const quantityDifference = newQuantity - currentQuantity;
 
-    if (quantityDifference === 0) {
-      return currentInventory || { item: itemId, location: locationId, quantity: 0 };
-    }
+      if (quantityDifference === 0) {
+        return currentInventory || { item: itemId, location: locationId, quantity: 0 };
+      }
 
-    // Update inventory
-    const inventory = await inventoryRepository.updateQuantity(
-      itemId,
-      locationId,
-      quantityDifference,
-      options.batchId,
-    );
+      // Update inventory
+      const inventory = await inventoryRepository.updateQuantity(
+        itemId,
+        locationId,
+        quantityDifference,
+        options.batchId,
+        session
+      );
 
-    // Log the adjustment
-    await this.logTransaction({
-      itemId,
-      locationId,
-      batchId: options.batchId,
-      referenceId: options.referenceId,
-      quantity: quantityDifference,
-      transactionType: 'STOCK_ADJUST',
-      notes: options.notes || `Adjusted stock from ${currentQuantity} to ${newQuantity}. ${options.reason || ''}`.trim(),
-      createdBy: options.userId,
+      // Log the adjustment
+      await this.logTransaction({
+        itemId,
+        locationId,
+        batchId: options.batchId,
+        referenceId: options.referenceId,
+        quantity: quantityDifference,
+        transactionType: 'STOCK_ADJUST',
+        notes: options.notes || `Adjusted stock from ${currentQuantity} to ${newQuantity}. ${options.reason || ''}`.trim(),
+        createdBy: options.userId,
+      }, session);
+
+      // Sync Item.inventory.currentStock
+      await this.syncItemCurrentStock(itemId, session);
+
+      return inventory;
     });
-
-    // Sync Item.inventory.currentStock
-    await this.syncItemCurrentStock(itemId);
-
-    return inventory;
   }
 
   /**

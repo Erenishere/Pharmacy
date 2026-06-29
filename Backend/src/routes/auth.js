@@ -10,7 +10,9 @@ const router = express.Router();
 // Login rate limiter - 10 attempts per 15 minutes
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 1000,
+  max: process.env.NODE_ENV === 'test'
+    ? 1000
+    : (parseInt(process.env.LOGIN_RATE_LIMIT_MAX, 10) || 10),
   message: { success: false, message: 'Too many login attempts, try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -114,7 +116,7 @@ const resetLimiter = rateLimit({
 
 /**
  * @route   POST /api/auth/forgot-password
- * @desc    Request admin password reset via email
+ * @desc    Request password reset OTP via email
  * @access  Public
  * @body    { email: string }
  */
@@ -132,6 +134,29 @@ router.post(
 );
 
 /**
+ * @route   POST /api/auth/verify-otp
+ * @desc    Verify the OTP sent to email
+ * @access  Public
+ * @body    { email: string, otp: string }
+ */
+router.post(
+  '/verify-otp',
+  resetLimiter,
+  [
+    body('email')
+      .trim()
+      .notEmpty().withMessage('Email is required')
+      .isEmail().withMessage('Please provide a valid email address'),
+    body('otp')
+      .trim()
+      .notEmpty().withMessage('Verification code is required')
+      .isLength({ min: 6, max: 6 }).withMessage('Verification code must be 6 digits'),
+    validate,
+  ],
+  authController.verifyOTP,
+);
+
+/**
  * @route   POST /api/auth/reset-password
  * @desc    Reset password using the token from the email link
  * @access  Public
@@ -139,6 +164,7 @@ router.post(
  */
 router.post(
   '/reset-password',
+  resetLimiter,
   [
     body('token')
       .trim()

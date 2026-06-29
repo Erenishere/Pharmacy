@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -12,12 +12,29 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ItemService } from '../../services/item.service';
 import { ToastService } from '../../../../shared/services/toast.service';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { SupportingMasterService } from '../../../master-data/services/supporting-master.service';
+import { Subject, catchError, distinctUntilChanged, map, of, startWith, switchMap, takeUntil } from 'rxjs';
+
+interface PricePreview {
+  netPurchase: string;
+  netSale: string;
+  retailWithGST: string;
+}
+
+interface ItemSnapshot {
+  isActive: boolean;
+  name: string;
+  code: string;
+  currentStock: number;
+  unit: string;
+  hasSupplier: boolean;
+  barcode: string;
+}
 
 @Component({
   selector: 'app-item-registration-form',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -34,11 +51,25 @@ import { environment } from '../../../../../environments/environment';
   templateUrl: './item-registration-form.component.html',
   styleUrl: './item-registration-form.component.scss'
 })
-export class ItemRegistrationFormComponent implements OnInit {
+export class ItemRegistrationFormComponent implements OnInit, OnDestroy {
   itemForm!: FormGroup;
   isEditMode = false;
   saving = false;
   imagePreview: string | null = null;
+  pricePreview: PricePreview = {
+    netPurchase: '0.00',
+    netSale: '0.00',
+    retailWithGST: '0.00'
+  };
+  snapshot: ItemSnapshot = {
+    isActive: true,
+    name: '',
+    code: '',
+    currentStock: 0,
+    unit: 'piece',
+    hasSupplier: false,
+    barcode: ''
+  };
 
   // Dropdown data
   companies: any[] = [];
@@ -64,6 +95,7 @@ export class ItemRegistrationFormComponent implements OnInit {
     { value: 'capsule', label: 'Capsule' }
   ];
   gstRateOptions = [0, 4, 18];
+  private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
@@ -71,18 +103,32 @@ export class ItemRegistrationFormComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: { item?: any },
     private itemService: ItemService,
     private toastService: ToastService,
-    private http: HttpClient
+    private supportingMasterService: SupportingMasterService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.isEditMode = !!this.data?.item;
     this.initializeForm();
+    this.setupFormPreview();
     this.setupDependentDropdowns();
     this.loadDropdownData();
 
     if (this.isEditMode && this.data.item) {
       this.populateForm(this.data.item);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  scrollToSection(sectionId: string): void {
+    document.getElementById(sectionId)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
   }
 
   initializeForm(): void {
@@ -148,68 +194,103 @@ export class ItemRegistrationFormComponent implements OnInit {
     });
   }
 
-  setupDependentDropdowns(): void {
-    this.itemForm.get('categoryId')?.valueChanges.subscribe((categoryId: string) => {
-      this.loadSubCategoriesByCategory(categoryId);
-    });
+  setupFormPreview(): void {
+    this.itemForm.valueChanges
+      .pipe(
+        startWith(this.itemForm.getRawValue()),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((value) => {
+        const priceValues = this.calculateNetPrices(value);
+        this.pricePreview = {
+          netPurchase: priceValues.netPurchase.toFixed(2),
+          netSale: priceValues.netSale.toFixed(2),
+          retailWithGST: priceValues.retailWithGST.toFixed(2)
+        };
+        this.snapshot = {
+          isActive: value.isActive !== false,
+          name: value.name?.trim() || '',
+          code: value.code?.trim() || '',
+          currentStock: this.toNumber(value.currentStock),
+          unit: value.unit || 'piece',
+          hasSupplier: !!value.mainSupplierId,
+          barcode: value.barcode?.trim() || ''
+        };
+        this.cdr.markForCheck();
+      });
+  }
 
-    this.itemForm.get('formulaId')?.valueChanges.subscribe((formulaId: string) => {
-      this.loadFormulaSizesByFormula(formulaId);
-    });
+  setupDependentDropdowns(): void {
+    this.itemForm.get('categoryId')?.valueChanges
+      .pipe(
+        startWith(this.itemForm.get('categoryId')?.value || ''),
+        distinctUntilChanged(),
+        switchMap((categoryId: string) => {
+          if (!categoryId) {
+            this.subCategories = [];
+            this.itemForm.patchValue({ subCategoryId: '' }, { emitEvent: false });
+            this.cdr.markForCheck();
+            return of([]);
+          }
+
+          return this.supportingMasterService.getSubCategoriesByCategory(categoryId).pipe(
+            map((response) => response.data || []),
+            catchError(() => of([]))
+          );
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((subCategories) => {
+        this.subCategories = subCategories;
+        this.cdr.markForCheck();
+      });
+
+    this.itemForm.get('formulaId')?.valueChanges
+      .pipe(
+        startWith(this.itemForm.get('formulaId')?.value || ''),
+        distinctUntilChanged(),
+        switchMap((formulaId: string) => {
+          if (!formulaId) {
+            this.formulaSizes = [];
+            this.itemForm.patchValue({ formulaSizeId: '' }, { emitEvent: false });
+            this.cdr.markForCheck();
+            return of([]);
+          }
+
+          return this.supportingMasterService.getFormulaSizesByFormula(formulaId).pipe(
+            map((response) => response.data || []),
+            catchError(() => of([]))
+          );
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((formulaSizes) => {
+        this.formulaSizes = formulaSizes;
+        this.cdr.markForCheck();
+      });
   }
 
   loadDropdownData(): void {
-    // Load Companies
-    this.http.get<any>(`${environment.apiUrl}/companies?isActive=true&limit=500`).subscribe({
-      next: (res) => this.companies = res.data || [],
-      error: () => this.companies = []
-    });
-
-    // Load Categories
-    this.http.get<any>(`${environment.apiUrl}/categories?isActive=true&limit=500`).subscribe({
-      next: (res) => this.categories = res.data || [],
-      error: () => this.categories = []
-    });
-
-    // Load Formulas
-    this.http.get<any>(`${environment.apiUrl}/formulas?isActive=true&limit=500`).subscribe({
-      next: (res) => this.formulas = res.data || [],
-      error: () => this.formulas = []
-    });
-
-    // Load Business Types
-    this.http.get<any>(`${environment.apiUrl}/business-types?isActive=true&limit=500`).subscribe({
-      next: (res) => this.businessTypes = res.data || [],
-      error: () => this.businessTypes = []
-    });
-
-    // Load Suppliers from Account Heads
-    this.http.get<any>(`${environment.apiUrl}/account-heads?type=supplier&isActive=true&limit=500`).subscribe({
-      next: (res) => this.suppliers = res.data || [],
-      error: () => this.suppliers = []
-    });
-  }
-
-  loadSubCategoriesByCategory(categoryId: string): void {
-    if (!categoryId) {
-      this.subCategories = [];
-      return;
-    }
-    this.http.get<any>(`${environment.apiUrl}/subcategories?categoryId=${categoryId}&isActive=true&limit=500`).subscribe({
-      next: (res) => this.subCategories = res.data || [],
-      error: () => this.subCategories = []
-    });
-  }
-
-  loadFormulaSizesByFormula(formulaId: string): void {
-    if (!formulaId) {
-      this.formulaSizes = [];
-      return;
-    }
-    this.http.get<any>(`${environment.apiUrl}/formula-sizes?formulaId=${formulaId}&isActive=true&limit=500`).subscribe({
-      next: (res) => this.formulaSizes = res.data || [],
-      error: () => this.formulaSizes = []
-    });
+    this.itemService.getItemRegistrationLookups()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: ({ companies, categories, formulas, businessTypes, suppliers }) => {
+          this.companies = companies;
+          this.categories = categories;
+          this.formulas = formulas;
+          this.businessTypes = businessTypes;
+          this.suppliers = suppliers;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.companies = [];
+          this.categories = [];
+          this.formulas = [];
+          this.businessTypes = [];
+          this.suppliers = [];
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   populateForm(item: any): void {
@@ -263,15 +344,9 @@ export class ItemRegistrationFormComponent implements OnInit {
       goodsChargesPerUnit: item.pricing?.goodsChargesOnUnit || item.additionalCharges?.goodsChargesPerUnit || 0
     });
 
-    if (categoryId) {
-      this.loadSubCategoriesByCategory(categoryId);
-    }
-    if (formulaId) {
-      this.loadFormulaSizesByFormula(formulaId);
-    }
-
     if (item.productImage || item.image) {
       this.imagePreview = item.productImage || item.image;
+      this.cdr.markForCheck();
     }
   }
 
@@ -282,9 +357,16 @@ export class ItemRegistrationFormComponent implements OnInit {
       reader.onload = (e: any) => {
         this.imagePreview = e.target.result;
         this.itemForm.patchValue({ image: e.target.result });
+        this.cdr.markForCheck();
       };
       reader.readAsDataURL(file);
     }
+  }
+
+  removeImage(): void {
+    this.imagePreview = null;
+    this.itemForm.patchValue({ image: null });
+    this.cdr.markForCheck();
   }
 
   generateBarcode(): void {
@@ -294,15 +376,15 @@ export class ItemRegistrationFormComponent implements OnInit {
     this.itemForm.patchValue({ barcode });
   }
 
-  calculateNetPrices(): {
+  calculateNetPrices(formValue: any): {
     netPurchase: number;
     netSale: number;
     retailWithGST: number;
   } {
-    const unitPurchase = this.itemForm.get('unitPurchaseTP')?.value || 0;
-    const unitSale = this.itemForm.get('unitSaleTP')?.value || 0;
-    const unitRetail = this.itemForm.get('unitRetailPrice')?.value || 0;
-    const gstFiler = this.itemForm.get('gstFiler')?.value || 0;
+    const unitPurchase = this.toNumber(formValue?.unitPurchaseTP);
+    const unitSale = this.toNumber(formValue?.unitSaleTP);
+    const unitRetail = this.toNumber(formValue?.unitRetailPrice);
+    const gstFiler = this.toNumber(formValue?.gstFiler);
 
     return {
       netPurchase: unitPurchase + (unitPurchase * gstFiler / 100),
@@ -407,7 +489,7 @@ export class ItemRegistrationFormComponent implements OnInit {
       ? this.itemService.updateItem(this.data.item._id, itemData)
       : this.itemService.createItem(itemData);
 
-    request.subscribe({
+    request.pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: any) => {
         this.toastService.success(
           this.isEditMode ? 'Item updated successfully' : 'Item created successfully'
@@ -425,10 +507,6 @@ export class ItemRegistrationFormComponent implements OnInit {
 
   onCancel(): void {
     this.dialogRef.close();
-  }
-
-  get netPrices() {
-    return this.calculateNetPrices();
   }
 
   private resolveId(value: any): string {

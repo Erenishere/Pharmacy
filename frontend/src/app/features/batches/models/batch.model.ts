@@ -10,14 +10,15 @@ export interface Batch {
     expiryDate: Date;
     locationId: string;
     location?: Location;
+    warehouse?: Location;
     supplierId?: string;
     supplier?: Supplier;
     status: BatchStatus;
     notes?: string;
     createdAt: Date;
     updatedAt: Date;
-    createdBy: string;
-    updatedBy: string;
+    createdBy?: string | UserReference;
+    updatedBy?: string | UserReference;
 }
 
 export enum BatchStatus {
@@ -99,4 +100,10 @@ export interface PaginationParams {
     limit: number;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
+}
+
+export interface UserReference {
+    _id?: string;
+    username?: string;
+    email?: string;
 }

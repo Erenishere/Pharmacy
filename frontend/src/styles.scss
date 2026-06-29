@@ -1,4 +1,4 @@
-/* You can add global styles to this file, and also import other style files */
+﻿/* You can add global styles to this file, and also import other style files */
 
 // ============================================
 // PREMIUM DESIGN SYSTEM
@@ -57,6 +57,30 @@ body {
     color: $text-body;
 }
 
+.mat-typography {
+    font-family: $font-family;
+}
+
+mat-icon,
+.mat-icon,
+.material-icons {
+    font-family: 'Material Icons' !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    font-size: 24px;
+    line-height: 1 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    white-space: nowrap !important;
+    word-wrap: normal !important;
+    direction: ltr !important;
+    -webkit-font-feature-settings: 'liga' !important;
+    font-feature-settings: 'liga' !important;
+    font-variant-ligatures: normal !important;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
 /* Custom Global Scrollbar */
 ::-webkit-scrollbar {
     width: 6px;
@@ -88,7 +112,8 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
     line-height: 1.25; /* Tighter heading line-height */
     margin-bottom: 0.5em;
-    font-family: 'Outfit', sans-serif;
+    font-family: $font-family-heading;
+    letter-spacing: 0;
 }
 
 h1 { font-size: clamp(1.75rem, 5vw, 2.25rem); }
@@ -142,7 +167,7 @@ p {
     min-height: 44px !important;
     padding: 0 20px !important;
     font-weight: 600 !important;
-    letter-spacing: 0.3px;
+    letter-spacing: 0;
     border-radius: 6px !important;
 }
 
@@ -806,3 +831,11 @@ p {
 // Final product theme layer. This intentionally comes last so the app has
 // one consistent visual system even while older feature SCSS is migrated.
 @import 'styles/indus-theme';
+
+@media print {
+    app-navbar, app-sidebar, app-breadcrumb, .mat-drawer-backdrop { display: none !important; }
+    .main-layout, .sidenav-container, .main-content, mat-sidenav-content.main-content { height: auto !important; overflow: visible !important; display: block !important; margin: 0 !important; padding: 0 !important; transform: none !important; }
+    .mat-drawer-container { height: auto !important; overflow: visible !important; z-index: auto !important; }
+    .cdk-overlay-container { display: none !important; }
+}
+

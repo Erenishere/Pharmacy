@@ -39,7 +39,6 @@ const connectToDatabase = async () => {
                 socketTimeoutMS: 45000,
             });
             isConnected = true;
-            console.log('Connected to MongoDB via Vercel');
         } catch (error) {
             console.error('MongoDB connection error:', error);
             connectionPromise = null;
@@ -52,14 +51,47 @@ const connectToDatabase = async () => {
 
 const app = express();
 
-app.use(cors({
+const configuredOrigins = (process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+const loopbackConfiguredOrigins = configuredOrigins.flatMap((origin) => {
+    try {
+        const url = new URL(origin);
+        if (url.hostname === 'localhost') {
+            url.hostname = '127.0.0.1';
+            return [origin, url.toString().replace(/\/$/, '')];
+        }
+        if (url.hostname === '127.0.0.1') {
+            url.hostname = 'localhost';
+            return [origin, url.toString().replace(/\/$/, '')];
+        }
+    } catch {
+        return [origin];
+    }
+    return [origin];
+});
+const defaultDevOrigins = [
+    'http://localhost:4200',
+    'http://127.0.0.1:4200',
+    'http://localhost:4201',
+    'http://127.0.0.1:4201',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+];
+const allowedOrigins = process.env.NODE_ENV === 'production'
+    ? configuredOrigins
+    : [...new Set([...loopbackConfiguredOrigins, ...defaultDevOrigins])];
+
+const corsOptions = {
     origin: (origin, callback) => {
-        // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
 
-        // For development and production, mirror the origin
-        // This is safe even with credentials: true
-        callback(null, true);
+        if (allowedOrigins.length === 0 && process.env.NODE_ENV === 'production') {
+            return callback(null, false);
+        }
+
+        return callback(null, allowedOrigins.includes(origin));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -71,9 +103,11 @@ app.use(cors({
         'Origin'
     ],
     exposedHeaders: ['Set-Cookie']
-}));
+};
 
-app.options('*', cors());
+app.use(cors(corsOptions));
+
+app.options('*', cors(corsOptions));
 
 app.use(responseTimeMiddleware);
 app.use(requestTrackingMiddleware);

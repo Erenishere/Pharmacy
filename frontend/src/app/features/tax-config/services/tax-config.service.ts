@@ -51,7 +51,19 @@ export class TaxConfigService {
   }
 
   updateTaxConfig(id: string, data: Partial<TaxConfig>): Observable<ApiResponse<TaxConfig>> {
-    return this.http.put<ApiResponse<any>>(`${this.baseUrl}/${id}`, this.toApi(data)).pipe(
+    return this.http.put<ApiResponse<any>>(`${this.baseUrl}/${id}`, this.toApi(data, true)).pipe(
+      map((res) => ({ ...res, data: this.fromApi(res.data) }))
+    );
+  }
+
+  activateTaxConfig(id: string): Observable<ApiResponse<TaxConfig>> {
+    return this.http.patch<ApiResponse<any>>(`${this.baseUrl}/${id}/activate`, {}).pipe(
+      map((res) => ({ ...res, data: this.fromApi(res.data) }))
+    );
+  }
+
+  deactivateTaxConfig(id: string): Observable<ApiResponse<TaxConfig>> {
+    return this.http.patch<ApiResponse<any>>(`${this.baseUrl}/${id}/deactivate`, {}).pipe(
       map((res) => ({ ...res, data: this.fromApi(res.data) }))
     );
   }
@@ -70,19 +82,40 @@ export class TaxConfigService {
     };
   }
 
-  private toApi(data: Partial<TaxConfig>): any {
-    const taxName = (data.taxName || data.name || '').trim();
-    const taxType = (data.taxType || data.type || 'GST').trim().toUpperCase();
-    const ratePercent = Number(data.rate || 0);
-    return {
-      name: taxName,
-      code: (data.code || `${taxType}_${taxName || Date.now()}`).replace(/[^a-z0-9]/gi, '_').slice(0, 20).toUpperCase(),
-      type: taxType,
-      rate: ratePercent > 1 ? ratePercent / 100 : ratePercent,
-      description: data.description || '',
-      isActive: data.isActive ?? true,
-      applicableOn: 'both',
-      effectiveFrom: new Date().toISOString()
-    };
+  private toApi(data: Partial<TaxConfig>, partial = false): any {
+    const payload: any = {};
+
+    if (!partial || data.taxName !== undefined || data.name !== undefined) {
+      payload.name = (data.taxName || data.name || '').trim();
+    }
+
+    if (!partial || data.taxType !== undefined || data.type !== undefined) {
+      payload.type = (data.taxType || data.type || 'GST').trim().toUpperCase();
+    }
+
+    if (!partial || data.rate !== undefined) {
+      payload.rate = Number(data.rate || 0) / 100;
+    }
+
+    if (!partial || data.code !== undefined) {
+      const taxType = payload.type || (data.taxType || data.type || 'GST').trim().toUpperCase();
+      const taxName = payload.name || (data.taxName || data.name || Date.now()).toString();
+      payload.code = (data.code || `${taxType}_${taxName}`).replace(/[^a-z0-9]/gi, '_').slice(0, 20).toUpperCase();
+    }
+
+    if (!partial || data.description !== undefined) {
+      payload.description = data.description || '';
+    }
+
+    if (!partial || data.isActive !== undefined) {
+      payload.isActive = data.isActive ?? true;
+    }
+
+    if (!partial) {
+      payload.applicableOn = 'both';
+      payload.effectiveFrom = new Date().toISOString();
+    }
+
+    return payload;
   }
 }

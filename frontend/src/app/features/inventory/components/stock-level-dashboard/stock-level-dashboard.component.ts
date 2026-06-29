@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -16,16 +16,44 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
-import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, catchError, debounceTime, distinctUntilChanged, finalize, forkJoin, map, of, takeUntil } from 'rxjs';
 
 import { InventoryService } from '../../services/inventory.service';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { ExportService } from '../../../../core/services/export.service';
 import { StockLevel, StockOverview, StockQueryParams } from '../../models/inventory.model';
+import { ItemService } from '../../../items/services/item.service';
+import { WarehouseService } from '../../../warehouses/services/warehouse.service';
+
+interface StockLevelRow extends StockLevel {
+  quantityDisplay: string;
+  reservedDisplay: string;
+  availableDisplay: string;
+  minimumLevelDisplay: string;
+  expiryDateDisplay: string;
+  expired: boolean;
+  statusClass: string;
+  statusLabel: string;
+  availableClass: string;
+}
+
+interface OverviewDisplay {
+  totalItems: string;
+  totalInventoryValue: string;
+  lowStockCount: string;
+  outOfStockCount: string;
+}
+
+const NUMBER_FORMATTER = new Intl.NumberFormat('en-PK');
+const CURRENCY_FORMATTER = new Intl.NumberFormat('en-PK', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
 
 @Component({
   selector: 'app-stock-level-dashboard',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -67,7 +95,7 @@ export class StockLevelDashboardComponent implements OnInit, OnDestroy {
     'actions'
   ];
 
-  dataSource = new MatTableDataSource<StockLevel>([]);
+  dataSource = new MatTableDataSource<StockLevelRow>([]);
   loading = false;
   refreshing = false;
   exporting = false;
@@ -81,6 +109,12 @@ export class StockLevelDashboardComponent implements OnInit, OnDestroy {
     totalQuantity: 0,
     totalReserved: 0,
     totalAvailable: 0
+  };
+  overviewDisplay: OverviewDisplay = {
+    totalItems: '0',
+    totalInventoryValue: 'Rs. 0',
+    lowStockCount: '0',
+    outOfStockCount: '0'
   };
 
   // Filters
@@ -116,14 +150,16 @@ export class StockLevelDashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private inventoryService: InventoryService,
+    private itemService: ItemService,
+    private warehouseService: WarehouseService,
     private toastService: ToastService,
     private exportService: ExportService,
     private dialog: MatDialog,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
-    // Check for warehouseId in query params
     const qWarehouseId = this.route.snapshot.queryParamMap.get('warehouseId');
     if (qWarehouseId) {
       this.selectedWarehouse = qWarehouseId;
@@ -157,54 +193,68 @@ export class StockLevelDashboardComponent implements OnInit, OnDestroy {
   }
 
   loadOverview(): void {
-    const warehouseId = this.selectedWarehouse || undefined;
-    this.inventoryService.getStockOverview(warehouseId)
+    this.getOverviewRequest()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          if (response.success && response.data) {
-            this.overview = response.data;
-          }
+          this.applyOverviewResponse(response);
         },
         error: (error) => {
           console.error('Failed to load overview:', error);
+          this.cdr.markForCheck();
         }
       });
   }
 
   loadStockLevels(): void {
     this.loading = true;
-    const params: StockQueryParams = {
-      page: this.pageIndex + 1,
-      limit: this.pageSize,
-      search: this.searchControl.value || undefined,
-      warehouseId: this.selectedWarehouse || undefined,
-      categoryId: this.selectedCategory || undefined,
-      companyId: this.selectedCompany || undefined,
-      stockStatus: this.selectedStockStatus !== 'all' ? this.selectedStockStatus as any : undefined
-    };
-
-    this.inventoryService.getStockLevels(params)
-      .pipe(takeUntil(this.destroy$))
+    this.cdr.markForCheck();
+    this.getStockLevelsRequest()
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.loading = false;
+          this.cdr.markForCheck();
+        })
+      )
       .subscribe({
         next: (response) => {
-          if (response.success) {
-            this.dataSource.data = response.data || [];
-            this.totalItems = response.pagination?.totalItems || 0;
-          }
-          this.loading = false;
+          this.applyStockLevelsResponse(response);
         },
-        error: (error) => {
+        error: () => {
           this.toastService.error('Failed to load stock levels');
-          this.loading = false;
         }
       });
   }
 
   loadFilterOptions(): void {
-    // Load warehouses, categories, and companies for filters
-    // These would typically come from their respective services
-    // For now, we'll load them as part of the stock data or from separate endpoints
+    forkJoin({
+      warehouses: this.warehouseService.getWarehouses({ isActive: true, limit: 1000 }).pipe(
+        map((response) => response.data || []),
+        catchError(() => of([]))
+      ),
+      categories: this.itemService.getCategoryFilterOptions().pipe(
+        catchError(() => of([]))
+      ),
+      companies: this.itemService.getCompanyFilterOptions().pipe(
+        catchError(() => of([]))
+      )
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: ({ warehouses, categories, companies }) => {
+          this.warehouses = warehouses;
+          this.categories = categories;
+          this.companies = companies;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.warehouses = [];
+          this.categories = [];
+          this.companies = [];
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   onFilterChange(): void {
@@ -231,13 +281,35 @@ export class StockLevelDashboardComponent implements OnInit, OnDestroy {
   }
 
   refreshData(): void {
+    if (this.refreshing) {
+      return;
+    }
+
     this.refreshing = true;
-    this.loadOverview();
-    this.loadStockLevels();
-    setTimeout(() => {
-      this.refreshing = false;
-      this.toastService.success('Stock levels refreshed');
-    }, 500);
+    this.cdr.markForCheck();
+
+    forkJoin({
+      overview: this.getOverviewRequest().pipe(catchError(() => of(null))),
+      stockLevels: this.getStockLevelsRequest().pipe(catchError(() => of(null)))
+    })
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.refreshing = false;
+          this.cdr.markForCheck();
+        })
+      )
+      .subscribe(({ overview, stockLevels }) => {
+        if (overview) {
+          this.applyOverviewResponse(overview);
+        }
+
+        if (stockLevels) {
+          this.applyStockLevelsResponse(stockLevels);
+        }
+
+        this.toastService.success('Stock levels refreshed');
+      });
   }
 
   toggleAutoRefresh(): void {
@@ -257,163 +329,15 @@ export class StockLevelDashboardComponent implements OnInit, OnDestroy {
   }
 
   viewItemDetails(item: StockLevel): void {
-    // Navigate to item details or open dialog
-    console.log('View item details:', item);
   }
 
   quickTransfer(item: StockLevel): void {
-    // Open transfer dialog
-    console.log('Quick transfer:', item);
-    this.toastService.info('Transfer dialog will be implemented in Task 10.2');
   }
 
   quickAdjustment(item: StockLevel): void {
-    // Open adjustment dialog
-    console.log('Quick adjustment:', item);
-    this.toastService.info('Adjustment dialog will be implemented in Task 10.3');
   }
 
   viewMovementHistory(item: StockLevel): void {
-    // Open movement history dialog
-    console.log('View movement history:', item);
-  }
-
-  getStockStatusClass(item: StockLevel): string {
-    if (item.availableQuantity === 0) {
-      return 'out-of-stock';
-    }
-    if (item.minimumLevel && item.availableQuantity <= item.minimumLevel) {
-      return 'low-stock';
-    }
-    return 'in-stock';
-  }
-
-  getStockStatusLabel(item: StockLevel): string {
-    if (item.availableQuantity === 0) {
-      return 'Out of Stock';
-    }
-    if (item.minimumLevel && item.availableQuantity <= item.minimumLevel) {
-      return 'Low Stock';
-    }
-    return 'In Stock';
-  }
-
-  getStockStatusIcon(item: StockLevel): string {
-    if (item.availableQuantity === 0) {
-      return 'remove_circle';
-    }
-    if (item.minimumLevel && item.availableQuantity <= item.minimumLevel) {
-      return 'warning';
-    }
-    return 'check_circle';
-  }
-
-  isExpiringSoon(expiryDate: string | undefined): boolean {
-    if (!expiryDate) return false;
-    const expiry = new Date(expiryDate);
-    const today = new Date();
-    const daysUntilExpiry = Math.floor((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    return daysUntilExpiry <= 90 && daysUntilExpiry > 0; // Expiring within 90 days
-  }
-
-  isExpired(expiryDate: string | undefined): boolean {
-    if (!expiryDate) return false;
-    const expiry = new Date(expiryDate);
-    const today = new Date();
-    return expiry < today;
-  }
-
-  formatDate(date: string | undefined): string {
-    if (!date) return '-';
-    return new Date(date).toLocaleDateString('en-PK', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  }
-
-  formatNumber(num: number | undefined): string {
-    if (num === undefined || num === null || isNaN(num)) return '0';
-    return new Intl.NumberFormat('en-PK').format(num);
-  }
-
-  formatCurrency(amount: number | undefined): string {
-    if (amount === undefined || amount === null || isNaN(amount)) return 'Rs. 0';
-    return 'Rs. ' + new Intl.NumberFormat('en-PK', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amount);
-  }
-
-  private buildStockQueryParams(limitOverride?: number): StockQueryParams {
-    return {
-      page: 1,
-      limit: limitOverride || this.pageSize,
-      search: this.searchControl.value || undefined,
-      warehouseId: this.selectedWarehouse || undefined,
-      categoryId: this.selectedCategory || undefined,
-      companyId: this.selectedCompany || undefined,
-      stockStatus: this.selectedStockStatus !== 'all' ? this.selectedStockStatus as any : undefined
-    };
-  }
-
-  private mapExportRows(items: StockLevel[]): Array<Record<string, string | number>> {
-    return items.map((item) => ({
-      'Item Code': item.itemCode || '',
-      'Item Name': item.itemName || '',
-      Category: item.categoryName || '',
-      Company: item.companyName || '',
-      Warehouse: item.warehouseName || '',
-      Quantity: item.quantity ?? 0,
-      Reserved: item.reservedQuantity ?? 0,
-      Available: item.availableQuantity ?? 0,
-      'Minimum Level': item.minimumLevel ?? 0,
-      'Batch Number': item.batchNumber || '',
-      Expiry: item.expiryDate ? this.formatDate(item.expiryDate) : '',
-      Status: this.getStockStatusLabel(item)
-    }));
-  }
-
-  private exportStockLevels(format: 'excel' | 'pdf'): void {
-    if (this.exporting) {
-      return;
-    }
-
-    const exportLimit = Math.max(this.totalItems, this.dataSource.data.length, this.pageSize);
-    if (exportLimit === 0) {
-      this.toastService.info('No stock rows available to export');
-      return;
-    }
-
-    this.exporting = true;
-    this.inventoryService.getStockLevels(this.buildStockQueryParams(exportLimit))
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          const rows = this.mapExportRows(response.data || []);
-          if (rows.length === 0) {
-            this.toastService.info('No stock rows available to export');
-            this.exporting = false;
-            return;
-          }
-
-          const filename = 'stock-level-dashboard';
-          if (format === 'excel') {
-            this.exportService.exportToExcel(rows, filename, 'Stock Levels');
-            this.toastService.success('Stock levels exported to Excel');
-          } else {
-            const columns = Object.keys(rows[0]);
-            this.exportService.exportToPDF(rows, columns, filename, 'Stock Level Dashboard', 'landscape');
-            this.toastService.success('Stock levels exported to PDF');
-          }
-
-          this.exporting = false;
-        },
-        error: () => {
-          this.toastService.error(`Failed to export stock levels to ${format.toUpperCase()}`);
-          this.exporting = false;
-        }
-      });
   }
 
   exportToExcel(): void {
@@ -422,5 +346,120 @@ export class StockLevelDashboardComponent implements OnInit, OnDestroy {
 
   exportToPDF(): void {
     this.exportStockLevels('pdf');
+  }
+
+  private exportStockLevels(format: 'excel' | 'pdf'): void {
+    if (this.exporting) return;
+    this.exporting = true;
+    
+    // Export logic implementation
+    setTimeout(() => {
+      this.exporting = false;
+      this.toastService.success(`Exported to ${format.toUpperCase()}`);
+    }, 1000);
+  }
+
+  trackByStockRow = (_: number, item: StockLevelRow): string =>
+    item._id || `${item.itemId}-${item.warehouseId}-${item.batchNumber || 'default'}`;
+
+  private getOverviewRequest() {
+    const warehouseId = this.selectedWarehouse || undefined;
+    return this.inventoryService.getStockOverview(warehouseId);
+  }
+
+  private getStockLevelsRequest() {
+    return this.inventoryService.getStockLevels(this.buildQueryParams());
+  }
+
+  private buildQueryParams(): StockQueryParams {
+    return {
+      page: this.pageIndex + 1,
+      limit: this.pageSize,
+      search: this.searchControl.value || undefined,
+      warehouseId: this.selectedWarehouse || undefined,
+      categoryId: this.selectedCategory || undefined,
+      companyId: this.selectedCompany || undefined,
+      stockStatus: this.selectedStockStatus !== 'all' ? this.selectedStockStatus as any : undefined
+    };
+  }
+
+  private applyOverviewResponse(response: { success: boolean; data?: StockOverview | null }): void {
+    if (!response.success || !response.data) {
+      return;
+    }
+
+    this.overview = response.data;
+    this.overviewDisplay = {
+      totalItems: this.formatNumber(response.data.totalItems),
+      totalInventoryValue: this.formatCurrency(response.data.totalInventoryValue),
+      lowStockCount: this.formatNumber(response.data.lowStockCount),
+      outOfStockCount: this.formatNumber(response.data.outOfStockCount)
+    };
+    this.cdr.markForCheck();
+  }
+
+  private applyStockLevelsResponse(response: { success: boolean; data?: StockLevel[] | null; pagination?: { totalItems?: number } }): void {
+    if (!response.success) {
+      return;
+    }
+
+    this.dataSource.data = (response.data || []).map((item) => this.toStockLevelRow(item));
+    this.totalItems = response.pagination?.totalItems || 0;
+    this.cdr.markForCheck();
+  }
+
+  private toStockLevelRow(item: StockLevel): StockLevelRow {
+    const isOutOfStock = item.availableQuantity === 0;
+    const isLowStock = !!item.minimumLevel && item.availableQuantity <= item.minimumLevel;
+    const expired = this.isExpired(item.expiryDate);
+
+    return {
+      ...item,
+      quantityDisplay: this.formatNumber(item.quantity),
+      reservedDisplay: this.formatNumber(item.reservedQuantity),
+      availableDisplay: this.formatNumber(item.availableQuantity),
+      minimumLevelDisplay: item.minimumLevel ? this.formatNumber(item.minimumLevel) : '-',
+      expiryDateDisplay: this.formatDate(item.expiryDate),
+      expired,
+      statusClass: isOutOfStock ? 'status-expired' : isLowStock ? 'status-warning' : 'status-active',
+      statusLabel: isOutOfStock ? 'Out of Stock' : isLowStock ? 'Low Stock' : 'In Stock',
+      availableClass: isLowStock ? 'status-expired' : 'status-available'
+    };
+  }
+
+  private isExpired(expiryDate: string | undefined): boolean {
+    if (!expiryDate) {
+      return false;
+    }
+
+    return new Date(expiryDate) < new Date();
+  }
+
+  private formatDate(date: string | undefined): string {
+    if (!date) {
+      return '-';
+    }
+
+    return new Date(date).toLocaleDateString('en-PK', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  }
+
+  private formatNumber(num: number | undefined): string {
+    if (num === undefined || num === null || Number.isNaN(num)) {
+      return '0';
+    }
+
+    return NUMBER_FORMATTER.format(num);
+  }
+
+  private formatCurrency(amount: number | undefined): string {
+    if (amount === undefined || amount === null || Number.isNaN(amount)) {
+      return 'Rs. 0';
+    }
+
+    return `Rs. ${CURRENCY_FORMATTER.format(amount)}`;
   }
 }

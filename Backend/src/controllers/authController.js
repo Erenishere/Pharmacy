@@ -1,5 +1,5 @@
 const authService = require('../services/authService');
-const { sendPasswordResetEmail } = require('../services/emailService');
+const { sendPasswordResetEmail, sendPasswordResetOTP } = require('../services/emailService');
 const User = require('../models/User');
 const Response = require('../utils/response');
 
@@ -144,8 +144,8 @@ class AuthController {
   }
 
   /**
-   * Forgot password – admin only
-   * Generates a reset token and sends it via email
+   * Forgot password
+   * Generates an OTP and sends it via email
    * @route POST /api/auth/forgot-password
    */
   async forgotPassword(req, res) {
@@ -161,38 +161,70 @@ class AuthController {
 
       // If no user found, return a generic success to prevent email enumeration
       if (!user) {
-        return Response.success(res, null, 'If that email is registered, a reset link has been sent.');
+        return Response.success(res, null, 'If that email is registered, a verification code has been sent.');
       }
 
-      // Only admin accounts can reset their password via email
-      if (user.role !== 'admin') {
+      // Only active accounts can reset password
+      if (!user.isActive) {
+        return Response.error(res, 'Your account is inactive. Please contact administrator.', 401, 'ACCOUNT_INACTIVE');
+      }
+
+      // Generate OTP and save
+      const otp = user.generatePasswordResetOTP();
+      await user.save({ validateBeforeSave: false });
+
+      // Send OTP email
+      try {
+        await sendPasswordResetOTP(user.email, otp);
+      } catch (emailError) {
+        // Rollback OTP if email fails
+        user.clearPasswordResetOTP();
+        await user.save({ validateBeforeSave: false });
+        console.error('[AuthController] Failed to send verification code:', emailError.message);
+        return Response.error(res, 'Failed to send verification code. Please try again later.', 500, 'EMAIL_ERROR');
+      }
+
+      return Response.success(res, null, 'Verification code has been sent to your email.');
+    } catch (error) {
+      console.error('[AuthController] forgotPassword error:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Verify OTP
+   * Checks if the OTP is correct and generates a password reset token
+   * @route POST /api/auth/verify-otp
+   */
+  async verifyOTP(req, res) {
+    try {
+      const { email, otp } = req.body;
+
+      if (!email || !otp) {
+        return Response.error(res, 'Email and verification code are required', 400, 'VALIDATION_ERROR');
+      }
+
+      // Find user with valid OTP
+      const user = await User.findByPasswordResetOTP(email, otp);
+
+      if (!user) {
         return Response.error(
           res,
-          'Only admin accounts can reset passwords via email.',
-          403,
-          'FORBIDDEN'
+          'Invalid or expired verification code. Please request a new one.',
+          400,
+          'INVALID_OTP'
         );
       }
 
-      // Generate reset token and save
+      // Set OTP as verified and generate a reset token for the final step
+      user.isOTPVerified = true;
+      user.clearPasswordResetOTP();
       const resetToken = user.generatePasswordResetToken();
       await user.save({ validateBeforeSave: false });
 
-      // Send reset email
-      try {
-        await sendPasswordResetEmail(user.email, resetToken);
-      } catch (emailError) {
-        // Rollback token if email fails
-        user.clearPasswordResetToken();
-        await user.save({ validateBeforeSave: false });
-        console.error('[AuthController] Failed to send reset email:', emailError.message);
-        return Response.error(res, 'Failed to send reset email. Please try again later.', 500, 'EMAIL_ERROR');
-      }
-
-      console.log(`[AuthController] Password reset email sent to ${user.email}`);
-      return Response.success(res, null, 'Password reset link has been sent to your email.');
+      return Response.success(res, { token: resetToken }, 'Code verified successfully. You can now change your password.');
     } catch (error) {
-      console.error('[AuthController] forgotPassword error:', error.message);
+      console.error('[AuthController] verifyOTP error:', error.message);
       throw error;
     }
   }
@@ -230,7 +262,6 @@ class AuthController {
       user.clearPasswordResetToken();
       await user.save();
 
-      console.log(`[AuthController] Password reset successful for ${user.email}`);
       return Response.success(res, null, 'Password has been reset successfully. You can now log in.');
     } catch (error) {
       console.error('[AuthController] resetPassword error:', error.message);

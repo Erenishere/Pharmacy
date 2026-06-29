@@ -1,24 +1,5 @@
 const { test, expect } = require('@playwright/test');
-
-async function loginAsSmokeAdmin(page) {
-  await page.goto('/login');
-
-  for (let attempt = 0; attempt < 2; attempt++) {
-    await page.locator('#identifier').fill(process.env.SMOKE_ADMIN_USERNAME || 'smoke.admin');
-    await page.locator('#password').fill(process.env.SMOKE_ADMIN_PASSWORD || 'SmokePass123');
-    await page.getByRole('button', { name: /sign in/i }).click();
-
-    try {
-      await page.waitForURL(/\/dashboard/, { timeout: 30_000 });
-      return;
-    } catch (error) {
-      const loginFailed = await page.locator('text=Login failed').isVisible().catch(() => false);
-      if (!loginFailed || attempt === 1) {
-        throw error;
-      }
-    }
-  }
-}
+const { loginAsSmokeAdmin } = require('./support/auth');
 
 test.describe('recovery summary browser proof', () => {
   test.beforeEach(async ({ page }) => {
@@ -49,8 +30,8 @@ test.describe('recovery summary browser proof', () => {
 
     const summaryRow = page.getByRole('row').filter({ hasText: 'Smoke Recovery Salesman' }).first();
     await expect(summaryRow).toBeVisible({ timeout: 20_000 });
-    await expect(summaryRow).toContainText('1');
-    await expect(summaryRow).toContainText(/25\.0+%/);
+    await expect(summaryRow).toContainText('2');
+    await expect(summaryRow).toContainText(/13\.16%/);
 
     await expect(page.locator('.detail-card')).toBeVisible();
     await expect(page.locator('.detail-card')).toContainText('Smoke Recovery Salesman Customer Breakdown');

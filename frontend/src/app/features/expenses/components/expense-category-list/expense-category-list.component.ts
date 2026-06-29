@@ -8,8 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ExpenseService } from '../../services/expense.service';
 import { ExpenseCategory } from '../../models/expense.model';
 
@@ -18,37 +18,49 @@ import { ExpenseCategory } from '../../models/expense.model';
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatInputModule,
-    MatButtonModule, MatIconModule, MatListModule, MatSnackBarModule, MatDividerModule, MatChipsModule
+    MatButtonModule, MatIconModule, MatListModule, MatSnackBarModule, MatChipsModule,
+    MatTooltipModule
   ],
   template: `
-    <div class="dialog-container">
-      <h2 mat-dialog-title>Expense Categories</h2>
+    <div class="form-dialog-shell expense-category-dialog">
+      <div class="dialog-header">
+        <div class="title-section">
+          <div class="header-icon">
+            <mat-icon>category</mat-icon>
+          </div>
+          <div class="text-group">
+            <h2 mat-dialog-title>Expense Categories</h2>
+          </div>
+        </div>
 
-      <mat-dialog-content>
-        <form [formGroup]="form" class="add-form" (ngSubmit)="addCategory()">
+        <button mat-icon-button type="button" class="close-btn" aria-label="Close dialog" (click)="dialogRef.close()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <mat-dialog-content class="dialog-content">
+        <form [formGroup]="form" class="category-form" (ngSubmit)="addCategory()">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Category Name</mat-label>
             <input matInput formControlName="categoryName">
           </mat-form-field>
-          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+          <button mat-raised-button color="primary" class="submit-btn" type="submit" [disabled]="form.invalid">
             <mat-icon>add</mat-icon> Add
           </button>
         </form>
 
-        <mat-divider></mat-divider>
-
-        <mat-list>
+        <mat-list class="category-list">
           @for (cat of categories; track cat._id) {
-            <mat-list-item>
-              <span matListItemTitle>{{ cat.categoryName }}</span>
-              <span matListItemMeta>
+            <mat-list-item class="category-row">
+              <span matListItemTitle class="category-title">{{ cat.categoryName }}</span>
+              <span matListItemMeta class="category-actions">
                 <mat-chip-set>
                   <mat-chip [class]="cat.status === 'active' ? 'chip-active' : 'chip-inactive'">{{ cat.status }}</mat-chip>
                 </mat-chip-set>
-                <button mat-icon-button (click)="toggleStatus(cat)" matTooltip="Toggle Status">
+                <button mat-icon-button type="button" (click)="toggleStatus(cat)" matTooltip="Toggle status">
                   <mat-icon>{{ cat.status === 'active' ? 'toggle_on' : 'toggle_off' }}</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" (click)="deleteCategory(cat)">
+                <button mat-icon-button type="button" color="warn" (click)="deleteCategory(cat)" matTooltip="Delete category">
                   <mat-icon>delete</mat-icon>
                 </button>
               </span>
@@ -60,8 +72,10 @@ import { ExpenseCategory } from '../../models/expense.model';
         </mat-list>
       </mat-dialog-content>
 
-      <mat-dialog-actions align="end">
-        <button mat-stroked-button (click)="dialogRef.close()">Close</button>
+      <mat-dialog-actions align="end" class="dialog-footer">
+        <div class="footer-actions">
+          <button mat-stroked-button type="button" class="cancel-btn" (click)="dialogRef.close()">Close</button>
+        </div>
       </mat-dialog-actions>
     </div>
   `,

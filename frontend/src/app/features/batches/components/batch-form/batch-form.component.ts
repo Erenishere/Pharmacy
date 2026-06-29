@@ -69,6 +69,8 @@ export class BatchFormComponent implements OnInit, OnDestroy {
   locationOptions$!: Observable<LocationOption[]>;
 
   private destroy$ = new Subject<void>();
+  private selectedItemDisplay = '';
+  private selectedSupplierDisplay = '';
 
   constructor(
     private fb: FormBuilder,
@@ -136,11 +138,17 @@ export class BatchFormComponent implements OnInit, OnDestroy {
       distinctUntilChanged(),
       switchMap(value => {
         if (typeof value === 'string' && value.length >= 2) {
+          this.clearSelectedItemIfUserTyped(value);
           return this.itemService.getItems({ search: value }).pipe(
             map((response: ItemServiceResponse) => response.success ? response.data : []),
             catchError(() => of([]))
           );
         }
+
+        if (!value) {
+          this.batchForm.patchValue({ itemId: '', batchNumber: '' }, { emitEvent: false });
+        }
+
         return of([]);
       }),
       takeUntil(this.destroy$)
@@ -152,12 +160,25 @@ export class BatchFormComponent implements OnInit, OnDestroy {
       debounceTime(300),
       distinctUntilChanged(),
       switchMap(value => {
+        if (typeof value === 'string') {
+          this.clearSelectedSupplierIfUserTyped(value);
+        }
+
         if (typeof value === 'string' && value.length >= 2) {
-          return this.supplierService.getSuppliers({ search: value, isActive: true }).pipe(
+          if (value.trim().toLowerCase() === 'none') {
+            return of([]);
+          }
+
+          return this.supplierService.getSuppliers({ search: value, type: 'supplier', isActive: true, limit: 20 }).pipe(
             map(response => response.success ? response.data : []),
             catchError(() => of([]))
           );
         }
+
+        if (!value) {
+          this.batchForm.patchValue({ supplierId: '' }, { emitEvent: false });
+        }
+
         return of([]);
       }),
       takeUntil(this.destroy$)
@@ -209,6 +230,8 @@ export class BatchFormComponent implements OnInit, OnDestroy {
       supplierSearch: batch.supplier ? `${batch.supplier.code} - ${batch.supplier.name}` : '',
       notes: batch.notes || ''
     });
+    this.selectedItemDisplay = this.batchForm.get('itemSearch')?.value || '';
+    this.selectedSupplierDisplay = this.batchForm.get('supplierSearch')?.value || '';
   }
 
   // Custom validators
@@ -242,10 +265,13 @@ export class BatchFormComponent implements OnInit, OnDestroy {
 
   // Event handlers
   onItemSelected(item: Item): void {
+    this.selectedItemDisplay = `${item.code} - ${item.name}`;
+
     this.batchForm.patchValue({
       itemId: item._id,
-      itemSearch: `${item.code} - ${item.name}`
+      itemSearch: item
     });
+    this.batchForm.get('itemSearch')?.setErrors(null);
 
     // Auto-generate batch number when item is selected
     if (!this.isEditMode) {
@@ -254,18 +280,36 @@ export class BatchFormComponent implements OnInit, OnDestroy {
   }
 
   onSupplierSelected(supplier: Supplier): void {
+    this.selectedSupplierDisplay = `${supplier.code} - ${supplier.name}`;
+
     this.batchForm.patchValue({
       supplierId: supplier._id,
-      supplierSearch: `${supplier.code} - ${supplier.name}`
+      supplierSearch: supplier
     });
   }
 
-  displayItemFn(item: Item): string {
-    return item ? `${item.code} - ${item.name}` : '';
+  displayItemFn(item: Item | string | null): string {
+    if (!item) {
+      return '';
+    }
+
+    if (typeof item === 'string') {
+      return item;
+    }
+
+    return `${item.code} - ${item.name}`;
   }
 
-  displaySupplierFn(supplier: Supplier): string {
-    return supplier ? `${supplier.code} - ${supplier.name}` : '';
+  displaySupplierFn(supplier: Supplier | string | null): string {
+    if (!supplier) {
+      return '';
+    }
+
+    if (typeof supplier === 'string') {
+      return supplier;
+    }
+
+    return `${supplier.code} - ${supplier.name}`;
   }
 
   private generateBatchNumber(itemId: string): void {
@@ -282,6 +326,8 @@ export class BatchFormComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
+    this.applySelectionValidation();
+
     if (this.batchForm.valid) {
       this.isLoading = true;
       this.loadingService.setLoading(true);
@@ -295,7 +341,7 @@ export class BatchFormComponent implements OnInit, OnDestroy {
       }
     } else {
       this.markFormGroupTouched();
-      this.toastService.error('Please fill in all required fields correctly');
+      this.toastService.error(this.getFirstValidationMessage());
     }
   }
 
@@ -378,6 +424,64 @@ export class BatchFormComponent implements OnInit, OnDestroy {
       const control = this.batchForm.get(key);
       control?.markAsTouched();
     });
+  }
+
+  private clearSelectedItemIfUserTyped(value: string): void {
+    const selectedItemId = this.batchForm.get('itemId')?.value;
+
+    if (!selectedItemId) {
+      return;
+    }
+
+    if (value !== this.selectedItemDisplay) {
+      this.selectedItemDisplay = '';
+      this.batchForm.patchValue({ itemId: '', batchNumber: '' }, { emitEvent: false });
+    }
+  }
+
+  private clearSelectedSupplierIfUserTyped(value: string): void {
+    const selectedSupplierId = this.batchForm.get('supplierId')?.value;
+
+    if (!selectedSupplierId) {
+      return;
+    }
+
+    if (value !== this.selectedSupplierDisplay) {
+      this.selectedSupplierDisplay = '';
+      this.batchForm.patchValue({ supplierId: '' }, { emitEvent: false });
+    }
+  }
+
+  private applySelectionValidation(): void {
+    const itemSearchControl = this.batchForm.get('itemSearch');
+    const itemId = this.batchForm.get('itemId')?.value;
+
+    if (itemSearchControl?.value && !itemId) {
+      itemSearchControl.setErrors({
+        ...(itemSearchControl.errors || {}),
+        selectionRequired: true
+      });
+    }
+  }
+
+  private getFirstValidationMessage(): string {
+    if (this.batchForm.get('itemSearch')?.hasError('selectionRequired') || this.batchForm.get('itemId')?.hasError('required')) {
+      return 'Please select an item from the search results';
+    }
+
+    if (this.batchForm.hasError('dateOrder')) {
+      return 'Expiry date must be after manufacturing date';
+    }
+
+    if (this.batchForm.get('locationId')?.hasError('required')) {
+      return 'Please select a location';
+    }
+
+    if (this.batchForm.get('batchNumber')?.hasError('required')) {
+      return 'Batch number is required';
+    }
+
+    return 'Please fill in all required fields correctly';
   }
 
   onCancel(): void {

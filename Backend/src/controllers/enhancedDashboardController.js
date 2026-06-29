@@ -113,7 +113,7 @@ class EnhancedDashboardController {
         categoryId,
       };
 
-      const analytics = await analyticsService.getSalesAnalytics(filters);
+      const analytics = await analyticsService.getSalesTrends(filters.startDate, filters.endDate, filters.granularity || 'daily');
 
       res.status(200).json({
         success: true,
@@ -143,12 +143,10 @@ class EnhancedDashboardController {
         sortBy = 'turnover_rate',
       } = req.query;
 
-      const performance = await analyticsService.getInventoryPerformance({
-        warehouseId,
-        categoryId,
-        stockStatus,
-        sortBy,
-      });
+      const performance = await analyticsService.getInventoryTurnover(
+        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        new Date()
+      );
 
       res.status(200).json({
         success: true,
@@ -177,12 +175,11 @@ class EnhancedDashboardController {
         segment = 'all',
       } = req.query;
 
-      const behavior = await analyticsService.getCustomerBehavior({
-        startDate: startDate || new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
-        endDate: endDate || new Date(),
-        customerId,
-        segment,
-      });
+      const behavior = await analyticsService.getTopCustomers(
+        startDate || new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+        endDate || new Date(),
+        10
+      );
 
       res.status(200).json({
         success: true,
@@ -197,7 +194,57 @@ class EnhancedDashboardController {
       });
     }
   }
+  /**
+   * Get operational metrics
+   * @route GET /api/v1/dashboard/operational-metrics
+   */
+  async getOperationalMetrics(req, res) {
+    try {
+      const metrics = await analyticsService.getPaymentCollectionEfficiency(new Date());
 
+      res.status(200).json({
+        success: true,
+        data: metrics,
+      });
+    } catch (error) {
+      console.error('Operational metrics error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch operational metrics',
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * Get financial health insights
+   * @route GET /api/v1/dashboard/financial-health
+   */
+  async getFinancialHealth(req, res) {
+    try {
+      const {
+        startDate,
+        endDate,
+      } = req.query;
+
+      const health = await analyticsService.getProfitMargins(
+        startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        endDate || new Date()
+      );
+
+      res.status(200).json({
+        success: true,
+        data: health,
+      });
+    } catch (error) {
+      console.error('Financial health error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch financial health',
+        error: error.message,
+      });
+    }
+  }
   // Private helper methods
   _calculateDateRange(startDate, endDate, period) {
     if (startDate && endDate) {
@@ -228,27 +275,29 @@ class EnhancedDashboardController {
   }
 
   async _getKPIs(startDate, endDate) {
-    return await dashboardService.getKPIs(startDate, endDate);
+    return await analyticsService.getRealTimeKPIs();
   }
 
   async _getSalesTrend(startDate, endDate) {
-    return await analyticsService.getSalesTrendAggregation(12);
+    return await analyticsService.getSalesTrends(startDate, endDate, 'daily');
   }
 
   async _getInventoryMetrics() {
-    return await analyticsService.getInventoryMetrics();
+    const now = new Date();
+    const lastMonth = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    return await analyticsService.getInventoryTurnover(lastMonth, now);
   }
 
   async _getCustomerInsights(startDate, endDate) {
-    return await analyticsService.getCustomerInsights(startDate, endDate);
+    return await analyticsService.getTopCustomers(startDate, endDate, 10);
   }
 
   async _getOperationalMetrics() {
-    return await analyticsService.getOperationalMetrics();
+    return await analyticsService.getPaymentCollectionEfficiency(new Date());
   }
 
   async _getFinancialHealth(startDate, endDate) {
-    return await analyticsService.getFinancialHealth(startDate, endDate);
+    return await analyticsService.getProfitMargins(startDate, endDate);
   }
 
   async _getCachedDashboard(period) {

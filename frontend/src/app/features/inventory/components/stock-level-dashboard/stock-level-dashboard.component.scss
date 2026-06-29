@@ -60,7 +60,7 @@
 
   /* Enhanced Filter Alignment */
   .list-filters-section {
-    flex-wrap: nowrap; /* Prevent items from dropping to next line on large desktop */
+    flex-wrap: nowrap;
     align-items: center;
     gap: 16px;
 
@@ -72,7 +72,7 @@
     .filter-group-secondary {
       flex: 2;
       justify-content: flex-end;
-      flex-wrap: nowrap; /* Keep dropdowns in line */
+      flex-wrap: nowrap;
       
       .filter-field {
         min-width: 140px;
@@ -94,7 +94,7 @@
     }
   }
 
-  /* Table Wrapper Horizontal Scroll */
+  /* Table Wrapper */
   .table-wrapper {
     overflow-x: auto !important;
     width: 100% !important;
@@ -128,32 +128,6 @@
       .meta {
         font-size: 11px;
         color: $grey-dark;
-      }
-    }
-
-    .stock-badge {
-      font-weight: 600;
-      padding: 4px 8px;
-      border-radius: 4px;
-      background: rgba($success, 0.1);
-      color: $success;
-
-      &.low {
-        background: rgba($danger, 0.1);
-        color: $danger;
-      }
-    }
-
-    .warehouse-chip {
-      background: linear-gradient(135deg, rgba($primary, 0.12) 0%, rgba($primary, 0.08) 100%);
-      border: 1px solid rgba($primary, 0.2);
-      color: darken($primary, 14%);
-      font-weight: 700;
-      letter-spacing: 0.01em;
-
-      ::ng-deep .mdc-evolution-chip__text-label {
-        color: darken($primary, 14%) !important;
-        opacity: 1 !important;
       }
     }
   }

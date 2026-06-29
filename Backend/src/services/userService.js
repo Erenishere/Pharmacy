@@ -143,7 +143,7 @@ class UserService {
 
     // Validate dimensionId if provided (Requirement 10.2)
     if (dimensionId) {
-      const DimensionBranch = require('../models/DimensionBranch');
+      const DimensionBranch = require('../models/dimensionbranch');
       const dimension = await DimensionBranch.findById(dimensionId);
       if (!dimension) {
         throw new Error('Dimension not found');
@@ -234,7 +234,7 @@ class UserService {
 
     // Validate dimensionId if provided (Requirement 10.2)
     if (updateData.dimensionId) {
-      const DimensionBranch = require('../models/DimensionBranch');
+      const DimensionBranch = require('../models/dimensionbranch');
       const dimension = await DimensionBranch.findById(updateData.dimensionId);
       if (!dimension) {
         throw new Error('Dimension not found');
@@ -508,7 +508,6 @@ class UserService {
           commissionRate: 0,
           isActive: true,
         });
-        console.log(`Created missing salesman profile for user: ${user.username}`);
       }
     } catch (error) {
       console.error(`Failed to ensure salesman profile for ${user.username}:`, error.message);
@@ -559,7 +558,7 @@ class UserService {
 
       // Validate dimension IDs if provided
       if (permissions.dataAccess.allowedDimensions && permissions.dataAccess.allowedDimensions.length > 0) {
-        const DimensionBranch = require('../models/DimensionBranch');
+        const DimensionBranch = require('../models/dimensionbranch');
         const dimensionChecks = await Promise.all(
           permissions.dataAccess.allowedDimensions.map((dimId) => DimensionBranch.findById(dimId)),
         );

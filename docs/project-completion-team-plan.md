@@ -114,6 +114,7 @@ Acceptance criteria:
 Verification:
 
 - Reconciliation tests after purchase, sale, sales return, purchase return, transfer, adjustment, reservation/release/fulfill, and physical count.
+- 2026-05-20 status: exact warehouse/batch removal is now protected by focused source-of-truth regression coverage and full backend Jest proof. Browser smoke still requires an approved smoke/test database before this lane can be called shipment-ready.
 
 ### P1: Invoice Workflow Correctness
 
@@ -242,4 +243,5 @@ Verification:
 5. Completed 2026-05-08: monitoring index snapshot uplift with parallel collection stats, short-route caching, and a benchmark budget entry for `/api/v1/monitoring/indexes`.
 6. Completed 2026-05-08: backend warm-cache uplift for `/api/v1/accounts/registration-lookups` with supporting master-data invalidation.
 7. Completed 2026-05-08: cashbook lookup-bundle optimization with projected `/api/v1/cashbook/lookups`, per-mode frontend caching, deferred supplier-mode boot, and focused API/build proof.
-8. Next: run the baseline against the dev/staging dataset, then tune the worst measured route first.
+8. Completed 2026-05-31: item list database retrieval hardening with literal-safe keyword search, bounded pagination defaults, compound indexes for common item list filters/sorts, and concurrent shared pagination helper reads.
+9. Next: run the baseline against the dev/staging dataset, then tune the worst measured route first.

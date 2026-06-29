@@ -1,5 +1,6 @@
 const salaryCalculationService = require('../services/salaryCalculationService');
 const SalaryCalculation = require('../models/SalaryCalculation');
+const SalaryPackage = require('../models/SalaryPackage');
 
 /**
  * Salary Calculation Controller
@@ -12,15 +13,30 @@ class SalaryCalculationController {
    */
   async calculateSalary(req, res) {
     try {
-      const { packageId, month, year } = req.body;
+      let { packageId, employeeId, employee, month, year } = req.body;
       const userId = req.user.id;
+
+      const empId = employeeId || employee;
+
+      // Resolve active package if packageId not explicitly supplied but employee reference is
+      if (!packageId && empId) {
+        const activePackage = await SalaryPackage.findOne({ employeeId: empId, status: 'Active' });
+        if (!activePackage) {
+          return res.status(400).json({
+            success: false,
+            error: 'No active salary package found',
+            message: 'An active salary package is required for this employee to calculate salary.',
+          });
+        }
+        packageId = activePackage._id;
+      }
 
       // Validate required fields
       if (!packageId || !month || !year) {
         return res.status(400).json({
           success: false,
           error: 'Missing required fields',
-          message: 'packageId, month, and year are required',
+          message: 'employeeId (or packageId), month, and year are required',
         });
       }
 

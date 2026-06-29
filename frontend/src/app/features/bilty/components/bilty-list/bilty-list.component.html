@@ -198,17 +198,17 @@
             </td>
           </tr>
         </table>
-
-        <mat-paginator
-          class="standard-purple-footer"
-          [length]="totalItems"
-          [pageSize]="pageSize"
-          [pageIndex]="pageIndex"
-          [pageSizeOptions]="[20, 50, 100]"
-          (page)="onPage($event)"
-          showFirstLastButtons>
-        </mat-paginator>
       </div>
+
+      <mat-paginator
+        class="standard-purple-footer"
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="[20, 50, 100]"
+        (page)="onPage($event)"
+        showFirstLastButtons>
+      </mat-paginator>
     }
   </div>
 </div>

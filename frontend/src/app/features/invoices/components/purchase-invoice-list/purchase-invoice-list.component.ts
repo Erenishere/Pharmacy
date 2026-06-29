@@ -471,14 +471,6 @@ export class PurchaseInvoiceListComponent implements OnInit, OnDestroy {
     this.toastService.success('Purchase invoice exported');
   }
 
-  calculateTotalAmount(invoices: Invoice[]): number {
-    return invoices.reduce((sum, inv) => sum + (inv.totals?.grandTotal || 0), 0);
-  }
-
-  calculateTotalGST(invoices: Invoice[]): number {
-    return invoices.reduce((sum, inv) => sum + this.getTotalGST(inv), 0);
-  }
-
   trackByValue(index: number, item: any): any { return item.value; }
   trackById(index: number, item: any): string { return item._id; }
 

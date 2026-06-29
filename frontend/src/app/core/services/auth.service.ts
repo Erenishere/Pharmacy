@@ -76,6 +76,13 @@ export class AuthService {
         );
     }
 
+    verifyOTP(email: string, otp: string): Observable<ApiResponse<{ token: string }>> {
+        return this.http.post<ApiResponse<{ token: string }>>(
+            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.VERIFY_OTP}`,
+            { email, otp }
+        );
+    }
+
     resetPassword(token: string, password: string): Observable<ApiResponse<null>> {
         return this.http.post<ApiResponse<null>>(
             `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.RESET_PASSWORD}`,

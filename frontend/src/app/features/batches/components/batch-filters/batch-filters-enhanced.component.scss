@@ -50,18 +50,17 @@
 
 // Standardized Filters Section Layout
 .filters-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 24px;
     margin-bottom: 0;
-    flex-wrap: wrap;
+    width: 100%;
 
     .search-filters {
-        flex: 1 1 540px;
-        min-width: 320px;
+        width: 100%;
         display: flex;
-        gap: 16px;
+        min-width: 0;
 
         .search-field {
             width: 100%;
@@ -73,6 +72,20 @@
 
                 .mat-mdc-text-field-wrapper {
                     background-color: #FCFCFD !important;
+                }
+
+                input.mat-mdc-input-element {
+                    color: #5E5873 !important;
+
+                    &::placeholder {
+                        color: #A8A5B6 !important;
+                        opacity: 1 !important;
+                    }
+                }
+
+                .batch-filter-search-input.mat-mdc-input-element::placeholder {
+                    color: #A8A5B6 !important;
+                    opacity: 1 !important;
                 }
 
                 .mdc-notched-outline__leading,
@@ -110,11 +123,12 @@
 
     .action-buttons {
         display: flex;
-        gap: 10px;
+        gap: 12px;
         align-items: center;
         justify-content: flex-end;
         flex-shrink: 0;
-        flex-wrap: wrap;
+        white-space: nowrap;
+        min-width: max-content;
 
         button {
             height: 48px;
@@ -343,8 +357,10 @@
 // Responsive Design
 @media (max-width: 992px) {
     .filters-section {
+        display: flex;
         flex-direction: column;
         align-items: stretch;
+        gap: 16px;
 
         .action-buttons {
             justify-content: flex-start;

@@ -156,7 +156,6 @@ async function createOptimizedIndexes() {
       { name: 'idx_user_role_active_login' },
     );
 
-    console.log('✓ All optimized compound indexes created successfully');
   } catch (error) {
     console.error('Error creating optimized indexes:', error);
     throw error;

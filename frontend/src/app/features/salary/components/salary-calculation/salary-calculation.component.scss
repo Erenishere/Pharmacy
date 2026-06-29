@@ -1,42 +1,67 @@
+@import 'styles/shared-list-styles';
+@import 'styles/vuexy-vars';
+
+:host {
+  display: block;
+  background: var(--indus-bg-page, #f8f7fa);
+}
+
 .salary-calculation-container {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  @include page-container;
+  max-width: 1400px;
 }
 
 .calculation-card {
+  @include list-card;
+  overflow: hidden;
+  border: 1px solid var(--indus-border, #ebe9f1);
+
   mat-card-header {
-    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    min-height: 88px;
+    margin: 0;
+    padding: 22px 24px !important;
+    border-bottom: 1px solid var(--indus-border, #ebe9f1);
+    background: linear-gradient(135deg, var(--indus-surface, #ffffff) 0%, var(--indus-surface-muted, #f8f7fa) 100%);
 
     mat-card-title {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 14px;
+      margin: 0;
+      padding-left: 16px;
+      border-left: 5px solid var(--indus-primary, #7367f0);
+      color: var(--indus-text, #5e5873);
       font-size: 24px;
-      font-weight: 600;
-      color: #333;
+      font-weight: 800;
+      line-height: 1.25;
 
       mat-icon {
-        font-size: 28px;
-        width: 28px;
-        height: 28px;
+        color: var(--indus-primary, #7367f0);
+        font-size: 30px;
+        width: 30px;
+        height: 30px;
       }
     }
   }
 
   mat-card-content {
-    padding: 20px;
+    padding: 0 !important;
   }
 }
 
 .calculation-form {
-  margin-bottom: 30px;
+  margin: 0;
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--indus-border, #ebe9f1);
+  background: var(--indus-surface, #ffffff);
 
   .form-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: 18px;
+    margin: 0;
   }
 
   .form-field {
@@ -46,19 +71,19 @@
   .form-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
+    margin-top: 4px;
 
     button {
-      min-width: 180px;
-      height: 45px;
-      font-size: 16px;
+      min-width: 190px;
+      min-height: 44px;
+      border-radius: var(--indus-radius-sm, 8px);
+      background: linear-gradient(135deg, var(--indus-primary, #7367f0) 0%, var(--indus-primary-dark, #5e50ee) 100%) !important;
+      box-shadow: var(--indus-shadow-button, 0 8px 18px rgba(115, 103, 240, 0.28));
+      color: var(--indus-white, #ffffff) !important;
+      font-weight: 800;
 
-      mat-icon {
-        margin-right: 8px;
-      }
-
+      mat-icon,
       mat-spinner {
-        display: inline-block;
         margin-right: 8px;
       }
     }
@@ -66,127 +91,149 @@
 }
 
 mat-divider {
-  margin: 30px 0;
+  display: none;
 }
 
 .calculation-results {
-  margin-top: 30px;
+  margin: 0;
+  padding: 28px 32px 32px;
+  background: var(--indus-surface, #ffffff);
 
   .results-header {
-    margin-bottom: 30px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #e0e0e0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 26px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--indus-border, #ebe9f1);
 
     h2 {
-      margin: 0 0 10px 0;
+      margin: 0;
+      color: var(--indus-text, #5e5873);
       font-size: 28px;
-      font-weight: 600;
-      color: #333;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: 0;
     }
 
     .employee-info {
       display: flex;
-      gap: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
       align-items: center;
+      justify-content: flex-end;
 
       .employee-name {
-        font-size: 18px;
-        font-weight: 500;
-        color: #555;
+        color: var(--indus-text, #5e5873);
+        font-size: 16px;
+        font-weight: 800;
       }
 
       .calculation-period {
-        font-size: 16px;
-        color: #777;
-        padding: 4px 12px;
-        background-color: #f5f5f5;
-        border-radius: 4px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: var(--indus-primary-soft, rgba(115, 103, 240, 0.1));
+        color: var(--indus-primary, #7367f0);
+        font-size: 13px;
+        font-weight: 800;
       }
     }
   }
 
   .section {
-    margin-bottom: 30px;
+    margin-bottom: 28px;
 
     .section-title {
+      display: flex;
+      align-items: center;
+      margin: 0 0 16px;
+      padding-left: 14px;
+      border-left: 5px solid var(--indus-primary, #7367f0);
+      color: var(--indus-text, #5e5873);
       font-size: 18px;
-      font-weight: 600;
-      color: #555;
-      margin-bottom: 15px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid #4CAF50;
+      font-weight: 800;
+      line-height: 1.35;
+      letter-spacing: 0;
     }
   }
 
   .component-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
 
     .component-item {
-      padding: 15px;
-      background-color: #f9f9f9;
-      border-radius: 8px;
-      border-left: 4px solid #4CAF50;
       display: flex;
+      min-height: 94px;
       flex-direction: column;
-      gap: 5px;
+      justify-content: center;
+      gap: 6px;
+      padding: 18px 20px;
+      border: 1px solid var(--indus-border, #ebe9f1);
+      border-left: 5px solid var(--indus-primary, #7367f0);
+      border-radius: var(--indus-radius-sm, 8px);
+      background: var(--indus-surface-muted, #f8f7fa);
 
       .component-label {
-        font-size: 14px;
-        font-weight: 600;
-        color: #666;
+        color: var(--indus-text-soft, #6e6b7b);
+        font-size: 13px;
+        font-weight: 800;
       }
 
       .component-sublabel {
+        color: var(--indus-text-muted, #b9b9c3);
         font-size: 12px;
-        color: #888;
+        font-weight: 600;
       }
 
       .component-value {
-        font-size: 18px;
-        font-weight: 700;
-        color: #333;
-        font-family: 'Courier New', monospace;
+        color: var(--indus-text, #5e5873);
+        font-family: inherit;
+        font-size: 21px;
+        font-weight: 800;
+        line-height: 1.2;
 
         &.deduction {
-          color: #f44336;
+          color: var(--indus-danger, #ea5455);
         }
       }
     }
   }
 
   .incentive-card {
-    margin-bottom: 15px;
-    padding: 15px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    border-left: 4px solid #2196F3;
+    margin-bottom: 16px;
+    padding: 18px 20px;
+    border: 1px solid var(--indus-border, #ebe9f1);
+    border-left: 5px solid var(--indus-primary, #7367f0);
+    border-radius: var(--indus-radius-sm, 8px);
+    background: var(--indus-surface-muted, #f8f7fa);
 
     .incentive-header {
       display: flex;
       justify-content: space-between;
+      gap: 16px;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
 
       .incentive-name {
+        color: var(--indus-text, #5e5873);
         font-size: 16px;
-        font-weight: 600;
-        color: #555;
+        font-weight: 800;
       }
 
       .incentive-amount {
-        font-size: 20px;
-        font-weight: 700;
-        color: #2196F3;
-        font-family: 'Courier New', monospace;
+        color: var(--indus-primary, #7367f0);
+        font-family: inherit;
+        font-size: 22px;
+        font-weight: 800;
       }
     }
 
     .incentive-details {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
+      grid-template-columns: repeat(3, minmax(160px, 1fr));
+      gap: 14px;
 
       .detail-item {
         display: flex;
@@ -194,22 +241,23 @@ mat-divider {
         gap: 4px;
 
         .detail-label {
+          color: var(--indus-text-muted, #b9b9c3);
           font-size: 12px;
-          color: #888;
-          font-weight: 500;
+          font-weight: 800;
+          text-transform: uppercase;
         }
 
         .detail-value {
+          color: var(--indus-text, #5e5873);
           font-size: 14px;
-          font-weight: 600;
-          color: #333;
+          font-weight: 800;
 
           &.achieved {
-            color: #4CAF50;
+            color: var(--indus-success, #28c76f);
           }
 
           &.not-achieved {
-            color: #f44336;
+            color: var(--indus-danger, #ea5455);
           }
         }
       }
@@ -219,16 +267,18 @@ mat-divider {
   .brand-incentives-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 
     .brand-incentive-item {
       display: flex;
       justify-content: space-between;
+      gap: 16px;
       align-items: center;
-      padding: 12px 15px;
-      background-color: #f9f9f9;
-      border-radius: 8px;
-      border-left: 4px solid #FF9800;
+      padding: 16px 18px;
+      border: 1px solid var(--indus-border, #ebe9f1);
+      border-left: 5px solid var(--indus-warning, #ff9f43);
+      border-radius: var(--indus-radius-sm, 8px);
+      background: var(--indus-surface-muted, #f8f7fa);
 
       .brand-info {
         display: flex;
@@ -236,22 +286,23 @@ mat-divider {
         gap: 4px;
 
         .brand-name {
+          color: var(--indus-text, #5e5873);
           font-size: 15px;
-          font-weight: 600;
-          color: #555;
+          font-weight: 800;
         }
 
         .brand-target {
+          color: var(--indus-text-soft, #6e6b7b);
           font-size: 12px;
-          color: #888;
+          font-weight: 600;
         }
       }
 
       .brand-amount {
+        color: var(--indus-warning, #ff9f43);
+        font-family: inherit;
         font-size: 18px;
-        font-weight: 700;
-        color: #FF9800;
-        font-family: 'Courier New', monospace;
+        font-weight: 800;
       }
     }
   }
@@ -259,59 +310,65 @@ mat-divider {
   .total-row {
     display: flex;
     justify-content: space-between;
+    gap: 18px;
     align-items: center;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 15px;
+    padding: 18px 22px;
+    border-radius: var(--indus-radius-sm, 8px);
+    margin-bottom: 0;
+
+    .total-label,
+    .total-value {
+      font-weight: 800;
+      line-height: 1.2;
+    }
 
     .total-label {
-      font-size: 20px;
-      font-weight: 700;
+      font-size: 18px;
     }
 
     .total-value {
+      font-family: inherit;
       font-size: 24px;
-      font-weight: 700;
-      font-family: 'Courier New', monospace;
     }
 
     &.gross-salary {
-      background-color: #E3F2FD;
-      border: 2px solid #2196F3;
+      border: 1px solid rgba(115, 103, 240, 0.26);
+      background: var(--indus-primary-soft, rgba(115, 103, 240, 0.1));
 
-      .total-label {
-        color: #1976D2;
-      }
-
+      .total-label,
       .total-value {
-        color: #1976D2;
+        color: var(--indus-primary, #7367f0);
       }
     }
 
     &.net-salary {
-      background-color: #4CAF50;
-      border: 2px solid #388E3C;
+      background: linear-gradient(135deg, var(--indus-primary, #7367f0) 0%, var(--indus-primary-dark, #5e50ee) 100%);
 
       .total-label,
       .total-value {
-        color: white;
+        color: var(--indus-white, #ffffff);
       }
     }
   }
 
   .print-actions {
     display: flex;
-    justify-content: center;
-    margin-top: 30px;
+    justify-content: flex-end;
+    margin-top: 28px;
     padding-top: 20px;
-    border-top: 2px solid #e0e0e0;
+    border-top: 1px solid var(--indus-border, #ebe9f1);
 
     button {
-      min-width: 200px;
-      height: 45px;
-      font-size: 16px;
+      min-width: 190px;
+      min-height: 44px;
+      border-radius: var(--indus-radius-sm, 8px);
+      background: var(--indus-primary-soft, rgba(115, 103, 240, 0.1)) !important;
+      color: var(--indus-primary, #7367f0) !important;
+      font-weight: 800;
+      box-shadow: none !important;
 
       mat-icon {
+        color: var(--indus-primary, #7367f0) !important;
         margin-right: 8px;
       }
     }
@@ -320,53 +377,99 @@ mat-divider {
 
 .loading-container {
   display: flex;
+  min-height: 240px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px;
-  gap: 20px;
+  gap: 16px;
+  padding: 40px 24px;
+  color: var(--indus-text-soft, #6e6b7b);
 
   p {
-    font-size: 16px;
-    color: #666;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
   }
 }
 
-// Responsive Design
-@media (max-width: 768px) {
+::ng-deep {
   .salary-calculation-container {
-    padding: 10px;
+    .mat-mdc-form-field .mdc-text-field--outlined {
+      background-color: var(--indus-surface, #ffffff) !important;
+      border-radius: var(--indus-radius-sm, 8px) !important;
+    }
+
+    .mat-mdc-form-field .mdc-notched-outline__leading,
+    .mat-mdc-form-field .mdc-notched-outline__notch,
+    .mat-mdc-form-field .mdc-notched-outline__trailing {
+      border-color: var(--indus-border-strong, #d8d6de) !important;
+      border-width: 1px !important;
+    }
+
+    .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+    .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+    .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+      border-color: var(--indus-primary, #7367f0) !important;
+      border-width: 2px !important;
+    }
+
+    .mdc-floating-label,
+    .mat-mdc-select-value {
+      color: var(--indus-text, #5e5873) !important;
+      letter-spacing: 0 !important;
+    }
+
+    .mat-mdc-form-field.mat-focused .mdc-floating-label,
+    .mat-mdc-select-arrow {
+      color: var(--indus-primary, #7367f0) !important;
+    }
+  }
+}
+
+@media (max-width: 960px) {
+  .calculation-form .form-row,
+  .calculation-results .incentive-card .incentive-details {
+    grid-template-columns: 1fr;
   }
 
-  .calculation-form {
-    .form-row {
-      grid-template-columns: 1fr;
+  .calculation-results .results-header {
+    flex-direction: column;
+
+    .employee-info {
+      justify-content: flex-start;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .salary-calculation-container {
+    padding: 16px;
+  }
+
+  .calculation-form,
+  .calculation-results {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .calculation-form .form-actions,
+  .calculation-results .print-actions {
+    justify-content: stretch;
+
+    button {
+      width: 100%;
     }
   }
 
   .calculation-results {
-    .results-header {
-      .employee-info {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
-    }
-
     .component-grid {
       grid-template-columns: 1fr;
     }
 
-    .incentive-card {
-      .incentive-details {
-        grid-template-columns: 1fr;
-      }
-    }
-
+    .brand-incentives-list .brand-incentive-item,
     .total-row {
       flex-direction: column;
-      gap: 10px;
-      text-align: center;
+      align-items: flex-start;
     }
   }
 }

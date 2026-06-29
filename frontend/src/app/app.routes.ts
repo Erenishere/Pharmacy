@@ -23,6 +23,7 @@ export const routes: Routes = [
         children: [
             {
                 path: 'dashboard',
+                data: { reuse: true },
                 loadComponent: () => import('./features/dashboard/components/dashboard.component').then(m => m.DashboardComponent)
             },
             {

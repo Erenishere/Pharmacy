@@ -34,30 +34,48 @@
         <span>Loading capital statement...</span>
       </div>
     } @else if (statement) {
-      <div class="statement-grid">
-        <div class="metric-card">
-          <span class="metric-label">Net Capital</span>
-          <strong>{{ fmtNum(statement.netCapital || 0) }}</strong>
+      <div class="dashboard-stats-grid">
+        <div class="stat-card success">
+          <div class="stat-icon-wrapper"><mat-icon>account_balance</mat-icon></div>
+          <div class="stat-data">
+            <span class="value">PKR {{ fmtNum(statement.netCapital || 0) }}</span>
+            <span class="label">Net Capital</span>
+          </div>
         </div>
-        <div class="metric-card">
-          <span class="metric-label">Capital In</span>
-          <strong>{{ fmtNum(statement.capitalSummary?.totalCapitalIn || 0) }}</strong>
+        <div class="stat-card primary">
+          <div class="stat-icon-wrapper"><mat-icon>trending_up</mat-icon></div>
+          <div class="stat-data">
+            <span class="value">PKR {{ fmtNum(statement.capitalSummary?.totalCapitalIn || 0) }}</span>
+            <span class="label">Capital In</span>
+          </div>
         </div>
-        <div class="metric-card">
-          <span class="metric-label">Capital Out</span>
-          <strong>{{ fmtNum(statement.capitalSummary?.totalCapitalOut || 0) }}</strong>
+        <div class="stat-card danger">
+          <div class="stat-icon-wrapper"><mat-icon>trending_down</mat-icon></div>
+          <div class="stat-data">
+            <span class="value">PKR {{ fmtNum(statement.capitalSummary?.totalCapitalOut || 0) }}</span>
+            <span class="label">Capital Out</span>
+          </div>
         </div>
-        <div class="metric-card">
-          <span class="metric-label">Cash In Hand</span>
-          <strong>{{ fmtNum(statement.cashInHand || 0) }}</strong>
+        <div class="stat-card info">
+          <div class="stat-icon-wrapper"><mat-icon>payments</mat-icon></div>
+          <div class="stat-data">
+            <span class="value">PKR {{ fmtNum(statement.cashInHand || 0) }}</span>
+            <span class="label">Cash In Hand</span>
+          </div>
         </div>
-        <div class="metric-card">
-          <span class="metric-label">Bank Cash</span>
-          <strong>{{ fmtNum(statement.bankCash || 0) }}</strong>
+        <div class="stat-card warning">
+          <div class="stat-icon-wrapper"><mat-icon>account_balance_wallet</mat-icon></div>
+          <div class="stat-data">
+            <span class="value">PKR {{ fmtNum(statement.bankCash || 0) }}</span>
+            <span class="label">Bank Cash</span>
+          </div>
         </div>
-        <div class="metric-card">
-          <span class="metric-label">Stock Value</span>
-          <strong>{{ fmtNum(statement.stockValue || 0) }}</strong>
+        <div class="stat-card primary">
+          <div class="stat-icon-wrapper"><mat-icon>inventory_2</mat-icon></div>
+          <div class="stat-data">
+            <span class="value">PKR {{ fmtNum(statement.stockValue || 0) }}</span>
+            <span class="label">Stock Value</span>
+          </div>
         </div>
       </div>
 
@@ -201,7 +219,7 @@
   </div>
 
   <div class="list-page-card">
-    <div class="list-filters-section">
+    <div class="list-filters-section table-toolbar">
       <div class="filter-group-primary">
         <div class="section-title">
           <mat-icon>list_alt</mat-icon>

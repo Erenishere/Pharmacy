@@ -28,7 +28,6 @@ class CacheService {
       deletes: 0,
     };
 
-    console.log('[Cache] In-memory cache initialized');
   }
 
   /**
@@ -254,7 +253,6 @@ class CacheService {
    * Pre-populates cache with frequently accessed data
    */
   async warmMasterDataCache() {
-    console.log('[Cache] Warming master data cache...');
     
     try {
       // Cache items
@@ -276,7 +274,6 @@ class CacheService {
       });
 
       await Promise.all([...itemPromises, ...codePromises]);
-      console.log(`[Cache] Cached ${items.length} items`);
 
       // Cache customers
       const Customer = require('../models/Customer');
@@ -296,9 +293,7 @@ class CacheService {
       });
 
       await Promise.all([...customerPromises, ...customerCodePromises]);
-      console.log(`[Cache] Cached ${customers.length} customers`);
 
-      console.log('[Cache] Master data cache warming complete');
       return true;
     } catch (error) {
       console.error('[Cache] Error warming master data:', error);
@@ -371,7 +366,6 @@ class CacheService {
   async clear() {
     try {
       this.cache.flushAll();
-      console.log('[Cache] Cache cleared');
       return true;
     } catch (error) {
       console.error('[Cache] Clear error:', error);

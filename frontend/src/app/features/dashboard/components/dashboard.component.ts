@@ -11,14 +11,20 @@ import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import {
   DashboardAlert,
+  ExpenseCategoryBreakdown,
+  ExpiryItem,
   DashboardGranularity,
   DashboardOverview,
   DashboardOverviewService,
   DashboardPeriod,
   LowStockItem,
+  SalesmanPerformance,
+  TopCustomer,
+  TopItem,
 } from '../services/dashboard-overview.service';
 
 Chart.register(...registerables);
+Chart.defaults.font.family = "'Moderne Sans', 'Modern Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
 interface PeriodOption {
   label: string;
@@ -41,6 +47,15 @@ interface HeroHighlightView {
   hint: string;
   icon: string;
   tone: 'primary' | 'success' | 'info' | 'warning' | 'danger';
+}
+
+interface OperationalVitalView {
+  label: string;
+  value: string;
+  hint: string;
+  icon: string;
+  tone: 'primary' | 'success' | 'info' | 'warning' | 'danger';
+  route: string;
 }
 
 @Component({
@@ -94,10 +109,22 @@ export class DashboardComponent implements OnInit {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: false },
+      legend: {
+        labels: {
+          color: '#6E6B7B',
+          usePointStyle: true,
+          pointStyle: 'circle',
+        },
+      },
       tooltip: {
         callbacks: {
-          label: (context) => `Sales: ${this.formatCurrency(context.parsed.y ?? 0)}`,
+          label: (context) => {
+            if (context.dataset.label === 'Invoices') {
+              return `Invoices: ${this.formatNumber(context.parsed.y ?? 0)}`;
+            }
+
+            return `Sales: ${this.formatCurrency(context.parsed.y ?? 0)}`;
+          },
         },
       },
     },
@@ -113,6 +140,15 @@ export class DashboardComponent implements OnInit {
         ticks: {
           color: '#6E6B7B',
           callback: (value) => this.formatCompactCurrency(Number(value)),
+        },
+      },
+      y1: {
+        beginAtZero: true,
+        position: 'right',
+        grid: { display: false },
+        ticks: {
+          color: '#00A9C0',
+          precision: 0,
         },
       },
     },
@@ -163,6 +199,87 @@ export class DashboardComponent implements OnInit {
       y: {
         beginAtZero: true,
         suggestedMax: 1,
+        grid: { color: 'rgba(115, 103, 240, 0.08)' },
+        ticks: {
+          color: '#6E6B7B',
+          callback: (value) => this.formatCompactCurrency(Number(value)),
+        },
+      },
+    },
+  };
+
+  warehouseValueData: ChartData<'bar'> = {
+    labels: [],
+    datasets: [
+      {
+        label: 'Inventory Value',
+        data: [],
+        backgroundColor: 'rgba(115, 103, 240, 0.86)',
+        borderRadius: 10,
+        maxBarThickness: 22,
+      },
+    ],
+  };
+
+  warehouseValueOptions: ChartConfiguration<'bar'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (context) => `Inventory value: ${this.formatCurrency(context.parsed.x ?? 0)}`,
+        },
+      },
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        grid: { color: 'rgba(115, 103, 240, 0.08)' },
+        ticks: {
+          color: '#6E6B7B',
+          callback: (value) => this.formatCompactCurrency(Number(value)),
+        },
+      },
+      y: {
+        grid: { display: false },
+        ticks: { color: '#6E6B7B' },
+      },
+    },
+  };
+
+  expenseBreakdownData: ChartData<'bar'> = {
+    labels: [],
+    datasets: [
+      {
+        label: 'Expense',
+        data: [],
+        backgroundColor: 'rgba(255, 159, 67, 0.86)',
+        borderRadius: 10,
+        maxBarThickness: 22,
+      },
+    ],
+  };
+
+  expenseBreakdownOptions: ChartConfiguration<'bar'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (context) => `Spend: ${this.formatCurrency(context.parsed.y ?? 0)}`,
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { color: '#6E6B7B' },
+      },
+      y: {
+        beginAtZero: true,
         grid: { color: 'rgba(115, 103, 240, 0.08)' },
         ticks: {
           color: '#6E6B7B',
@@ -292,6 +409,115 @@ export class DashboardComponent implements OnInit {
         tone: finance.pdc.overdue > 0 ? 'danger' : 'info',
       },
     ];
+  }
+
+  get operationalVitals(): OperationalVitalView[] {
+    if (!this.overview) {
+      return [];
+    }
+
+    const { summary, finance, operations } = this.overview;
+
+    return [
+      {
+        label: 'Receivables',
+        value: this.formatCompactCurrency(summary.receivablesDue.value),
+        hint: `${summary.receivablesDue.count} overdue invoices`,
+        icon: 'request_quote',
+        tone: summary.receivablesDue.count > 0 ? 'warning' : 'success',
+        route: summary.receivablesDue.route,
+      },
+      {
+        label: 'Payables',
+        value: this.formatCompactCurrency(summary.payablesDue.value),
+        hint: `${summary.payablesDue.count} supplier dues`,
+        icon: 'receipt_long',
+        tone: summary.payablesDue.count > 0 ? 'danger' : 'success',
+        route: summary.payablesDue.route,
+      },
+      {
+        label: 'PDC Queue',
+        value: this.formatNumber(finance.pdc.overdue),
+        hint: `${this.formatCompactCurrency(finance.pdc.totalPendingAmount)} pending`,
+        icon: 'event_busy',
+        tone: finance.pdc.overdue > 0 ? 'danger' : 'info',
+        route: finance.pdc.route,
+      },
+      {
+        label: 'Route Coverage',
+        value: this.formatPercent(operations.routeCoverage),
+        hint: `${this.formatNumber(operations.dispatchBacklog)} dispatch backlog`,
+        icon: 'route',
+        tone: operations.routeCoverage >= 80 ? 'success' : 'warning',
+        route: '/route-plans',
+      },
+    ];
+  }
+
+  get visibleAlerts(): DashboardAlert[] {
+    return this.overview?.alerts.slice(0, 5) || [];
+  }
+
+  get visibleLowStock(): LowStockItem[] {
+    return this.overview?.inventory.lowStock.slice(0, 5) || [];
+  }
+
+  get visibleSalesmen(): SalesmanPerformance[] {
+    return this.overview?.commercial.salesmen.slice(0, 5) || [];
+  }
+
+  get visibleTopCustomers(): TopCustomer[] {
+    return this.overview?.commercial.topCustomers.slice(0, 5) || [];
+  }
+
+  get visibleTopItems(): TopItem[] {
+    return this.overview?.commercial.topItems.slice(0, 5) || [];
+  }
+
+  get visibleExpiry(): ExpiryItem[] {
+    return this.overview?.inventory.expiry.slice(0, 4) || [];
+  }
+
+  get visibleExpenses(): ExpenseCategoryBreakdown[] {
+    return this.overview?.finance.expenseByCategory.slice(0, 4) || [];
+  }
+
+  get dateRangeLabel(): string {
+    if (!this.overview) {
+      return '';
+    }
+
+    return `${this.formatShortDate(this.overview.scope.startDate)} - ${this.formatShortDate(this.overview.scope.endDate)}`;
+  }
+
+  get generatedAtLabel(): string {
+    if (!this.overview?.generatedAt) {
+      return 'Live snapshot';
+    }
+
+    const generatedAt = new Date(this.overview.generatedAt);
+
+    if (Number.isNaN(generatedAt.getTime())) {
+      return 'Live snapshot';
+    }
+
+    return new Intl.DateTimeFormat('en-PK', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(generatedAt);
+  }
+
+  get cashFlowNet(): number {
+    if (!this.overview) {
+      return 0;
+    }
+
+    return this.overview.finance.cashFlowTrend.reduce(
+      (total, point) => total + (point.receipts || 0) - (point.payments || 0),
+      0,
+    );
   }
 
   get summaryCards(): DashboardCardView[] {
@@ -435,6 +661,21 @@ export class DashboardComponent implements OnInit {
           pointHoverRadius: 6,
           pointBackgroundColor: '#7367F0',
           borderWidth: 3,
+          yAxisID: 'y',
+        },
+        {
+          label: 'Invoices',
+          data: this.overview.commercial.salesTrend.map((point) => point.invoices),
+          borderColor: '#00CFE8',
+          backgroundColor: 'rgba(0, 207, 232, 0.08)',
+          fill: false,
+          tension: 0.36,
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          pointBackgroundColor: '#00CFE8',
+          borderDash: [6, 5],
+          borderWidth: 2,
+          yAxisID: 'y1',
         },
       ],
     };
@@ -494,6 +735,35 @@ export class DashboardComponent implements OnInit {
             },
           ],
         };
+
+    const warehouseRows = this.overview.inventory.warehouseDistribution.slice(0, 6);
+    const expenseRows = this.overview.finance.expenseByCategory.slice(0, 6);
+
+    this.warehouseValueData = {
+      labels: warehouseRows.length ? warehouseRows.map((row) => row.warehouseName) : ['No warehouse data'],
+      datasets: [
+        {
+          label: 'Inventory Value',
+          data: warehouseRows.length ? warehouseRows.map((row) => row.totalValue) : [0],
+          backgroundColor: ['#7367F0', '#00CFE8', '#28C76F', '#FF9F43', '#EA5455', '#9E95F5'],
+          borderRadius: 10,
+          maxBarThickness: 22,
+        },
+      ],
+    };
+
+    this.expenseBreakdownData = {
+      labels: expenseRows.length ? expenseRows.map((row) => row.name || 'Uncategorized') : ['No expenses'],
+      datasets: [
+        {
+          label: 'Expense',
+          data: expenseRows.length ? expenseRows.map((row) => row.amount) : [0],
+          backgroundColor: ['#FF9F43', '#7367F0', '#00CFE8', '#28C76F', '#EA5455', '#9E95F5'],
+          borderRadius: 10,
+          maxBarThickness: 22,
+        },
+      ],
+    };
   }
 
   trackByIndex(index: number): number {
@@ -573,6 +843,23 @@ export class DashboardComponent implements OnInit {
 
   formatNumber(value: number): string {
     return new Intl.NumberFormat('en-PK').format(value || 0);
+  }
+
+  formatShortDate(value: string): string {
+    if (!value) {
+      return '-';
+    }
+
+    const parsed = new Date(value);
+
+    if (Number.isNaN(parsed.getTime())) {
+      return value;
+    }
+
+    return new Intl.DateTimeFormat('en-PK', {
+      month: 'short',
+      day: 'numeric',
+    }).format(parsed);
   }
 
   formatPercent(value: number): string {

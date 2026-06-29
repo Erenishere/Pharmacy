@@ -23,22 +23,18 @@ class SocketService {
     });
 
     this.io.on('connection', (socket) => {
-      console.log(`Client connected: ${socket.id}`);
 
       // Join a specific channel/room
       socket.on('join-channel', (channelId) => {
         socket.join(channelId);
-        console.log(`Socket ${socket.id} joined channel: ${channelId}`);
       });
 
       // Leave a channel/room
       socket.on('leave-channel', (channelId) => {
         socket.leave(channelId);
-        console.log(`Socket ${socket.id} left channel: ${channelId}`);
       });
 
       socket.on('disconnect', () => {
-        console.log(`Client disconnected: ${socket.id}`);
       });
     });
 
